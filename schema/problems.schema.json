@@ -76,7 +76,8 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "Path to the proof, relative to repo root. Single-file proofs point to the file (e.g. `problems/<number>/<filename>.lean`); multi-file proofs point to the directory (`problems/<number>/`). The convention is `problems/<number>/`."
+            "pattern": "^problems/[0-9]+/$",
+            "description": "Path to the proof's directory, relative to repo root. Always `problems/<number>/`. The directory contains the `.lean` source file(s), `lakefile.toml`, and `lean-toolchain`."
           },
           "theorem": {
             "type": "string",
