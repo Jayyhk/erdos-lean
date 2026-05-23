@@ -76,11 +76,11 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "Path to the proof file relative to repo root, e.g. 'problems/281/281.lean'. The convention is `problems/<number>/<filename>.lean`."
+            "description": "Path to the proof, relative to repo root. Single-file proofs point to the file (e.g. `problems/<number>/<filename>.lean`); multi-file proofs point to the directory (`problems/<number>/`). The convention is `problems/<number>/`."
           },
           "theorem": {
             "type": "string",
-            "description": "Fully qualified name of the headline theorem, e.g. 'Erdos1.erdos_1'."
+            "description": "Fully qualified name of the headline theorem in the proof file."
           },
           "state": {
             "type": "string",
