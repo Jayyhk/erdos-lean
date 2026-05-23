@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "erdos-lean problems catalog",
+  "description": "Per-problem metadata for the erdos-lean repository. This repo is a *collection* of proofs from various sources; different problems may use different Lean toolchains and Mathlib revisions. The `proof` block records what the proof depends on (`sorry` gaps, extra axioms declared in this repo, hypotheses representing unproven external results, mechanisms that expand the trusted base) and the Lean environment it was written against.",
+  "type": "array",
+  "uniqueItems": true,
+  "items": {
+    "type": "object",
+    "required": ["number", "proof"],
+    "additionalProperties": false,
+    "properties": {
+      "number": {
+        "type": "string",
+        "pattern": "^[0-9]+$",
+        "description": "Erdős problem number as listed on erdosproblems.com. The full statement of the problem lives at erdosproblems.com/<number>."
+      },
+      "proof": {
+        "type": "object",
+        "required": ["path", "state", "last_update"],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if":   { "properties": { "state": { "const": "complete" } }, "required": ["state"] },
+            "then": {
+              "properties": {
+                "sorries":          { "maximum": 0 },
+                "extra_axioms":     { "maxItems": 0 },
+                "hypotheses":       { "maxItems": 0 },
+                "trust_extensions": { "maxItems": 0 }
+              }
+            }
+          },
+          {
+            "if":   { "properties": { "state": { "const": "trust_extended" } }, "required": ["state"] },
+            "then": {
+              "required": ["trust_extensions"],
+              "properties": {
+                "sorries":          { "maximum": 0 },
+                "extra_axioms":     { "maxItems": 0 },
+                "hypotheses":       { "maxItems": 0 },
+                "trust_extensions": { "minItems": 1 }
+              }
+            }
+          },
+          {
+            "if":   { "properties": { "state": { "const": "hypothetical" } }, "required": ["state"] },
+            "then": {
+              "required": ["hypotheses"],
+              "properties": {
+                "sorries":      { "maximum": 0 },
+                "extra_axioms": { "maxItems": 0 },
+                "hypotheses":   { "minItems": 1 }
+              }
+            }
+          },
+          {
+            "if":   { "properties": { "state": { "const": "axiomatic" } }, "required": ["state"] },
+            "then": {
+              "required": ["extra_axioms"],
+              "properties": {
+                "sorries":      { "maximum": 0 },
+                "extra_axioms": { "minItems": 1 }
+              }
+            }
+          },
+          {
+            "if":   { "properties": { "state": { "const": "sorry" } }, "required": ["state"] },
+            "then": {
+              "required": ["sorries"],
+              "properties": {
+                "sorries": { "minimum": 1 }
+              }
+            }
+          }
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path relative to repo root, e.g. 'problems/1/main.lean' or 'problems/1/'."
+          },
+          "state": {
+            "type": "string",
+            "description": "The worst category that applies, determined by the dependency fields `sorries`, `extra_axioms`, `hypotheses`, and `trust_extensions`. Consistency is enforced by the schema (via the `allOf` constraint on the `proof` object). Ordering best → worst: complete > trust_extended > hypothetical > axiomatic > sorry.",
+            "oneOf": [
+              { "const": "complete",       "description": "Proof has no unproven dependencies: no `sorry`, no extra axioms, no hypotheses, no trust extensions." },
+              { "const": "trust_extended", "description": "No `sorry`, no extra axioms, no hypotheses, but has entries in `trust_extensions` (mechanisms that expand the trusted base, like `native_decide`)." },
+              { "const": "hypothetical",   "description": "No `sorry`, no extra axioms, but the headline theorem has hypotheses encoding unproven external results (listed in `hypotheses`). The Lean code is honest; the headline claim is conditional. May also use trust extensions." },
+              { "const": "axiomatic",      "description": "No `sorry`, but closes modulo axioms declared in this repo (listed in `extra_axioms`). May also have hypotheses or trust extensions." },
+              { "const": "sorry",          "description": "Proof contains at least one `sorry` (count in `sorries`). May also have any of the other dependency fields populated." }
+            ]
+          },
+          "last_update": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+            "description": "Date this catalog entry was last edited, in ISO 8601 (YYYY-MM-DD), e.g. '2026-05-23'."
+          },
+          "lean_version": {
+            "type": "string",
+            "description": "Lean toolchain the proof was written against, e.g. 'leanprover/lean4:v4.30.0-rc2' or 'lean-3.50.3'."
+          },
+          "mathlib_revision": {
+            "type": "string",
+            "description": "Mathlib (or Mathlib3) revision the proof was written against — tag, branch, or commit hash."
+          },
+          "theorem": {
+            "type": "string",
+            "description": "Fully qualified name of the headline theorem, e.g. 'Erdos1.erdos_1'."
+          },
+          "sorries": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of `sorry` occurrences in the proof. Must be ≥ 1 iff `state` is `sorry`; 0 (or absent) otherwise. Among sorry-state proofs, the count is a useful comparison metric (fewer = closer to complete), though one `sorry` hiding a hard step can still be worse than many hiding trivial ones."
+          },
+          "extra_axioms": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true,
+            "description": "Fully qualified names of axioms declared in this repo (via the `axiom` keyword) that the proof depends on. Surfaces in `#print axioms`. Does not include Lean's internal axioms surfaced by trust extensions (e.g. `Lean.ofReduceBool` from `native_decide`) — those go under `trust_extensions`."
+          },
+          "hypotheses": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true,
+            "description": "Hypotheses in the headline theorem's signature representing unproven external results. The Lean code is honest (the dependency is visible in the type), but the headline claim is conditional on these. List the Prop name (or the variable name) of each."
+          },
+          "trust_extensions": {
+            "type": "array",
+            "uniqueItems": true,
+            "description": "Mechanisms used by the proof that expand the trusted base beyond the standard Lean kernel + Mathlib + declared axioms. Tags are listed below with descriptions.",
+            "items": {
+              "oneOf": [
+                { "const": "uses_native_decide",            "description": "Uses `native_decide` (or `bv_decide`). Trusts the Lean compiler + every `@[implemented_by]`/`@[extern]` transitively. Surfaces in `#print axioms` as `Lean.ofReduceBool` / `Lean.trustCompiler` (pre-4.29) or `*._native.{native_decide,bv_decide}.proof_N` (4.29+)." },
+                { "const": "uses_csimp",                    "description": "Uses `@[csimp]`. Known soundness gap: the proof of the `csimp` lemma can use any axiom (incl. `sorry`) without propagating to `#print axioms` of consumers (lean4#7463)." },
+                { "const": "uses_implemented_by",           "description": "Theorem depends on a definition tagged `@[implemented_by]`. Invisible to `#print axioms` unless combined with `native_decide`." },
+                { "const": "uses_extern",                   "description": "Theorem depends on a definition tagged `@[extern]`. Same caveat as `uses_implemented_by`." },
+                { "const": "uses_opaque",                   "description": "Theorem statement or proof depends on an `opaque` definition whose body the kernel won't unfold." },
+                { "const": "uses_partial",                  "description": "Theorem statement or proof depends on a `partial def` (kernel treats as opaque constant)." },
+                { "const": "uses_unsafe_axioms",            "description": "Proof's `#print axioms` includes one of Lean's internal unsafe axioms (`lcProof`, `lcCast`, `lcUnreachable`, `lcErased`, `lcAny`, `lcVoid`, `Quot.lcInv`, `isScalarObj`), typically leaked via `@[implemented_by]` of an `unsafe def`." },
+                { "const": "uses_skipped_kernel_typecheck", "description": "Uses `set_option debug.skipKernelTC true` somewhere in the proof. Disables typechecking; equivalent to `sorry` in severity." },
+                { "const": "uses_add_decl_without_checking","description": "Proof construction uses `Environment.addDeclWithoutChecking` (or equivalent) to install a constant without kernel checking. Strictly more severe than `uses_bespoke_tactics`; this is the \"environment hacking\" vector `lean4checker` exists to catch." },
+                { "const": "uses_bespoke_tactics",          "description": "Proof uses non-standard tactics defined in this repo. Tactic correctness is not guaranteed by the kernel until the final term is re-typechecked." }
+              ]
+            }
+          },
+          "source": {
+            "type": "string",
+            "description": "Origin of the proof: URL, paper, or attribution (e.g. 'adapted from formal-conjectures', 'original')."
+          },
+          "note": {
+            "type": "string",
+            "description": "Free-text catch-all for anything not captured by the structured fields — what the partial argument reduces to, why a particular axiom or hypothesis is needed, known weaknesses a reader should be aware of, etc."
+          }
+        }
+      }
+    }
+  }
+}
