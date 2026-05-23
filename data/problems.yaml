@@ -8,6 +8,17 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     source: "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos16.lean"
 
+- number: "24"
+  proof:
+    path: "problems/24/"
+    theorem: "Erdos24.erdos_24"
+    state: "trust_extended"
+    last_update: "2026-05-23"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    trust_extensions: ["uses_native_decide"]
+    source: "https://www.erdosproblems.com/forum/thread/24#post-5732"
+
 - number: "281"
   proof:
     path: "problems/281/"
