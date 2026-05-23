@@ -1,7 +1,17 @@
+- number: "16"
+  proof:
+    path: "problems/16/"
+    theorem: "Erdos16.ErdosProblem16"
+    state: "complete"
+    last_update: "2026-05-23"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    source: "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos16.lean"
+
 - number: "281"
   proof:
     path: "problems/281/"
-    theorem: "Erdos_281"
+    theorem: "Erdos281.Erdos_281"
     state: "complete"
     last_update: "2026-05-23"
     lean_toolchain: "leanprover/lean4:v4.24.0"

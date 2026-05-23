@@ -20,10 +20,11 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-1 proof in the catalog (out of 1217+ Erdős problems).
+2 proofs in the catalog (out of 1217+ Erdős problems).
 
 | # | State | Proof | Notes |
 |---|-------|-------|-------|
+| [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 
 <!-- TABLE:END -->
