@@ -76,7 +76,11 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "Path relative to repo root, e.g. 'problems/1/main.lean' or 'problems/1/'."
+            "description": "Path to the proof file relative to repo root, e.g. 'problems/281/281.lean'. The convention is `problems/<number>/<filename>.lean`."
+          },
+          "theorem": {
+            "type": "string",
+            "description": "Fully qualified name of the headline theorem, e.g. 'Erdos1.erdos_1'."
           },
           "state": {
             "type": "string",
@@ -95,17 +99,13 @@
             "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
             "description": "Date this catalog entry was last edited, in ISO 8601 (YYYY-MM-DD), e.g. '2026-05-23'."
           },
-          "lean_version": {
+          "lean_toolchain": {
             "type": "string",
-            "description": "Lean toolchain the proof was written against, e.g. 'leanprover/lean4:v4.30.0-rc2' or 'lean-3.50.3'."
+            "description": "Lean toolchain the proof was written against (the string from `lean-toolchain`), e.g. 'leanprover/lean4:v4.30.0-rc2' or 'lean-3.50.3'."
           },
           "mathlib_revision": {
             "type": "string",
             "description": "Mathlib (or Mathlib3) revision the proof was written against — tag, branch, or commit hash."
-          },
-          "theorem": {
-            "type": "string",
-            "description": "Fully qualified name of the headline theorem, e.g. 'Erdos1.erdos_1'."
           },
           "sorries": {
             "type": "integer",
