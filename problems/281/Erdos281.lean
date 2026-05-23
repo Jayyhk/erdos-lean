@@ -767,7 +767,7 @@ lemma fk_uniform_convergence (n : ℕ → ℕ) (hmono : StrictMono n) (hnpos : �
 /-
 The main theorem: The hypothesis implies the conclusion (uniform finite-stage control).
 -/
-theorem Erdos_281 (n : ℕ → ℕ) (hmono : StrictMono n) (hnpos : ∀ i, 0 < n i)
+theorem erdos_281 (n : ℕ → ℕ) (hmono : StrictMono n) (hnpos : ∀ i, 0 < n i)
     (h : Erdos281Hyp n hmono hnpos) : Erdos281Concl n hmono hnpos := by
   intro ε hε
   -- 1. Get the uniform threshold k from Dini's Theorem
@@ -783,7 +783,7 @@ theorem Erdos_281 (n : ℕ → ℕ) (hmono : StrictMono n) (hnpos : ∀ i, 0 < n
   specialize hk k (le_refl k) a
   simpa [fk] using hk
 
-#print axioms Erdos_281
--- 'Erdos281.Erdos_281' depends on axioms: [propext, Classical.choice, Quot.sound]
+#print axioms erdos_281
+-- 'Erdos281.erdos_281' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos281

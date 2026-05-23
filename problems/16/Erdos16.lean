@@ -269,7 +269,7 @@ lemma n_lt_two_pow (n : ℕ) : n < 2^n := by
     have h4 : 2^n + 2^n = 2^(n + 1) := by ring
     omega
 
-theorem ErdosProblem16 : ¬ ∃ m_0 a_0 : ℕ, m_0 > 0 ∧ ∃ W : Set ℕ, containsNoInfiniteAP W ∧ U = { x | ∃ h, x = m_0 * h + a_0 } ∪ W := by
+theorem erdos_16 : ¬ ∃ m_0 a_0 : ℕ, m_0 > 0 ∧ ∃ W : Set ℕ, containsNoInfiniteAP W ∧ U = { x | ∃ h, x = m_0 * h + a_0 } ∪ W := by
   rintro ⟨m_0, a_0, hm0, W, hW, hU⟩
   have h1 := lemma1 hW hU (by decide) hm0 firstap
   have h2 := lemma1 hW hU (by decide) hm0 secondap
@@ -339,7 +339,7 @@ theorem ErdosProblem16 : ¬ ∃ m_0 a_0 : ℕ, m_0 > 0 ∧ ∃ W : Set ℕ, cont
       refine ⟨by decide, by omega, rfl⟩
     exact hx_not_in_U hx_in_U
 
-#print axioms ErdosProblem16
--- 'Erdos16.ErdosProblem16' depends on axioms: [propext, Classical.choice, Quot.sound]
+#print axioms erdos_16
+-- 'Erdos16.erdos_16' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos16

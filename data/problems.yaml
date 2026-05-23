@@ -1,7 +1,7 @@
 - number: "16"
   proof:
     path: "problems/16/"
-    theorem: "Erdos16.ErdosProblem16"
+    theorem: "Erdos16.erdos_16"
     state: "complete"
     last_update: "2026-05-23"
     lean_toolchain: "leanprover/lean4:v4.24.0"
@@ -11,7 +11,7 @@
 - number: "281"
   proof:
     path: "problems/281/"
-    theorem: "Erdos281.Erdos_281"
+    theorem: "Erdos281.erdos_281"
     state: "complete"
     last_update: "2026-05-23"
     lean_toolchain: "leanprover/lean4:v4.24.0"
