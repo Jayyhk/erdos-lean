@@ -6,7 +6,9 @@
     last_update: "2026-05-23"
     lean_toolchain: "leanprover/lean4:v4.24.0"
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
-    source: "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos16.lean"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/16#post-4464"
+      - "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos16.lean"
 
 - number: "24"
   proof:
@@ -17,7 +19,8 @@
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     trust_extensions: ["uses_native_decide"]
-    source: "https://www.erdosproblems.com/forum/thread/24#post-5732"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/24#post-5732"
 
 - number: "26"
   proof:
@@ -27,7 +30,9 @@
     last_update: "2026-05-24"
     lean_toolchain: "leanprover/lean4:v4.24.0"
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
-    source: "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos26.lean"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/26#post-2532"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos26.lean"
 
 - number: "281"
   proof:
@@ -37,4 +42,5 @@
     last_update: "2026-05-23"
     lean_toolchain: "leanprover/lean4:v4.24.0"
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
-    source: "https://www.erdosproblems.com/forum/thread/281#post-3445"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/281#post-3445"

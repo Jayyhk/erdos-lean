@@ -144,9 +144,10 @@
               ]
             }
           },
-          "source": {
-            "type": "string",
-            "description": "Origin of the proof: URL, paper, or attribution (e.g. 'adapted from formal-conjectures', 'original')."
+          "sources": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Origins of the proof."
           },
           "note": {
             "type": "string",
