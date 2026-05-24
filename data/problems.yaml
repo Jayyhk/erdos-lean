@@ -34,6 +34,18 @@
       - "https://www.erdosproblems.com/forum/thread/26#post-2532"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos26.lean"
 
+- number: "31"
+  proof:
+    path: "problems/31/"
+    theorem: "Erdos31.erdos_31"
+    state: "complete"
+    last_update: "2026-05-24"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/31#post-1818"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos31.lean"
+
 - number: "281"
   proof:
     path: "problems/281/"
