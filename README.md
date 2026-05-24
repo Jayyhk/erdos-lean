@@ -22,8 +22,8 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-7 proofs in the catalog (out of 1217+ Erdős problems):
-- 6 `complete`
+8 proofs in the catalog (out of 1217+ Erdős problems):
+- 7 `complete`
 - 1 `trust_extended`
 
 | # | State | Proof | Notes |
@@ -34,6 +34,7 @@ Verify with `cd problems/N && lake build`.
 | [31](https://www.erdosproblems.com/31) | `complete` | [problems/31/](problems/31/) | |
 | [34](https://www.erdosproblems.com/34) | `complete` | [problems/34/](problems/34/) | |
 | [38](https://www.erdosproblems.com/38) | `complete` | [problems/38/](problems/38/) | |
+| [42](https://www.erdosproblems.com/42) | `complete` | [problems/42/](problems/42/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 
 <!-- TABLE:END -->

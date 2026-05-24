@@ -63,6 +63,17 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/38#post-6131"
+- number: "42"
+  proof:
+    path: "problems/42/"
+    theorem: "Erdos42.erdos_42"
+    state: "complete"
+    last_update: "2026-05-24"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/42#post-6370"
+      - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P42/CompactCayley/Proof.lean"
 - number: "281"
   proof:
     path: "problems/281/"
