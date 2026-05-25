@@ -74,6 +74,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/42#post-6370"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P42/CompactCayley/Proof.lean"
+- number: "46"
+  proof:
+    path: "problems/46/"
+    theorem: "Erdos46.erdos_46"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.29.1"
+    mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
+    sources:
+      - "https://github.com/plby/unit-fractions/tree/master/src4"
 - number: "56"
   proof:
     path: "problems/56/"
