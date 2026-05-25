@@ -22,9 +22,9 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-28 proofs in the catalog (out of 1217+ Erdős problems):
-- 25 `complete`
-- 2 `trust_extended`
+31 proofs in the catalog (out of 1217+ Erdős problems):
+- 27 `complete`
+- 3 `trust_extended`
 - 1 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -51,10 +51,13 @@ Verify with `cd problems/N && lake build`.
 | [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) | |
 | [178](https://www.erdosproblems.com/178) | `complete` | [problems/178/](problems/178/) | |
 | [189](https://www.erdosproblems.com/189) | `complete` | [problems/189/](problems/189/) | |
+| [192](https://www.erdosproblems.com/192) | `trust_extended` | [problems/192/](problems/192/) | uses `native_decide` |
 | [194](https://www.erdosproblems.com/194) | `complete` | [problems/194/](problems/194/) | |
 | [198](https://www.erdosproblems.com/198) | `complete` | [problems/198/](problems/198/) | |
 | [199](https://www.erdosproblems.com/199) | `complete` | [problems/199/](problems/199/) | |
+| [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) | |
 | [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes PNT (`nth_prime_asymp`) |
+| [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
 

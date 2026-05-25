@@ -237,6 +237,18 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/189#post-2281"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos189.lean"
+- number: "192"
+  proof:
+    path: "problems/192/"
+    theorem: "Erdos192.erdos_192"
+    state: "trust_extended"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    trust_extensions: ["uses_native_decide"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/192#post-6375"
+      - "https://gist.github.com/LorenzoLuccioli/f2ead0e5941e78a8fb78cf1d5925eca1#file-erdos192-lean"
 - number: "194"
   proof:
     path: "problems/194/"
@@ -269,6 +281,17 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/199#post-4442"
+- number: "204"
+  proof:
+    path: "problems/204/"
+    theorem: "Erdos204.erdos_204"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/204#post-4790"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem204.lean"
 - number: "205"
   proof:
     path: "problems/205/"
@@ -281,6 +304,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/205"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos205.lean"
+- number: "206"
+  proof:
+    path: "problems/206/"
+    theorem: "Erdos206.erdos_206"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/206#post-5989"
+      - "https://gist.github.com/madeve-unipi/0920783513a1a00af4a14660852df60e#file-erdos206-lean"
 - number: "281"
   proof:
     path: "problems/281/"
