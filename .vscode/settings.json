@@ -1,0 +1,11 @@
+{
+  "files.watcherExclude": {
+    "**/.lake/**": true
+  },
+  "search.exclude": {
+    "**/.lake": true
+  },
+  "files.exclude": {
+    "**/.lake": true
+  }
+}
