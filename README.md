@@ -2,7 +2,7 @@
 
 A collection of Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
 
-The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. Each proof carries its own version info in the catalog, and brings its own `lean-toolchain` / `lakefile.toml` so you can check it.
+The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. Each proof is a single self-contained file that imports only Mathlib, with no dependencies between problems, and brings its own `lean-toolchain` / `lakefile.toml` and version info in the catalog — so any one of them builds and can be checked on its own.
 
 Not every proof will be fully legitimate. Some might depend on `sorry`, on extra axioms declared in the proof itself, on unproven results dragged in as hypotheses, or on mechanisms that expand Lean's trusted base. The table below records every such qualification explicitly, with the catalog in [data/problems.yaml](data/problems.yaml) as the ground truth. Field definitions and the meaning of each `state` value / `trust_extensions` tag live in [schema/problems.schema.json](schema/problems.schema.json).
 
@@ -22,8 +22,8 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-20 proofs in the catalog (out of 1217+ Erdős problems):
-- 18 `complete`
+21 proofs in the catalog (out of 1217+ Erdős problems):
+- 19 `complete`
 - 2 `trust_extended`
 
 | # | State | Proof | Notes |
@@ -45,6 +45,7 @@ Verify with `cd problems/N && lake build`.
 | [125](https://www.erdosproblems.com/125) | `complete` | [problems/125/](problems/125/) | |
 | [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
 | [150](https://www.erdosproblems.com/150) | `complete` | [problems/150/](problems/150/) | |
+| [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) | |
 | [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
