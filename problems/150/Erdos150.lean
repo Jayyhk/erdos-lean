@@ -3,15 +3,7 @@ Copyright (c) 2026 Pietro Monticone. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Pietro Monticone, Aristotle (Harmonic)
 -/
-import Mathlib.Algebra.Order.Ring.Star
-import Mathlib.Analysis.SpecialFunctions.Log.Base
-import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
-import Mathlib.Analysis.Subadditive
-import Mathlib.Combinatorics.SimpleGraph.Connectivity.WalkDecomp
-import Mathlib.Data.Int.Star
-import Mathlib.Data.Real.StarOrdered
-import Mathlib.Order.BourbakiWitt
-import Mathlib.Tactic.Cases
+import Mathlib
 
 /-! # Erdős Problem 150: Minimal Vertex Cuts
 
