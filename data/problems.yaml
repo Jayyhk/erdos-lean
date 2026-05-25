@@ -20,6 +20,7 @@
     trust_extensions: ["uses_native_decide"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/24#post-5732"
+      - "https://gist.github.com/madeve-unipi/683739094ab7a5079a2bc2647c47743b#file-erdos24-lean"
 - number: "26"
   proof:
     path: "problems/26/"
@@ -63,6 +64,7 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/38#post-6131"
+      - "https://gist.github.com/madeve-unipi/690d2bd8f6e8304ba8b456f9db559747#file-erdos38-lean"
 - number: "42"
   proof:
     path: "problems/42/"
