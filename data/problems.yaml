@@ -138,6 +138,17 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/115#post-4555"
+- number: "125"
+  proof:
+    path: "problems/125/"
+    theorem: "Erdos125.erdos_125"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/125#post-5110"
+      - "https://github.com/mo271/formal-conjectures/blob/c27415379b5dbe34105d1fdd707994540c4c6fc7/FormalConjectures/ErdosProblems/125.lean#L468"
 - number: "281"
   proof:
     path: "problems/281/"
