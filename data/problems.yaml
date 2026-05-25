@@ -128,6 +128,16 @@
     mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
     sources:
       - "https://github.com/plby/unit-fractions/tree/master/src4"
+- number: "115"
+  proof:
+    path: "problems/115/"
+    theorem: "Erdos115.erdos_115"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/115#post-4555"
 - number: "281"
   proof:
     path: "problems/281/"
