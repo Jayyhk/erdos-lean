@@ -315,6 +315,28 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/206#post-5989"
       - "https://gist.github.com/madeve-unipi/0920783513a1a00af4a14660852df60e#file-erdos206-lean"
+- number: "221"
+  proof:
+    path: "problems/221/"
+    theorem: "Erdos221.erdos_221"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/221#post-3991"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem221.lean"
+- number: "224"
+  proof:
+    path: "problems/224/"
+    theorem: "Erdos224.erdos_224"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.25.0-rc2"
+    mathlib_revision: "e93118937acf127bf5c203937d61eb25802c265a"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/224#post-3157"
+      - "https://github.com/SpringSense-Innovation-Institute/ai-for-math-lean/blob/main/erdos-problems/erdos224/Erdos224.lean"
 - number: "281"
   proof:
     path: "problems/281/"

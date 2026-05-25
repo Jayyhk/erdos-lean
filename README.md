@@ -22,8 +22,8 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-31 proofs in the catalog (out of 1217+ Erdős problems):
-- 27 `complete`
+33 proofs in the catalog (out of 1217+ Erdős problems):
+- 29 `complete`
 - 3 `trust_extended`
 - 1 `axiomatic`
 
@@ -58,6 +58,8 @@ Verify with `cd problems/N && lake build`.
 | [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) | |
 | [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes PNT (`nth_prime_asymp`) |
 | [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |
+| [221](https://www.erdosproblems.com/221) | `complete` | [problems/221/](problems/221/) | |
+| [224](https://www.erdosproblems.com/224) | `complete` | [problems/224/](problems/224/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
 
