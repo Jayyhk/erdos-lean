@@ -149,6 +149,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/125#post-5110"
       - "https://github.com/mo271/formal-conjectures/blob/c27415379b5dbe34105d1fdd707994540c4c6fc7/FormalConjectures/ErdosProblems/125.lean#L468"
+- number: "150"
+  proof:
+    path: "problems/150/"
+    theorem: "Erdos150.erdos_150"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/150#post-5145"
+      - "https://gist.github.com/pitmonticone/d8558d3361ad2d673b5405239ea30700#file-erdos150-lean"
 - number: "281"
   proof:
     path: "problems/281/"
