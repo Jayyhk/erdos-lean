@@ -248,6 +248,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/194#post-5430"
       - "https://gist.github.com/ster-oc/ffe9e4fa1b813111f40c0e417bbe8be0#file-erdos194-lean"
+- number: "198"
+  proof:
+    path: "problems/198/"
+    theorem: "Erdos198.erdos_198"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/198#post-1809"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos198.lean"
 - number: "281"
   proof:
     path: "problems/281/"
