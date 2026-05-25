@@ -348,6 +348,20 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/224#post-3157"
       - "https://github.com/SpringSense-Innovation-Institute/ai-for-math-lean/blob/main/erdos-problems/erdos224/Erdos224.lean"
+- number: "237"
+  proof:
+    path: "problems/237/"
+    theorem: "Erdos237.erdos_237"
+    state: "axiomatic"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    extra_axioms: ["Erdos237.maynard_tao"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/237#post-5240"
+      - "https://gist.github.com/pitmonticone/8ea0d1cdb963b6213ac639b11d33f811#file-erdos237-lean"
+      - "https://www.erdosproblems.com/forum/thread/237#post-5395"
+      - "https://github.com/Woett/Lean-files/blob/main/MertensThird.lean"
 - number: "281"
   proof:
     path: "problems/281/"
