@@ -2,9 +2,9 @@
 
 A collection of Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
 
-The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. This repo is **not** a single buildable Lake project — each proof carries its own version info in the catalog, and may bring its own `lean-toolchain` / `lakefile.toml` if you want to check it.
+The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. Each proof carries its own version info in the catalog, and brings its own `lean-toolchain` / `lakefile.toml` so you can check it.
 
-Files may be lightly modified from their original source — typically renaming the headline theorem to fit our `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the catalog's `sources` field.
+Files may be lightly modified from their original source — typically renaming the headline theorem to fit our `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
 
 Not every proof will be fully legitimate. Some might depend on `sorry`, on extra axioms declared in the proof itself, on unproven results dragged in as hypotheses, or on mechanisms that expand Lean's trusted base. The table below records every such qualification explicitly, with the catalog in [data/problems.yaml](data/problems.yaml) as the ground truth. Field definitions and the meaning of each `state` value / `trust_extensions` tag live in [schema/problems.schema.json](schema/problems.schema.json).
 
@@ -22,8 +22,8 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-10 proofs in the catalog (out of 1217+ Erdős problems):
-- 8 `complete`
+11 proofs in the catalog (out of 1217+ Erdős problems):
+- 9 `complete`
 - 2 `trust_extended`
 
 | # | State | Proof | Notes |
@@ -37,6 +37,7 @@ Verify with `cd problems/N && lake build`.
 | [42](https://www.erdosproblems.com/42) | `complete` | [problems/42/](problems/42/) | |
 | [56](https://www.erdosproblems.com/56) | `trust_extended` | [problems/56/](problems/56/) | uses `native_decide` |
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
+| [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 
 <!-- TABLE:END -->

@@ -96,6 +96,17 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/93#post-4346"
+- number: "94"
+  proof:
+    path: "problems/94/"
+    theorem: "Erdos94.erdos_94"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.21.0"
+    mathlib_revision: "308445d7985027f538e281e18df29ca16ede2ba3"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/94"
+      - "https://github.com/SpringSense-Innovation-Institute/ai-for-math-lean/blob/main/erdos-problems/erdos94/erdos94.lean"
 - number: "281"
   proof:
     path: "problems/281/"
