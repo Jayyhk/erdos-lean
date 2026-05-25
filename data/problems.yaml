@@ -118,6 +118,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/105#post-1746"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos105.lean"
+- number: "298"
+  proof:
+    path: "problems/298/"
+    theorem: "Erdos298.erdos_298"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.29.1"
+    mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
+    sources:
+      - "https://github.com/plby/unit-fractions/tree/master/src4"
 - number: "281"
   proof:
     path: "problems/281/"
