@@ -873,24 +873,14 @@ theorem erdos94_bigO (P : Finset Point) (h : PerpBisectorAtMostTwo P) :
                 ring
     nlinarith [hmain, hpow]
 
--- Big-O form with convex/no-three-collinear premise (via GeneralPosition).
-theorem erdos94_bigO_general_position (P : Finset Point) (hgp : GeneralPosition P) :
+/-- Erdős 94: for n points in ℝ² forming a convex polygon,
+∑ f(uᵢ)² = O(n³). -/
+theorem erdos_94 (P : Finset Point) (hconv : ConvexPosition P) :
     S(P)=O(n^3) := by
+  have hgp : GeneralPosition P := ⟨hconv, convexPosition_noThreeCollinear P hconv⟩
   have hperp : PerpBisectorAtMostTwo P :=
     perpBisectorAtMostTwo_of_general_position P hgp
   simpa using (erdos94_bigO P hperp)
-
--- Convenience wrapper combining convex + no-three-collinear into GeneralPosition.
-theorem erdos94_bigO_convex_no3collinear (P : Finset Point)
-    (hconv : ConvexPosition P) (hnc : NoThreeCollinear P) :
-    S(P)=O(n^3) := by
-  exact erdos94_bigO_general_position P ⟨hconv, hnc⟩
-
-/-- Erdős 94 (literal): for n points in ℝ² forming a convex polygon,
-∑ f(uᵢ)² = O(n³). -/
-theorem erdos_94 (P : Finset Point) (hconv : ConvexPosition P) :
-    S(P)=O(n^3) :=
-  erdos94_bigO_convex_no3collinear P hconv (convexPosition_noThreeCollinear P hconv)
 
 end
 
