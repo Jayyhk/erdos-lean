@@ -1110,18 +1110,15 @@ lemma nat_le_of_real_le_add_half (c n : ℕ) (h : (c : ℝ) ≤ (n : ℝ) ^ 5 + 
   have : (c : ℝ) < (n ^ 5 + 1 : ℕ) := by push_cast; linarith
   exact Nat.lt_add_one_iff.mp (Nat.cast_lt.mp this)
 
-/-- **Erdős Pentagon Conjecture** (settled affirmatively by Grzesik, 2012).
-  Statement in terms of `SimpleGraph.numC5Copies`. See `erdos_24` for
-  a statement in terms of `SimpleGraph.numC5`. See Section §11 for a discussion on the
-  differences between the two.
+/-- The key combinatorial bound (Grzesik's Theorem 2): a triangle-free graph on `5n`
+vertices has at most `n⁵` vertex-sets supporting a `C₅` (`SimpleGraph.numC5Copies`).
 
-Every triangle-free graph on `5n` vertices contains at most `n⁵` copies of `C₅`.
-
-The proof follows Grzesik's Theorem 2: assuming `c = numC5Copies G`, the balanced
-blow-up `G.blowup N` is triangle-free with `≥ c · N⁵` copies of `C₅`. Choosing
-`ε = 12/(625·n⁵)` and applying the Turán density bound to the blow-up gives
-`c ≤ n⁵ + 1/2`, hence `c ≤ n⁵` since `c` is a natural number. -/
-theorem erdos_24' (n : ℕ) (G : SimpleGraph (Fin (5 * n)))
+Writing `c = numC5Copies G`, the balanced blow-up `G.blowup N` is triangle-free with
+`≥ c · N⁵` such sets; choosing `ε = 12/(625·n⁵)` and applying the Turán density bound to
+the blow-up gives `c ≤ n⁵ + 1/2`, hence `c ≤ n⁵` since `c` is a natural number.  For
+triangle-free `G` this count agrees with the genuine `C₅`-count `numC5`
+(`numC5_eq_numC5Copies_of_triangleFree`), which yields the headline `erdos_24`. -/
+private lemma numC5Copies_le (n : ℕ) (G : SimpleGraph (Fin (5 * n)))
     (hG : G.CliqueFree 3) :
     numC5Copies G ≤ n ^ 5 := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
@@ -1333,13 +1330,14 @@ theorem numC5_eq_numC5Copies_of_triangleFree {V : Type*} [Fintype V] [DecidableE
 
 /-- **Erdős Pentagon Conjecture** (settled affirmatively by Grzesik, 2012).
 
-Every triangle-free graph on `5n` vertices contains at most `n⁵` copies of `C₅`,
-where copies are counted as subgraphs isomorphic to the cycle graph `C₅`
-(see `SimpleGraph.numC5` and Section §11). -/
+Every triangle-free graph on `5n` vertices contains at most `n⁵` copies of `C₅`, where
+copies are counted as subgraphs isomorphic to the cycle graph `C₅` (`SimpleGraph.numC5`;
+see Section §11 for the distinction from `numC5Copies`, which agrees with `numC5` on
+triangle-free graphs). -/
 theorem erdos_24 (n : ℕ) (G : SimpleGraph (Fin (5 * n))) (hG : G.CliqueFree 3) :
     numC5 G ≤ n ^ 5 := by
   rw [numC5_eq_numC5Copies_of_triangleFree G hG]
-  exact erdos_24' n G hG
+  exact numC5Copies_le n G hG
 
 #print axioms erdos_24
 -- 'Erdos24.erdos_24' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
