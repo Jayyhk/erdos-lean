@@ -74,6 +74,18 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/42#post-6370"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P42/CompactCayley/Proof.lean"
+- number: "56"
+  proof:
+    path: "problems/56/"
+    theorem: "Erdos56.erdos_56"
+    state: "trust_extended"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    trust_extensions: ["uses_native_decide"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/56#post-1850"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos56.lean"
 - number: "281"
   proof:
     path: "problems/281/"
