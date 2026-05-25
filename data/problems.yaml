@@ -269,6 +269,18 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/199#post-4442"
+- number: "205"
+  proof:
+    path: "problems/205/"
+    theorem: "Erdos205.erdos_205"
+    state: "axiomatic"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    extra_axioms: ["Erdos205.nth_prime_asymp"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/205"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos205.lean"
 - number: "281"
   proof:
     path: "problems/281/"
