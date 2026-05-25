@@ -22,12 +22,12 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-23 proofs in the catalog (out of 1217+ Erdős problems):
-- 21 `complete`
+24 proofs in the catalog (out of 1217+ Erdős problems):
+- 22 `complete`
 - 2 `trust_extended`
 
-| # | State | Proof | Notes |
-|---|-------|-------|-------|
+| # | State | Lean | Notes |
+|---|-------|------|-------|
 | [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
 | [24](https://www.erdosproblems.com/24) | `trust_extended` | [problems/24/](problems/24/) | uses `native_decide` |
 | [26](https://www.erdosproblems.com/26) | `complete` | [problems/26/](problems/26/) | |
@@ -49,6 +49,7 @@ Verify with `cd problems/N && lake build`.
 | [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) | |
 | [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) | |
 | [178](https://www.erdosproblems.com/178) | `complete` | [problems/178/](problems/178/) | |
+| [189](https://www.erdosproblems.com/189) | `complete` | [problems/189/](problems/189/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
 
