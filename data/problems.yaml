@@ -183,6 +183,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/150#post-5145"
       - "https://gist.github.com/pitmonticone/d8558d3361ad2d673b5405239ea30700#file-erdos150-lean"
+- number: "164"
+  proof:
+    path: "problems/164/"
+    theorem: "Erdos164.erdos_164"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.29.0"
+    mathlib_revision: "8a178386ffc0f5fef0b77738bb5449d50efeea95"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/164#post-5760"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.29.0/ErdosProblems/Erdos164.lean"
 - number: "281"
   proof:
     path: "problems/281/"
