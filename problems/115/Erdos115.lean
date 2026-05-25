@@ -14,12 +14,6 @@ import Mathlib
 
 set_option linter.mathlibStandardSet false
 
-open scoped BigOperators
-open scoped Real
-open scoped Nat
-open scoped Classical
-open scoped Pointwise
-
 set_option maxHeartbeats 0
 set_option maxRecDepth 4000
 set_option synthInstance.maxHeartbeats 20000
@@ -29,6 +23,12 @@ set_option relaxedAutoImplicit false
 set_option autoImplicit false
 
 namespace Erdos115
+
+open scoped BigOperators
+open scoped Real
+open scoped Nat
+open scoped Classical
+open scoped Pointwise
 
 noncomputable section
 

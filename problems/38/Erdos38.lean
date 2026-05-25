@@ -50,12 +50,12 @@ we use `Finset ℕ` (only `supp(Sₘ)` matters).
 We use Mathlib's `schnirelmannDensity` and define additive basis and related notions.
 -/
 
-open scoped BigOperators Pointwise
-open Finset Classical Real Filter
-
 set_option maxHeartbeats 800000
 
 namespace Erdos38
+
+open scoped BigOperators Pointwise
+open Finset Classical Real Filter
 
 noncomputable section
 

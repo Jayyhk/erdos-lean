@@ -1,9 +1,9 @@
 import Mathlib
 
+namespace Erdos94
+
 open scoped BigOperators
 open Finset
-
-namespace Erdos94
 
 abbrev Point := EuclideanSpace ℝ (Fin 2)
 noncomputable section

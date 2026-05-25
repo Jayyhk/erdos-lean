@@ -39,11 +39,11 @@ Following Grzesik (2012), the proof proceeds in two steps:
   120(3):722–732, 2013.
 -/
 
-open Finset Function SimpleGraph Fintype Nat Matrix
-
 attribute [local instance] Classical.propDecidable
 
 namespace Erdos24
+
+open Finset Function SimpleGraph Fintype Nat Matrix
 
 /-!
 ## § 1. Certificate Matrices and PSD Verification

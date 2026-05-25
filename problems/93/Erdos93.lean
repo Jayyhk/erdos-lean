@@ -1,12 +1,13 @@
 import Mathlib
 
-open Real Metric Set InnerProductSpace Complex EuclideanGeometry
-open scoped Classical InnerProductSpace Pointwise Complex EuclideanGeometry
 set_option maxHeartbeats 2000000
 set_option linter.unusedSectionVars false
 set_option linter.unusedVariables false
 
 namespace Erdos93
+
+open Real Metric Set InnerProductSpace Complex EuclideanGeometry
+open scoped Classical InnerProductSpace Pointwise Complex EuclideanGeometry
 
 noncomputable section
 

@@ -14,11 +14,11 @@ import Mathlib
 
 set_option maxHeartbeats 800000
 
+namespace Erdos281
+
 open Filter Topology Classical
 
 open scoped BigOperators
-
-namespace Erdos281
 
 /- Strictly increasing sequence n₁ < n₂ < ⋯ indexed by naturals. -/
 variable {n : ℕ → ℕ} (hmono : StrictMono n) (hnpos : ∀ i, 0 < n i)
