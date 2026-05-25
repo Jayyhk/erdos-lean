@@ -4317,9 +4317,9 @@ theorem erdos_115 (n : ℕ) :
   exact ⟨eremenko_lempert_reduction n (eremenko_lempert_at_zero_proof n),
          extremal_polynomial_derivative_at_zero n⟩
 
+end
+
 #print axioms erdos_115
 -- 'Erdos115.erdos_115' depends on axioms: [propext, Classical.choice, Quot.sound]
-
-end
 
 end Erdos115
