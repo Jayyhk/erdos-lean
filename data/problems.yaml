@@ -315,6 +315,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/206#post-5989"
       - "https://gist.github.com/madeve-unipi/0920783513a1a00af4a14660852df60e#file-erdos206-lean"
+- number: "214"
+  proof:
+    path: "problems/214/"
+    theorem: "Erdos214.erdos_214"
+    state: "complete"
+    last_update: "2026-05-25"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/214#post-4547"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem214FourPoints.lean"
 - number: "221"
   proof:
     path: "problems/221/"
