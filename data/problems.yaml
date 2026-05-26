@@ -13,11 +13,10 @@
   proof:
     path: "problems/24/"
     theorem: "Erdos24.erdos_24"
-    state: "trust_extended"
-    last_update: "2026-05-23"
+    state: "complete"
+    last_update: "2026-05-26"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    trust_extensions: ["uses_native_decide"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/24#post-5732"
       - "https://gist.github.com/madeve-unipi/683739094ab7a5079a2bc2647c47743b#file-erdos24-lean"

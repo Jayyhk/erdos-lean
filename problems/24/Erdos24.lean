@@ -3,6 +3,145 @@ Released under Apache 2.0 license.
 Authors: Matteo Del Vecchio, Aristotle (Harmonic)
 -/
 import Mathlib
+-- ↓↓↓ inlined from Erdos24IntCheck.lean (kernel-decide integer verification) ↓↓↓
+
+namespace Erdos24
+
+open Finset
+
+/-! ### Integer certificate matrices -/
+
+def P_int_fin (i j : Fin 8) : Int := match i.val, j.val with
+  | 0, 0 => 24 | 0, 1 => -36 | 0, 2 => -36 | 0, 3 => 24 | 0, 4 => -36 | 0, 5 => 24 | 0, 6 => 24 | 0, 7 => -36
+  | 1, 0 => -36 | 1, 1 => 277 | 1, 2 => 97 | 1, 3 => -79 | 1, 4 => 97 | 1, 5 => -79 | 1, 6 => -259 | 1, 7 => 54
+  | 2, 0 => -36 | 2, 1 => 97 | 2, 2 => 277 | 2, 3 => -79 | 2, 4 => 97 | 2, 5 => -259 | 2, 6 => -79 | 2, 7 => 54
+  | 3, 0 => 24 | 3, 1 => -79 | 3, 2 => -79 | 3, 3 => 247 | 3, 4 => -259 | 3, 5 => 67 | 3, 6 => 67 | 3, 7 => -36
+  | 4, 0 => -36 | 4, 1 => 97 | 4, 2 => 97 | 4, 3 => -259 | 4, 4 => 277 | 4, 5 => -79 | 4, 6 => -79 | 4, 7 => 54
+  | 5, 0 => 24 | 5, 1 => -79 | 5, 2 => -259 | 5, 3 => 67 | 5, 4 => -79 | 5, 5 => 247 | 5, 6 => 67 | 5, 7 => -36
+  | 6, 0 => 24 | 6, 1 => -259 | 6, 2 => -79 | 6, 3 => 67 | 6, 4 => -79 | 6, 5 => 67 | 6, 6 => 247 | 6, 7 => -36
+  | 7, 0 => -36 | 7, 1 => 54 | 7, 2 => 54 | 7, 3 => -36 | 7, 4 => 54 | 7, 5 => -36 | 7, 6 => -36 | 7, 7 => 54
+  | _, _ => 0
+
+def Q_int_fin (i j : Fin 6) : Int := match i.val, j.val with
+  | 0, 0 => 1728 | 0, 1 => -1551 | 0, 2 => -1551 | 0, 3 => -1308 | 0, 4 => 687 | 0, 5 => 687
+  | 1, 0 => -1551 | 1, 1 => 2336 | 1, 2 => 742 | 1, 3 => 908 | 1, 4 => 2557 | 1, 5 => -4084
+  | 2, 0 => -1551 | 2, 1 => 742 | 2, 2 => 2336 | 2, 3 => 908 | 2, 4 => -4084 | 2, 5 => 2557
+  | 3, 0 => -1308 | 3, 1 => 908 | 3, 2 => 908 | 3, 3 => 1728 | 3, 4 => -254 | 3, 5 => -254
+  | 4, 0 => 687 | 4, 1 => 2557 | 4, 2 => -4084 | 4, 3 => -254 | 4, 4 => 15264 | 4, 5 => -14424
+  | 5, 0 => 687 | 5, 1 => -4084 | 5, 2 => 2557 | 5, 3 => -254 | 5, 4 => -14424 | 5, 5 => 15264
+  | _, _ => 0
+
+def R_int_fin (i j : Fin 5) : Int := match i.val, j.val with
+  | 0, 0 => 1512 | 0, 1 => 568 | 0, 2 => -380 | 0, 3 => 568 | 0, 4 => -376
+  | 1, 0 => 568 | 1, 1 => 475 | 1, 2 => -191 | 1, 3 => 0 | 1, 4 => -93
+  | 2, 0 => -380 | 2, 1 => -191 | 2, 2 => 192 | 2, 3 => -191 | 2, 4 => -2
+  | 3, 0 => 568 | 3, 1 => 0 | 3, 2 => -191 | 3, 3 => 475 | 3, 4 => -93
+  | 4, 0 => -376 | 4, 1 => -93 | 4, 2 => -2 | 4, 3 => -93 | 4, 4 => 190
+  | _, _ => 0
+
+/-! ### Flag index functions (duplicated for self-containment) -/
+
+def σ₀FI (adjDA adjDB adjDC : Bool) : Fin 8 :=
+  ⟨(if adjDA then 1 else 0) + (if adjDB then 2 else 0) + (if adjDC then 4 else 0),
+   by cases adjDA <;> cases adjDB <;> cases adjDC <;> simp⟩
+
+def σ₁FI (adjDA adjDB adjDC : Bool) : Option (Fin 6) :=
+  match adjDA, adjDB, adjDC with
+  | false, false, false => some 0 | true, false, false => some 1
+  | false, true, false => some 2 | false, false, true => some 3
+  | true, false, true => some 4 | false, true, true => some 5
+  | _, _, _ => none
+
+def σ₂FI (adjDA adjDCenter adjDC : Bool) : Option (Fin 5) :=
+  match adjDA, adjDCenter, adjDC with
+  | false, false, false => some 0 | true, false, false => some 1
+  | false, true, false => some 2 | false, false, true => some 3
+  | true, false, true => some 4
+  | _, _, _ => none
+
+/-! ### Integer quintuple contribution (= 2500 × quintContrib) -/
+
+/-- Integer version of `quintContrib`, equal to `2500 * quintContrib adj p`. -/
+def intQC (adj : Fin 5 → Fin 5 → Bool) (p : Equiv.Perm (Fin 5)) : Int :=
+  let a := p 0; let b := p 1; let c := p 2; let d := p 3; let e := p 4
+  let ab := adj a b; let ac := adj a c; let bc := adj b c
+  if !ab && !ac && !bc then
+    4 * P_int_fin (σ₀FI (adj d a) (adj d b) (adj d c))
+                  (σ₀FI (adj e a) (adj e b) (adj e c))
+  else if ab && !ac && !bc then
+    match σ₁FI (adj d a) (adj d b) (adj d c),
+          σ₁FI (adj e a) (adj e b) (adj e c) with
+    | some fi, some fj => Q_int_fin fi fj
+    | _, _ => 0
+  else if ab && bc && !ac then
+    match σ₂FI (adj d a) (adj d b) (adj d c),
+          σ₂FI (adj e a) (adj e b) (adj e c) with
+    | some fi, some fj => 4 * R_int_fin fi fj
+    | _, _ => 0
+  else 0
+
+/-! ### Nat-encoded graph adjacency -/
+
+def getBitN (n i : Nat) : Bool := (n >>> i) &&& 1 == 1
+
+def adj5N (n : Nat) : Fin 5 → Fin 5 → Bool := fun i j =>
+  match i.val, j.val with
+  | 0, 1 | 1, 0 => getBitN n 0 | 0, 2 | 2, 0 => getBitN n 1
+  | 0, 3 | 3, 0 => getBitN n 2 | 0, 4 | 4, 0 => getBitN n 3
+  | 1, 2 | 2, 1 => getBitN n 4 | 1, 3 | 3, 1 => getBitN n 5
+  | 1, 4 | 4, 1 => getBitN n 6 | 2, 3 | 3, 2 => getBitN n 7
+  | 2, 4 | 4, 2 => getBitN n 8 | 3, 4 | 4, 3 => getBitN n 9
+  | _, _ => false
+
+def isTriFreeN (n : Nat) : Bool :=
+  let g := adj5N n
+  let chk (a b c : Fin 5) := !(g a b && g b c && g a c)
+  chk 0 1 2 && chk 0 1 3 && chk 0 1 4 && chk 0 2 3 && chk 0 2 4 &&
+  chk 0 3 4 && chk 1 2 3 && chk 1 2 4 && chk 1 3 4 && chk 2 3 4
+
+def isC5N (n : Nat) : Bool :=
+  let g := adj5N n
+  let deg (v : Fin 5) : Nat :=
+    (if g v 0 then 1 else 0) + (if g v 1 then 1 else 0) +
+    (if g v 2 then 1 else 0) + (if g v 3 then 1 else 0) +
+    (if g v 4 then 1 else 0)
+  deg 0 == 2 && deg 1 == 2 && deg 2 == 2 && deg 3 == 2 && deg 4 == 2
+
+/-! ### Range check utility -/
+
+def checkRangeN (f : Nat → Bool) (lo : Nat) : Nat → Bool
+  | 0 => true
+  | n + 1 => f (lo + n) && checkRangeN f lo n
+
+theorem checkRangeN_sound (f : Nat → Bool) (lo n : Nat)
+    (h : checkRangeN f lo n = true) : ∀ k, k < n → f (lo + k) = true := by
+  induction n with
+  | zero => intro k hk; omega
+  | succ m ih =>
+    intro k hk
+    simp [checkRangeN, Bool.and_eq_true] at h
+    by_cases hkm : k = m
+    · exact hkm ▸ h.1
+    · exact ih h.2 k (by omega)
+
+/-! ### Kernel-verified decide proofs -/
+
+set_option maxRecDepth 4096 in
+set_option maxHeartbeats 800000000 in
+theorem intCheck_flag_bound :
+    checkRangeN (fun n => !isTriFreeN n || decide
+      (Finset.univ.sum (fun p => intQC (adj5N n) p) ≤ 11520)) 0 1024 = true := by
+  decide
+
+set_option maxRecDepth 4096 in
+set_option maxHeartbeats 800000000 in
+theorem intCheck_flag_bound_c5 :
+    checkRangeN (fun n => !isTriFreeN n || decide
+      (Finset.univ.sum (fun p => intQC (adj5N n) p) +
+        (if isC5N n then 300000 else 0) ≤ 11520)) 0 1024 = true := by
+  decide
+
+-- ↑↑↑ end inlined Erdos24IntCheck ↑↑↑
 
 /-!
 # Erdős Pentagon Conjecture
@@ -39,17 +178,15 @@ Following Grzesik (2012), the proof proceeds in two steps:
   120(3):722–732, 2013.
 -/
 
-attribute [local instance] Classical.propDecidable
-
-namespace Erdos24
-
 open Finset Function SimpleGraph Fintype Nat Matrix
+
+attribute [local instance] Classical.propDecidable
 
 /-!
 ## § 1. Certificate Matrices and PSD Verification
 
 Three certificate matrices P (8×8), Q (6×6), R (5×5) from the flag algebra proof,
-verified positive semidefinite via explicit LDLᵀ decompositions checked by `native_decide`.
+verified positive semidefinite via explicit LDLᵀ decompositions checked by `decide`.
 -/
 
 /-- Certificate matrix P (8×8) for type σ₀, scaled by 625. -/
@@ -114,20 +251,38 @@ private def L_R : Matrix (Fin 5) (Fin 5) ℚ := !![
 private def D_R_vec : Fin 5 → ℚ :=
   ![1512, 49447/189, 4331525/49447, 0, 0]
 
+set_option maxHeartbeats 6400000 in
 private lemma P_ldlt : P_cert = L_P * Matrix.diagonal D_P_vec * L_P.transpose := by
-  native_decide
+  ext i j; fin_cases i <;> fin_cases j <;>
+  simp [P_cert, L_P, D_P_vec, Matrix.mul_apply, Matrix.diagonal, Matrix.transpose_apply,
+        Fin.sum_univ_succ, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.vecHead, Matrix.vecTail] <;>
+  norm_num
 
+set_option maxHeartbeats 6400000 in
 private lemma Q_ldlt : Q_cert = L_Q * Matrix.diagonal D_Q_vec * L_Q.transpose := by
-  native_decide
+  ext i j; fin_cases i <;> fin_cases j <;>
+  simp [Q_cert, L_Q, D_Q_vec, Matrix.mul_apply, Matrix.diagonal, Matrix.transpose_apply,
+        Fin.sum_univ_succ, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.vecHead, Matrix.vecTail] <;>
+  norm_num
 
+set_option maxHeartbeats 3200000 in
 private lemma R_ldlt : R_cert = L_R * Matrix.diagonal D_R_vec * L_R.transpose := by
-  native_decide
+  ext i j; fin_cases i <;> fin_cases j <;>
+  simp [R_cert, L_R, D_R_vec, Matrix.mul_apply, Matrix.diagonal, Matrix.transpose_apply,
+        Fin.sum_univ_succ, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.vecHead, Matrix.vecTail] <;>
+  norm_num
 
-private lemma D_P_nonneg : ∀ i : Fin 8, 0 ≤ D_P_vec i := by native_decide
+private lemma D_P_nonneg : ∀ i : Fin 8, 0 ≤ D_P_vec i := by
+  intro i; fin_cases i <;> simp [D_P_vec, Matrix.cons_val_zero, Matrix.cons_val_one] <;> norm_num
 
-private lemma D_Q_nonneg : ∀ i : Fin 6, 0 ≤ D_Q_vec i := by native_decide
+private lemma D_Q_nonneg : ∀ i : Fin 6, 0 ≤ D_Q_vec i := by
+  intro i; fin_cases i <;> simp [D_Q_vec, Matrix.cons_val_zero, Matrix.cons_val_one] <;> norm_num
 
-private lemma D_R_nonneg : ∀ i : Fin 5, 0 ≤ D_R_vec i := by native_decide
+private lemma D_R_nonneg : ∀ i : Fin 5, 0 ≤ D_R_vec i := by
+  intro i; fin_cases i <;> simp [D_R_vec, Matrix.cons_val_zero, Matrix.cons_val_one] <;> norm_num
 
 /-- If `M = L * diag(d) * Lᵀ` with `d ≥ 0`, then `M` is positive semidefinite. -/
 lemma psd_of_ldlt {n : ℕ} (M L : Matrix (Fin n) (Fin n) ℚ) (d : Fin n → ℚ)
@@ -215,27 +370,154 @@ def mkAdj5 (e : Fin 10 → Bool) : Fin 5 → Fin 5 → Bool := fun i j =>
   | 2, 3 | 3, 2 => e 7 | 2, 4 | 4, 2 => e 8 | 3, 4 | 4, 3 => e 9
   | _, _ => false
 
-/-- For every triangle-free graph on `Fin 5`,
+/-! ### Bridge lemmas connecting integer and rational computations -/
+
+private lemma σ₀FI_eq : σ₀FI = σ₀FlagIdx := by
+  ext a b c; simp [σ₀FI, σ₀FlagIdx]
+
+private lemma σ₁FI_eq : σ₁FI = σ₁FlagIdx := by
+  ext a b c; cases a <;> cases b <;> cases c <;> rfl
+
+private lemma σ₂FI_eq : σ₂FI = σ₂FlagIdx := by
+  ext a b c; cases a <;> cases b <;> cases c <;> rfl
+
+set_option maxHeartbeats 6400000 in
+private lemma P_cert_eq_int : ∀ i j : Fin 8, P_cert i j = (P_int_fin i j : ℚ) := by
+  intro i j; fin_cases i <;> fin_cases j <;> simp [P_cert, P_int_fin] <;> norm_num
+
+set_option maxHeartbeats 3200000 in
+private lemma Q_cert_eq_int : ∀ i j : Fin 6, Q_cert i j = (Q_int_fin i j : ℚ) := by
+  intro i j; fin_cases i <;> fin_cases j <;> simp [Q_cert, Q_int_fin] <;> norm_num
+
+set_option maxHeartbeats 1600000 in
+private lemma R_cert_eq_int : ∀ i j : Fin 5, R_cert i j = (R_int_fin i j : ℚ) := by
+  intro i j; fin_cases i <;> fin_cases j <;> simp [R_cert, R_int_fin] <;> norm_num
+
+private lemma quintContrib_eq_intQC_div (adj : Fin 5 → Fin 5 → Bool)
+    (p : Equiv.Perm (Fin 5)) :
+    quintContrib adj p = (intQC adj p : ℚ) / 2500 := by
+  unfold quintContrib intQC;
+  rw [ show σ₀FI = σ₀FlagIdx from σ₀FI_eq, show σ₁FI = σ₁FlagIdx from σ₁FI_eq, show σ₂FI = σ₂FlagIdx from σ₂FI_eq ];
+  rw [ show P_cert = _ from funext fun i => funext fun j => P_cert_eq_int i j ] ; rw [ show Q_cert = _ from funext fun i => funext fun j => Q_cert_eq_int i j ] ; rw [ show R_cert = _ from funext fun i => funext fun j => R_cert_eq_int i j ] ;
+  cases h : σ₁FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₁FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
+  · split_ifs <;> ring;
+    cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
+    ring;
+  · split_ifs <;> ring;
+    cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
+    ring;
+  · split_ifs <;> ring;
+    cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
+    ring;
+  · cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
+    · split_ifs <;> ring;
+    · split_ifs <;> ring;
+    · split_ifs <;> ring;
+    · grind
+
+private lemma totalFlagContrib_eq_intSum_div (adj : Fin 5 → Fin 5 → Bool) :
+    totalFlagContrib adj =
+      ((Finset.univ : Finset (Equiv.Perm (Fin 5))).sum (fun p => intQC adj p) : ℚ) / 2500 := by
+  unfold totalFlagContrib
+  simp_rw [quintContrib_eq_intQC_div]
+  rw [Finset.sum_div]
+
+/-- Encode `Fin 10 → Bool` as a natural number in `[0, 1024)`. -/
+def encodeGraph (e : Fin 10 → Bool) : Nat :=
+  (if e 0 then 1 else 0) + (if e 1 then 2 else 0) + (if e 2 then 4 else 0) +
+  (if e 3 then 8 else 0) + (if e 4 then 16 else 0) + (if e 5 then 32 else 0) +
+  (if e 6 then 64 else 0) + (if e 7 then 128 else 0) + (if e 8 then 256 else 0) +
+  (if e 9 then 512 else 0)
+
+private lemma encodeGraph_lt (e : Fin 10 → Bool) : encodeGraph e < 1024 := by
+  simp only [encodeGraph]; split <;> split <;> split <;> split <;> split <;>
+    split <;> split <;> split <;> split <;> split <;> omega
+
+set_option maxHeartbeats 6400000 in
+private lemma encodeGraph_eq_bit (e : Fin 10 → Bool) :
+    encodeGraph e = Nat.bit (e 0) (Nat.bit (e 1) (Nat.bit (e 2) (Nat.bit (e 3)
+      (Nat.bit (e 4) (Nat.bit (e 5) (Nat.bit (e 6) (Nat.bit (e 7)
+        (Nat.bit (e 8) (Nat.bit (e 9) 0))))))))) := by
+  simp only [encodeGraph, Nat.bit_val]
+  cases e 0 <;> cases e 1 <;> cases e 2 <;> cases e 3 <;> cases e 4 <;>
+    cases e 5 <;> cases e 6 <;> cases e 7 <;> cases e 8 <;> cases e 9 <;>
+    simp [Bool.toNat] <;> omega
+
+private lemma getBitN_eq_testBit (n i : Nat) : getBitN n i = n.testBit i := by
+  simp [getBitN, Nat.testBit]
+
+private lemma getBitN_encode (e : Fin 10 → Bool) (i : Fin 10) :
+    getBitN (encodeGraph e) i.val = e i := by
+  rw [getBitN_eq_testBit, encodeGraph_eq_bit]
+  fin_cases i <;> simp [Nat.testBit_bit_zero, Nat.testBit_bit_succ]
+
+private lemma adj5N_encode (e : Fin 10 → Bool) :
+    adj5N (encodeGraph e) = mkAdj5 e := by
+  ext i j;
+  fin_cases i <;> fin_cases j <;> simp +decide [ adj5N, mkAdj5, getBitN_encode ];
+  all_goals exact getBitN_encode e ⟨ _, by decide ⟩ ;
+
+private lemma isTriFreeN_of_triFree (e : Fin 10 → Bool)
+    (h : ∀ a b c : Fin 5, ¬(mkAdj5 e a b = true ∧ mkAdj5 e b c = true ∧ mkAdj5 e a c = true)) :
+    isTriFreeN (encodeGraph e) = true := by
+  simp only [isTriFreeN, adj5N_encode]
+  simp +zetaDelta at *;
+  grind +locals
+
+/-
+For every triangle-free graph on `Fin 5`,
 `totalFlagContrib ≤ 576/125 = 120 · (24/625)`.
-Checked over all `2^10 = 1024` possible edge configurations by `native_decide`. -/
+Checked over all `2^10 = 1024` possible edge configurations.
+-/
 theorem flag_bound_all_graphs : ∀ e : Fin 10 → Bool,
     (∀ a b c : Fin 5,
       ¬(mkAdj5 e a b = true ∧ mkAdj5 e b c = true ∧ mkAdj5 e a c = true)) →
     totalFlagContrib (mkAdj5 e) ≤ 576 / 125 := by
-  native_decide
+  intro e htf
+  rw [totalFlagContrib_eq_intSum_div]
+  have hlt := encodeGraph_lt e
+  have hadj := adj5N_encode e
+  have htfN := isTriFreeN_of_triFree e htf
+  have hcheck := checkRangeN_sound _ 0 1024 intCheck_flag_bound (encodeGraph e) hlt
+  simp [htfN, hadj] at hcheck
+  convert div_le_div_of_nonneg_right ( Int.cast_le.mpr hcheck ) ( by norm_num : ( 0 : ℚ ) ≤ 2500 ) using 1 ; norm_num [ Finset.sum_div _ _ _ ];
+  norm_num [ div_eq_mul_inv ]
+
+-- bridge from Int bound to ℚ bound
 
 /-- Whether a graph on `Fin 5` is a 5-cycle (every vertex has degree exactly 2). -/
 def isC5_adj (adj : Fin 5 → Fin 5 → Bool) : Bool :=
   ((Finset.univ : Finset (Fin 5)).filter (fun v =>
     ((Finset.univ : Finset (Fin 5)).filter (fun w => adj v w)).card = 2)).card = 5
 
-/-- Strengthened computational bound including the C₅ indicator. -/
+set_option maxHeartbeats 40000000 in
+private lemma isC5N_eq (e : Fin 10 → Bool) :
+    isC5N (encodeGraph e) = isC5_adj (mkAdj5 e) := by
+  have he : e = ![e 0, e 1, e 2, e 3, e 4, e 5, e 6, e 7, e 8, e 9] := by
+    ext k; fin_cases k <;> rfl
+  rw [he]
+  cases e 0 <;> cases e 1 <;> cases e 2 <;> cases e 3 <;> cases e 4 <;>
+    cases e 5 <;> cases e 6 <;> cases e 7 <;> cases e 8 <;> cases e 9 <;>
+    decide
+
+/-
+Strengthened computational bound including the C₅ indicator.
+-/
 theorem flag_bound_with_c5 : ∀ e : Fin 10 → Bool,
     (∀ a b c : Fin 5,
       ¬(mkAdj5 e a b = true ∧ mkAdj5 e b c = true ∧ mkAdj5 e a c = true)) →
     totalFlagContrib (mkAdj5 e) +
       120 * (if isC5_adj (mkAdj5 e) then 1 else 0) ≤ 576 / 125 := by
-  native_decide
+  intro e htf
+  rw [totalFlagContrib_eq_intSum_div, ← isC5N_eq]
+  have hlt := encodeGraph_lt e
+  have hadj := adj5N_encode e
+  have htfN := isTriFreeN_of_triFree e htf
+  have hcheck := checkRangeN_sound _ 0 1024 intCheck_flag_bound_c5 (encodeGraph e) hlt
+  simp [htfN, hadj] at hcheck
+  convert div_le_div_of_nonneg_right ( Int.cast_le.mpr hcheck ) ( by norm_num : ( 0 : ℚ ) ≤ 2500 ) using 1 ; norm_num [ Finset.sum_ite ] ; ring!;
+  · grind;
+  · norm_num
 
 /-!
 ## § 4. Graph Adjacency from Injective Functions
@@ -470,10 +752,34 @@ lemma quadForm_nonneg {V : Type*} [Fintype V]
 ## § 8. Bounds on `quintContrib` Values
 -/
 
-/-- Every `quintContrib` value is ≤ 7 (verified computationally). -/
+/-
+Every `quintContrib` value is ≤ 7 (verified computationally).
+-/
+private lemma P_entry_le : ∀ i j : Fin 8, P_cert i j / 625 ≤ 7 := by
+  intro i j; fin_cases i <;> fin_cases j <;> simp [P_cert] <;> norm_num
+
+private lemma Q_entry_le : ∀ i j : Fin 6, Q_cert i j / 2500 ≤ 7 := by
+  intro i j; fin_cases i <;> fin_cases j <;> simp [Q_cert] <;> norm_num
+
+private lemma R_entry_le : ∀ i j : Fin 5, R_cert i j / 625 ≤ 7 := by
+  intro i j; fin_cases i <;> fin_cases j <;> simp [R_cert] <;> norm_num
+
 theorem quintContrib_le_seven :
     ∀ (e : Fin 10 → Bool), quintContrib (mkAdj5 e) (Equiv.refl _) ≤ 7 := by
-  native_decide
+  intro e
+  unfold quintContrib
+  simp only [Equiv.refl_apply]
+  split_ifs with h1 h2 h3
+  · exact P_entry_le _ _
+  · match σ₁FlagIdx (mkAdj5 e 3 0) (mkAdj5 e 3 1) (mkAdj5 e 3 2),
+          σ₁FlagIdx (mkAdj5 e 4 0) (mkAdj5 e 4 1) (mkAdj5 e 4 2) with
+    | some fi, some fj => exact Q_entry_le fi fj
+    | some _, none | none, some _ | none, none => norm_num
+  · match σ₂FlagIdx (mkAdj5 e 3 0) (mkAdj5 e 3 1) (mkAdj5 e 3 2),
+          σ₂FlagIdx (mkAdj5 e 4 0) (mkAdj5 e 4 1) (mkAdj5 e 4 2) with
+    | some fi, some fj => exact R_entry_le fi fj
+    | some _, none | none, some _ | none, none => norm_num
+  · norm_num
 
 /-- `quintContrib` is bounded by 7 for any `graphAdj5`. -/
 lemma quintContrib_le_for_graphAdj {V : Type*} (G : SimpleGraph V) (f : Fin 5 → V) :
@@ -526,7 +832,7 @@ lemma non_injective_count_le {V : Type*} [Fintype V] :
         ⟨fun i => e.symm (b i), ⟨x, y, by simpa using hxy, hne⟩, by simp +decide⟩
   intro n
   by_cases hn : n ≤ 4
-  · interval_cases n <;> native_decide
+  · set_option maxRecDepth 8192 in set_option maxHeartbeats 6400000 in interval_cases n <;> decide
   · have h_count :
         (Finset.univ.filter fun f : Fin 5 → Fin n => Injective f).card =
           Nat.descFactorial n 5 := by
@@ -1110,15 +1416,18 @@ lemma nat_le_of_real_le_add_half (c n : ℕ) (h : (c : ℝ) ≤ (n : ℝ) ^ 5 + 
   have : (c : ℝ) < (n ^ 5 + 1 : ℕ) := by push_cast; linarith
   exact Nat.lt_add_one_iff.mp (Nat.cast_lt.mp this)
 
-/-- The key combinatorial bound (Grzesik's Theorem 2): a triangle-free graph on `5n`
-vertices has at most `n⁵` vertex-sets supporting a `C₅` (`SimpleGraph.numC5Copies`).
+/-- **Erdős Pentagon Conjecture** (settled affirmatively by Grzesik, 2012).
+  Statement in terms of `SimpleGraph.numC5Copies`. See `erdos_24` for
+  a statement in terms of `SimpleGraph.numC5`. See Section §11 for a discussion on the
+  differences between the two.
 
-Writing `c = numC5Copies G`, the balanced blow-up `G.blowup N` is triangle-free with
-`≥ c · N⁵` such sets; choosing `ε = 12/(625·n⁵)` and applying the Turán density bound to
-the blow-up gives `c ≤ n⁵ + 1/2`, hence `c ≤ n⁵` since `c` is a natural number.  For
-triangle-free `G` this count agrees with the genuine `C₅`-count `numC5`
-(`numC5_eq_numC5Copies_of_triangleFree`), which yields the headline `erdos_24`. -/
-private lemma numC5Copies_le (n : ℕ) (G : SimpleGraph (Fin (5 * n)))
+Every triangle-free graph on `5n` vertices contains at most `n⁵` copies of `C₅`.
+
+The proof follows Grzesik's Theorem 2: assuming `c = numC5Copies G`, the balanced
+blow-up `G.blowup N` is triangle-free with `≥ c · N⁵` copies of `C₅`. Choosing
+`ε = 12/(625·n⁵)` and applying the Turán density bound to the blow-up gives
+`c ≤ n⁵ + 1/2`, hence `c ≤ n⁵` since `c` is a natural number. -/
+theorem numC5Copies_le_pow_five (n : ℕ) (G : SimpleGraph (Fin (5 * n)))
     (hG : G.CliqueFree 3) :
     numC5Copies G ≤ n ^ 5 := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
@@ -1297,7 +1606,7 @@ lemma labeledC5_fiber_card {V : Type*} [Fintype V] [DecidableEq V]
         convert Finset.card_image_of_injective _ ( show Function.Injective ( fun σ : Equiv.Perm ( Fin 5 ) => fun i => f₀ ( σ i ) ) from ?_ ) using 1;
         any_goals exact Finset.filter ( fun σ : Equiv.Perm ( Fin 5 ) => ∀ i : Fin 5, σ ( i + 1 ) = σ i + 1 ∨ σ i = σ ( i + 1 ) + 1 ) Finset.univ;
         · exact congr_arg Finset.card ( Finset.ext fun x => by simpa using h_bij x );
-        · native_decide;
+        · set_option maxRecDepth 8192 in set_option maxHeartbeats 6400000 in decide;
         · intro σ τ hστ; have := hf₀.1.1; simp_all +decide [ funext_iff, Fin.forall_fin_succ ] ;
           exact Equiv.Perm.ext fun x => this <| by fin_cases x <;> tauto;
 
@@ -1330,16 +1639,15 @@ theorem numC5_eq_numC5Copies_of_triangleFree {V : Type*} [Fintype V] [DecidableE
 
 /-- **Erdős Pentagon Conjecture** (settled affirmatively by Grzesik, 2012).
 
-Every triangle-free graph on `5n` vertices contains at most `n⁵` copies of `C₅`, where
-copies are counted as subgraphs isomorphic to the cycle graph `C₅` (`SimpleGraph.numC5`;
-see Section §11 for the distinction from `numC5Copies`, which agrees with `numC5` on
-triangle-free graphs). -/
+Every triangle-free graph on `5n` vertices contains at most `n⁵` copies of `C₅`,
+where copies are counted as subgraphs isomorphic to the cycle graph `C₅`
+(see `SimpleGraph.numC5` and Section §11). -/
 theorem erdos_24 (n : ℕ) (G : SimpleGraph (Fin (5 * n))) (hG : G.CliqueFree 3) :
     numC5 G ≤ n ^ 5 := by
   rw [numC5_eq_numC5Copies_of_triangleFree G hG]
-  exact numC5Copies_le n G hG
+  exact numC5Copies_le_pow_five n G hG
 
 #print axioms erdos_24
--- 'Erdos24.erdos_24' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
+-- 'Erdos24.erdos_24' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos24

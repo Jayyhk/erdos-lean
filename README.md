@@ -23,14 +23,14 @@ Verify with `cd problems/N && lake build`.
 
 <!-- TABLE:START -->
 39 proofs in the catalog (out of 1217+ Erdős problems):
-- 33 `complete`
-- 4 `trust_extended`
+- 34 `complete`
+- 3 `trust_extended`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
 | [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
-| [24](https://www.erdosproblems.com/24) | `trust_extended` | [problems/24/](problems/24/) | uses `native_decide` |
+| [24](https://www.erdosproblems.com/24) | `complete` | [problems/24/](problems/24/) | |
 | [26](https://www.erdosproblems.com/26) | `complete` | [problems/26/](problems/26/) | |
 | [31](https://www.erdosproblems.com/31) | `complete` | [problems/31/](problems/31/) | |
 | [34](https://www.erdosproblems.com/34) | `complete` | [problems/34/](problems/34/) | |
