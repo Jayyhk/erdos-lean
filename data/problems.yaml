@@ -579,3 +579,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/330#post-6271"
       - "https://github.com/AllenGrahamHart/FormalConjectures-Bench/tree/main/formalizations/erdos330"
+- number: "331"
+  proof:
+    path: "problems/331/"
+    theorem: "Erdos331.erdos_331"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/331#post-4019"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem331.lean"
