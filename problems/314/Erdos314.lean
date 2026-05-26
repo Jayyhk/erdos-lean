@@ -12,11 +12,11 @@ Mathlib version: 8f9d9cff6bd728b17a24e163c9402775d9e6a365
 
 import Mathlib
 
-open Finset Real MeasureTheory intervalIntegral
-
 noncomputable section
 
 namespace Erdos314
+
+open Finset Real MeasureTheory intervalIntegral
 
 /-- The partial harmonic sum from n to m: ∑_{ℓ=n}^{m} 1/ℓ. -/
 def harmonicPartialSum (n m : ℕ) : ℝ :=

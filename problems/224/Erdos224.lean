@@ -10,14 +10,14 @@ from SpringSense Innovation Institute
 -/
 
 
+namespace Erdos224
+
 open scoped BigOperators
 open scoped Real
 open scoped RealInnerProductSpace
 open scoped Pointwise  -- Minkowski sum / scalar actions on sets often live here
 open MeasureTheory
 open Filter
-
-namespace Erdos224
 
 variable {d : ℕ}
 
