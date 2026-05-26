@@ -547,3 +547,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/314#post-5193"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem314.lean"
+- number: "315"
+  proof:
+    path: "problems/315/"
+    theorem: "Erdos315.erdos_315"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/315#post-4020"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos315.lean"
