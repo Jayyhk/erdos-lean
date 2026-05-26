@@ -622,3 +622,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/347#post-3610"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem347.lean"
+- number: "350"
+  proof:
+    path: "problems/350/"
+    theorem: "Erdos350.erdos_350"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/350#post-1848"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos350.lean"
