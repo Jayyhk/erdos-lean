@@ -348,6 +348,40 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/224#post-3157"
       - "https://github.com/SpringSense-Innovation-Institute/ai-for-math-lean/blob/main/erdos-problems/erdos224/Erdos224.lean"
+- number: "226"
+  proof:
+    path: "problems/226/"
+    theorem: "Erdos226.erdos_226"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/226#post-2574"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos226.lean"
+- number: "229"
+  proof:
+    path: "problems/229/"
+    theorem: "Erdos229.erdos_229"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/229#post-2514"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos229.lean"
+- number: "231"
+  proof:
+    path: "problems/231/"
+    theorem: "Erdos231.erdos_231"
+    state: "trust_extended"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    trust_extensions: ["uses_native_decide"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/231#post-6376"
+      - "https://gist.github.com/LorenzoLuccioli/d9854d75aa8494921cbb50c465a9b9dd#file-erdos231-lean"
 - number: "237"
   proof:
     path: "problems/237/"
