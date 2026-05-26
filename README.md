@@ -22,8 +22,8 @@ Verify with `cd problems/N && lake build`.
 ## Catalog
 
 <!-- TABLE:START -->
-40 proofs in the catalog (out of 1217+ Erdős problems):
-- 34 `complete`
+41 proofs in the catalog (out of 1217+ Erdős problems):
+- 35 `complete`
 - 3 `trust_extended`
 - 3 `axiomatic`
 
@@ -67,6 +67,7 @@ Verify with `cd problems/N && lake build`.
 | [237](https://www.erdosproblems.com/237) | `axiomatic` | [problems/237/](problems/237/) | assumes Maynard–Tao (`maynard_tao`) |
 | [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
 | [258](https://www.erdosproblems.com/258) | `axiomatic` | [problems/258/](problems/258/) | assumes Tao–Teräväinen (`tao_teravainen`) |
+| [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
 
