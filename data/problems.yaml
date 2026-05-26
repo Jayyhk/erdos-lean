@@ -441,6 +441,28 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/268#post-5359"
       - "https://gist.github.com/madeve-unipi/62a8f68cdb4864b85b81a6752dcb0aa4#file-erdos268-lean"
+- number: "275"
+  proof:
+    path: "problems/275/"
+    theorem: "Erdos275.erdos_275"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/275#post-3543"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos275.lean"
+- number: "280"
+  proof:
+    path: "problems/280/"
+    theorem: "Erdos280.erdos_280"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/280#post-5595"
+      - "https://gist.github.com/LorenzoLuccioli/2dda92a192c15c24263c8a258979e7e3#file-erdos280-lean"
 - number: "281"
   proof:
     path: "problems/281/"
