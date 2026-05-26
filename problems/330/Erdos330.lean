@@ -12,22 +12,24 @@ in dependency order with project-internal imports removed and the namespace
 -/
 import Mathlib
 
+namespace Erdos330
+
 namespace Set
 
-open Filter
+open Filter _root_.Set
 
 noncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Iio b).ncard / (A ∩ Iio b).ncard
 
 theorem partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) (b : β) : S.partialDensity A b ≤ 1 := by
+    (S : Set β) (A : Set β := Set.univ) (b : β) : Set.partialDensity S A b ≤ 1 := by
   apply div_le_one_of_le₀ _ (Nat.cast_nonneg _)
   exact mod_cast Set.ncard_le_ncard <| Set.inter_subset_inter_left _ inter_subset_right
 
 noncomputable def upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : ℝ :=
-  atTop.limsup fun (b : β) ↦ S.partialDensity A b
+  atTop.limsup fun (b : β) ↦ Set.partialDensity S A b
 
 end Set
 
@@ -35,6 +37,8 @@ end Set
 theorem Nat.ncard_Iio (b : ℕ) : (Set.Iio b).ncard = b := by
   rw [← Finset.coe_Iio, Set.ncard_coe_finset]
   exact Nat.card_Iio _
+
+end Erdos330
 
 
 /-! ### module: Basic -/
@@ -75,7 +79,7 @@ def privateSet (A : Set ℕ) (a : ℕ) : Set ℕ :=
 
 /-- Positive upper asymptotic density. -/
 def HasPositiveUpperDensity (A : Set ℕ) : Prop :=
-  0 < A.upperDensity
+  0 < Set.upperDensity A
 
 /--
 Proof-faithful target for Erdős Problem 330 in the exact two-fold,
@@ -91,8 +95,8 @@ theorem mainTarget_iff :
     MainTarget ↔
       ∃ A : Set ℕ,
         IsAsymptoticBasisTwo A ∧
-        0 < A.upperDensity ∧
-        ∀ a ∈ A, 0 < (privateSet A a).upperDensity := by
+        0 < Set.upperDensity A ∧
+        ∀ a ∈ A, 0 < Set.upperDensity (privateSet A a) := by
   rfl
 
 theorem mem_twoFold {A : Set ℕ} {n : ℕ} :
@@ -954,13 +958,13 @@ namespace Erdos330
 open Filter
 
 theorem partialDensity_univ_nat (S : Set ℕ) (b : ℕ) :
-    S.partialDensity Set.univ b = ((S ∩ Set.Iio b).ncard : ℝ) / b := by
+    Set.partialDensity S Set.univ b = ((S ∩ Set.Iio b).ncard : ℝ) / b := by
   simp [Set.partialDensity, Nat.ncard_Iio]
 
 theorem le_partialDensity_univ_nat_of_count {S : Set ℕ} {b : ℕ} {c : ℝ}
     (hb : 0 < b)
     (hcount : c * (b : ℝ) ≤ ((S ∩ Set.Iio b).ncard : ℝ)) :
-    c ≤ S.partialDensity Set.univ b := by
+    c ≤ Set.partialDensity S Set.univ b := by
   rw [partialDensity_univ_nat]
   rwa [le_div_iff₀ (Nat.cast_pos.mpr hb)]
 
@@ -968,7 +972,7 @@ theorem le_partialDensity_univ_nat_of_finset {S : Set ℕ} {B : Finset ℕ} {b :
     (hb : 0 < b)
     (hB : ∀ n ∈ B, n ∈ S ∧ n < b)
     (hcount : c * (b : ℝ) ≤ (B.card : ℝ)) :
-    c ≤ S.partialDensity Set.univ b := by
+    c ≤ Set.partialDensity S Set.univ b := by
   have hBsub : (B : Set ℕ) ⊆ S ∩ Set.Iio b := by
     intro n hn
     exact hB n hn
@@ -984,13 +988,13 @@ density.  This is the main limsup bridge used by the global construction.
 -/
 theorem upperDensity_pos_of_frequently_partialDensity_ge {S : Set ℕ} {c : ℝ}
     (hc : 0 < c)
-    (hfreq : ∀ N : ℕ, ∃ b : ℕ, N ≤ b ∧ c ≤ S.partialDensity Set.univ b) :
-    0 < S.upperDensity := by
+    (hfreq : ∀ N : ℕ, ∃ b : ℕ, N ≤ b ∧ c ≤ Set.partialDensity S Set.univ b) :
+    0 < Set.upperDensity S := by
   have hbounded :
-      Filter.atTop.IsBoundedUnder (· ≤ ·) (fun b : ℕ => S.partialDensity Set.univ b) := by
+      Filter.atTop.IsBoundedUnder (· ≤ ·) (fun b : ℕ => Set.partialDensity S Set.univ b) := by
     refine isBoundedUnder_of_eventually_le (a := (1 : ℝ)) ?_
     exact Eventually.of_forall fun b => Set.partialDensity_le_one S Set.univ b
-  have hle : c ≤ S.upperDensity := by
+  have hle : c ≤ Set.upperDensity S := by
     rw [Set.upperDensity]
     refine le_limsup_of_le hbounded ?_
     intro B hB
@@ -1048,7 +1052,7 @@ theorem protectedBlock_partialDensity_lower {st : ℕ → StageState} (chain : S
     {k a endpoint : ℕ} (hendpoint : endpoint ≤ (st k).X) (hendpoint_pos : 0 < endpoint)
     (cert : ProtectedBlockCertificate (st k).S a endpoint) :
     ((cert.densityNumerator : ℝ) / (cert.densityDenominator : ℝ)) ≤
-      (privateSet (finalSet st) a).partialDensity Set.univ endpoint := by
+      Set.partialDensity (privateSet (finalSet st) a) Set.univ endpoint := by
   refine le_partialDensity_univ_nat_of_finset (S := privateSet (finalSet st) a)
     (B := cert.block) hendpoint_pos ?_ ?_
   · intro n hn
