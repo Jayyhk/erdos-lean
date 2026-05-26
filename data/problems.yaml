@@ -655,3 +655,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/355#post-4741"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem355.lean"
+- number: "363"
+  proof:
+    path: "problems/363/"
+    theorem: "Erdos363.erdos_363"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/363#post-4709"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem363.lean"
