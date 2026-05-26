@@ -479,19 +479,13 @@ lemma lower_density_zero : (A + B).lowerDensity = 0 := by
 the lower density of A + B is zero, where A and B are the sets of base-3 and base-4
 digit-{0,1} integers. Equivalently, A + B does NOT have positive lower density. -/
 theorem erdos_125 :
-    False ↔ 0 < ({ x : ℕ | (digits 3 x).toFinset ⊆ {0, 1} } +
+    ¬ 0 < ({ x : ℕ | (digits 3 x).toFinset ⊆ {0, 1} } +
       { x : ℕ | (digits 4 x).toFinset ⊆ {0, 1} }).lowerDensity := by
   have hA : {x : ℕ | (digits 3 x).toFinset ⊆ {0, 1}} = A := rfl
   have hB : {x : ℕ | (digits 4 x).toFinset ⊆ {0, 1}} = B := rfl
-  have h_zero : (A + B).lowerDensity = 0 := lower_density_zero
-  constructor
-  · intro h
-    contradiction
-  · intro h
-    rw [hA, hB] at h
-    rw [h_zero] at h
-    revert h
-    norm_num
+  intro h
+  rw [hA, hB, lower_density_zero] at h
+  exact lt_irrefl 0 h
 
 #print axioms erdos_125
 -- 'Erdos125.erdos_125' depends on axioms: [propext, Classical.choice, Quot.sound]

@@ -140,21 +140,19 @@ def IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=
 def IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=
   ∃ a d : α, IsAPOfLengthWith s l a d
 
-theorem erdos_198 : (∀ A : Set ℕ, IsSidon A → (∃ Y, IsAPOfLength Y ⊤ ∧ Y ⊆ Aᶜ)) ↔ False := by
-  bound;
-  · -- Apply the assumption `a` to the specific Sidon set `A` we constructed.
-    obtain ⟨Y, hY⟩ := a A A_is_Sidon;
-    -- Since Y is an infinite arithmetic progression, there must be some element in Y that is also in A.
-    obtain ⟨y, hyY, hyA⟩ : ∃ y ∈ Y, y ∈ A := by
-      obtain ⟨ a, d, hd, h ⟩ := hY.1;
-      -- Since $A$ intersects every infinite arithmetic progression, there must be some element in $Y$ that is also in $A$.
-      have h_inter : (A ∩ {x | ∃ n : ℕ, x = a + n * d}).Nonempty := by
-        have := A_intersects_every_infinite_AP { x | ∃ n : ℕ, x = a + n * d } ⟨ a, d, by
-          rcases d with ( _ | _ | d ) <;> simp_all +decide [ Set.subset_def ], rfl ⟩ ; aesop;
-      obtain ⟨ y, hyA, hyY ⟩ := h_inter; use y; aesop;
-    exact hY.2 hyY hyA;
-  · -- Since we have a contradiction, we can use the `contradiction` tactic to close the goal.
-    contradiction
+theorem erdos_198 : ¬ ∀ A : Set ℕ, IsSidon A → (∃ Y, IsAPOfLength Y ⊤ ∧ Y ⊆ Aᶜ) := by
+  intro a
+  -- Apply the assumption to the constructed Sidon set `A`.
+  obtain ⟨Y, hY⟩ := a A A_is_Sidon;
+  -- Since Y is an infinite arithmetic progression, there must be some element in Y that is also in A.
+  obtain ⟨y, hyY, hyA⟩ : ∃ y ∈ Y, y ∈ A := by
+    obtain ⟨ a, d, hd, h ⟩ := hY.1;
+    -- Since `A` intersects every infinite arithmetic progression, some element of `Y` is also in `A`.
+    have h_inter : (A ∩ {x | ∃ n : ℕ, x = a + n * d}).Nonempty := by
+      have := A_intersects_every_infinite_AP { x | ∃ n : ℕ, x = a + n * d } ⟨ a, d, by
+        rcases d with ( _ | _ | d ) <;> simp_all +decide [ Set.subset_def ], rfl ⟩ ; aesop;
+    obtain ⟨ y, hyA, hyY ⟩ := h_inter; use y; aesop;
+  exact hY.2 hyY hyA
 
 end
 

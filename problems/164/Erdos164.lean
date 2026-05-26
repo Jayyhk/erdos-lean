@@ -4713,9 +4713,8 @@ theorem primitiveWeightSum_le_primeWeightSum {A : Set ℕ} (hA : PrimitiveSet A)
 
 theorem erdos_164 :
     PrimitiveSet primeSet ∧
-      primitiveWeightSum primeSet = primeWeightSum ∧
       ∀ A : Set ℕ, PrimitiveSet A → primitiveWeightSum A ≤ primitiveWeightSum primeSet := by
-  refine ⟨?_, ?_, ?_⟩
+  refine ⟨?_, ?_⟩
   · constructor
     · intro a ha
       have hPrime : a.Prime := by
@@ -4730,7 +4729,6 @@ theorem erdos_164 :
         exact ne_of_gt <| lt_of_lt_of_le (by decide : 1 < 2) haPrime.two_le
       have hEq : b = a := (hbPrime.dvd_iff_eq ha_ne_one).mp hab
       simpa using hEq.symm
-  · rfl
   · intro A hA
     simpa [primitiveWeightSum, primeWeightSum, primeSet] using
       primitiveWeightSum_le_primeWeightSum hA

@@ -575,14 +575,13 @@ lemma is_rectangle_of_erdos (a b c d : ℝ²)
 end AristotleLemmas
 
 theorem erdos_189 :
-    Erdos189For
+    ¬ Erdos189For
       (fun a b c d ↦
         line[ℝ, a, b].direction ⟂ line[ℝ, b, c].direction ∧
         line[ℝ, b, c].direction ⟂ line[ℝ, c, d].direction ∧
         line[ℝ, c, d].direction ⟂ line[ℝ, d, a].direction)
-      (fun a b c d ↦ dist a b * dist b c) ↔ False := by
-  refine' iff_false_intro _;
-  -- By definition of Erdos189For, we need to show that there exists a coloring with 25 colors such that no monochromatic rectangle of area 1 exists.
+      (fun a b c d ↦ dist a b * dist b c) := by
+  -- There is a 25-colouring (Kovač) with no monochromatic rectangle of area 1.
   intro h
   obtain ⟨f, hf⟩ := partition_rectangles_final_v4;
   obtain ⟨ n, hn ⟩ := h 25 ( by norm_num ) ( fun x => f ( toComplex x ) );
