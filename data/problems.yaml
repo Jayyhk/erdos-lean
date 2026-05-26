@@ -429,6 +429,18 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/259#post-5683"
       - "https://gist.github.com/ster-oc/c7429943f6b3a634797dc8b2a3b01f2d#file-erdos259-lean"
+- number: "268"
+  proof:
+    path: "problems/268/"
+    theorem: "Erdos268.erdos_268"
+    state: "trust_extended"
+    trust_extensions: ["uses_native_decide"]
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/268#post-5359"
+      - "https://gist.github.com/madeve-unipi/62a8f68cdb4864b85b81a6752dcb0aa4#file-erdos268-lean"
 - number: "281"
   proof:
     path: "problems/281/"
