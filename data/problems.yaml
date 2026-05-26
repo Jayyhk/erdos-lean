@@ -433,8 +433,7 @@
   proof:
     path: "problems/268/"
     theorem: "Erdos268.erdos_268"
-    state: "trust_extended"
-    trust_extensions: ["uses_native_decide"]
+    state: "complete"
     last_update: "2026-05-26"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"

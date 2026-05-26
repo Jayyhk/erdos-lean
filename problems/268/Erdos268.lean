@@ -82,11 +82,8 @@ lemma unique_representation (a₁ a₂ k₁ k₂ : ℕ)
       intro a ha k
       have hpf : ∀ p, Nat.Prime p → p ∣ a → p ∣ m_const := by
         intro p hp hpa
-        have : p ∈ Nat.primeFactors a :=
-          Nat.mem_primeFactors.mpr ⟨hp, hpa, by fin_cases ha <;> trivial⟩
-        have : ∀ a ∈ S₁ ∪ T₁ ∪ S₂ ∪ T₂ ∪ S₃ ∪ T₃,
-            ∀ p ∈ Nat.primeFactors a, p ∣ m_const := by native_decide
-        exact this a ha p ‹_›
+        apply hp.dvd_of_dvd_pow (n := 5)
+        exact dvd_trans hpa (by fin_cases ha <;> simp [m_const])
       exact Nat.coprime_of_dvd' fun p pp dp dk => by
         simpa [Nat.dvd_add_right (dvd_mul_of_dvd_right (hpf p pp dp) _)] using dk
     exact ⟨h a₁ ha₁ k₂, h a₂ ha₂ k₁⟩
@@ -1291,6 +1288,6 @@ theorem erdos_268 :
 end
 
 #print axioms erdos_268
--- 'Erdos268.erdos_268' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
+-- 'Erdos268.erdos_268' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos268
