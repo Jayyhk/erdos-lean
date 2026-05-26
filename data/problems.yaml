@@ -590,3 +590,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/331#post-4019"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem331.lean"
+- number: "333"
+  proof:
+    path: "problems/333/"
+    theorem: "Erdos333.erdos_333"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/333#post-2403"
