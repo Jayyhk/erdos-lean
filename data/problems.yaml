@@ -558,3 +558,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/315#post-4020"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos315.lean"
+- number: "316"
+  proof:
+    path: "problems/316/"
+    theorem: "Erdos316.erdos_316"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/316.lean"
