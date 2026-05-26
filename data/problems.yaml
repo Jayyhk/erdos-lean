@@ -483,6 +483,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/283#post-6290"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P283/Proof_flat.lean"
+- number: "290"
+  proof:
+    path: "problems/290/"
+    theorem: "Erdos290.erdos_290"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/290#post-3180"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem290.lean"
 - number: "298"
   proof:
     path: "problems/298/"
