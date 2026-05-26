@@ -14742,7 +14742,7 @@ lemma exists_maximal_sidon_extension {A : Set ℕ} {N : ℕ}
 
 /-! ## §4c Erdős 42 — literal every-nonempty-Sidon form -/
 
-theorem erdos_42 :
+theorem erdos_42_iff :
     True ↔ ∀ M ≥ 1, ∀ᶠ N in atTop, ∀ (A : Set ℕ),
       A ⊆ Set.Icc 1 N → IsSidon A → A.Nonempty → ∃ (B : Set ℕ),
         B ⊆ Set.Icc 1 N ∧ IsSidon B ∧ B.ncard = M ∧
@@ -14772,6 +14772,15 @@ theorem erdos_42 :
   intro y hy
   rw [Set.mem_singleton_iff] at hy; subst hy
   exact ⟨h_zero_AA, h_zero_BB⟩
+
+/-- **Erdős Problem 42** (solved). For every `M ≥ 1` and all sufficiently large `N`, every
+nonempty Sidon set `A ⊆ {1,…,N}` admits a Sidon set `B ⊆ {1,…,N}` of size `M` with
+`(A - A) ∩ (B - B) = {0}`. -/
+theorem erdos_42 : ∀ M ≥ 1, ∀ᶠ N in atTop, ∀ (A : Set ℕ),
+    A ⊆ Set.Icc 1 N → IsSidon A → A.Nonempty → ∃ (B : Set ℕ),
+      B ⊆ Set.Icc 1 N ∧ IsSidon B ∧ B.ncard = M ∧
+      ((A - A) ∩ (B - B) : Set ℕ) = {0} :=
+  erdos_42_iff.mp trivial
 
 #print axioms erdos_42
 -- 'Erdos42.erdos_42' depends on axioms: [propext, Classical.choice, Quot.sound]

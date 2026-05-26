@@ -1274,7 +1274,7 @@ Suppose $A \subseteq \{1,\dots,N\}$ is such that there are no $k+1$ elements of 
 relatively prime. An example is the set of all multiples of the first $k$ primes.
 Is this the largest such set?
 -/
-theorem erdos_56 :
+theorem erdos_56_aux :
   (∀ᵉ (N ≥ 2) (k > 0),
       N ≥ k.nth Nat.Prime →
       MaxWeaklyDivisible N k = (FirstPrimesMultiples N k).card) ↔
@@ -1346,6 +1346,18 @@ theorem erdos_56 :
   linarith
 
 end
+
+/-- **Erdős Problem 56** (disproved, Ahlswede–Khachatrian for `k = 212`). With `p_k` the `k`-th
+prime, it is **not** the case that for every `N ≥ p_k` the largest `A ⊆ {1,…,N}` with no `k+1`
+pairwise-coprime elements is the set of multiples of the first `k` primes. -/
+theorem erdos_56 : ¬ ∀ᵉ (N ≥ 2) (k > 0),
+    N ≥ Nat.nth Nat.Prime (k - 1) →
+    MaxWeaklyDivisible N k = (FirstPrimesMultiples N k).card := by
+  intro h
+  refine erdos_56_aux.mp ?_
+  intro N hN2 k hk hN
+  exact h N hN2 k hk
+    (le_trans (Nat.nth_monotone Nat.infinite_setOf_prime (Nat.sub_le k 1)) hN)
 
 #print axioms erdos_56
 -- 'Erdos56.erdos_56' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]

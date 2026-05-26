@@ -873,14 +873,17 @@ theorem erdos94_bigO (P : Finset Point) (h : PerpBisectorAtMostTwo P) :
                 ring
     nlinarith [hmain, hpow]
 
-/-- Erdős 94: for n points in ℝ² forming a convex polygon,
-∑ f(uᵢ)² = O(n³). -/
-theorem erdos_94 (P : Finset Point) (hconv : ConvexPosition P) :
-    S(P)=O(n^3) := by
+/-- **Erdős Problem 94** (solved). For `n` points in `ℝ²` forming a convex polygon, with
+`f(uᵢ)` the number of point-pairs at distance `uᵢ`, one has `∑ᵢ f(uᵢ)² ≪ n³`: there is an
+**absolute** constant `C` (here `3/4`) with `S P ≤ C · n³` for *every* convex `P`. -/
+theorem erdos_94 : ∃ C : ℝ, 0 ≤ C ∧
+    ∀ P : Finset Point, ConvexPosition P → S P ≤ C * (P.card : ℝ)^3 := by
+  refine ⟨3 / 4, by norm_num, fun P hconv => ?_⟩
   have hgp : GeneralPosition P := ⟨hconv, convexPosition_noThreeCollinear P hconv⟩
   have hperp : PerpBisectorAtMostTwo P :=
     perpBisectorAtMostTwo_of_general_position P hgp
-  simpa using (erdos94_bigO P hperp)
+  have hmain := erdos94 P hperp
+  nlinarith [hmain, sq_nonneg (P.card : ℝ), Nat.cast_nonneg (α := ℝ) P.card]
 
 end
 
