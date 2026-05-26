@@ -396,6 +396,17 @@
       - "https://gist.github.com/pitmonticone/8ea0d1cdb963b6213ac639b11d33f811#file-erdos237-lean"
       - "https://www.erdosproblems.com/forum/thread/237#post-5395"
       - "https://github.com/Woett/Lean-files/blob/main/MertensThird.lean"
+- number: "246"
+  proof:
+    path: "problems/246/"
+    theorem: "Erdos246.erdos_246"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/246#post-2513"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos246.lean"
 - number: "281"
   proof:
     path: "problems/281/"
