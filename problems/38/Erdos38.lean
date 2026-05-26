@@ -1832,25 +1832,38 @@ the density increment property holds.
 
 noncomputable section
 
-/-- **Erdős Problem 38**: There exists a set B ⊂ ℕ which is not an additive basis,
-    and a function f with f(α) > 0 for 0 < α < 1, such that for every A ⊆ ℕ with
-    Schnirelmann density α and every N ≥ 1, there exists b ∈ B with
-    |(A ∪ (A+b)) ∩ {1,...,N}| ≥ (α + f(α))N. -/
+/-- **Erdős Problem 38**: There exists a set `B ⊂ ℕ` which is not an additive basis,
+    and a function `f` with `f(α) > 0` for `0 < α < 1`, such that for **every** `A ⊆ ℕ`
+    (of Schnirelmann density `α`) and every `N ≥ 1`, there exists `b ∈ B` with
+    `|(A ∪ (A+b)) ∩ {1,...,N}| ≥ (α + f(α))N`.
+
+    We take `f` to be `erdos_f` on `(0,1)` and `0` elsewhere (where the conjecture promises
+    nothing); the endpoint cases hold trivially since `α·N ≤ |A ∩ {1..N}| ≤ |(A∪(A+b))∩{1..N}|`. -/
 theorem erdos_38 :
     ∃ (B : Set ℕ) (f : ℝ → ℝ), ¬IsAdditiveBasis B ∧ (∀ α : ℝ, 0 < α → α < 1 → 0 < f α) ∧
-      ∀ (A : Set ℕ), 0 < schnirelmannDensity A → schnirelmannDensity A < 1 → ∀ (N : ℕ), 0 < N → ∃ b ∈ B,
+      ∀ (A : Set ℕ) (N : ℕ), 0 < N → ∃ b ∈ B,
         (schnirelmannDensity A + f (schnirelmannDensity A)) * ↑N ≤ (unionTranslateCount A b N : ℝ) := by
-  -- Get the shift approximation data
   obtain ⟨d⟩ := shift_approx_exists
-  -- Use the constructed B and erdos_f
-  refine ⟨constructB d, erdos_f, ?_, ?_, ?_⟩
-  -- B is not an additive basis
-  · exact constructB_not_basis d
-    -- f(α) > 0 for 0 < α < 1
-  · exact fun α hα0 hα1 => erdos_f_pos hα0 hα1
-    -- Density increment
-  · intro A hα0 hα1 N hN
-    exact density_increment d A N hN hα0 hα1
+  refine ⟨constructB d, (Set.Ioo (0:ℝ) 1).indicator erdos_f, constructB_not_basis d, ?_, ?_⟩
+  · -- f(α) > 0 for 0 < α < 1
+    intro α hα0 hα1
+    rw [Set.indicator_of_mem (Set.mem_Ioo.mpr ⟨hα0, hα1⟩)]
+    exact erdos_f_pos hα0 hα1
+  · -- density increment for every A
+    intro A N hN
+    by_cases hmem : schnirelmannDensity A ∈ Set.Ioo (0:ℝ) 1
+    · -- 0 < α < 1: the substantive case
+      obtain ⟨hα0, hα1⟩ := Set.mem_Ioo.mp hmem
+      rw [Set.indicator_of_mem hmem]
+      exact density_increment d A N hN hα0 hα1
+    · -- α ∉ (0,1): f = 0, and α·N ≤ count holds trivially
+      rw [Set.indicator_of_notMem hmem, add_zero]
+      refine ⟨1, by norm_num [constructB], ?_⟩
+      calc schnirelmannDensity A * (N : ℝ)
+          ≤ (countIn A N : ℝ) := countIn_density A N
+        _ ≤ (unionTranslateCount A 1 N : ℝ) := by
+            unfold unionTranslateCount
+            exact_mod_cast countIn_mono_set Set.subset_union_left N
 
 end
 

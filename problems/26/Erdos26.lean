@@ -457,7 +457,7 @@ lemma isBehrend_implies_upperDensity_eq_one {ι : Type*} {A : ι → ℕ} (h : I
 /-
 If we allow for $\sum_{a\in A} \frac{1}{a} < \infty$ then Rusza has found a counter-example.
 -/
-theorem erdos_26 : ∃ A : ℕ → ℕ,
+theorem erdos_26_witness : ∃ A : ℕ → ℕ,
     StrictMono A ∧ ¬IsThick A ∧ ∀ k, ¬IsBehrend (A · + k) := by
   constructor;
   swap;
@@ -492,6 +492,20 @@ theorem erdos_26 : ∃ A : ℕ → ℕ,
           · simpa using summable_nat_add_iff 1 |>.2 <| summable_geometric_two;
         exact h_sum_lt_one.trans_le ( by ring_nf; rw [ tsum_mul_right, tsum_geometric_of_lt_one ] <;> norm_num );
       exact fun h => h_sum_lt_one.not_ge <| h_upper_density.trans' <| by linarith [ isBehrend_implies_upperDensity_eq_one h ] ;
+
+/-- **Erdős Problem 26** (Erdős–Tenenbaum conjecture). For every infinite `A ⊆ ℕ` (given as a
+strictly increasing sequence), is there some `k ≥ 1` such that `A + k` is a Behrend sequence,
+i.e. almost all integers have a divisor of the form `a + k` with `a ∈ A`? -/
+def Conjecture26 : Prop :=
+  ∀ A : ℕ → ℕ, StrictMono A → ∃ k, 1 ≤ k ∧ IsBehrend (A · + k)
+
+/-- **Erdős Problem 26** (disproved, Ruzsa / Davenport–Erdős). The conjecture is false: there is
+an infinite set `A` for which no shift `A + k` is a Behrend sequence. -/
+theorem erdos_26 : ¬ Conjecture26 := by
+  intro h
+  obtain ⟨A, hmono, _, hk⟩ := erdos_26_witness
+  obtain ⟨k, _, hB⟩ := h A hmono
+  exact hk k hB
 
 #print axioms erdos_26
 -- 'Erdos26.erdos_26' depends on axioms: [propext, Classical.choice, Quot.sound]

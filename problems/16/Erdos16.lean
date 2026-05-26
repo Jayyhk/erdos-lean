@@ -269,7 +269,7 @@ lemma n_lt_two_pow (n : ℕ) : n < 2^n := by
     have h4 : 2^n + 2^n = 2^(n + 1) := by ring
     omega
 
-theorem erdos_16 : ¬ ∃ m_0 a_0 : ℕ, m_0 > 0 ∧ ∃ W : Set ℕ, containsNoInfiniteAP W ∧ U = { x | ∃ h, x = m_0 * h + a_0 } ∪ W := by
+theorem erdos_16_strong : ¬ ∃ m_0 a_0 : ℕ, m_0 > 0 ∧ ∃ W : Set ℕ, containsNoInfiniteAP W ∧ U = { x | ∃ h, x = m_0 * h + a_0 } ∪ W := by
   rintro ⟨m_0, a_0, hm0, W, hW, hU⟩
   have h1 := lemma1 hW hU (by decide) hm0 firstap
   have h2 := lemma1 hW hU (by decide) hm0 secondap
@@ -338,6 +338,71 @@ theorem erdos_16 : ¬ ∃ m_0 a_0 : ℕ, m_0 > 0 ∧ ∃ W : Set ℕ, containsNo
       use 3, a_0 + 1
       refine ⟨by decide, by omega, rfl⟩
     exact hx_not_in_U hx_in_U
+
+/-- A set `W ⊆ ℕ` has natural density `0`: the proportion of `W` in `{0,…,N-1}` tends to `0`. -/
+def hasDensityZero (W : Set ℕ) : Prop :=
+  Filter.Tendsto (fun N : ℕ => (((Finset.range N).filter (fun x => x ∈ W)).card : ℝ) / N) Filter.atTop (nhds 0)
+
+/-- A set of natural density `0` contains no infinite arithmetic progression: an infinite AP with
+common difference `m` has density `1/m > 0`, so it cannot sit inside a density-`0` set. -/
+lemma densityZero_imp_noInfiniteAP {W : Set ℕ} (hW : hasDensityZero W) :
+    containsNoInfiniteAP W := by
+  intro m a hm hsub
+  -- The AP `{m·k + a}` puts ≥ `T` elements below `m·T + a`, so density along that subsequence ≥ 1/(2m).
+  have hg : Filter.Tendsto (fun T : ℕ => m * T + a) Filter.atTop Filter.atTop := by
+    apply Filter.tendsto_atTop_mono (f := fun T : ℕ => T)
+    · intro T; have := Nat.le_mul_of_pos_left T hm; omega
+    · exact Filter.tendsto_id
+  have hfg : Filter.Tendsto
+      (fun T : ℕ => (((Finset.range (m * T + a)).filter (fun x => x ∈ W)).card : ℝ)
+        / ((m * T + a : ℕ) : ℝ)) Filter.atTop (nhds 0) := hW.comp hg
+  have hlt : ∀ᶠ T in Filter.atTop,
+      (((Finset.range (m * T + a)).filter (fun x => x ∈ W)).card : ℝ) / ((m * T + a : ℕ) : ℝ)
+        < 1 / (2 * m) :=
+    hfg.eventually (Iio_mem_nhds (show (0:ℝ) < 1 / (2 * m) by positivity))
+  have hge : ∀ᶠ T in Filter.atTop,
+      1 / (2 * m) ≤ (((Finset.range (m * T + a)).filter (fun x => x ∈ W)).card : ℝ)
+        / ((m * T + a : ℕ) : ℝ) := by
+    filter_upwards [Filter.eventually_ge_atTop (a + 1)] with T hT
+    -- count below `m·T + a` is at least `T` (the AP elements `m·k + a`, `k < T`)
+    have hcard : (Finset.range T).image (fun k => m * k + a)
+        ⊆ (Finset.range (m * T + a)).filter (fun x => x ∈ W) := by
+      intro y hy
+      simp only [Finset.mem_image, Finset.mem_range] at hy
+      obtain ⟨k, hk, rfl⟩ := hy
+      simp only [Finset.mem_filter, Finset.mem_range]
+      refine ⟨?_, hsub ⟨k, rfl⟩⟩
+      have hkT : m * k < m * T := mul_lt_mul_of_pos_left hk hm
+      omega
+    have hcount : (T : ℝ) ≤ (((Finset.range (m * T + a)).filter (fun x => x ∈ W)).card : ℝ) := by
+      have hinj : Function.Injective (fun k => m * k + a) := by
+        intro x y hxy
+        simp only at hxy
+        exact Nat.eq_of_mul_eq_mul_left hm (Nat.add_right_cancel hxy)
+      have hcardeq : ((Finset.range T).image (fun k => m * k + a)).card = T := by
+        rw [Finset.card_image_of_injective _ hinj, Finset.card_range]
+      have hle : T ≤ ((Finset.range (m * T + a)).filter (fun x => x ∈ W)).card :=
+        hcardeq.symm.trans_le (Finset.card_le_card hcard)
+      exact_mod_cast hle
+    have h0 : 0 < m * T + a := by
+      have : 0 < m * T := mul_pos hm (by omega); omega
+    have hden : (0:ℝ) < ((m * T + a : ℕ) : ℝ) := by exact_mod_cast h0
+    have h2m : (0:ℝ) < 2 * (m : ℝ) := by positivity
+    have hmT : (a : ℝ) ≤ (m : ℝ) * T := by
+      have : a ≤ m * T := le_trans (by omega) (Nat.le_mul_of_pos_left T hm)
+      exact_mod_cast this
+    rw [le_div_iff₀ hden, one_div, inv_mul_eq_div, div_le_iff₀ h2m]
+    push_cast
+    nlinarith [hcount, hmT, mul_le_mul_of_nonneg_left hcount (le_of_lt h2m)]
+  obtain ⟨T, h1, h2⟩ := (hge.and hlt).exists
+  linarith
+
+/-- **Erdős Problem 16** (disproved, Chen). The set `U` of odd integers not of the form `2^k + p`
+(with `p` prime) is **not** the union of an infinite arithmetic progression and a set of density `0`. -/
+theorem erdos_16 : ¬ ∃ m_0 a_0 : ℕ, m_0 > 0 ∧ ∃ W : Set ℕ,
+    hasDensityZero W ∧ U = { x | ∃ h, x = m_0 * h + a_0 } ∪ W := by
+  rintro ⟨m_0, a_0, hm0, W, hW, hU⟩
+  exact erdos_16_strong ⟨m_0, a_0, hm0, W, densityZero_imp_noInfiniteAP hW, hU⟩
 
 #print axioms erdos_16
 -- 'Erdos16.erdos_16' depends on axioms: [propext, Classical.choice, Quot.sound]
