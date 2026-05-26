@@ -633,3 +633,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/350#post-1848"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos350.lean"
+- number: "351"
+  proof:
+    path: "problems/351/"
+    theorem: "Erdos351.erdos_351"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/283#post-6290"
+      - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P283/Proof_flat.lean"
