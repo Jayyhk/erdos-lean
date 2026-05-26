@@ -516,3 +516,13 @@
     mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
     sources:
       - "https://github.com/plby/unit-fractions/tree/master/src4"
+- number: "299"
+  proof:
+    path: "problems/299/"
+    theorem: "Erdos299.erdos_299"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.29.1"
+    mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
+    sources:
+      - "https://github.com/plby/unit-fractions/blob/master/src4/ErdosProblems.lean"
