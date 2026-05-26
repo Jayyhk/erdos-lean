@@ -526,3 +526,13 @@
     mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
     sources:
       - "https://github.com/plby/unit-fractions/blob/master/src4/ErdosProblems.lean"
+- number: "303"
+  proof:
+    path: "problems/303/"
+    theorem: "Erdos303.erdos_303"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.22.0"
+    mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/303#post-2347"
