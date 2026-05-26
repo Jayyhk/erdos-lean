@@ -473,6 +473,17 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/281#post-3445"
+- number: "283"
+  proof:
+    path: "problems/283/"
+    theorem: "Erdos283.erdos_283"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/283#post-6290"
+      - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P283/Proof_flat.lean"
 - number: "298"
   proof:
     path: "problems/298/"

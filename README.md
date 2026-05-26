@@ -70,8 +70,9 @@ Verify with `cd problems/N && lake build`.
 | [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
 | [268](https://www.erdosproblems.com/268) | `trust_extended` | [problems/268/](problems/268/) | uses `native_decide` |
 | [275](https://www.erdosproblems.com/275) | `complete` | [problems/275/](problems/275/) | |
-| [280](https://www.erdosproblems.com/280) | `complete` | [problems/280/](problems/280/) | disproof (counterexample) |
+| [280](https://www.erdosproblems.com/280) | `complete` | [problems/280/](problems/280/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
+| [283](https://www.erdosproblems.com/283) | `complete` | [problems/283/](problems/283/) | |
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
 
 <!-- TABLE:END -->
