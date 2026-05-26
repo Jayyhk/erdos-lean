@@ -17,13 +17,19 @@ For problem `N`, `problems/N/` contains:
 - `lean-toolchain` — the Lean version
 - `lake-manifest.json` — dependency lockfile
 
-Verify with `cd problems/N && lake build`.
+Verify with:
+
+```bash
+cd problems/N
+lake exe cache get   # download prebuilt Mathlib oleans (skip and it compiles Mathlib from source)
+lake build
+```
 
 ## Catalog
 
 <!-- TABLE:START -->
-49 proofs in the catalog (out of 1217 Erdős problems):
-- 43 `complete`
+50 proofs in the catalog (out of 1217 Erdős problems):
+- 44 `complete`
 - 3 `trust_extended`
 - 3 `axiomatic`
 
@@ -78,5 +84,6 @@ Verify with `cd problems/N && lake build`.
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
 | [299](https://www.erdosproblems.com/299) | `complete` | [problems/299/](problems/299/) | |
 | [303](https://www.erdosproblems.com/303) | `complete` | [problems/303/](problems/303/) | |
+| [314](https://www.erdosproblems.com/314) | `complete` | [problems/314/](problems/314/) | |
 
 <!-- TABLE:END -->

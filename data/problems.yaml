@@ -536,3 +536,14 @@
     mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
     sources:
       - "https://www.erdosproblems.com/forum/thread/303#post-2347"
+- number: "314"
+  proof:
+    path: "problems/314/"
+    theorem: "Erdos314.erdos_314"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/314#post-5193"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem314.lean"
