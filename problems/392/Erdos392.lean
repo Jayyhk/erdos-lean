@@ -3053,7 +3053,5 @@ theorem erdos_392 :
 #print axioms erdos_392
 -- 'Erdos392.erdos_392' depends on axioms:
 -- [propext, Classical.choice, pi_alt', Quot.sound, LogTables.log_7_lt]
--- (pi_alt' = the Prime Number Theorem; LogTables.log_7_lt = a numerical log bound;
---  both proved in the PrimeNumberTheoremAnd project, axiomatized here.)
 
 end Erdos392
