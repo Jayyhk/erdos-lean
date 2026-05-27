@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-62 proofs in the catalog (out of 1217 Erdős problems):
-- 56 `complete`
+63 proofs in the catalog (out of 1217 Erdős problems):
+- 57 `complete`
 - 3 `trust_extended`
 - 3 `axiomatic`
 
@@ -96,6 +96,7 @@ lake build
 | [351](https://www.erdosproblems.com/351) | `complete` | [problems/351/](problems/351/) | |
 | [355](https://www.erdosproblems.com/355) | `complete` | [problems/355/](problems/355/) | |
 | [363](https://www.erdosproblems.com/363) | `complete` | [problems/363/](problems/363/) | |
-| [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | Intended interpretation (SkyYang): k consecutive in [N/2,N], all Nᵉ-smooth (literal text is trivial) |
+| [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
+| [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
 
 <!-- TABLE:END -->
