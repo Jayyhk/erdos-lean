@@ -688,3 +688,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/370#post-1813"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos370.lean"
+- number: "379"
+  proof:
+    path: "problems/379/"
+    theorem: "Erdos379.erdos_379"
+    state: "complete"
+    last_update: "2026-05-26"
+    lean_toolchain: "leanprover/lean4:v4.22.0"
+    mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/379#post-2350"

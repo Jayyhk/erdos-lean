@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-63 proofs in the catalog (out of 1217 Erdős problems):
-- 57 `complete`
+64 proofs in the catalog (out of 1217 Erdős problems):
+- 58 `complete`
 - 3 `trust_extended`
 - 3 `axiomatic`
 
@@ -98,5 +98,6 @@ lake build
 | [363](https://www.erdosproblems.com/363) | `complete` | [problems/363/](problems/363/) | |
 | [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
 | [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
+| [379](https://www.erdosproblems.com/379) | `complete` | [problems/379/](problems/379/) | |
 
 <!-- TABLE:END -->
