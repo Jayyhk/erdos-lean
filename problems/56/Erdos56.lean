@@ -29,6 +29,197 @@ import Mathlib
 
 namespace Erdos56
 
+/- ===== vendored from Erdos56/PrimeCount.lean (chunked kernel-`decide` prime counts) ===== -/
+set_option maxHeartbeats 0
+set_option maxRecDepth 8000
+set_option linter.style.setOption false
+set_option linter.style.longLine false
+
+/-! ### Prime counting in chunks of 50
+
+We prove `Nat.count Nat.Prime 1289 = 208` by breaking the range [0, 1289)
+into chunks of 50 (plus a remainder) and using `decide` on each chunk.
+-/
+
+private lemma cnt_p_100 : Nat.count Nat.Prime 100 = 25 := by
+  rw [show (100:ℕ) = 50 + 50 from rfl, Nat.count_add]
+  have : Nat.count Nat.Prime 50 = 15 := by decide
+  have : Nat.count (fun k => Nat.Prime (50 + k)) 50 = 10 := by decide
+  omega
+
+private lemma cnt_p_200 : Nat.count Nat.Prime 200 = 46 := by
+  rw [show (200:ℕ) = 100 + 100 from rfl, Nat.count_add, cnt_p_100,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (100 + k))]
+  have : Nat.count (fun k => Nat.Prime (100 + k)) 50 = 10 := by decide
+  have : Nat.count (fun k => Nat.Prime (100 + (50 + k))) 50 = 11 := by decide
+  omega
+
+private lemma cnt_p_300 : Nat.count Nat.Prime 300 = 62 := by
+  rw [show (300:ℕ) = 200 + 100 from rfl, Nat.count_add, cnt_p_200,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (200 + k))]
+  have : Nat.count (fun k => Nat.Prime (200 + k)) 50 = 7 := by decide
+  have : Nat.count (fun k => Nat.Prime (200 + (50 + k))) 50 = 9 := by decide
+  omega
+
+private lemma cnt_p_400 : Nat.count Nat.Prime 400 = 78 := by
+  rw [show (400:ℕ) = 300 + 100 from rfl, Nat.count_add, cnt_p_300,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (300 + k))]
+  have : Nat.count (fun k => Nat.Prime (300 + k)) 50 = 8 := by decide
+  have : Nat.count (fun k => Nat.Prime (300 + (50 + k))) 50 = 8 := by decide
+  omega
+
+private lemma cnt_p_500 : Nat.count Nat.Prime 500 = 95 := by
+  rw [show (500:ℕ) = 400 + 100 from rfl, Nat.count_add, cnt_p_400,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (400 + k))]
+  have : Nat.count (fun k => Nat.Prime (400 + k)) 50 = 9 := by decide
+  have : Nat.count (fun k => Nat.Prime (400 + (50 + k))) 50 = 8 := by decide
+  omega
+
+private lemma cnt_p_600 : Nat.count Nat.Prime 600 = 109 := by
+  rw [show (600:ℕ) = 500 + 100 from rfl, Nat.count_add, cnt_p_500,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (500 + k))]
+  have : Nat.count (fun k => Nat.Prime (500 + k)) 50 = 6 := by decide
+  have : Nat.count (fun k => Nat.Prime (500 + (50 + k))) 50 = 8 := by decide
+  omega
+
+private lemma cnt_p_700 : Nat.count Nat.Prime 700 = 125 := by
+  rw [show (700:ℕ) = 600 + 100 from rfl, Nat.count_add, cnt_p_600,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (600 + k))]
+  have : Nat.count (fun k => Nat.Prime (600 + k)) 50 = 9 := by decide
+  have : Nat.count (fun k => Nat.Prime (600 + (50 + k))) 50 = 7 := by decide
+  omega
+
+private lemma cnt_p_800 : Nat.count Nat.Prime 800 = 139 := by
+  rw [show (800:ℕ) = 700 + 100 from rfl, Nat.count_add, cnt_p_700,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (700 + k))]
+  have : Nat.count (fun k => Nat.Prime (700 + k)) 50 = 7 := by decide
+  have : Nat.count (fun k => Nat.Prime (700 + (50 + k))) 50 = 7 := by decide
+  omega
+
+private lemma cnt_p_900 : Nat.count Nat.Prime 900 = 154 := by
+  rw [show (900:ℕ) = 800 + 100 from rfl, Nat.count_add, cnt_p_800,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (800 + k))]
+  have : Nat.count (fun k => Nat.Prime (800 + k)) 50 = 7 := by decide
+  have : Nat.count (fun k => Nat.Prime (800 + (50 + k))) 50 = 8 := by decide
+  omega
+
+private lemma cnt_p_1000 : Nat.count Nat.Prime 1000 = 168 := by
+  rw [show (1000:ℕ) = 900 + 100 from rfl, Nat.count_add, cnt_p_900,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (900 + k))]
+  have : Nat.count (fun k => Nat.Prime (900 + k)) 50 = 7 := by decide
+  have : Nat.count (fun k => Nat.Prime (900 + (50 + k))) 50 = 7 := by decide
+  omega
+
+private lemma cnt_p_1100 : Nat.count Nat.Prime 1100 = 184 := by
+  rw [show (1100:ℕ) = 1000 + 100 from rfl, Nat.count_add, cnt_p_1000,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (1000 + k))]
+  have : Nat.count (fun k => Nat.Prime (1000 + k)) 50 = 8 := by decide
+  have : Nat.count (fun k => Nat.Prime (1000 + (50 + k))) 50 = 8 := by decide
+  omega
+
+private lemma cnt_p_1200 : Nat.count Nat.Prime 1200 = 196 := by
+  rw [show (1200:ℕ) = 1100 + 100 from rfl, Nat.count_add, cnt_p_1100,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (1100 + k))]
+  have : Nat.count (fun k => Nat.Prime (1100 + k)) 50 = 5 := by decide
+  have : Nat.count (fun k => Nat.Prime (1100 + (50 + k))) 50 = 7 := by decide
+  omega
+
+private lemma cnt_p_1300 : Nat.count Nat.Prime 1300 = 211 := by
+  rw [show (1300:ℕ) = 1200 + 100 from rfl, Nat.count_add, cnt_p_1200,
+      show (100:ℕ) = 50 + 50 from rfl, Nat.count_add (fun k => Nat.Prime (1200 + k))]
+  have : Nat.count (fun k => Nat.Prime (1200 + k)) 50 = 8 := by decide
+  have : Nat.count (fun k => Nat.Prime (1200 + (50 + k))) 50 = 7 := by decide
+  omega
+
+/-! ### Key count facts -/
+
+lemma count_prime_1289 : Nat.count Nat.Prime 1289 = 208 := by
+  rw [show (1289:ℕ) = 1200 + 89 from rfl, Nat.count_add, cnt_p_1200,
+      show (89:ℕ) = 50 + 39 from rfl, Nat.count_add (fun k => Nat.Prime (1200 + k))]
+  have : Nat.count (fun k => Nat.Prime (1200 + k)) 50 = 8 := by decide
+  have : Nat.count (fun k => Nat.Prime (1200 + (50 + k))) 39 = 4 := by decide
+  omega
+
+lemma count_prime_1362 : Nat.count Nat.Prime 1362 = 218 := by
+  rw [show (1362:ℕ) = 1300 + 62 from rfl, Nat.count_add, cnt_p_1300]
+  have : Nat.count (fun k => Nat.Prime (1300 + k)) 62 = 7 := by decide
+  omega
+
+lemma count_prime_1361 : Nat.count Nat.Prime 1361 = 217 := by
+  rw [show (1361:ℕ) = 1300 + 61 from rfl, Nat.count_add, cnt_p_1300]
+  have : Nat.count (fun k => Nat.Prime (1300 + k)) 61 = 6 := by decide
+  omega
+
+/-! ### Nth prime values -/
+
+lemma nth_prime_208 : Nat.nth Nat.Prime 208 = 1289 := by
+  rw [← count_prime_1289, Nat.nth_count (show Nat.Prime 1289 from by norm_num)]
+
+lemma nth_prime_209 : Nat.nth Nat.Prime 209 = 1291 := by
+  have : Nat.count Nat.Prime 1291 = 209 := by
+    rw [show (1291:ℕ) = 1289 + 2 from rfl, Nat.count_add, count_prime_1289]
+    have : Nat.count (fun k => Nat.Prime (1289 + k)) 2 = 1 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1291 from by norm_num)]
+
+lemma nth_prime_210 : Nat.nth Nat.Prime 210 = 1297 := by
+  have : Nat.count Nat.Prime 1297 = 210 := by
+    rw [show (1297:ℕ) = 1289 + 8 from rfl, Nat.count_add, count_prime_1289]
+    have : Nat.count (fun k => Nat.Prime (1289 + k)) 8 = 2 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1297 from by norm_num)]
+
+lemma nth_prime_211 : Nat.nth Nat.Prime 211 = 1301 := by
+  have : Nat.count Nat.Prime 1301 = 211 := by
+    rw [show (1301:ℕ) = 1289 + 12 from rfl, Nat.count_add, count_prime_1289]
+    have : Nat.count (fun k => Nat.Prime (1289 + k)) 12 = 3 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1301 from by norm_num)]
+
+lemma nth_prime_212 : Nat.nth Nat.Prime 212 = 1303 := by
+  have : Nat.count Nat.Prime 1303 = 212 := by
+    rw [show (1303:ℕ) = 1289 + 14 from rfl, Nat.count_add, count_prime_1289]
+    have : Nat.count (fun k => Nat.Prime (1289 + k)) 14 = 4 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1303 from by norm_num)]
+
+lemma nth_prime_213 : Nat.nth Nat.Prime 213 = 1307 := by
+  have : Nat.count Nat.Prime 1307 = 213 := by
+    rw [show (1307:ℕ) = 1289 + 18 from rfl, Nat.count_add, count_prime_1289]
+    have : Nat.count (fun k => Nat.Prime (1289 + k)) 18 = 5 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1307 from by norm_num)]
+
+lemma nth_prime_214 : Nat.nth Nat.Prime 214 = 1319 := by
+  have : Nat.count Nat.Prime 1319 = 214 := by
+    rw [show (1319:ℕ) = 1300 + 19 from rfl, Nat.count_add, cnt_p_1300]
+    have : Nat.count (fun k => Nat.Prime (1300 + k)) 19 = 3 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1319 from by norm_num)]
+
+lemma nth_prime_215 : Nat.nth Nat.Prime 215 = 1321 := by
+  have : Nat.count Nat.Prime 1321 = 215 := by
+    rw [show (1321:ℕ) = 1300 + 21 from rfl, Nat.count_add, cnt_p_1300]
+    have : Nat.count (fun k => Nat.Prime (1300 + k)) 21 = 4 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1321 from by norm_num)]
+
+lemma nth_prime_216 : Nat.nth Nat.Prime 216 = 1327 := by
+  have : Nat.count Nat.Prime 1327 = 216 := by
+    rw [show (1327:ℕ) = 1300 + 27 from rfl, Nat.count_add, cnt_p_1300]
+    have : Nat.count (fun k => Nat.Prime (1300 + k)) 27 = 5 := by decide
+    omega
+  rw [← this, Nat.nth_count (show Nat.Prime 1327 from by norm_num)]
+
+lemma nth_prime_217 : Nat.nth Nat.Prime 217 = 1361 := by
+  rw [← count_prime_1361, Nat.nth_count (show Nat.Prime 1361 from by norm_num)]
+
+/-! ### Derived facts needed by main proof -/
+
+lemma lt_count_prime_1362 : 217 < Nat.count Nat.Prime 1362 := by
+  rw [count_prime_1362]; omega
+/- ===== end vendored PrimeCount ===== -/
+
 open scoped BigOperators
 open scoped Real
 open scoped Nat
@@ -43,7 +234,6 @@ set_option linter.style.cases false
 set_option linter.style.cdot false
 set_option linter.style.longLine false
 set_option linter.style.multiGoal false
-set_option linter.style.nativeDecide false
 set_option linter.style.openClassical false
 set_option linter.style.refine false
 set_option linter.style.setOption false
@@ -481,7 +671,7 @@ lemma card_C_eq_36 (t : ℕ) (ht : t ≥ 1) : (C t).card = 36 := by
   -- Since $C t$ is the image of the set of pairs $(i, j)$ with $0 \leq i < j \leq 8$ under the injective map $(i, j) \mapsto p (t + i) * p (t + j)$, it must have the same cardinality as the domain.
   have h_card_eq : (Finset.image (fun x => p (t + x.1) * p (t + x.2)) (Finset.filter (fun x => x.1 < x.2) (Finset.product (Finset.range 9) (Finset.range 9)))).card = 36 := by
     rw [ Finset.card_image_of_injOn ];
-    · native_decide;
+    · decide;
     · intros x hx y hy hxy;
       have := C_map_injective_new t ht x.1 x.2 y.1 y.2 ; aesop;
       · exact this ( by linarith ) ( by linarith ) |>.1;
@@ -730,9 +920,7 @@ lemma D_products_subset (t n : ℕ) (h_H : satisfies_H t) (h_n : interval_start 
         have h_prod_lt_interval : p (t + 3) * p (t + 8) < p (t + 7) * p (t + 8) := by
           -- Since $p(t+3)$ and $p(t+7)$ are primes, and primes are strictly increasing, we have $p(t+3) < p(t+7)$.
           have h_prime_lt : Nat.nth Nat.Prime (t + 2) < Nat.nth Nat.Prime (t + 6) := by
-            rw [ Nat.nth_lt_nth ] <;> norm_num;
-            -- The set of primes is infinite, so we can conclude that the set of primes is infinite.
-            apply Nat.infinite_setOf_prime;
+            rw [ Nat.nth_lt_nth (Nat.infinite_setOf_prime) ]; norm_num;
           exact Nat.mul_lt_mul_of_pos_right h_prime_lt ( Nat.Prime.pos ( Nat.prime_nth_prime _ ) )
         exact le_trans ( Nat.mul_le_mul h_pi_le_pt3 h_pj_le_pt8 ) ( le_trans h_prod_lt_interval.le h_n );
       · -- Since the gcd is not 1, it must be greater than 1.
@@ -898,24 +1086,9 @@ def D_extra (t : ℕ) : Finset ℕ := {p t * p (t + 9)}
 def D_plus (t : ℕ) : Finset ℕ := D_union t ∪ D_extra t
 
 lemma satisfies_H_209 : satisfies_H 209 := by
-  -- We'll use that $p_{209} = 1289$, $p_{210} = 1291$, ..., $p_{218} = 1361$, and $p_{219} = 1373$.
-  have h_p_values : Nat.nth Nat.Prime 208 = 1289 ∧ Nat.nth Nat.Prime 209 = 1291 ∧ Nat.nth Nat.Prime 210 = 1297 ∧ Nat.nth Nat.Prime 211 = 1301 ∧ Nat.nth Nat.Prime 212 = 1303 ∧ Nat.nth Nat.Prime 213 = 1307 ∧ Nat.nth Nat.Prime 214 = 1319 ∧ Nat.nth Nat.Prime 215 = 1321 ∧ Nat.nth Nat.Prime 216 = 1327 ∧ Nat.nth Nat.Prime 217 = 1361 := by
-    -- We'll use the fact that the nth prime is the nth element in the list of primes.
-    have h_prime_list : ∀ n, Nat.nth Nat.Prime n = Nat.recOn n 2 (fun n p => Nat.find (Nat.exists_infinite_primes (p + 1))) := by
-      intro n;
-      induction n <;> simp_all +decide [ Nat.nth_zero ];
-      · exact le_antisymm ( Nat.sInf_le Nat.prime_two ) ( le_csInf ⟨ 2, Nat.prime_two ⟩ fun x hx => Nat.Prime.two_le hx );
-      · rw [ Nat.nth_eq_sInf ];
-        refine' le_antisymm _ _;
-        · norm_num +zetaDelta at *;
-          intro m hm₁ hm₂ hm₃; exact hm₁.not_le <| Nat.sInf_le ⟨ hm₃, fun k hk => by linarith [ Nat.nth_monotone ( Nat.infinite_setOf_prime ) <| Nat.le_of_lt_succ hk ] ⟩ ;
-        · refine' le_csInf _ _;
-          · exact ⟨ _, Nat.prime_nth_prime _, fun k hk => Nat.nth_strictMono ( Nat.infinite_setOf_prime ) ( Nat.lt_succ_of_le ( Nat.le_of_lt_succ hk ) ) ⟩;
-          · aesop;
-            exact ⟨ b, le_rfl, Nat.succ_le_of_lt ( a ▸ right _ ( Nat.lt_succ_self _ ) ), left ⟩;
-    -- Apply the hypothesis `h_prime_list` to each `n` in the goal.
-    simp [h_prime_list];
-    native_decide;
+  have h_p_values : Nat.nth Nat.Prime 208 = 1289 ∧ Nat.nth Nat.Prime 209 = 1291 ∧ Nat.nth Nat.Prime 210 = 1297 ∧ Nat.nth Nat.Prime 211 = 1301 ∧ Nat.nth Nat.Prime 212 = 1303 ∧ Nat.nth Nat.Prime 213 = 1307 ∧ Nat.nth Nat.Prime 214 = 1319 ∧ Nat.nth Nat.Prime 215 = 1321 ∧ Nat.nth Nat.Prime 216 = 1327 ∧ Nat.nth Nat.Prime 217 = 1361 :=
+    ⟨nth_prime_208, nth_prime_209, nth_prime_210, nth_prime_211, nth_prime_212,
+     nth_prime_213, nth_prime_214, nth_prime_215, nth_prime_216, nth_prime_217⟩
   unfold satisfies_H; norm_num [ h_p_values ] ;
   unfold p; norm_num [ h_p_values ] ;
 
@@ -941,7 +1114,7 @@ lemma m_structure (t : ℕ) (m : ℕ) (h_t : t = 209) (hm_le : m ≤ p (t + 9)) 
           -- We can use the fact that the nth prime is the nth element in the list of primes.
           have h_prime_list : Nat.nth Nat.Prime 208 = 1289 := by
             have h_prime_list : Nat.nth Nat.Prime 208 = Nat.nth Nat.Prime (Nat.count Nat.Prime 1289) := by
-              rw [ show Nat.count Nat.Prime 1289 = 208 by native_decide ]
+              rw [ show Nat.count Nat.Prime 1289 = 208 from count_prime_1289 ]
             rw [ h_prime_list, Nat.nth_count ];
             norm_num;
           exact h_prime_list;
@@ -957,7 +1130,7 @@ lemma m_structure (t : ℕ) (m : ℕ) (h_t : t = 209) (hm_le : m ≤ p (t + 9)) 
     -- Since $p (t + 9)$ is the 218th prime, we have $p (t + 9) \leq 1361$.
     have h_pt9_le_1361 : p (t + 9) ≤ 1361 := by
       subst h_t;
-      exact Nat.le_of_lt_succ ( Nat.nth_lt_of_lt_count ( by native_decide ) );
+      exact Nat.le_of_lt_succ ( Nat.nth_lt_of_lt_count lt_count_prime_1362 );
     nlinarith only [ ha_ge_pt, hb_ge_pt, h_pt_ge_1289, h_pt9_le_1361, hm_le, hm ];
   · rcases m with ( _ | _ | m ) <;> simp_all +decide [ Nat.prime_def_lt' ];
     · contrapose! hm_factors;
@@ -970,25 +1143,8 @@ def D_extra_v3 (t : ℕ) : Finset ℕ := {p t * p (t + 9)}
 def D_plus_v3 (t : ℕ) : Finset ℕ := D_union t ∪ D_extra_v3 t
 
 lemma p_t_sq_gt_p_t_plus_9_v3 (t : ℕ) (h_t : t = 209) : p t ^ 2 > p (t + 9) := by
-  -- By definition of $p$, we know that $p 209 = 1289$ and $p 218 = 1361$.
-  have h_p209 : p 209 = 1289 := by
-    -- We can use the fact that the 209th prime is known to be 1289.
-    have h_prime_209 : Nat.nth Nat.Prime 208 = 1289 := by
-      have h_prime_list : Nat.nth Nat.Prime 208 = 1289 := by
-        have h_prime_count : Nat.count Nat.Prime 1289 = 208 := by
-          native_decide
-        rw [ ← h_prime_count, Nat.nth_count ];
-        native_decide +revert
-      exact h_prime_list;
-    exact h_prime_209
-  have h_p218 : p 218 = 1361 := by
-    -- We'll use the fact that $p_{218}$ is the $218$-th prime number.
-    have h_prime_218 : Nat.nth Nat.Prime 217 = 1361 := by
-      have : Nat.count (Nat.Prime) 1361 = 217 := by
-        native_decide
-      rw [ ← this, Nat.nth_count ];
-      norm_num;
-    exact h_prime_218;
+  have h_p209 : p 209 = 1289 := nth_prime_208
+  have h_p218 : p 218 = 1361 := nth_prime_217
   norm_num [ h_t, h_p209, h_p218 ]
 
 lemma m_is_prime_or_one_v3 (t : ℕ) (m : ℕ) (h_t : t = 209) (hm_le : m ≤ p (t + 9)) (hm_factors : ∀ r, Nat.Prime r → r ∣ m → p t ≤ r) : m = 1 ∨ Nat.Prime m := by
@@ -1345,11 +1501,6 @@ theorem erdos_56_aux :
     · tauto;
   linarith
 
-end
-
-/-- **Erdős Problem 56** (disproved, Ahlswede–Khachatrian for `k = 212`). With `p_k` the `k`-th
-prime, it is **not** the case that for every `N ≥ p_k` the largest `A ⊆ {1,…,N}` with no `k+1`
-pairwise-coprime elements is the set of multiples of the first `k` primes. -/
 theorem erdos_56 : ¬ ∀ᵉ (N ≥ 2) (k > 0),
     N ≥ Nat.nth Nat.Prime (k - 1) →
     MaxWeaklyDivisible N k = (FirstPrimesMultiples N k).card := by
@@ -1359,7 +1510,9 @@ theorem erdos_56 : ¬ ∀ᵉ (N ≥ 2) (k > 0),
   exact h N hN2 k hk
     (le_trans (Nat.nth_monotone Nat.infinite_setOf_prime (Nat.sub_le k 1)) hN)
 
+end
+
 #print axioms erdos_56
--- 'Erdos56.erdos_56' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
+-- 'Erdos56.erdos_56' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos56

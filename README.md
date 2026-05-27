@@ -29,8 +29,8 @@ lake build
 
 <!-- TABLE:START -->
 65 proofs in the catalog (out of 1217 Erdős problems):
-- 58 `complete`
-- 3 `trust_extended`
+- 59 `complete`
+- 2 `trust_extended`
 - 4 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -45,7 +45,7 @@ lake build
 | [45](https://www.erdosproblems.com/45) | `complete` | [problems/45/](problems/45/) | |
 | [46](https://www.erdosproblems.com/46) | `complete` | [problems/46/](problems/46/) | |
 | [47](https://www.erdosproblems.com/47) | `complete` | [problems/47/](problems/47/) | |
-| [56](https://www.erdosproblems.com/56) | `trust_extended` | [problems/56/](problems/56/) | uses `native_decide` |
+| [56](https://www.erdosproblems.com/56) | `complete` | [problems/56/](problems/56/) | |
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
 | [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
 | [105](https://www.erdosproblems.com/105) | `complete` | [problems/105/](problems/105/) | |
