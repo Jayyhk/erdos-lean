@@ -764,3 +764,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/419#post-3992"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos419.lean"
+- number: "426"
+  proof:
+    path: "problems/426/"
+    theorem: "Erdos426.erdos_426"
+    state: "complete"
+    last_update: "2026-05-28"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/426#post-5775"
+      - "https://gist.github.com/LorenzoLuccioli/6740274ef8c8bd77a6c966887a72b198#file-erdos426-lean"
