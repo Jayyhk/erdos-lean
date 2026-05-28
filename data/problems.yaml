@@ -709,3 +709,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/392#post-4410"
       - "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Erdos392.lean"
+- number: "397"
+  proof:
+    path: "problems/397/"
+    theorem: "Erdos397.erdos_397"
+    state: "complete"
+    last_update: "2026-05-28"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/397#post-2940"
+      - "https://gist.github.com/llllvvuu/40d68cfa9de9f43eece07ff4fdc3b0ef#file-397-lean"
