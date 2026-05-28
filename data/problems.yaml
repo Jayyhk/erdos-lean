@@ -741,3 +741,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/401#post-3002"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos401b.lean"
+- number: "418"
+  proof:
+    path: "problems/418/"
+    theorem: "Erdos418.erdos_418"
+    state: "trust_extended"
+    last_update: "2026-05-28"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    trust_extensions: ["uses_native_decide"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/418#post-1778"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos418.lean"
