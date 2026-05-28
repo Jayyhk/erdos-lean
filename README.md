@@ -28,10 +28,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-71 proofs in the catalog (out of 1217 Erdős problems):
+72 proofs in the catalog (out of 1217 Erdős problems):
 - 64 `complete`
 - 3 `trust_extended`
-- 4 `axiomatic`
+- 5 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -106,5 +106,6 @@ lake build
 | [418](https://www.erdosproblems.com/418) | `trust_extended` | [problems/418/](problems/418/) | uses `native_decide` |
 | [419](https://www.erdosproblems.com/419) | `complete` | [problems/419/](problems/419/) | |
 | [426](https://www.erdosproblems.com/426) | `complete` | [problems/426/](problems/426/) | |
+| [427](https://www.erdosproblems.com/427) | `axiomatic` | [problems/427/](problems/427/) | assumes Shiu's theorem (`shiu_consecutive_primes`) |
 
 <!-- TABLE:END -->

@@ -775,3 +775,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/426#post-5775"
       - "https://gist.github.com/LorenzoLuccioli/6740274ef8c8bd77a6c966887a72b198#file-erdos426-lean"
+- number: "427"
+  proof:
+    path: "problems/427/"
+    theorem: "Erdos427.erdos_427"
+    state: "axiomatic"
+    last_update: "2026-05-28"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    extra_axioms: ["Erdos427.shiu_consecutive_primes"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/427#post-5920"
+      - "https://gist.github.com/JohnEdwardJennings/e2c6ef0daab55857b7cc9d340de7af84#file-erdos427-lean"
