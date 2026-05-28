@@ -720,3 +720,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/397#post-2940"
       - "https://gist.github.com/llllvvuu/40d68cfa9de9f43eece07ff4fdc3b0ef#file-397-lean"
+- number: "399"
+  proof:
+    path: "problems/399/"
+    theorem: "Erdos399.erdos_399"
+    state: "complete"
+    last_update: "2026-05-28"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/399"
+      - "https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/399.lean"
