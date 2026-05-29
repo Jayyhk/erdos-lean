@@ -941,3 +941,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/490#post-6497"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem490.lean"
+- number: "493"
+  proof:
+    path: "problems/493/"
+    theorem: "Erdos493.erdos_493"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/493#post-2456"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos493.lean"

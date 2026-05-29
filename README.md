@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-86 proofs in the catalog (out of 1217 Erdős problems):
-- 77 `complete`
+87 proofs in the catalog (out of 1217 Erdős problems):
+- 78 `complete`
 - 3 `trust_extended`
 - 6 `axiomatic`
 
@@ -120,6 +120,7 @@ lake build
 | [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) | |
 | [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) | |
 | [487](https://www.erdosproblems.com/487) | `complete` | [problems/487/](problems/487/) | |
-| [490](https://www.erdosproblems.com/490) | `axiomatic` | [problems/490/](problems/490/) | assumes 4 explicit [Dusart](https://doi.org/10.1007/s11139-016-9839-4) prime estimates (`dusart_pi_lower`, `dusart_pi_upper`, `dusart_chebyshev`, `dusart_mertens_product`) |
+| [490](https://www.erdosproblems.com/490) | `axiomatic` | [problems/490/](problems/490/) | assumes 4 [Dusart](https://doi.org/10.1007/s11139-016-9839-4) prime estimates (`dusart_pi_lower`, `dusart_pi_upper`, `dusart_chebyshev`, `dusart_mertens_product`) |
+| [493](https://www.erdosproblems.com/493) | `complete` | [problems/493/](problems/493/) | |
 
 <!-- TABLE:END -->
