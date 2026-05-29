@@ -929,3 +929,15 @@
       - "https://www.erdosproblems.com/forum/thread/487#post-4327"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos487.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos447.lean"
+- number: "490"
+  proof:
+    path: "problems/490/"
+    theorem: "Erdos490.erdos_490"
+    state: "axiomatic"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    extra_axioms: ["Erdos490.dusart_chebyshev", "Erdos490.dusart_mertens_product", "Erdos490.dusart_pi_lower", "Erdos490.dusart_pi_upper"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/490#post-6497"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem490.lean"

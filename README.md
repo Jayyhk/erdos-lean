@@ -21,17 +21,17 @@ Verify with:
 
 ```bash
 cd problems/N
-lake exe cache get   # download prebuilt Mathlib oleans (skip and it compiles Mathlib from source)
+lake exe cache get
 lake build
 ```
 
 ## Catalog
 
 <!-- TABLE:START -->
-85 proofs in the catalog (out of 1217 Erdős problems):
+86 proofs in the catalog (out of 1217 Erdős problems):
 - 77 `complete`
 - 3 `trust_extended`
-- 5 `axiomatic`
+- 6 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -70,9 +70,9 @@ lake build
 | [226](https://www.erdosproblems.com/226) | `complete` | [problems/226/](problems/226/) | |
 | [229](https://www.erdosproblems.com/229) | `complete` | [problems/229/](problems/229/) | |
 | [231](https://www.erdosproblems.com/231) | `trust_extended` | [problems/231/](problems/231/) | uses `native_decide` |
-| [237](https://www.erdosproblems.com/237) | `axiomatic` | [problems/237/](problems/237/) | assumes Maynard–Tao (`maynard_tao`) |
+| [237](https://www.erdosproblems.com/237) | `axiomatic` | [problems/237/](problems/237/) | assumes [Maynard–Tao](https://arxiv.org/abs/1311.4600) (`maynard_tao`) |
 | [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
-| [258](https://www.erdosproblems.com/258) | `axiomatic` | [problems/258/](problems/258/) | assumes Tao–Teräväinen (`tao_teravainen`) |
+| [258](https://www.erdosproblems.com/258) | `axiomatic` | [problems/258/](problems/258/) | assumes [Tao–Teräväinen](https://arxiv.org/abs/2512.01739) (`tao_teravainen`) |
 | [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
 | [268](https://www.erdosproblems.com/268) | `complete` | [problems/268/](problems/268/) | |
 | [275](https://www.erdosproblems.com/275) | `complete` | [problems/275/](problems/275/) | |
@@ -106,7 +106,7 @@ lake build
 | [418](https://www.erdosproblems.com/418) | `trust_extended` | [problems/418/](problems/418/) | uses `native_decide` |
 | [419](https://www.erdosproblems.com/419) | `complete` | [problems/419/](problems/419/) | |
 | [426](https://www.erdosproblems.com/426) | `complete` | [problems/426/](problems/426/) | |
-| [427](https://www.erdosproblems.com/427) | `axiomatic` | [problems/427/](problems/427/) | assumes Shiu's theorem (`shiu_consecutive_primes`) |
+| [427](https://www.erdosproblems.com/427) | `axiomatic` | [problems/427/](problems/427/) | assumes [Shiu's theorem](https://doi.org/10.1112/S0024610799007863) (`shiu_consecutive_primes`) |
 | [429](https://www.erdosproblems.com/429) | `complete` | [problems/429/](problems/429/) | |
 | [433](https://www.erdosproblems.com/433) | `complete` | [problems/433/](problems/433/) | |
 | [434](https://www.erdosproblems.com/434) | `complete` | [problems/434/](problems/434/) | |
@@ -120,5 +120,6 @@ lake build
 | [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) | |
 | [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) | |
 | [487](https://www.erdosproblems.com/487) | `complete` | [problems/487/](problems/487/) | |
+| [490](https://www.erdosproblems.com/490) | `axiomatic` | [problems/490/](problems/490/) | assumes 4 explicit [Dusart](https://doi.org/10.1007/s11139-016-9839-4) prime estimates (`dusart_pi_lower`, `dusart_pi_upper`, `dusart_chebyshev`, `dusart_mertens_product`) |
 
 <!-- TABLE:END -->
