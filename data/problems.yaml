@@ -963,3 +963,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/497#post-4154"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos497.lean"
+- number: "498"
+  proof:
+    path: "problems/498/"
+    theorem: "Erdos498.erdos_498"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/498#post-3844"
