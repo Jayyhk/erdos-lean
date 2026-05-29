@@ -705,7 +705,7 @@
     last_update: "2026-05-26"
     lean_toolchain: "leanprover/lean4:v4.29.0"
     mathlib_revision: "8a178386ffc0f5fef0b77738bb5449d50efeea95"
-    extra_axioms: ["Erdos392.pi_alt'", "Erdos392.LogTables.log_7_lt"]
+    extra_axioms: ["Erdos392.pi_alt'"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/392#post-4410"
       - "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Erdos392.lean"

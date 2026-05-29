@@ -9,10 +9,6 @@ project but not available in core Mathlib; here `π(⌊x⌋) ~ x / log x`. -/
 axiom pi_alt' :
     (fun (x : ℝ) ↦ (primeCounting ⌊x⌋₊ : ℝ)) ~[Filter.atTop] (fun x ↦ x / log x)
 
-/-- Numerical bound `log 7 < 1.945911` (axiomatized; from `PrimeNumberTheoremAnd.LogTables`,
-    where it is proved by `interval_decide`). -/
-axiom LogTables.log_7_lt : Real.log 7 < 1.945911
-
 structure Factorization (n : ℕ) where
   a : Multiset ℕ
   ha : ∀ m ∈ a, m ≤ n
@@ -1733,7 +1729,10 @@ lemma Params.primeCounting_ge_log (n : ℕ) (hn : n ≥ 2) :
         norm_num at *
         linarith
       · rw [show primeCounting 7 = 4 by rfl]; norm_num
-        linarith [LogTables.log_7_lt]
+        have h8 : Real.log 7 ≤ 3 * Real.log 2 := by
+          calc Real.log 7 ≤ Real.log 8 := by gcongr <;> norm_num
+            _ = 3 * Real.log 2 := by rw [show (8:ℝ) = 2 ^ 3 by norm_num, Real.log_pow]; push_cast; ring
+        linarith [Real.log_two_lt_d9]
     · grw [h_log_le, log_two_lt_d9, ← h_pi_ge_k]; norm_num
     · grw [h_log_le, log_two_lt_d9, ← h_pi_ge_k]; norm_num
 
@@ -3052,6 +3051,6 @@ theorem erdos_392 :
 
 #print axioms erdos_392
 -- 'Erdos392.erdos_392' depends on axioms:
--- [propext, Classical.choice, pi_alt', Quot.sound, LogTables.log_7_lt]
+-- [propext, Classical.choice, pi_alt', Quot.sound]
 
 end Erdos392
