@@ -886,3 +886,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/459#post-4716"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem459.lean"
+- number: "476"
+  proof:
+    path: "problems/476/"
+    theorem: "Erdos476.erdos_476"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/476#post-2614"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos476.lean"
