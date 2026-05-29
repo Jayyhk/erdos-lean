@@ -2344,5 +2344,6 @@ theorem erdos_443 :
   ⟨erdos_443_part_one, erdos_443_part_two⟩
 
 #print axioms erdos_443
+-- 'Erdos443.erdos_443' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos443

@@ -1415,5 +1415,6 @@ theorem erdos_206 : volume {x : ℝ | EventuallyGreedy x} = 0 := by
 end
 
 #print axioms erdos_206
+-- 'Erdos206.erdos_206' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos206

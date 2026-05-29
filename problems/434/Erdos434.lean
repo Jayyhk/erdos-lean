@@ -6347,5 +6347,6 @@ theorem erdos_434 (n k : ℕ) (hk : k ≤ n) (hk_ge_2 : k ≥ 2) :
 end
 
 #print axioms erdos_434
+-- 'Erdos434.erdos_434' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos434

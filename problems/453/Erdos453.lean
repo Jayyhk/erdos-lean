@@ -506,5 +506,6 @@ theorem erdos_453 :
   exact Set.not_infinite.mpr ( Set.finite_iff_bddAbove.mpr ⟨ N, fun n hn => not_lt.1 fun contra => h_finite n contra.le hn ⟩ )
 
 #print axioms erdos_453
+-- 'Erdos453.erdos_453' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos453

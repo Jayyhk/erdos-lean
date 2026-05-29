@@ -344,5 +344,6 @@ theorem erdos_457 : ∃ ε > (0 : ℝ),
 end
 
 #print axioms erdos_457
+-- 'Erdos457.erdos_457' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos457

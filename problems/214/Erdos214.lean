@@ -2855,5 +2855,6 @@ theorem erdos_214 (c : Point → Color)
 end
 
 #print axioms erdos_214
+-- 'Erdos214.erdos_214' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos214
