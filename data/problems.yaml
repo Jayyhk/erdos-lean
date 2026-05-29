@@ -994,3 +994,14 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/502#post-4106"
+- number: "505"
+  proof:
+    path: "problems/505/"
+    theorem: "Erdos505.erdos_505"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/505#post-4108"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos505.lean"
