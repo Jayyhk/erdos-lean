@@ -436,9 +436,9 @@ theorem erdos_331 :
   · simp +zetaDelta at *;
     exact Set.finite_empty.subset fun x hx => hB.2.2 _ hx.1 _ hx.2.1 _ hx.2.2.1 _ hx.2.2.2.1 hx.2.2.2.2.1 <| by linarith [ hx.2.2.2.2.2 ] ;
 
+end
+
 #print axioms erdos_331
 -- 'Erdos331.erdos_331' depends on axioms: [propext, Classical.choice, Quot.sound]
-
-end
 
 end Erdos331

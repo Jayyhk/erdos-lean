@@ -5383,9 +5383,9 @@ theorem erdos_426 :
   · filter_upwards [Filter.eventually_ge_atTop n₀] with n hn
     exact hn₀ n hn
 
+end
+
 #print axioms erdos_426
 -- 'Erdos426.erdos_426' depends on axioms: [propext, Classical.choice, Quot.sound]
-
-end
 
 end Erdos426
