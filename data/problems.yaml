@@ -798,3 +798,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/429#post-3910"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem429.lean"
+- number: "433"
+  proof:
+    path: "problems/433/"
+    theorem: "Erdos433.erdos_433"
+    state: "complete"
+    last_update: "2026-05-28"
+    lean_toolchain: "leanprover/lean4:v4.29.0"
+    mathlib_revision: "8a178386ffc0f5fef0b77738bb5449d50efeea95"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/433#post-4436"
+      - "https://github.com/YaelDillies/MiscYD/blob/master/MiscYD/AddCombi/Kneser/Kneser.lean"
