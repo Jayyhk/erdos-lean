@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-94 proofs in the catalog (out of 1217 Erdős problems):
-- 85 `complete`
+95 proofs in the catalog (out of 1217 Erdős problems):
+- 86 `complete`
 - 3 `trust_extended`
 - 6 `axiomatic`
 
@@ -129,5 +129,6 @@ lake build
 | [505](https://www.erdosproblems.com/505) | `complete` | [problems/505/](problems/505/) | disproof (Kahn–Kalai counterexample in dim 946) |
 | [519](https://www.erdosproblems.com/519) | `complete` | [problems/519/](problems/519/) | |
 | [532](https://www.erdosproblems.com/532) | `complete` | [problems/532/](problems/532/) | via Mathlib's [`Hindman.exists_FS_of_finite_cover`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Combinatorics/Hindman.html) |
+| [537](https://www.erdosproblems.com/537) | `complete` | [problems/537/](problems/537/) | disproof (Ruzsa's spread-prime-factor construction) |
 
 <!-- TABLE:END -->

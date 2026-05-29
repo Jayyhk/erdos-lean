@@ -1027,3 +1027,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/532#post-4004"
       - "https://leanprover-community.github.io/mathlib4_docs/Mathlib/Combinatorics/Hindman.html"
+- number: "537"
+  proof:
+    path: "problems/537/"
+    theorem: "Erdos537.erdos_537"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/537#post-4225"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos537.lean"
