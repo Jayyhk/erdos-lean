@@ -820,3 +820,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/434#post-4437"
       - "https://github.com/YaelDillies/MiscYD/blob/master/MiscYD/AddCombi/Kneser/Kneser.lean"
+- number: "435"
+  proof:
+    path: "problems/435/"
+    theorem: "Erdos435.erdos_435"
+    state: "complete"
+    last_update: "2026-05-28"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/435#post-4173"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos435.lean"
