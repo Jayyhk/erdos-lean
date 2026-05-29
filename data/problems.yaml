@@ -897,3 +897,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/476#post-2614"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos476.lean"
+- number: "481"
+  proof:
+    path: "problems/481/"
+    theorem: "Erdos481.erdos_481"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/481#post-1930"
