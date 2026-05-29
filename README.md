@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-92 proofs in the catalog (out of 1217 Erdős problems):
-- 83 `complete`
+93 proofs in the catalog (out of 1217 Erdős problems):
+- 84 `complete`
 - 3 `trust_extended`
 - 6 `axiomatic`
 
@@ -127,5 +127,6 @@ lake build
 | [499](https://www.erdosproblems.com/499) | `complete` | [problems/499/](problems/499/) | |
 | [502](https://www.erdosproblems.com/502) | `complete` | [problems/502/](problems/502/) | |
 | [505](https://www.erdosproblems.com/505) | `complete` | [problems/505/](problems/505/) | disproof (Kahn–Kalai counterexample in dim 946) |
+| [519](https://www.erdosproblems.com/519) | `complete` | [problems/519/](problems/519/) | |
 
 <!-- TABLE:END -->

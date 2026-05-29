@@ -1005,3 +1005,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/505#post-4108"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos505.lean"
+- number: "519"
+  proof:
+    path: "problems/519/"
+    theorem: "Erdos519.erdos_519"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/519#post-5599"
+      - "https://gist.github.com/JohnEdwardJennings/db1e0cb00b7d6866193c12f1c70a1813#file-erdos519-lean"
