@@ -6320,33 +6320,29 @@ Let k ≤ n and k ≥ 2. The choice of A ⊆ {1, ..., n} (with gcd(A) = 1) of si
 /-- **Erdős Problem 434.** Among A ⊆ {1,…,n} with |A|=k and gcd 1, the block
 {n-k+1,…,n} maximises the number of non-representable integers. -/
 theorem erdos_434 (n k : ℕ) (hk : k ≤ n) (hk_ge_2 : k ≥ 2) :
-  ∀ A : Finset ℕ, (A : Set ℕ) ⊆ Set.Icc 1 n → A.card = k → Finset.gcd A id = 1 →
-  non_representable_count A ≤ non_representable_count (A_opt n k) := by
-  intro A hA_sub hA_card hA_gcd
-  have hn_ge_1 : n ≥ 1 := by
-    apply le_trans _ hk
-    apply le_trans _ hk_ge_2
-    norm_num
-  have hA_pos : ∀ x ∈ A, x > 0 := by
-    intro x hx
-    have := hA_sub hx
-    simp at this
-    linarith
-  have h_finite_A : (Set.univ \ (S A : Set ℕ)).Finite := finite_compl_S A hA_gcd
-  have h_finite_opt : (Set.univ \ (S (A_opt n k : Set ℕ) : Set ℕ)).Finite := finite_compl_S_A_opt n k hk_ge_2 hk
+    IsGreatest
+      {c : ℕ | ∃ A : Finset ℕ, (A : Set ℕ) ⊆ Set.Icc 1 n ∧ A.card = k ∧
+        Finset.gcd A id = 1 ∧ non_representable_count A = c}
+      (non_representable_count (A_opt n k)) := by
+  have hn_ge_1 : n ≥ 1 := by omega
   have h_opt_sub : (A_opt n k : Set ℕ) ⊆ Set.Icc 1 n := by
     intro x hx
     rw [A_opt, Finset.coe_Icc, Set.mem_Icc] at hx
-    constructor
-    · have : n - k + 1 ≥ 1 := by
-        apply Nat.le_add_left
-      apply le_trans this hx.1
-    · exact hx.2
-  rw [count_eq_one_add_sum_gaps A n hn_ge_1 hA_sub h_finite_A]
-  rw [count_eq_one_add_sum_gaps (A_opt n k) n hn_ge_1 h_opt_sub h_finite_opt]
-  apply Nat.add_le_add_left
-  apply sum_gaps_le n k _ hk A hA_sub hA_card hA_gcd h_finite_opt
-  linarith
+    rw [Set.mem_Icc]; omega
+  have h_finite_opt : (Set.univ \ (S (A_opt n k : Set ℕ) : Set ℕ)).Finite :=
+    finite_compl_S_A_opt n k hk_ge_2 hk
+  constructor
+  · -- {n-k+1,…,n} is itself a valid choice, so its count is achieved
+    refine ⟨A_opt n k, h_opt_sub, ?_, gcd_A_opt_eq_one n k hk_ge_2 hk, rfl⟩
+    rw [A_opt, Nat.card_Icc]; omega
+  · -- and no valid choice exceeds it
+    rintro c ⟨A, hA_sub, hA_card, hA_gcd, rfl⟩
+    have h_finite_A : (Set.univ \ (S A : Set ℕ)).Finite := finite_compl_S A hA_gcd
+    rw [count_eq_one_add_sum_gaps A n hn_ge_1 hA_sub h_finite_A]
+    rw [count_eq_one_add_sum_gaps (A_opt n k) n hn_ge_1 h_opt_sub h_finite_opt]
+    apply Nat.add_le_add_left
+    apply sum_gaps_le n k _ hk A hA_sub hA_card hA_gcd h_finite_opt
+    linarith
 
 end
 
