@@ -984,3 +984,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/499#post-1889"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos499.lean"
+- number: "502"
+  proof:
+    path: "problems/502/"
+    theorem: "Erdos502.erdos_502"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/502#post-4106"
