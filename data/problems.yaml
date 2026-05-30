@@ -1060,3 +1060,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/541#post-2617"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos541.lean"
+- number: "582"
+  proof:
+    path: "problems/582/"
+    theorem: "Erdos582.erdos_582"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/582#post-4212"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos582.lean"
