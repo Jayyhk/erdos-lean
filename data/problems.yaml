@@ -1137,3 +1137,15 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/646#post-4507"
+- number: "648"
+  proof:
+    path: "problems/648/"
+    theorem: "Erdos648.erdos_648"
+    state: "axiomatic"
+    extra_axioms: ["Erdos648.pi_alt"]
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/648#post-4156"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos648.lean"
