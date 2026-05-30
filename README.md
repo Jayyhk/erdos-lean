@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-105 proofs in the catalog (out of 1217 Erdős problems):
-- 95 `complete`
+106 proofs in the catalog (out of 1217 Erdős problems):
+- 96 `complete`
 - 3 `trust_extended`
 - 7 `axiomatic`
 
@@ -140,5 +140,6 @@ lake build
 | [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) | |
 | [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) | |
 | [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes PNT (`pi_alt`) |
+| [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
 
 <!-- TABLE:END -->
