@@ -1071,3 +1071,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/582#post-4212"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos582.lean"
+- number: "613"
+  proof:
+    path: "problems/613/"
+    theorem: "Erdos613.erdos_613"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.29.1"
+    mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/613#post-1678"
+      - "https://github.com/teorth/analysis/blob/main/Analysis/Misc/erdos_613.lean"
