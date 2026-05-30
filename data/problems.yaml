@@ -1082,3 +1082,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/613#post-1678"
       - "https://github.com/teorth/analysis/blob/main/Analysis/Misc/erdos_613.lean"
+- number: "618"
+  proof:
+    path: "problems/618/"
+    theorem: "Erdos618.erdos_618"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/618#post-4235"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos618.lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos134.lean"
