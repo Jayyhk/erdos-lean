@@ -26,10 +26,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-107 proofs in the catalog (out of 1217 Erdős problems):
+108 proofs in the catalog (out of 1217 Erdős problems):
 - 97 `complete`
 - 3 `trust_extended`
-- 7 `axiomatic`
+- 8 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -140,5 +140,6 @@ lake build
 | [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes PNT (`pi_alt`) |
 | [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
 | [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
+| [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes [Frankl–Rödl](https://doi.org/10.1002/rsa.10017) (`frankl_roedl_theorem`) |
 
 <!-- TABLE:END -->

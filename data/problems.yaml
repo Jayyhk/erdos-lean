@@ -1171,3 +1171,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/650#post-4683"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem650.lean"
+- number: "658"
+  proof:
+    path: "problems/658/"
+    theorem: "Erdos658.erdos_658"
+    state: "axiomatic"
+    extra_axioms: ["Erdos658.frankl_roedl_theorem"]
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/658#post-5677"
+      - "https://gist.github.com/JohnEdwardJennings/ca7d49761fb51d28613bafc956742fbc#file-erdos658-lean"
