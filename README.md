@@ -26,8 +26,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-110 proofs in the catalog (out of 1217 Erdős problems):
-- 98 `complete`
+111 proofs in the catalog (out of 1217 Erdős problems):
+- 99 `complete`
 - 3 `trust_extended`
 - 9 `axiomatic`
 
@@ -143,5 +143,6 @@ lake build
 | [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes [Frankl–Rödl](https://doi.org/10.1002/rsa.10017) (`frankl_roedl_theorem`) |
 | [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes [Bernays' theorem](https://gdz.sub.uni-goettingen.de/id/PPN313341249) (`bernays`) |
 | [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) | |
+| [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
 
 <!-- TABLE:END -->
