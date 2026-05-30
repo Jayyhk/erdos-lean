@@ -1116,3 +1116,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/639#post-6189"
       - "https://gist.github.com/Parcly-Taxel/f9a6a963d1057880633e4034294aa98e#file-erdos639-lean"
+- number: "645"
+  proof:
+    path: "problems/645/"
+    theorem: "Erdos645.erdos_645"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/645#post-1795"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos645.lean"

@@ -2,20 +2,20 @@
 
 A collection of Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
 
-The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. Each proof is a single self-contained file that imports only Mathlib, with no dependencies between problems, and brings its own `lean-toolchain` / `lakefile.toml` and version info in the catalog — so any one of them builds and can be checked on its own.
+The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. Each proof is a single self-contained file that imports only Mathlib, with no dependencies between problems, and brings its own `lean-toolchain` / `lakefile.toml` and version info in the catalog, so any one of them builds and can be checked on its own.
 
 Not every proof will be fully legitimate. Some might depend on `sorry`, on extra axioms declared in the proof itself, on unproven results dragged in as hypotheses, or on mechanisms that expand Lean's trusted base. The table below records every such qualification explicitly, with the catalog in [data/problems.yaml](data/problems.yaml) as the ground truth. Field definitions and the meaning of each `state` value / `trust_extensions` tag live in [schema/problems.schema.json](schema/problems.schema.json).
 
-Files may be lightly modified from their original source — typically renaming the headline theorem to fit our `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
+Files may be lightly modified from their original source, typically renaming the headline theorem to fit our `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
 
 ## Conventions
 
 For problem `N`, `problems/N/` contains:
 
-- `ErdosN.lean` — the proof
-- `lakefile.toml` — package `erdosN`, library `ErdosN`, Mathlib pinned to the catalog's revision
-- `lean-toolchain` — the Lean version
-- `lake-manifest.json` — dependency lockfile
+- `ErdosN.lean`: the proof
+- `lakefile.toml`: package `erdosN`, library `ErdosN`, Mathlib pinned to the catalog's revision
+- `lean-toolchain`: the Lean version
+- `lake-manifest.json`: dependency lockfile
 
 Verify with:
 
@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-102 proofs in the catalog (out of 1217 Erdős problems):
-- 93 `complete`
+103 proofs in the catalog (out of 1217 Erdős problems):
+- 94 `complete`
 - 3 `trust_extended`
 - 6 `axiomatic`
 
@@ -137,5 +137,6 @@ lake build
 | [618](https://www.erdosproblems.com/618) | `complete` | [problems/618/](problems/618/) | |
 | [621](https://www.erdosproblems.com/621) | `complete` | [problems/621/](problems/621/) | |
 | [639](https://www.erdosproblems.com/639) | `complete` | [problems/639/](problems/639/) | |
+| [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) | |
 
 <!-- TABLE:END -->
