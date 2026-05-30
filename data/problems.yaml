@@ -1038,3 +1038,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/537#post-4225"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos537.lean"
+- number: "540"
+  proof:
+    path: "problems/540/"
+    theorem: "Erdos540.erdos_540"
+    state: "complete"
+    last_update: "2026-05-29"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/540#post-5410"
+      - "https://gist.github.com/madeve-unipi/e5b448ddfb84f4c5427d22555f19b1e6#file-erdos540-lean"
