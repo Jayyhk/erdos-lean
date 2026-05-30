@@ -1160,3 +1160,14 @@
       - "https://www.erdosproblems.com/forum/thread/649#post-4229"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos649.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos368b.lean"
+- number: "650"
+  proof:
+    path: "problems/650/"
+    theorem: "Erdos650.erdos_650"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/650#post-4683"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem650.lean"

@@ -4,7 +4,7 @@ A collection of Lean proofs for problems from [erdosproblems.com](https://www.er
 
 The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. Each proof is a single self-contained file that imports only Mathlib, with no dependencies between problems, and brings its own `lean-toolchain` / `lakefile.toml` and version info in the catalog, so any one of them builds and can be checked on its own.
 
-Not every proof will be fully legitimate. Some might depend on `sorry`, on extra axioms declared in the proof itself, on unproven results dragged in as hypotheses, or on mechanisms that expand Lean's trusted base. The table below records every such qualification explicitly, with the catalog in [data/problems.yaml](data/problems.yaml) as the ground truth. Field definitions and the meaning of each `state` value / `trust_extensions` tag live in [schema/problems.schema.json](schema/problems.schema.json).
+Not every proof will be fully legitimate. Some might depend on `sorry`, on extra axioms declared in the proof itself, or on mechanisms that expand Lean's trusted base. The table below records every such qualification explicitly, with the catalog in [data/problems.yaml](data/problems.yaml) as the ground truth. Field definitions and the meaning of each `state` value / `trust_extensions` tag live in [schema/problems.schema.json](schema/problems.schema.json).
 
 Files may be lightly modified from their original source, typically renaming the headline theorem to fit our `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
 
@@ -28,8 +28,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-106 proofs in the catalog (out of 1217 Erdős problems):
-- 96 `complete`
+107 proofs in the catalog (out of 1217 Erdős problems):
+- 97 `complete`
 - 3 `trust_extended`
 - 7 `axiomatic`
 
@@ -141,5 +141,6 @@ lake build
 | [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) | |
 | [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes PNT (`pi_alt`) |
 | [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
+| [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
 
 <!-- TABLE:END -->
