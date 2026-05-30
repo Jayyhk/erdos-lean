@@ -26,10 +26,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-111 proofs in the catalog (out of 1217 Erdős problems):
+112 proofs in the catalog (out of 1217 Erdős problems):
 - 99 `complete`
 - 3 `trust_extended`
-- 9 `axiomatic`
+- 10 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -144,5 +144,6 @@ lake build
 | [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes [Bernays' theorem](https://gdz.sub.uni-goettingen.de/id/PPN313341249) (`bernays`) |
 | [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) | |
 | [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
+| [678](https://www.erdosproblems.com/678) | `axiomatic` | [problems/678/](problems/678/) | assumes PNT (`pi_alt`) |
 
 <!-- TABLE:END -->
