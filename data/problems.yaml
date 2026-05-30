@@ -1183,3 +1183,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/658#post-5677"
       - "https://gist.github.com/JohnEdwardJennings/ca7d49761fb51d28613bafc956742fbc#file-erdos658-lean"
+- number: "659"
+  proof:
+    path: "problems/659/"
+    theorem: "Erdos659.erdos_659"
+    state: "axiomatic"
+    extra_axioms: ["Erdos659.bernays"]
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/659#post-3156"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos659.lean"
