@@ -1049,3 +1049,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/540#post-5410"
       - "https://gist.github.com/madeve-unipi/e5b448ddfb84f4c5427d22555f19b1e6#file-erdos540-lean"
+- number: "541"
+  proof:
+    path: "problems/541/"
+    theorem: "Erdos541.erdos_541"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/541#post-2617"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos541.lean"
