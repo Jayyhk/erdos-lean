@@ -1094,3 +1094,14 @@
       - "https://www.erdosproblems.com/forum/thread/618#post-4235"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos618.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos134.lean"
+- number: "621"
+  proof:
+    path: "problems/621/"
+    theorem: "Erdos621.erdos_621"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/621#post-5605"
+      - "https://gist.github.com/LorenzoLuccioli/71247a0c86fa35cb1e000160baef0bba#file-erdos621-lean"
