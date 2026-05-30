@@ -2,11 +2,9 @@
 
 A collection of Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
 
-The proofs here come from various sources and target various Lean toolchains and Mathlib revisions. Each proof is a single self-contained file that imports only Mathlib, with no dependencies between problems, and brings its own `lean-toolchain` / `lakefile.toml` and version info in the catalog, so any one of them builds and can be checked on its own.
-
 Not every proof will be fully legitimate. Some might depend on `sorry`, on extra axioms declared in the proof itself, or on mechanisms that expand Lean's trusted base. The table below records every such qualification explicitly, with the catalog in [data/problems.yaml](data/problems.yaml) as the ground truth. Field definitions and the meaning of each `state` value / `trust_extensions` tag live in [schema/problems.schema.json](schema/problems.schema.json).
 
-Files may be lightly modified from their original source, typically renaming the headline theorem to fit our `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
+Files may be lightly modified from their original source, typically renaming the headline theorem to fit the `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
 
 ## Conventions
 

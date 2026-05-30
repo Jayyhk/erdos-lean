@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "erdos-lean problems catalog",
-  "description": "Per-problem metadata for the erdos-lean repository. This repo is a *collection* of proofs from various sources; different problems may use different Lean toolchains and Mathlib revisions. The `proof` block records what the proof depends on (`sorry` gaps, extra axioms declared in this repo, hypotheses representing unproven external results, mechanisms that expand the trusted base) and the Lean environment it was written against.",
+  "description": "Per-problem metadata for the erdos-lean repository. This repo is a *collection* of proofs from various sources; different problems may use different Lean toolchains and Mathlib revisions. The `proof` block records what the proof depends on (`sorry` gaps, extra axioms declared in this repo, mechanisms that expand the trusted base) and the Lean environment it was written against.",
   "type": "array",
   "uniqueItems": true,
   "items": {
@@ -25,7 +25,6 @@
               "properties": {
                 "sorries":          { "maximum": 0 },
                 "extra_axioms":     { "maxItems": 0 },
-                "hypotheses":       { "maxItems": 0 },
                 "trust_extensions": { "maxItems": 0 }
               }
             }
@@ -37,19 +36,7 @@
               "properties": {
                 "sorries":          { "maximum": 0 },
                 "extra_axioms":     { "maxItems": 0 },
-                "hypotheses":       { "maxItems": 0 },
                 "trust_extensions": { "minItems": 1 }
-              }
-            }
-          },
-          {
-            "if":   { "properties": { "state": { "const": "hypothetical" } }, "required": ["state"] },
-            "then": {
-              "required": ["hypotheses"],
-              "properties": {
-                "sorries":      { "maximum": 0 },
-                "extra_axioms": { "maxItems": 0 },
-                "hypotheses":   { "minItems": 1 }
               }
             }
           },
@@ -85,12 +72,11 @@
           },
           "state": {
             "type": "string",
-            "description": "The worst category that applies, determined by the dependency fields `sorries`, `extra_axioms`, `hypotheses`, and `trust_extensions`. Consistency is enforced by the schema (via the `allOf` constraint on the `proof` object). Ordering best → worst: complete > trust_extended > hypothetical > axiomatic > sorry.",
+            "description": "The worst category that applies, determined by the dependency fields `sorries`, `extra_axioms`, and `trust_extensions`. Consistency is enforced by the schema (via the `allOf` constraint on the `proof` object). Ordering best → worst: complete > trust_extended > axiomatic > sorry.",
             "oneOf": [
-              { "const": "complete",       "description": "Proof has no unproven dependencies: no `sorry`, no extra axioms, no hypotheses, no trust extensions." },
-              { "const": "trust_extended", "description": "No `sorry`, no extra axioms, no hypotheses, but has entries in `trust_extensions` (mechanisms that expand the trusted base, like `native_decide`)." },
-              { "const": "hypothetical",   "description": "No `sorry`, no extra axioms, but the headline theorem has hypotheses encoding unproven external results (listed in `hypotheses`). The Lean code is honest; the headline claim is conditional. May also use trust extensions." },
-              { "const": "axiomatic",      "description": "No `sorry`, but closes modulo axioms declared in this repo (listed in `extra_axioms`). May also have hypotheses or trust extensions." },
+              { "const": "complete",       "description": "Proof has no unproven dependencies: no `sorry`, no extra axioms, no trust extensions." },
+              { "const": "trust_extended", "description": "No `sorry`, no extra axioms, but has entries in `trust_extensions` (mechanisms that expand the trusted base, like `native_decide`)." },
+              { "const": "axiomatic",      "description": "No `sorry`, but closes modulo axioms declared in this repo (listed in `extra_axioms`). May also have trust extensions." },
               { "const": "sorry",          "description": "Proof contains at least one `sorry` (count in `sorries`). May also have any of the other dependency fields populated." }
             ]
           },
@@ -117,13 +103,7 @@
             "type": "array",
             "items": { "type": "string" },
             "uniqueItems": true,
-            "description": "Fully qualified names of axioms declared in this repo (via the `axiom` keyword) that the proof depends on. Surfaces in `#print axioms`. Does not include Lean's internal axioms surfaced by trust extensions (e.g. `Lean.ofReduceBool` from `native_decide`) — those go under `trust_extensions`."
-          },
-          "hypotheses": {
-            "type": "array",
-            "items": { "type": "string" },
-            "uniqueItems": true,
-            "description": "Hypotheses in the headline theorem's signature representing unproven external results. The Lean code is honest (the dependency is visible in the type), but the headline claim is conditional on these. List the Prop name (or the variable name) of each."
+            "description": "Fully qualified names of axioms declared in this repo (via the `axiom` keyword) that the proof depends on. Surfaces in `#print axioms`. Does not include Lean's internal axioms surfaced by trust extensions (e.g. `Lean.ofReduceBool` from `native_decide`) — those go under `trust_extensions`. Any unproven external result the headline theorem depends on must be declared as an `axiom` and listed here."
           },
           "trust_extensions": {
             "type": "array",
@@ -151,7 +131,7 @@
           },
           "note": {
             "type": "string",
-            "description": "Free-text catch-all for anything not captured by the structured fields — what the partial argument reduces to, why a particular axiom or hypothesis is needed, known weaknesses a reader should be aware of, etc."
+            "description": "Free-text catch-all for anything not captured by the structured fields — what the partial argument reduces to, why a particular axiom is needed, known weaknesses a reader should be aware of, etc."
           }
         }
       }
