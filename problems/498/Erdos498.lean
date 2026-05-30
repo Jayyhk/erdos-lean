@@ -73,8 +73,7 @@ The following was proved by Aristotle:
 
 import Mathlib
 
-
-import Mathlib.Tactic.GeneralizeProofs
+namespace Erdos498
 
 namespace Harmonic.GeneralizeProofs
 -- Harmonic `generalize_proofs` tactic
@@ -285,8 +284,6 @@ set_option maxHeartbeats 2000000
 open Complex ArithmeticFunction Int Set Real Filter Topology BigOperators Metric
 
 open scoped BigOperators Classical
-
-namespace Erdos498
 
 variable {n : ℕ}
 
