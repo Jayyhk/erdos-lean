@@ -1127,3 +1127,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/645#post-1795"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos645.lean"
+- number: "646"
+  proof:
+    path: "problems/646/"
+    theorem: "Erdos646.erdos_646"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/646#post-4507"
