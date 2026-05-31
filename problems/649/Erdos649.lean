@@ -6,7 +6,6 @@ set_option linter.style.maxHeartbeats false
 set_option linter.style.refine false
 set_option linter.style.commandStart false
 set_option linter.style.multiGoal false
-set_option linter.style.nativeDecide false
 
 namespace Erdos649
 
@@ -1056,7 +1055,12 @@ lemma P_eq_two_iff_pow_two {m : ℕ} (hm : m ≠ 0) : P m = 2 ↔ ∃ k > 0, m =
         cases h' : Finset.max m.primeFactors <;> aesop;
       rw [ ← Nat.prod_primeFactorsList hm ] ; rw [ List.prod_eq_pow_single 2 ] ; aesop;
       intro p hp hprime; have := h_prime_factors p ( by aesop ) ; interval_cases p <;> simp_all +decide ;
-    exact ⟨ k, Nat.pos_of_ne_zero ( by rintro rfl; exact absurd h ( by native_decide ) ), rfl ⟩;
+    refine ⟨ k, Nat.pos_of_ne_zero ?_, rfl ⟩
+    rintro rfl
+    have hP1 : P 1 = 0 := by
+      show ((1 : ℕ).primeFactors).max.getD 0 = 0
+      rw [Nat.primeFactors_one]; rfl
+    rw [pow_zero] at h; omega
   · unfold P;
     rcases h with ⟨ k, hk, rfl ⟩ ; rcases k with ( _ | _ | k ) <;> simp_all +decide [ Nat.primeFactors_pow ] ;
 
@@ -1245,7 +1249,7 @@ lemma case2_impossible {q1 q2 n : ℕ} (hq1 : q1.Prime) (hq2 : q2.Prime)
     have h_Pn_ge_q2 : P n ≥ q2 := by
       have h_Pn_ge_q2 : q2 ∈ n.primeFactors := by
         rcases n with ( _ | _ | n ) <;> simp_all +decide
-        cases hPn.symm.trans ( by native_decide : P 0 = 0 );
+        cases hPn.symm.trans (show P 0 = 0 by show ((0 : ℕ).primeFactors).max.getD 0 = 0; rw [Nat.primeFactors_zero]; rfl);
         contradiction;
       have h_Pn_ge_q2 : ∀ {S : Finset ℕ}, q2 ∈ S → S.max.getD 0 ≥ q2 := by
         intros S hS; exact (by
@@ -1515,6 +1519,6 @@ many counterexamples to "for all primes `p, q`, there exists `n` with
 theorem erdos_649 : { q | StrangePair 2 q }.Infinite := infinite_strange_pairs
 
 #print axioms erdos_649
--- 'Erdos649.erdos_649' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
+-- 'Erdos649.erdos_649' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos649
