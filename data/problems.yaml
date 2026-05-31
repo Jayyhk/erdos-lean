@@ -1228,3 +1228,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/678#post-2855"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos678.lean"
+- number: "692"
+  proof:
+    path: "problems/692/"
+    theorem: "Erdos692.erdos_692"
+    state: "complete"
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/692#post-5204"
+      - "https://gist.github.com/pitmonticone/96516af9100a37a1da81908dc0b0410c#file-erdos692-lean"
