@@ -1163,8 +1163,9 @@
   proof:
     path: "problems/649/"
     theorem: "Erdos649.erdos_649"
-    state: "complete"
-    last_update: "2026-05-30"
+    state: "trust_extended"
+    trust_extensions: ["uses_native_decide"]
+    last_update: "2026-05-31"
     lean_toolchain: "leanprover/lean4:v4.24.0"
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:

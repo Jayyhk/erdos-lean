@@ -27,8 +27,8 @@ lake build
 
 <!-- TABLE:START -->
 118 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
-- 103 `complete`
-- 3 `trust_extended`
+- 102 `complete`
+- 4 `trust_extended`
 - 12 `axiomatic`
 - 0 `sorry`
 
@@ -140,7 +140,7 @@ lake build
 | [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) | |
 | [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) | |
 | [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt`) |
-| [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
+| [649](https://www.erdosproblems.com/649) | `trust_extended` | [problems/649/](problems/649/) | uses `native_decide` |
 | [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
 | [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes Theorem 2.2 of [Solymosi](https://jayyhk.github.io/papers/solymosi2004.pdf) (`frankl_roedl_theorem`) |
 | [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes Theorems 1 and 2 on page 92 of [Bernays](https://jayyhk.github.io/papers/bernays1912.pdf) (`bernays`) |

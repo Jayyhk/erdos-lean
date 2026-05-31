@@ -1503,12 +1503,18 @@ theorem infinite_strange_pairs : { q | StrangePair 2 q }.Infinite := by
     · linarith [ Nat.le_of_dvd ( Nat.succ_pos _ ) h_div ];
   exact fun a => by obtain ⟨ p, hp₁, hp₂ ⟩ := h_infinite_primes_gt_5 a; obtain ⟨ q, hq₁, hq₂, hq₃ ⟩ := h_exists_q p hp₁.left hp₁.right; exact ⟨ q, hq₁, by linarith ⟩ ;
 
-/-- **Erdős Problem 649**: every pair of primes `(p, q)` occurs as `(P n, P (n+1))`
-for some `n`. *False* — counterexample `p = 2, q = 7`. -/
-theorem erdos_649 : ¬ ∀ (p q : ℕ), p.Prime → q.Prime → ∃ (n : ℕ), P n = p ∧ P (n + 1) = q :=
+/-- Disproof of Erdős Problem 649 in the literal form, via the explicit
+counterexample `p = 2, q = 7`. -/
+theorem erdos_649_simple : ¬ ∀ (p q : ℕ), p.Prime → q.Prime → ∃ (n : ℕ), P n = p ∧ P (n + 1) = q :=
   erdos_649_main
 
+/-- **Erdős Problem 649** (Alan Tong's strong disproof): there exist
+*infinitely many* primes `q` forming a strange pair with `2` — i.e., infinitely
+many counterexamples to "for all primes `p, q`, there exists `n` with
+`P n = p ∧ P (n+1) = q`". -/
+theorem erdos_649 : { q | StrangePair 2 q }.Infinite := infinite_strange_pairs
+
 #print axioms erdos_649
--- 'Erdos649.erdos_649' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos649.erdos_649' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
 
 end Erdos649

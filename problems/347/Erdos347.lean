@@ -13,7 +13,7 @@ Using Aristotle, Bartosz Naskrecki then helped Enrique obtain a Lean formalizati
 
 https://github.com/ebarschkis/ErdosProblem/blob/main/Problem347/Formalization.lean
 
-I slightly changed their Lean proof, following suggestions from live.lean-lang.org, removing some unnecessary definitions and lemmas, and removing the use of native_decide. The result can be found below.
+I slightly changed their Lean proof, following suggestions from live.lean-lang.org, removing some unnecessary definitions and lemmas. The result can be found below.
 
 Lean version: leanprover/lean4:v4.24.0
 Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
