@@ -388,7 +388,7 @@
     last_update: "2026-05-25"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    extra_axioms: ["Erdos237.maynard_tao"]
+    extra_axioms: ["Erdos237.maynard_prime_tuples"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/237#post-5240"
       - "https://gist.github.com/pitmonticone/8ea0d1cdb963b6213ac639b11d33f811#file-erdos237-lean"
@@ -1239,3 +1239,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/692#post-5204"
       - "https://gist.github.com/pitmonticone/96516af9100a37a1da81908dc0b0410c#file-erdos692-lean"
+- number: "694"
+  proof:
+    path: "problems/694/"
+    theorem: "Erdos694.erdos_694"
+    state: "axiomatic"
+    extra_axioms: ["Erdos694.mertens_product", "Erdos694.linnik_dvd"]
+    last_update: "2026-05-30"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/694#post-6202"
+      - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P694/Proof.lean"

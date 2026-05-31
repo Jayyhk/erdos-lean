@@ -26,10 +26,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-113 proofs in the catalog (out of 1217 Erdős problems):
+114 proofs in the catalog (out of 1217 Erdős problems):
 - 100 `complete`
 - 3 `trust_extended`
-- 10 `axiomatic`
+- 11 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -60,7 +60,7 @@ lake build
 | [198](https://www.erdosproblems.com/198) | `complete` | [problems/198/](problems/198/) | |
 | [199](https://www.erdosproblems.com/199) | `complete` | [problems/199/](problems/199/) | |
 | [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) | |
-| [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes PNT (`nth_prime_asymp`) |
+| [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`nth_prime_asymp`) |
 | [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |
 | [214](https://www.erdosproblems.com/214) | `complete` | [problems/214/](problems/214/) | |
 | [221](https://www.erdosproblems.com/221) | `complete` | [problems/221/](problems/221/) | |
@@ -68,9 +68,9 @@ lake build
 | [226](https://www.erdosproblems.com/226) | `complete` | [problems/226/](problems/226/) | |
 | [229](https://www.erdosproblems.com/229) | `complete` | [problems/229/](problems/229/) | |
 | [231](https://www.erdosproblems.com/231) | `trust_extended` | [problems/231/](problems/231/) | uses `native_decide` |
-| [237](https://www.erdosproblems.com/237) | `axiomatic` | [problems/237/](problems/237/) | assumes [Maynard–Tao](https://arxiv.org/abs/1311.4600) (`maynard_tao`) |
+| [237](https://www.erdosproblems.com/237) | `axiomatic` | [problems/237/](problems/237/) | assumes an intermediate result on page 7 in the proof of Theorem 1.1 of [Maynard](https://jayyhk.github.io/papers/maynard2015.pdf) (`maynard_prime_tuples`) |
 | [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
-| [258](https://www.erdosproblems.com/258) | `axiomatic` | [problems/258/](problems/258/) | assumes [Tao–Teräväinen](https://arxiv.org/abs/2512.01739) (`tao_teravainen`) |
+| [258](https://www.erdosproblems.com/258) | `axiomatic` | [problems/258/](problems/258/) | assumes Theorem 1.1 of [Tao–Teräväinen](https://jayyhk.github.io/papers/tao-teravainen2025.pdf) (`tao_teravainen`) |
 | [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
 | [268](https://www.erdosproblems.com/268) | `complete` | [problems/268/](problems/268/) | |
 | [275](https://www.erdosproblems.com/275) | `complete` | [problems/275/](problems/275/) | |
@@ -97,14 +97,14 @@ lake build
 | [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
 | [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
 | [379](https://www.erdosproblems.com/379) | `complete` | [problems/379/](problems/379/) | |
-| [392](https://www.erdosproblems.com/392) | `axiomatic` | [problems/392/](problems/392/) | assumes PNT (`pi_alt'`) |
+| [392](https://www.erdosproblems.com/392) | `axiomatic` | [problems/392/](problems/392/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt'`) |
 | [397](https://www.erdosproblems.com/397) | `complete` | [problems/397/](problems/397/) | |
 | [399](https://www.erdosproblems.com/399) | `complete` | [problems/399/](problems/399/) | |
 | [401](https://www.erdosproblems.com/401) | `complete` | [problems/401/](problems/401/) | |
 | [418](https://www.erdosproblems.com/418) | `trust_extended` | [problems/418/](problems/418/) | uses `native_decide` |
 | [419](https://www.erdosproblems.com/419) | `complete` | [problems/419/](problems/419/) | |
 | [426](https://www.erdosproblems.com/426) | `complete` | [problems/426/](problems/426/) | |
-| [427](https://www.erdosproblems.com/427) | `axiomatic` | [problems/427/](problems/427/) | assumes [Shiu's theorem](https://doi.org/10.1112/S0024610799007863) (`shiu_consecutive_primes`) |
+| [427](https://www.erdosproblems.com/427) | `axiomatic` | [problems/427/](problems/427/) | assumes Theorem 1 of [Shiu](https://jayyhk.github.io/papers/shiu2000.pdf) (`shiu_consecutive_primes`) |
 | [429](https://www.erdosproblems.com/429) | `complete` | [problems/429/](problems/429/) | |
 | [433](https://www.erdosproblems.com/433) | `complete` | [problems/433/](problems/433/) | |
 | [434](https://www.erdosproblems.com/434) | `complete` | [problems/434/](problems/434/) | |
@@ -118,7 +118,7 @@ lake build
 | [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) | |
 | [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) | |
 | [487](https://www.erdosproblems.com/487) | `complete` | [problems/487/](problems/487/) | |
-| [490](https://www.erdosproblems.com/490) | `axiomatic` | [problems/490/](problems/490/) | assumes 4 [Dusart](https://doi.org/10.1007/s11139-016-9839-4) prime estimates (`dusart_pi_lower`, `dusart_pi_upper`, `dusart_chebyshev`, `dusart_mertens_product`) |
+| [490](https://www.erdosproblems.com/490) | `axiomatic` | [problems/490/](problems/490/) | assumes prime bounds of [Dusart](https://jayyhk.github.io/papers/dusart2018.pdf): Theorem 3.3 (`dusart_chebyshev`), equation 5.4 of Corollary 5.2 (`dusart_pi_lower`, `dusart_pi_upper`), and Theorem 5.9 (`dusart_mertens_product`) |
 | [493](https://www.erdosproblems.com/493) | `complete` | [problems/493/](problems/493/) | |
 | [497](https://www.erdosproblems.com/497) | `complete` | [problems/497/](problems/497/) | |
 | [498](https://www.erdosproblems.com/498) | `complete` | [problems/498/](problems/498/) | |
@@ -137,14 +137,15 @@ lake build
 | [639](https://www.erdosproblems.com/639) | `complete` | [problems/639/](problems/639/) | |
 | [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) | |
 | [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) | |
-| [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes PNT (`pi_alt`) |
+| [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt`) |
 | [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
 | [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
-| [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes [Frankl–Rödl](https://doi.org/10.1002/rsa.10017) (`frankl_roedl_theorem`) |
-| [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes [Bernays' theorem](https://gdz.sub.uni-goettingen.de/id/PPN313341249) (`bernays`) |
+| [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes Theorem 2.2 of [Solymosi](https://jayyhk.github.io/papers/solymosi2004.pdf) (`frankl_roedl_theorem`) |
+| [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes Theorems 1 and 2 on page 92 of [Bernays](https://jayyhk.github.io/papers/bernays1912.pdf) (`bernays`) |
 | [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) | |
 | [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
-| [678](https://www.erdosproblems.com/678) | `axiomatic` | [problems/678/](problems/678/) | assumes PNT (`pi_alt`) |
+| [678](https://www.erdosproblems.com/678) | `axiomatic` | [problems/678/](problems/678/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt`) |
 | [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
+| [694](https://www.erdosproblems.com/694) | `axiomatic` | [problems/694/](problems/694/) | assumes equation 15 of [Mertens](https://jayyhk.github.io/papers/mertens1874.pdf) (`mertens_product`) and equation 2 of [Linnik](https://jayyhk.github.io/papers/linnik1944.pdf) (`linnik_dvd`) |
 
 <!-- TABLE:END -->
