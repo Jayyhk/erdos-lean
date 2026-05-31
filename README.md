@@ -26,10 +26,11 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-114 proofs in the catalog (out of 1217 Erdős problems):
+115 proofs in the catalog (out of 1217 Erdős problems):
 - 100 `complete`
 - 3 `trust_extended`
-- 11 `axiomatic`
+- 12 `axiomatic`
+- 0 `sorry`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -147,5 +148,6 @@ lake build
 | [678](https://www.erdosproblems.com/678) | `axiomatic` | [problems/678/](problems/678/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt`) |
 | [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
 | [694](https://www.erdosproblems.com/694) | `axiomatic` | [problems/694/](problems/694/) | assumes equation 15 of [Mertens](https://jayyhk.github.io/papers/mertens1874.pdf) (`mertens_product`) and equation 2 of [Linnik](https://jayyhk.github.io/papers/linnik1944.pdf) (`linnik_dvd`) |
+| [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) and equation 1.10 of [Montgomery–Vaughan](https://jayyhk.github.io/papers/montgomery-vaughan1973.pdf) (`brun_titchmarsh`) |
 
 <!-- TABLE:END -->

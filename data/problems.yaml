@@ -1251,3 +1251,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/694#post-6202"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P694/Proof.lean"
+- number: "696"
+  proof:
+    path: "problems/696/"
+    theorem: "Erdos696.erdos_696"
+    state: "axiomatic"
+    extra_axioms: ["Erdos696.siegel_walfisz", "Erdos696.brun_titchmarsh"]
+    last_update: "2026-05-31"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/696#post-6155"
+      - "https://github.com/davidturturean/erdos-696"
