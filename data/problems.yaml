@@ -1263,3 +1263,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/696#post-6155"
       - "https://github.com/davidturturean/erdos-696"
+- number: "698"
+  proof:
+    path: "problems/698/"
+    theorem: "Erdos698.erdos_698"
+    state: "complete"
+    last_update: "2026-05-31"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/698#post-3276"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem698.lean"

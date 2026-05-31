@@ -26,8 +26,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-115 proofs in the catalog (out of 1217 Erdős problems):
-- 100 `complete`
+116 proofs in the catalog (out of 1217 Erdős problems):
+- 101 `complete`
 - 3 `trust_extended`
 - 12 `axiomatic`
 - 0 `sorry`
@@ -149,5 +149,6 @@ lake build
 | [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
 | [694](https://www.erdosproblems.com/694) | `axiomatic` | [problems/694/](problems/694/) | assumes equation 15 of [Mertens](https://jayyhk.github.io/papers/mertens1874.pdf) (`mertens_product`) and equation 2 of [Linnik](https://jayyhk.github.io/papers/linnik1944.pdf) (`linnik_dvd`) |
 | [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) and equation 1.10 of [Montgomery–Vaughan](https://jayyhk.github.io/papers/montgomery-vaughan1973.pdf) (`brun_titchmarsh`) |
+| [698](https://www.erdosproblems.com/698) | `complete` | [problems/698/](problems/698/) | |
 
 <!-- TABLE:END -->
