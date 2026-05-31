@@ -66,9 +66,10 @@ def Admissible (B : Finset ℤ) : Prop :=
 
 /-! ## Axioms from analytic number theory -/
 
-/-- **Maynard–Tao Theorem** (2015). For any `m ≥ 2`, if `B` is an admissible set with
-`|B| log |B| > e^{8m+4}`, then there are infinitely many `n` such that at least `m` of
-`{n + b : b ∈ B}` are prime. -/
+/-- Intermediate result on page 7 in the proof of **Theorem 1.1 of Maynard**
+(*Small gaps between primes*, Annals of Math. 181 (2015), 383–413). For any `m ≥ 2`,
+if `B` is an admissible set with `|B| log |B| > e^{8m+4}`, then there are infinitely
+many `n` such that at least `m` of `{n + b : b ∈ B}` are prime. -/
 axiom maynard_prime_tuples (m : ℕ) (hm : 2 ≤ m) (B : Finset ℤ)
     (hB : Admissible B) (hk : exp (8 * m + 4) < B.card * Real.log B.card) :
     ∀ N : ℕ, ∃ n : ℤ, N < n ∧ m ≤ (B.filter (fun b ↦ (n + b).natAbs.Prime)).card

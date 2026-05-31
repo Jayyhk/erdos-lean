@@ -36,7 +36,8 @@ runs of `l` consecutive primes all congruent to `a` modulo `q`.
 *D. K. L. Shiu, "Strings of Congruent Primes", J. London Math. Soc. 61 (2000), 359–373.*
 -/
 
-/-- Shiu's theorem: for any positive length `l`, any modulus `q ≥ 1`, and any
+/-- **Theorem 1 of Shiu** (*Strings of Congruent Primes*, J. London Math. Soc. 61 (2000),
+359–373; qualitative form). For any positive length `l`, any modulus `q ≥ 1`, and any
 `a` coprime to `q`, there are arbitrarily late runs of `l` consecutive primes
 each congruent to `a` modulo `q`. -/
 axiom shiu_consecutive_primes

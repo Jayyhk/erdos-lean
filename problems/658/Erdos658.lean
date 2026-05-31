@@ -91,7 +91,8 @@ def Theorem_2_2 : Prop :=
       (∀ t ⊆ K, t.card = 3 → t ∈ E) ∧ e ⊆ K) →
     (E.card : ℝ) < ε * (V.card : ℝ) ^ 3
 
-/-- **Theorem 2.2** (Frankl–Rödl, 2002). -/
+/-- **Theorem 2.2 of Solymosi** (*A Note on a Question of Erdős and Graham*,
+Combinatorics, Probability and Computing 13 (2004), 263–267; attributed to Frankl–Rödl). -/
 axiom frankl_roedl_theorem : Theorem_2_2
 
 /-- **Conjecture 2.1** (Frankl–Rödl conjecture):

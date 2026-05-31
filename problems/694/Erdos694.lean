@@ -410,7 +410,8 @@ Both axioms below are transitively used by `totient_fibre_extremes`:
 by the lower-bound construction; `linnik_dvd` is consumed by the lower-bound
 construction at the height-to-`x` rescaling step. -/
 
-/-- **Mertens' product theorem (axiomatized).**
+/-- **Equation 15 of Mertens** (*Ein Beitrag zur analytischen Zahlentheorie*,
+J. reine angew. Math. 78 (1874), 46–62; page 53). Mertens' third theorem:
 `∏_{p ≤ y, p prime} (1 - 1/p)^{-1}` is asymptotic to `e^γ · log y` as `y → ∞`.
 Mathlib has `Nat.Primes.not_summable_one_div` (divergence of Σ 1/p) but not
 the asymptotic of the product. -/
@@ -421,7 +422,10 @@ axiom mertens_product :
           (Real.exp Real.eulerMascheroniConstant * Real.log y))
       atTop (𝓝 1)
 
-/-- **Linnik's theorem (divisibility form, axiomatized).**
+/-- **Equation 2 of Linnik** (*On the least prime in an arithmetic progression. I.
+The basic theorem*, Mat. Sbornik N.S. 15 (57) (1944), 139–178; page 139),
+specialized to the residue class `l = 1`.
+
 There exist absolute constants `C, L ≥ 1` such that for every `M ≥ 1`,
 there exists a prime `ℓ` with `M ∣ ℓ - 1` and `ℓ ≤ C · M^L`.
 

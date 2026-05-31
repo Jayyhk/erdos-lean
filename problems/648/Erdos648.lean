@@ -684,6 +684,8 @@ theorem g_upper_bound_asymptotic :
     rw [ Asymptotics.isBigO_iff ];
     exact ⟨ 1, by filter_upwards [ h_g_le_upper_bound ] with n hn; rw [ Real.norm_of_nonneg ( by positivity ), Real.norm_of_nonneg ( by exact le_trans ( by positivity ) hn ) ] ; linarith ⟩
 
+/-- **Prime Number Theorem** (axiomatized; not in core Mathlib).
+`π(⌊x⌋) = (1 + o(1)) · x / log x` as `x → ∞`. -/
 axiom pi_alt : ∃ c : ℝ → ℝ, c =o[atTop] (fun _ ↦ (1 : ℝ)) ∧
     ∀ x : ℝ, Nat.primeCounting ⌊x⌋₊ = (1 + c x) * x / log x
 

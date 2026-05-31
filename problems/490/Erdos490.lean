@@ -35,26 +35,34 @@ def chebyshevPsi (x : ℝ) : ℝ :=
 
 /-! ## Dusart's Mertens product estimate (Theorem 5.9) -/
 
-/-- For x ≥ 2278382, |∏_{p≤x}(1-1/p) - 1/(e^γ log x)| ≤ 1/(5 e^γ log⁴ x) -/
+/-- **Theorem 5.9 of Dusart** (*Estimates of some functions over primes without R.H.*,
+Ramanujan J. 45 (2018), 227–251). For x ≥ 2278382,
+|∏_{p≤x}(1-1/p) - 1/(e^γ log x)| ≤ 1/(5 e^γ log⁴ x). -/
 axiom dusart_mertens_product (x : ℝ) (hx : x ≥ 2278382) :
     |∏ p ∈ primesUpTo x, (1 - 1 / (p : ℝ)) - 1 / (Real.exp γ * Real.log x)| ≤
       1 / (5 * Real.exp γ * Real.log x ^ 4)
 
 /-! ## Dusart's prime counting estimates (Corollary 5.2) -/
 
-/-- For x ≥ 88789, π(x) ≥ x/log x + x/log²x + 2x/log³x -/
+/-- Lower bound from **equation 5.4 of Corollary 5.2 of Dusart** (*Estimates of some
+functions over primes without R.H.*, Ramanujan J. 45 (2018), 227–251). For x ≥ 88789,
+π(x) ≥ x/log x + x/log²x + 2x/log³x. -/
 axiom dusart_pi_lower (x : ℝ) (hx : x ≥ 88789) :
     x / Real.log x + x / Real.log x ^ 2 + 2 * x / Real.log x ^ 3 ≤
       ((primesUpTo x).card : ℝ)
 
-/-- For x ≥ 88789, π(x) ≤ x/log x + x/log²x + 2.53816·x/log³x -/
+/-- Upper bound from **equation 5.4 of Corollary 5.2 of Dusart** (*Estimates of some
+functions over primes without R.H.*, Ramanujan J. 45 (2018), 227–251). For x ≥ 88789,
+π(x) ≤ x/log x + x/log²x + 2.53816·x/log³x. -/
 axiom dusart_pi_upper (x : ℝ) (hx : x ≥ 88789) :
     ((primesUpTo x).card : ℝ) ≤
       x / Real.log x + x / Real.log x ^ 2 + 2.53816 * x / Real.log x ^ 3
 
 /-! ## Dusart's Chebyshev estimate (Theorem 3.3) -/
 
-/-- For x ≥ 2, |ψ(x) - x| < 1.66·x/log²x -/
+/-- **Theorem 3.3 of Dusart** (*Estimates of some functions over primes without R.H.*,
+Ramanujan J. 45 (2018), 227–251), instantiated at k=2 (η₂ = 1.66).
+For x ≥ 2, |ψ(x) - x| < 1.66·x/log²x. -/
 axiom dusart_chebyshev (x : ℝ) (hx : x ≥ 2) :
     |chebyshevPsi x - x| < 1.66 * x / Real.log x ^ 2
 

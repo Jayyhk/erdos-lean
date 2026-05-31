@@ -101,13 +101,17 @@ noncomputable def B (f : BinQuadForm) (x : ℝ) : ℕ :=
 end BinQuadForm
 
 /--
-**Bernays' theorem (assumed as an axiom).**
+**Bernays' theorem** — Satz 1 and Satz 2 on page 92 of Bernays' dissertation
+(*Über die Darstellung von positiven, ganzen Zahlen durch die primitiven, binären
+quadratischen Formen einer nicht-quadratischen Diskriminante*, Göttingen, 1912).
 
 Let `f(X,Y)=aX^2+bXY+cY^2` be a primitive positive definite binary quadratic form
 with non-square discriminant `Δ`. Then there exists a constant `C_Δ > 0` such that
 `B_f(x) ~ C_Δ * x / sqrt(log x)` as `x → ∞`.
 
-We phrase this so that `C_Δ` depends only on `Δ` (and works for every `f` of that discriminant).
+Phrased so that `C_Δ` depends only on `Δ` (works for every `f` of that discriminant),
+which combines Satz 1 (existence of nonzero limit per class) with Satz 2 (limit is
+class-independent within a discriminant).
 -/
 axiom bernays
     (Δ : ℤ) (hΔnonsq : ¬ ∃ z : ℤ, z * z = Δ) :
