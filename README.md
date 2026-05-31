@@ -26,8 +26,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-117 proofs in the catalog (out of 1217 Erdős problems):
-- 102 `complete`
+118 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
+- 103 `complete`
 - 3 `trust_extended`
 - 12 `axiomatic`
 - 0 `sorry`
@@ -60,6 +60,7 @@ lake build
 | [194](https://www.erdosproblems.com/194) | `complete` | [problems/194/](problems/194/) | |
 | [198](https://www.erdosproblems.com/198) | `complete` | [problems/198/](problems/198/) | |
 | [199](https://www.erdosproblems.com/199) | `complete` | [problems/199/](problems/199/) | |
+| [202](https://www.erdosproblems.com/202) | `complete` | [problems/202/](problems/202/) | |
 | [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) | |
 | [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`nth_prime_asymp`) |
 | [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |

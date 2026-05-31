@@ -279,6 +279,17 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/199#post-4442"
+- number: "202"
+  proof:
+    path: "problems/202/"
+    theorem: "Erdos202.erdos_202"
+    state: "complete"
+    last_update: "2026-05-31"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/202#post-6456"
+      - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P202/Proof.lean"
 - number: "204"
   proof:
     path: "problems/204/"
