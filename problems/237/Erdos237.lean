@@ -21,7 +21,7 @@ The assumption that `A` is infinite suffices.
 ## Proof structure
 
 The proof chain is:
-1. `maynard_tao` (axiom): admissible tuples yield many primes.
+1. `maynard_prime_tuples` (axiom): admissible tuples yield many primes.
 2. `mertens_third_theorem` (proved): `∏_{p ≤ n} (1 - 1/p) ≥ 1/(3 log n)`, an effective form
     of Mertens' third theorem, formalized unconditionally below (see references).
 3. `sieving_lemma` (proved): large sets contain admissible subsets meeting the Maynard–Tao
@@ -69,7 +69,7 @@ def Admissible (B : Finset ℤ) : Prop :=
 /-- **Maynard–Tao Theorem** (2015). For any `m ≥ 2`, if `B` is an admissible set with
 `|B| log |B| > e^{8m+4}`, then there are infinitely many `n` such that at least `m` of
 `{n + b : b ∈ B}` are prime. -/
-axiom maynard_tao (m : ℕ) (hm : 2 ≤ m) (B : Finset ℤ)
+axiom maynard_prime_tuples (m : ℕ) (hm : 2 ≤ m) (B : Finset ℤ)
     (hB : Admissible B) (hk : exp (8 * m + 4) < B.card * Real.log B.card) :
     ∀ N : ℕ, ∃ n : ℤ, N < n ∧ m ≤ (B.filter (fun b ↦ (n + b).natAbs.Prime)).card
 
@@ -78,7 +78,7 @@ end Erdos237Defs
 /-! ## Mertens' third theorem (effective form)
 
 An unconditional formalization of `1 / (3 log n) ≤ ∏_{p ≤ n} (1 - 1/p)` for `n ≥ 3`.
-This replaces what was previously an axiom, so `maynard_tao` is the sole remaining axiom.
+This replaces what was previously an axiom, so `maynard_prime_tuples` is the sole remaining axiom.
 Formalization due to T. Woett, obtained with Aristotle (Harmonic);
 see https://github.com/Woett/Lean-files/blob/main/MertensThird.lean -/
 
@@ -917,7 +917,7 @@ lemma sieving_lemma (m : ℕ) (_hm : 2 ≤ m) :
 
 /-! ## Chen–Ding theorem -/
 
-/-- **Chen–Ding Theorem** (2022), proved from `maynard_tao` + `sieving_lemma`. -/
+/-- **Chen–Ding Theorem** (2022), proved from `maynard_prime_tuples` + `sieving_lemma`. -/
 theorem chen_ding_theorem (m : ℕ) :
     ∃ ℓ₀ : ℕ, ∀ (S : Finset ℕ), ℓ₀ ≤ S.card → ∃ n : ℕ, m ≤ repCount (S : Set ℕ) n := by
   obtain ⟨ℓ₀, hℓ₀⟩ := sieving_lemma (max m 2) (le_max_right m 2)
@@ -926,7 +926,7 @@ theorem chen_ding_theorem (m : ℕ) :
   have hS'card : S'.card = S.card :=
     Finset.card_image_of_injective _ fun (a b : ℕ) (h : -(a : ℤ) = -(b : ℤ)) ↦ by omega
   obtain ⟨B, hBS', hBadm, hBsize⟩ := hℓ₀ S' (hS'card ▸ hS)
-  obtain ⟨n, hnN, hn⟩ := maynard_tao (max m 2) (le_max_right m 2) B hBadm hBsize (↑(S.sup id) + 1)
+  obtain ⟨n, hnN, hn⟩ := maynard_prime_tuples (max m 2) (le_max_right m 2) B hBadm hBsize (↑(S.sup id) + 1)
   refine ⟨n.toNat, (le_max_left m 2).trans (hn.trans ?_)⟩
   have hrc : repCount (↑S) n.toNat = (S.filter fun a ↦ a ≤ n.toNat ∧ (n.toNat - a).Prime).card := by
     simp only [repCount, ← ncard_coe_finset]; congr 1; ext; simp
@@ -969,6 +969,6 @@ theorem erdos_237 (A : Set ℕ) (hA : A.Infinite) :
 end Erdos237Main
 
 #print axioms erdos_237
--- 'Erdos237.erdos_237' depends on axioms: [propext, Classical.choice, Erdos237.maynard_tao, Quot.sound]
+-- 'Erdos237.erdos_237' depends on axioms: [propext, Classical.choice, Erdos237.maynard_prime_tuples, Quot.sound]
 
 end Erdos237
