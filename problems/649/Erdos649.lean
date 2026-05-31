@@ -784,7 +784,7 @@ def P (n : ℕ) : ℕ := (n.primeFactors).max.getD 0
 /-
 It is not true that for any two primes $p,q$, there exists some integer $n$ such that $P(n)=p$ and $P(n+1)=q$. Specifically, there is no solution for $p=2$ and $q=7$.
 -/
-theorem erdos_649 : ¬ ∀ (p q : ℕ), p.Prime → q.Prime → ∃ (n : ℕ), P n = p ∧ P (n + 1) = q := by
+theorem erdos_649_main : ¬ ∀ (p q : ℕ), p.Prime → q.Prime → ∃ (n : ℕ), P n = p ∧ P (n + 1) = q := by
   simp +zetaDelta at *;
   use 2, Nat.prime_two, 7, by norm_num;
   unfold P;
@@ -1502,6 +1502,11 @@ theorem infinite_strange_pairs : { q | StrangePair 2 q }.Infinite := by
     · cases hq.1.2.1 ; contradiction;
     · linarith [ Nat.le_of_dvd ( Nat.succ_pos _ ) h_div ];
   exact fun a => by obtain ⟨ p, hp₁, hp₂ ⟩ := h_infinite_primes_gt_5 a; obtain ⟨ q, hq₁, hq₂, hq₃ ⟩ := h_exists_q p hp₁.left hp₁.right; exact ⟨ q, hq₁, by linarith ⟩ ;
+
+/-- **Erdős Problem 649**: every pair of primes `(p, q)` occurs as `(P n, P (n+1))`
+for some `n`. *False* — counterexample `p = 2, q = 7`. -/
+theorem erdos_649 : ¬ ∀ (p q : ℕ), p.Prime → q.Prime → ∃ (n : ℕ), P n = p ∧ P (n + 1) = q :=
+  erdos_649_main
 
 #print axioms erdos_649
 -- 'Erdos649.erdos_649' depends on axioms: [propext, Classical.choice, Quot.sound]

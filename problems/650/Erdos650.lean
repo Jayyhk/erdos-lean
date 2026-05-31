@@ -1087,7 +1087,7 @@ theorem erdos_f_lower_bound (m : ℕ) (hm : 0 < m) :
 -- ════════════════════════════════════════════════════════════════════════════════
 
 /-- Main result: f(m) = min(m, ⌈2√m⌉). -/
-theorem erdos_650 (m : ℕ) (hm : 0 < m) :
+theorem erdos_650_main (m : ℕ) (hm : 0 < m) :
     erdos_f m = min m ⌈(2 : ℝ) * Real.sqrt ↑m⌉₊ := by
       refine le_antisymm ( le_min ( erdos_f_le m ) ?_ ) ( erdos_f_lower_bound m hm );
       -- Apply the upper bound result from Theorem 3.1 with s = t = 1.
@@ -1112,8 +1112,12 @@ theorem erdos_650 (m : ℕ) (hm : 0 < m) :
 /-- Corollary: for m ≥ 4, f(m) = ⌈2√m⌉. -/
 theorem erdos_f_eq_ge4 (m : ℕ) (hm : 4 ≤ m) :
     erdos_f m = ⌈(2 : ℝ) * Real.sqrt ↑m⌉₊ := by
-      rw [ erdos_650 m ( by linarith ) ];
+      rw [ erdos_650_main m ( by linarith ) ];
       exact min_eq_right <| Nat.ceil_le.mpr <| by nlinarith [ Real.mul_self_sqrt ( Nat.cast_nonneg m ), ( by norm_cast : ( 4 : ℝ ) ≤ m ) ] ;
+
+/-- **Erdős Problem 650**: closed form for `f(m)`. -/
+theorem erdos_650 (m : ℕ) (hm : 0 < m) :
+    erdos_f m = min m ⌈(2 : ℝ) * Real.sqrt ↑m⌉₊ := erdos_650_main m hm
 
 #print axioms erdos_650
 -- 'Erdos650.erdos_650' depends on axioms: [propext, Classical.choice, Quot.sound]

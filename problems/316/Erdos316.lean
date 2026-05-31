@@ -12,10 +12,9 @@ set_option maxHeartbeats 1000000
 
 namespace Erdos316
 
-/-- **Erdős Problem 316.** It is *not* true that every finite `A ⊆ ℕ \ {1}` with
-`∑_{n ∈ A} 1/n < 2` admits a partition `A = A₁ ⊔ A₂` with `∑_{n ∈ Aᵢ} 1/n < 1` for `i = 1, 2`.
-A counterexample is `{2,3,4,5,6,7,10,11,13,14,15}` (Sándor; minimal, found by Tom Stobart). -/
-theorem erdos_316 : ¬ ∀ A : Finset ℕ, 0 ∉ A → 1 ∉ A →
+/-- **Erdős Problem 316.** Main statement (proven via the counterexample
+`{2,3,4,5,6,7,10,11,13,14,15}` due to Sándor; minimal version by Tom Stobart). -/
+theorem erdos_316_main : ¬ ∀ A : Finset ℕ, 0 ∉ A → 1 ∉ A →
     ∑ n ∈ A, (1 / n : ℚ) < 2 → ∃ (A₁ A₂ : Finset ℕ),
       Disjoint A₁ A₂ ∧ A = A₁ ∪ A₂ ∧
       ∑ n ∈ A₁, (1 / n : ℚ) < 1 ∧ ∑ n ∈ A₂, (1 / n : ℚ) < 1 := by
@@ -43,6 +42,13 @@ lemma erdos_316_multiset : ∃ A : Multiset ℕ, 0 ∉ A ∧ 1 ∉ A ∧
       Function.comp_apply, one_div] at h ⊢
     exact this ▸ h B (by simp [hBC])
   decide +kernel
+
+/-- **Erdős Problem 316**: every finite `A ⊆ ℕ \ {1}` with `∑ 1/n < 2` admits
+a partition into two parts each with sum `< 1`. *False* (counterexample above). -/
+theorem erdos_316 : ¬ ∀ A : Finset ℕ, 0 ∉ A → 1 ∉ A →
+    ∑ n ∈ A, (1 / n : ℚ) < 2 → ∃ (A₁ A₂ : Finset ℕ),
+      Disjoint A₁ A₂ ∧ A = A₁ ∪ A₂ ∧
+      ∑ n ∈ A₁, (1 / n : ℚ) < 1 ∧ ∑ n ∈ A₂, (1 / n : ℚ) < 1 := erdos_316_main
 
 #print axioms erdos_316
 -- 'Erdos316.erdos_316' depends on axioms: [propext, Classical.choice, Quot.sound]

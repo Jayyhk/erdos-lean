@@ -7,10 +7,6 @@ open Nat
 def solutionSet : Set (ℕ × ℕ × ℕ) :=
     { (x, y, z) | 1 < x ∧ 1 < y ∧ 1 < z ∧ x ^ x * y ^ y = z ^ z }
 
-theorem erdos_674 : solutionSet.Nonempty := by
-  rw [solutionSet]
-  exact ⟨⟨2 ^ 12 * 3 ^ 6, 2 ^ 8 * 3 ^ 8, 2 ^ 11 * 3 ^ 7⟩, by decide +kernel⟩
-
 theorem erdos_674_infinite : solutionSet.Infinite := by
   let i (n : ℕ) : ℕ := 2 ^ n
   let b (n : ℕ) : ℕ := i n - 1
@@ -58,6 +54,11 @@ theorem erdos_674_infinite : solutionSet.Infinite := by
   · simp +contextual only [Set.MapsTo, Set.mem_Ici, solutionSet, Set.mem_setOf_eq, h, and_true]
     intro n hn
     exact ⟨by grind, by grind, by grind⟩
+
+/-- **Erdős Problem 674**: there exist `x, y, z > 1` with `x^x * y^y = z^z`. -/
+theorem erdos_674 : solutionSet.Nonempty := by
+  rw [solutionSet]
+  exact ⟨⟨2 ^ 12 * 3 ^ 6, 2 ^ 8 * 3 ^ 8, 2 ^ 11 * 3 ^ 7⟩, by decide +kernel⟩
 
 #print axioms erdos_674
 -- 'Erdos674.erdos_674' depends on axioms: [propext]
