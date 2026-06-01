@@ -111,6 +111,6 @@
    "configFile": "lakefile.toml"
   }
  ],
- "name": "lean",
+ "name": "erdos224",
  "lakeDir": ".lake"
 }
