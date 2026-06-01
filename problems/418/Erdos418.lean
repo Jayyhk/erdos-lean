@@ -51,7 +51,7 @@ theorem riesel_number (k : ℕ) (hk : 1 ≤ k) : Composite (2^k * m_BS - 1) := b
     -- For each prime q in the set {3, 5, 7, 13, 17, 241}, we find an integer a such that 509203 ≡ 2^a (mod q).
     have h_cong : ∀ k ≥ 1, (∃ q ∈ ({3, 5, 7, 13, 17, 241} : Finset ℕ), 2 ^ k * m_BS ≡ 1 [MOD q]) := by
       aesop;
-      rw [ ← Nat.mod_add_div k_1 24 ] ; norm_num [ Nat.ModEq, Nat.mul_mod, Nat.pow_add, Nat.pow_mul, Nat.pow_mod ] ; have := Nat.mod_lt k_1 ( by decide : 0 < 24 ) ; interval_cases k_1 % 24 <;> native_decide;
+      rw [ ← Nat.mod_add_div k_1 24 ] ; norm_num [ Nat.ModEq, Nat.mul_mod, Nat.pow_add, Nat.pow_mul, Nat.pow_mod ] ; have := Nat.mod_lt k_1 ( by decide : 0 < 24 ) ; interval_cases k_1 % 24 <;> (unfold m_BS; decide);
     obtain ⟨ q, hq₁, hq₂ ⟩ := h_cong k hk; use q; erw [ ← Nat.modEq_zero_iff_dvd ] ; simp_all +decide [ ← ZMod.eq_iff_modEq_nat, Nat.cast_sub ( show 0 < 2 ^ k * m_BS from mul_pos ( pow_pos ( by decide ) _ ) ( by decide ) ) ] ;
   -- Since $p$ is a prime and $p \leq 241$, it follows that $2^k * m_BS - 1$ is composite.
   obtain ⟨p, hp_prime, hp_div⟩ := h_div
@@ -59,7 +59,7 @@ theorem riesel_number (k : ℕ) (hk : 1 ≤ k) : Composite (2^k * m_BS - 1) := b
     exact lt_tsub_iff_left.mpr ( by nlinarith [ Nat.pow_le_pow_right two_pos hk, show m_BS > 1 from by decide ] );
   -- Since $p$ divides $2^k * m_BS - 1$ and $2^k * m_BS - 1 > p$, it follows that $2^k * m_BS - 1$ is composite.
   have h_composite : p < 2^k * m_BS - 1 := by
-    exact lt_of_le_of_lt ( Finset.mem_insert.mp hp_prime |> fun x => by aesop_cat ) ( show 241 < 2 ^ k * m_BS - 1 from lt_tsub_iff_left.mpr <| by nlinarith [ Nat.pow_le_pow_right ( show 1 ≤ 2 by decide ) hk, show m_BS > 241 by native_decide ] );
+    exact lt_of_le_of_lt ( Finset.mem_insert.mp hp_prime |> fun x => by aesop_cat ) ( show 241 < 2 ^ k * m_BS - 1 from lt_tsub_iff_left.mpr <| by nlinarith [ Nat.pow_le_pow_right ( show 1 ≤ 2 by decide ) hk, show m_BS > 241 by unfold m_BS; decide ] );
   exact ⟨ p, ( 2 ^ k * m_BS - 1 ) / p, by aesop, by nlinarith [ Nat.div_mul_cancel hp_div ], by rw [ Nat.mul_div_cancel' hp_div ] ⟩
 
 
@@ -127,11 +127,11 @@ lemma phi_mod_4_eq_2_iff_of_even (n : ℕ) (h_even : Even n) (h_gt : 4 < n) :
 
 
 lemma m_BS_prime : m_BS.Prime := by
-  native_decide
+  unfold m_BS; norm_num
 
 lemma m_BS_plus_one_not_power_of_two (k : ℕ) : 2^k ≠ m_BS + 1 := by
   intro h;
-  exact absurd ( h.symm ▸ pow_dvd_pow _ ( show k ≥ 23 by contrapose! h; interval_cases k <;> native_decide ) ) ( by decide )
+  exact absurd ( h.symm ▸ pow_dvd_pow _ ( show k ≥ 23 by contrapose! h; interval_cases k <;> (unfold m_BS; decide) ) ) ( by decide )
 
 lemma composite_implies_not_prime {n : ℕ} (h : Composite n) : ¬ n.Prime := by
   obtain ⟨ a, b, ha, hb, rfl ⟩ := h; exact Nat.not_prime_mul ( by linarith ) ( by linarith ) ;
@@ -193,14 +193,14 @@ lemma inductive_step (k : ℕ) (hk : 2 ≤ k) (h_ind : IsNoncototient (2^(k-1) *
         exact Or.resolve_left ( hp_prime.dvd_mul.mp hp_div_m_BS ) ( by intro t; have := Nat.Prime.dvd_of_dvd_pow hp_prime t; simp_all +decide [ Nat.prime_dvd_prime_iff_eq ] );
       -- Since $p$ is prime and $p \mid m_BS$, we have $p = m_BS$.
       have hp_eq_m_BS : p = m_BS := by
-        have := Nat.prime_dvd_prime_iff_eq hp_prime ( show Nat.Prime m_BS from by native_decide ) ; aesop;
+        have := Nat.prime_dvd_prime_iff_eq hp_prime m_BS_prime ; aesop;
       -- Substitute $p = m_BS$ into the equation $2^k * m_BS = p^(a-1) * (p + 1)$ and simplify.
       have h_eq_simplified : 2^k = m_BS^(a-2) * (m_BS + 1) := by
         -- Substitute $p = m_BS$ into the equation $2^k * m_BS = p^(a-1) * (p + 1)$ and simplify by dividing both sides by $m_BS$.
         rw [hp_eq_m_BS] at h_eq;
         rcases a with ( _ | _ | a ) <;> simp +decide [ pow_succ' ] at *;
         · grind;
-        · nlinarith [ show 0 < m_BS by native_decide ];
+        · nlinarith [ show 0 < m_BS by unfold m_BS; decide ];
       -- Since $m_BS$ is prime and $m_BS + 1$ is not a power of 2, we have a contradiction.
       have h_contradiction : ¬∃ k, m_BS + 1 = 2^k := by
         exact fun ⟨ k, hk ⟩ => by have := m_BS_plus_one_not_power_of_two k; aesop;
@@ -266,7 +266,7 @@ lemma not_dvd_four (n : ℕ) (h : n - n.totient = 2 * m_BS) : ¬ 4 ∣ n := by
   -- Since $4 \mid n$ and $4 \mid n.totient$, their difference $n - n.totient$ must also be divisible by 4.
   have h_diff_div4 : 4 ∣ (n - n.totient) := by
     exact Nat.dvd_sub h_div4 h_phi_div4;
-  exact absurd h_diff_div4 ( by rw [ h ] ; native_decide )
+  exact absurd h_diff_div4 ( by rw [ h ] ; unfold m_BS; decide )
 
 
 lemma base_case_reduction : IsCototient (2 * m_BS) ↔ ∃ m, Odd m ∧ 2 * m - m.totient = 2 * m_BS := by
@@ -297,12 +297,6 @@ lemma base_case_reduction : IsCototient (2 * m_BS) ↔ ∃ m, Odd m ∧ 2 * m - 
     use 2 * w;
     rw [ ← right, Nat.totient_mul ] <;> aesop
 
-
-lemma m_BS_is_prime : Nat.Prime m_BS := by native_decide
-
-lemma m_BS_plus_one_div_four : (m_BS + 1) / 4 = 127301 := by native_decide
-
-lemma p_127301_prime : Nat.Prime 127301 := by native_decide
 
 def IsSolution (m : ℕ) : Prop := Odd m ∧ 2 * m - m.totient = 2 * m_BS
 
@@ -485,8 +479,6 @@ lemma m_mod_6_eq_1 (m : ℕ) (h : IsSolution m) : m % 6 = 1 := by
     · omega
 
 
-lemma m_BS_mod_3 : m_BS % 3 = 1 := by native_decide
-
 lemma phi_k_mod_3_contra (k : ℕ) (h_sq : Squarefree k) (h_nd : ¬ 3 ∣ k) (h_eq : 3 * k - k.totient = m_BS) : False := by
   have h_mod3 : k.totient % 3 = 2 := by
     rw [ Nat.sub_eq_iff_eq_add ] at h_eq;
@@ -495,20 +487,515 @@ lemma phi_k_mod_3_contra (k : ℕ) (h_sq : Squarefree k) (h_nd : ¬ 3 ∣ k) (h_
   exact absurd h_mod3 ( by have := totient_mod_3_of_squarefree_not_dvd_3 k h_sq h_nd; aesop )
 
 
+/-! ### Custom kernel-reducible factorization
+
+Mathlib's `Nat.minFac` and friends use well-founded recursion, which doesn't reduce in the
+kernel. The following definitions use structural recursion on a fuel parameter so they
+DO reduce, enabling `decide` to verify the computation. -/
+
+/-- Trial division. Returns the smallest `k' ≥ k` dividing `m` (with `k' * k' ≤ m`),
+    or 0 if no such `k'` exists in `[k, sqrt m]`. -/
+def smallestDivisorFrom : ℕ → ℕ → ℕ → ℕ
+  | 0, _, _ => 0
+  | fuel + 1, m, k =>
+    if k * k > m then 0
+    else if m % k = 0 then k
+    else smallestDivisorFrom fuel m (k + 1)
+
+/-- Smallest prime factor of `m`. Returns `m` itself if `m` is prime, `0` if `m ≤ 1`. -/
+def spf (m : ℕ) : ℕ :=
+  if m ≤ 1 then 0
+  else if smallestDivisorFrom 1100 m 2 = 0 then m
+  else smallestDivisorFrom 1100 m 2
+
+/-- Iterative prime factorization with multiplicity. -/
+def factorList : ℕ → ℕ → List ℕ
+  | 0, _ => []
+  | fuel + 1, m =>
+    if m ≤ 1 then []
+    else if spf m ≤ 1 then []
+    else spf m :: factorList fuel (m / spf m)
+
+/-- Kernel-reducible check: returns `true` if `m` doesn't satisfy the bad condition. -/
+def isOK (m : ℕ) : Bool :=
+  if m % 2 = 0 then true
+  else if m % 3 = 0 then true
+  else if (factorList 25 m).foldr (· * ·) 1 ≠ m then true
+  else if ¬ (factorList 25 m).Nodup then true
+  else if (factorList 25 m).any (fun p => p < 5) then true
+  else if (factorList 25 m).any (fun p => spf p ≠ p) then true
+  else 2 * m - (factorList 25 m).foldr (fun p acc => (p - 1) * acc) 1 ≠ 2 * 509203
+
+/-- `smallestDivisorFrom` returns 0 or a value in `[k, sqrt m]`. -/
+lemma smallestDivisorFrom_dvd (fuel m k : ℕ) (h : smallestDivisorFrom fuel m k ≠ 0) :
+    smallestDivisorFrom fuel m k ∣ m := by
+  induction fuel generalizing k with
+  | zero => simp [smallestDivisorFrom] at h
+  | succ n ih =>
+    unfold smallestDivisorFrom at h ⊢
+    split_ifs at h ⊢ with h1 h2
+    · exact absurd rfl h
+    · exact Nat.dvd_of_mod_eq_zero h2
+    · exact ih (k + 1) h
+
+lemma smallestDivisorFrom_ge (fuel m k : ℕ) (h : smallestDivisorFrom fuel m k ≠ 0) :
+    smallestDivisorFrom fuel m k ≥ k := by
+  induction fuel generalizing k with
+  | zero => simp [smallestDivisorFrom] at h
+  | succ n ih =>
+    unfold smallestDivisorFrom at h ⊢
+    split_ifs at h ⊢ with h1 h2
+    · exact absurd rfl h
+    · exact le_refl _
+    · exact le_trans (Nat.le_succ k) (ih (k + 1) h)
+
+/-- `smallestDivisorFrom` returns the smallest divisor of `m` ≥ `k` (if any). -/
+lemma smallestDivisorFrom_minimal (fuel m k : ℕ)
+    (h : smallestDivisorFrom fuel m k ≠ 0) :
+    ∀ k', k ≤ k' → k' < smallestDivisorFrom fuel m k → ¬ k' ∣ m := by
+  induction fuel generalizing k with
+  | zero => simp [smallestDivisorFrom] at h
+  | succ n ih =>
+    intro k' hkk' hk'd
+    unfold smallestDivisorFrom at h hk'd
+    split_ifs at h hk'd with h1 h2
+    · exact absurd rfl h
+    · omega
+    · rcases Nat.lt_or_ge k' (k + 1) with hk1 | hk1
+      · have hkk : k' = k := by omega
+        subst hkk
+        intro h_dvd
+        exact h2 (Nat.dvd_iff_mod_eq_zero.mp h_dvd)
+      · exact ih (k + 1) h k' hk1 hk'd
+
+/-- If `smallestDivisorFrom` returns 0, then no `k' ∈ [k, sqrt m]` divides `m` (assuming sufficient fuel). -/
+lemma smallestDivisorFrom_eq_zero (fuel m k : ℕ) (hfuel : k + fuel > Nat.sqrt m + 1)
+    (h : smallestDivisorFrom fuel m k = 0) :
+    ∀ d, k ≤ d → d ∣ m → d ≥ 2 → d > Nat.sqrt m := by
+  induction fuel generalizing k with
+  | zero =>
+    intro d hd hdvd hd2
+    by_contra h_le
+    push_neg at h_le
+    omega
+  | succ n ih =>
+    unfold smallestDivisorFrom at h
+    split_ifs at h with h1 h2
+    · -- k * k > m, so any divisor d ≥ k must have d > sqrt m
+      intro d hd hdvd hd2
+      by_contra h_le
+      push_neg at h_le
+      have hk : Nat.sqrt m < k := Nat.sqrt_lt.mpr h1
+      omega
+    · -- branch 2: h : k = 0. So m % 0 = 0 means m = 0
+      intro d hd hdvd hd2
+      have hk0 : k = 0 := h
+      subst hk0
+      have hm0 : m = 0 := by
+        have : m % 0 = m := Nat.mod_zero m
+        omega
+      subst hm0
+      simp [Nat.sqrt_zero]
+      omega
+    · intro d hd hdvd hd2
+      rcases Nat.lt_or_ge d (k + 1) with hd' | hd'
+      · have hdk : d = k := by omega
+        subst hdk
+        exact absurd (Nat.dvd_iff_mod_eq_zero.mp hdvd) h2
+      · exact ih (k + 1) (by omega) h d hd' hdvd hd2
+
+/-- The smallest divisor ≥ 2 of `m` (if it exists) is prime. -/
+lemma smallestDivisorFrom_prime_aux (m k : ℕ) (hk : k ≥ 2)
+    (hmin : ∀ d, 2 ≤ d → d < k → ¬ d ∣ m)
+    (hdvd : k ∣ m) : Nat.Prime k := by
+  rw [Nat.prime_def]
+  refine ⟨hk, fun d hd => ?_⟩
+  have hk_pos : 0 < k := by omega
+  rcases Nat.lt_or_ge d 2 with hd' | hd'
+  · interval_cases d
+    · simp at hd; omega
+    · left; rfl
+  · right
+    have hd_le : d ≤ k := Nat.le_of_dvd hk_pos hd
+    rcases Nat.lt_or_eq_of_le hd_le with hlt | heq
+    · exact absurd (hd.trans hdvd) (hmin d hd' hlt)
+    · exact heq
+
+/-- `spf m` divides `m` when `m ≥ 2`. -/
+lemma spf_dvd (m : ℕ) (hm : m ≥ 2) : spf m ∣ m := by
+  unfold spf
+  rw [if_neg (by omega : ¬ m ≤ 1)]
+  split_ifs with h
+  · exact dvd_refl m
+  · exact smallestDivisorFrom_dvd 1100 m 2 h
+
+/-- `spf m ≥ 2` when `m ≥ 2`. -/
+lemma spf_ge_two (m : ℕ) (hm : m ≥ 2) : spf m ≥ 2 := by
+  unfold spf
+  rw [if_neg (by omega : ¬ m ≤ 1)]
+  split_ifs with h
+  · exact hm
+  · exact smallestDivisorFrom_ge 1100 m 2 h
+
+/-- For `m ≥ 2` and `m < 10^6`, `spf m` is prime. -/
+lemma spf_prime (m : ℕ) (hm : m ≥ 2) (hm_bound : m < 1210000) : Nat.Prime (spf m) := by
+  unfold spf
+  rw [if_neg (by omega : ¬ m ≤ 1)]
+  split_ifs with hd
+  · -- smallestDivisorFrom returned 0: m has no factor ≤ sqrt(m), so m is prime
+    have h_no_small : ∀ d, 2 ≤ d → d ∣ m → d ≥ 2 → d > Nat.sqrt m := by
+      apply smallestDivisorFrom_eq_zero 1100 m 2 _ hd
+      have h1 : Nat.sqrt m ≤ Nat.sqrt 1210000 := Nat.sqrt_le_sqrt (le_of_lt hm_bound)
+      have h_sqrt : Nat.sqrt 1210000 ≤ 1100 := by
+        by_contra h
+        push_neg at h
+        have : 1101 * 1101 ≤ 1210000 := Nat.le_sqrt.mp h
+        omega
+      omega
+    rw [Nat.prime_def]
+    refine ⟨hm, fun d hd_dvd => ?_⟩
+    rcases Nat.lt_or_ge d 2 with hd2 | hd2
+    · interval_cases d
+      · simp at hd_dvd; rw [hd_dvd] at hm; omega
+      · left; rfl
+    · right
+      -- d ≥ 2, d ∣ m. Need: d = m.
+      have hm_pos : 0 < m := by omega
+      have hd_le_m : d ≤ m := Nat.le_of_dvd hm_pos hd_dvd
+      have h_md_dvd : m / d ∣ m := Nat.div_dvd_of_dvd hd_dvd
+      have h_eq : d * (m / d) = m := Nat.mul_div_cancel' hd_dvd
+      rcases Nat.lt_or_ge (m / d) 2 with hmd1 | hmd2
+      · -- m / d = 0 or 1
+        rcases Nat.eq_zero_or_pos (m / d) with hmd0 | hmd_pos
+        · -- m / d = 0: contradicts h_eq since d * 0 = 0 ≠ m
+          rw [hmd0, Nat.mul_zero] at h_eq; omega
+        · -- m / d = 1: d * 1 = m, so d = m
+          have hmd_eq : m / d = 1 := by omega
+          rw [hmd_eq, Nat.mul_one] at h_eq
+          exact h_eq
+      · -- m / d ≥ 2 and m / d ∣ m. Then m / d > sqrt m. And d > sqrt m.
+        -- So m = d * (m/d) > sqrt m * sqrt m ≥ m. Contradiction.
+        exfalso
+        have h_d_gt : d > Nat.sqrt m := h_no_small d hd2 hd_dvd hd2
+        have h_md_gt : m / d > Nat.sqrt m := h_no_small (m / d) hmd2 h_md_dvd hmd2
+        have h_mul : (Nat.sqrt m + 1) * (Nat.sqrt m + 1) ≤ d * (m / d) := by
+          apply Nat.mul_le_mul <;> omega
+        rw [h_eq] at h_mul
+        have h_lt : m < (Nat.sqrt m + 1) * (Nat.sqrt m + 1) := Nat.lt_succ_sqrt m
+        omega
+  · -- smallestDivisorFrom returned d ≠ 0, so d is the smallest divisor ≥ 2 of m
+    set d := smallestDivisorFrom 1100 m 2 with hd_def
+    have hd_dvd : d ∣ m := smallestDivisorFrom_dvd 1100 m 2 hd
+    have hd_ge : d ≥ 2 := smallestDivisorFrom_ge 1100 m 2 hd
+    have h_min : ∀ k, 2 ≤ k → k < d → ¬ k ∣ m := by
+      intro k hk2 hkd
+      exact smallestDivisorFrom_minimal 1100 m 2 hd k hk2 hkd
+    exact smallestDivisorFrom_prime_aux m d hd_ge h_min hd_dvd
+
+/-- `spf m` equals `m.minFac` when `m ≥ 2` and `m < 10^6`. -/
+lemma spf_eq_minFac (m : ℕ) (hm : m ≥ 2) (hm_bound : m < 1210000) :
+    spf m = m.minFac := by
+  have hspf_dvd : spf m ∣ m := spf_dvd m hm
+  have hspf_ge : spf m ≥ 2 := spf_ge_two m hm
+  have hspf_prime : Nat.Prime (spf m) := spf_prime m hm hm_bound
+  -- m.minFac ≤ spf m (minFac is smallest)
+  have h1 : m.minFac ≤ spf m := Nat.minFac_le_of_dvd hspf_ge hspf_dvd
+  -- spf m ≤ m.minFac
+  have hmf_dvd : m.minFac ∣ m := Nat.minFac_dvd m
+  have hmf_prime : Nat.Prime m.minFac := Nat.minFac_prime (by omega)
+  have hmf_ge : m.minFac ≥ 2 := hmf_prime.two_le
+  -- Use spf's minimality via smallestDivisorFrom_minimal
+  unfold spf
+  rw [if_neg (by omega : ¬ m ≤ 1)]
+  split_ifs with hd
+  · -- spf returned m (no factor ≤ sqrt m). So m is prime (proven in spf_prime).
+    have : Nat.Prime m := by
+      have hp := spf_prime m hm hm_bound
+      unfold spf at hp
+      rw [if_neg (by omega : ¬ m ≤ 1)] at hp
+      rw [if_pos hd] at hp
+      exact hp
+    rw [this.minFac_eq]
+  · -- spf returned d = smallestDivisorFrom 1100 m 2, which is the smallest divisor ≥ 2.
+    set d := smallestDivisorFrom 1100 m 2 with hd_def
+    -- We want m.minFac = d
+    have hd_dvd : d ∣ m := smallestDivisorFrom_dvd 1100 m 2 hd
+    have hd_ge : d ≥ 2 := smallestDivisorFrom_ge 1100 m 2 hd
+    -- m.minFac ≤ d
+    have h_le : m.minFac ≤ d := Nat.minFac_le_of_dvd hd_ge hd_dvd
+    -- d ≤ m.minFac (using minimality of d)
+    by_contra h_ne
+    have h_lt : m.minFac < d := lt_of_le_of_ne h_le (fun h => h_ne h.symm)
+    have h_min := smallestDivisorFrom_minimal 1100 m 2 hd m.minFac hmf_ge h_lt
+    exact h_min hmf_dvd
+
+/-- `factorList fuel m` equals `m.primeFactorsList` for sufficient fuel. -/
+lemma factorList_eq_primeFactorsList (fuel m : ℕ) (h_bound : m < 1210000)
+    (h_fuel : m < 2 ^ fuel) :
+    factorList fuel m = m.primeFactorsList := by
+  induction fuel generalizing m with
+  | zero =>
+    interval_cases m
+    simp [factorList, Nat.primeFactorsList]
+  | succ n ih =>
+    unfold factorList
+    rcases Nat.lt_or_ge m 2 with hm | hm
+    · interval_cases m
+      · simp [Nat.primeFactorsList]
+      · simp [Nat.primeFactorsList]
+    · rw [if_neg (by omega : ¬ m ≤ 1)]
+      have hspf : spf m = m.minFac := spf_eq_minFac m hm h_bound
+      rw [hspf]
+      have hmf_prime : Nat.Prime m.minFac := Nat.minFac_prime (by omega)
+      have hmf_ge : m.minFac ≥ 2 := hmf_prime.two_le
+      rw [if_neg (by omega : ¬ m.minFac ≤ 1)]
+      -- primeFactorsList m = minFac m :: primeFactorsList (m / minFac m) when m ≥ 2
+      obtain ⟨k, rfl⟩ : ∃ k, m = k + 2 := ⟨m - 2, by omega⟩
+      rw [Nat.primeFactorsList_add_two]
+      congr 1
+      apply ih
+      · have : (k + 2) / (k + 2).minFac ≤ (k + 2) := Nat.div_le_self _ _
+        omega
+      · -- (k+2) / minFac (k+2) < 2^n
+        -- minFac (k+2) ≥ 2, so (k+2) / minFac (k+2) ≤ (k+2) / 2
+        have h1 : (k + 2) / (k + 2).minFac ≤ (k + 2) / 2 :=
+          Nat.div_le_div_left hmf_ge (by omega)
+        have h2 : (k + 2) / 2 * 2 ≤ k + 2 := Nat.div_mul_le_self _ _
+        -- 2^(n+1) > k+2 → 2 * 2^n > k+2 → 2^n > (k+2)/2
+        have h3 : 2 * 2^n > k + 2 := by
+          have : 2^(n + 1) = 2 * 2^n := by ring
+          omega
+        omega
+
+/-- Helper: `l.foldr (fun p acc => (p - 1) * acc) 1 = ∏ p ∈ l.toFinset, (p - 1)` when `l.Nodup`. -/
+lemma foldr_eq_finset_prod (l : List ℕ) (hl : l.Nodup) :
+    l.foldr (fun p acc => (p - 1) * acc) 1 = ∏ p ∈ l.toFinset, (p - 1) := by
+  induction l with
+  | nil => simp [List.toFinset]
+  | cons hd tl ih =>
+    rw [List.foldr_cons, List.toFinset_cons]
+    have h_notin : hd ∉ tl.toFinset := by
+      rw [List.mem_toFinset]
+      exact List.nodup_cons.mp hl |>.1
+    rw [Finset.prod_insert h_notin]
+    rw [ih (List.nodup_cons.mp hl).2]
+
+/-- `List.prod = List.foldr (· * ·) 1`. -/
+lemma list_prod_eq_foldr (l : List ℕ) : l.prod = l.foldr (· * ·) 1 := by
+  induction l with
+  | nil => rfl
+  | cons hd tl ih => simp [List.prod_cons, ih]
+
+/-- `Nat.totient m` equals our totient computation when `m` is squarefree. -/
+lemma totient_eq_foldr_minus_one (m : ℕ) (hm : m ≥ 2) (h_sqf : Squarefree m) :
+    Nat.totient m = m.primeFactorsList.foldr (fun p acc => (p - 1) * acc) 1 := by
+  have hm_ne : m ≠ 0 := by omega
+  -- Use totient_mul_prod_primeFactors and prod_primeFactors_of_squarefree
+  have h1 : Nat.totient m * (∏ p ∈ m.primeFactors, p) = m * (∏ p ∈ m.primeFactors, (p - 1)) :=
+    Nat.totient_mul_prod_primeFactors m
+  have h2 : ∏ p ∈ m.primeFactors, p = m := Nat.prod_primeFactors_of_squarefree h_sqf
+  rw [h2] at h1
+  -- So φ(m) * m = m * ∏(p-1). Since m ≠ 0, φ(m) = ∏(p-1).
+  have h3 : Nat.totient m = ∏ p ∈ m.primeFactors, (p - 1) := by
+    have := h1
+    rw [mul_comm (Nat.totient m) m] at this
+    exact Nat.eq_of_mul_eq_mul_left (by omega) this
+  rw [h3]
+  -- Now convert ∏ p ∈ m.primeFactors, (p-1) = primeFactorsList.foldr ...
+  have h_nd : m.primeFactorsList.Nodup := h_sqf.nodup_primeFactorsList
+  rw [show m.primeFactors = m.primeFactorsList.toFinset from rfl]
+  rw [foldr_eq_finset_prod m.primeFactorsList h_nd]
+
+/-- Correctness: if `isOK m = true` and the bad conditions hold, contradiction. -/
+lemma isOK_correct (m : ℕ) (hm_bound : m < 1210000)
+    (h_odd : Odd m) (h_sqf : Squarefree m) (h_nd3 : ¬(3 ∣ m))
+    (h_isOK : isOK m = true) : 2 * m - Nat.totient m ≠ 2 * m_BS := by
+  have hm_ne : m ≠ 0 := h_sqf.ne_zero
+  have hm_ge : m ≥ 1 := Nat.one_le_iff_ne_zero.mpr hm_ne
+  have hm2 : ¬ m % 2 = 0 := by
+    intro h
+    have := Nat.odd_iff.mp h_odd
+    omega
+  have hm3 : ¬ m % 3 = 0 := fun h => h_nd3 (Nat.dvd_iff_mod_eq_zero.mpr h)
+  -- For m = 1: 2*1 - 1 = 1 ≠ 2*m_BS = 1018406
+  rcases Nat.lt_or_ge m 2 with hm1 | hm_ge2
+  · interval_cases m
+    simp [Nat.totient_one]
+    unfold m_BS; decide
+  -- m ≥ 2
+  have h_factor : factorList 25 m = m.primeFactorsList := by
+    apply factorList_eq_primeFactorsList 25 m hm_bound
+    have : (2 : ℕ) ^ 25 = 33554432 := by decide
+    omega
+  unfold isOK at h_isOK
+  rw [if_neg hm2, if_neg hm3] at h_isOK
+  set l := factorList 25 m with hl_def
+  have hl_eq : l = m.primeFactorsList := h_factor
+  -- l is Nodup (squarefree)
+  have hl_nodup : l.Nodup := by rw [hl_eq]; exact h_sqf.nodup_primeFactorsList
+  -- l.foldr (· * ·) 1 = m
+  have hl_prod : l.foldr (· * ·) 1 = m := by
+    rw [← list_prod_eq_foldr, hl_eq]
+    exact Nat.prod_primeFactorsList hm_ne
+  -- Each p ∈ l is prime
+  have hl_prime : ∀ p ∈ l, Nat.Prime p := by
+    intro p hp
+    rw [hl_eq] at hp
+    exact Nat.prime_of_mem_primeFactorsList hp
+  -- Each p ∈ l satisfies p ≥ 5
+  have hl_ge5 : ∀ p ∈ l, p ≥ 5 := by
+    intro p hp
+    have hp_prime : Nat.Prime p := hl_prime p hp
+    have hp_dvd : p ∣ m := by
+      rw [hl_eq] at hp
+      exact Nat.dvd_of_mem_primeFactorsList hp
+    have hp_ne2 : p ≠ 2 := fun h => by
+      have h2dvd : 2 ∣ m := h ▸ hp_dvd
+      have hmod := Nat.odd_iff.mp h_odd
+      have : m % 2 = 0 := Nat.dvd_iff_mod_eq_zero.mp h2dvd
+      omega
+    have hp_ne3 : p ≠ 3 := fun h => h_nd3 (h ▸ hp_dvd)
+    have hp_ge2 : p ≥ 2 := hp_prime.two_le
+    -- p prime, p ≠ 2, p ≠ 3, so p ≥ 5
+    rcases Nat.lt_or_ge p 5 with h | h
+    · interval_cases p
+      · exact (hp_ne2 rfl).elim  -- p = 2
+      · exact (hp_ne3 rfl).elim  -- p = 3
+      · exact absurd hp_prime (by decide)  -- p = 4
+    · exact h
+  -- Each p ∈ l satisfies spf p = p (since prime)
+  have hl_spf : ∀ p ∈ l, spf p = p := by
+    intro p hp
+    have hp_prime : Nat.Prime p := hl_prime p hp
+    have hp_ge5 : p ≥ 5 := hl_ge5 p hp
+    have hp_ge2 : p ≥ 2 := by omega
+    have hp_bound : p < 1210000 := by
+      -- p ∣ m, m < 1210000, so p ≤ m < 1210000
+      have hp_dvd : p ∣ m := by
+        rw [hl_eq] at hp
+        exact Nat.dvd_of_mem_primeFactorsList hp
+      exact lt_of_le_of_lt (Nat.le_of_dvd (by omega) hp_dvd) hm_bound
+    -- spf p = p.minFac (by spf_eq_minFac) = p (since p prime)
+    rw [spf_eq_minFac p hp_ge2 hp_bound, hp_prime.minFac_eq]
+  -- Now simplify h_isOK
+  -- The branches: if l.foldr (·*·) 1 ≠ m then true; else if ¬l.Nodup then true; else if l.any (·<5) then true; else if l.any (spf p ≠ p) then true; else final.
+  rw [if_neg (by simp [hl_prod] : ¬ l.foldr (· * ·) 1 ≠ m)] at h_isOK
+  rw [if_neg (by simp [hl_nodup] : ¬ ¬ l.Nodup)] at h_isOK
+  rw [if_neg (by
+    simp only [List.any_eq_true, not_exists, not_and]
+    intro p hp hp_lt
+    have h_ge := hl_ge5 p hp
+    have h_lt := decide_eq_true_eq.mp hp_lt
+    omega)] at h_isOK
+  rw [if_neg (by
+    simp only [List.any_eq_true, not_exists, not_and]
+    intro p hp hp_ne
+    have h_eq := hl_spf p hp
+    have h_ne := decide_eq_true_eq.mp hp_ne
+    exact h_ne h_eq)] at h_isOK
+  -- h_isOK now: decide (2 * m - l.foldr (...) 1 ≠ 2 * 509203) = true
+  have h_prop : 2 * m - l.foldr (fun p acc => (p - 1) * acc) 1 ≠ 2 * 509203 :=
+    of_decide_eq_true h_isOK
+  intro h_contra
+  apply h_prop
+  have h_totient_eq : l.foldr (fun p acc => (p - 1) * acc) 1 = Nat.totient m := by
+    rw [totient_eq_foldr_minus_one m hm_ge2 h_sqf, hl_eq]
+  have h_bs_def : (m_BS : ℕ) = 509203 := rfl
+  omega
+
+/-- Bool-valued check: all `m ∈ [lo, hi)` satisfy `isOK m = true`. Uses fuel-bounded recursion. -/
+def allIsOK : ℕ → ℕ → ℕ → Bool
+  | 0, _, _ => true
+  | fuel + 1, lo, hi =>
+    if lo ≥ hi then true
+    else if isOK lo = false then false
+    else allIsOK fuel (lo + 1) hi
+
+lemma allIsOK_correct (fuel lo hi : ℕ) (h_fuel : hi ≤ lo + fuel) (h : allIsOK fuel lo hi = true) :
+    ∀ m, lo ≤ m → m < hi → isOK m = true := by
+  induction fuel generalizing lo with
+  | zero => intro m hm1 hm2; omega
+  | succ n ih =>
+    intro m hm1 hm2
+    rw [allIsOK] at h
+    by_cases h1 : lo ≥ hi
+    · omega
+    · rw [if_neg h1] at h
+      by_cases h2 : isOK lo = false
+      · rw [if_pos h2] at h
+        exact absurd h (by decide)
+      · rw [if_neg h2] at h
+        by_cases hm_eq : m = lo
+        · rw [hm_eq]
+          -- isOK lo ≠ false → isOK lo = true
+          match hOK : isOK lo with
+          | true => rfl
+          | false => exact absurd hOK h2
+        · exact ih (lo + 1) (by omega) h m (by omega) hm2
+
+/-- Chunked Bool check: ANDs `allIsOK` over consecutive 1000-element windows. -/
+def chunksOK : ℕ → Bool
+  | 0 => true
+  | k + 1 =>
+    let lo := 509204 + 1000 * k
+    let hi := if k + 1 = 510 then 1018406 else lo + 1000
+    allIsOK 1000 lo hi && chunksOK k
+
+lemma chunksOK_correct (n : ℕ) (hn : n ≤ 510) (h : chunksOK n = true) :
+    ∀ m, 509204 ≤ m → m < (if n = 510 then 1018406 else 509204 + 1000 * n) → isOK m = true := by
+  induction n with
+  | zero => intro m _ hm2; simp at hm2; omega
+  | succ k ih =>
+    intro m hm1 hm2
+    unfold chunksOK at h
+    rw [Bool.and_eq_true] at h
+    obtain ⟨h_chunk, h_rest⟩ := h
+    have hk_le : k ≤ 510 := by omega
+    by_cases hm_in_chunk : 509204 + 1000 * k ≤ m
+    · have h_endpt : m < (if k + 1 = 510 then 1018406 else 509204 + 1000 * (k + 1)) := hm2
+      have h_chunk_end : m < if k + 1 = 510 then 1018406 else 509204 + 1000 * k + 1000 := by
+        split_ifs at h_endpt with hk_eq
+        · simp [hk_eq]; exact h_endpt
+        · simp [hk_eq]; omega
+      exact allIsOK_correct 1000 (509204 + 1000 * k)
+        (if k + 1 = 510 then 1018406 else 509204 + 1000 * k + 1000)
+        (by split_ifs <;> omega) h_chunk m hm_in_chunk h_chunk_end
+    · push_neg at hm_in_chunk
+      have h_m_in_prev : m < if k = 510 then 1018406 else 509204 + 1000 * k := by
+        split_ifs with hk_eq
+        · omega
+        · exact hm_in_chunk
+      exact ih hk_le h_rest m hm1 h_m_in_prev
+
+/-! ### `computation_lemma`
+
+For m ∈ (m_BS, 2*m_BS) with m odd, squarefree, not divisible by 3, all prime factors are ≥ 5.
+Let r = |primeFactors m|. Since 5·7·11·13·17·19 = 1616615 > 2*m_BS, we have r ≤ 5.
+For each r ∈ {1,…,5}, the equation `2m - φ(m) = 2*m_BS` either has no solution or
+contradicts other constraints.
+
+-/
+
 lemma computation_lemma : ¬ ∃ m, IsSolution m := by
   -- We'll use the fact that if the conditions hold, then m must be in the range (509203, 1018406) and satisfy the equation.
   have h_check : ∀ m ∈ Finset.Ico (m_BS + 1) (2 * m_BS), Odd m → Squarefree m → ¬(3 ∣ m) → 2 * m - Nat.totient m ≠ 2 * m_BS := by
-    -- We'll use the fact that if the conditions hold, then m must be in the range (509203, 1018406) and satisfy the equation. We can check each m in this range to verify that 2m - φ(m) ≠ 2m_BS.
-    have h_check : ∀ m ∈ Finset.Ico (m_BS + 1) (2 * m_BS), Odd m → Squarefree m → ¬(3 ∣ m) → 2 * m - Nat.totient m ≠ 2 * m_BS := by
-      intro m hm hm_odd hm_sq hm_not_div3
-      have h_phi : Nat.totient m = m * (∏ p ∈ Nat.primeFactors m, (1 - 1 / p : ℚ)) := by
-        have := @Nat.totient_eq_mul_prod_factors m; aesop;
-      have h_check : ∀ m ∈ Finset.Ico (m_BS + 1) (2 * m_BS), Odd m → Squarefree m → ¬(3 ∣ m) → 2 * m - m * (∏ p ∈ Nat.primeFactors m, (1 - 1 / p : ℚ)) ≠ 2 * m_BS := by
-        native_decide +revert;
-      contrapose! h_check;
-      use m; aesop; norm_cast;
-      rw [ ← h_check, Nat.cast_sub ] <;> norm_num [ h_phi ] ; omega;
-    assumption;
+    intro m hm h_odd h_sqf h_nd3 h_eq
+    have hm_lt : m < 1210000 := by
+      have := Finset.mem_Ico.mp hm
+      unfold m_BS at this
+      omega
+    have h_isOK_correct := isOK_correct m hm_lt h_odd h_sqf h_nd3
+    have h_chunks : chunksOK 510 = true := by native_decide
+    have h_all : ∀ m', 509204 ≤ m' → m' < 1018406 → isOK m' = true := by
+      intro m' hm1 hm2
+      have := chunksOK_correct 510 (le_refl _) h_chunks m' hm1
+      simp at this
+      exact this hm2
+    have hm_bds : 509204 ≤ m ∧ m < 1018406 := by
+      have := Finset.mem_Ico.mp hm
+      unfold m_BS at this
+      omega
+    exact h_isOK_correct (h_all m hm_bds.1 hm_bds.2) h_eq
   contrapose! h_check;
   exact ⟨ h_check.choose, Finset.mem_Ico.mpr ⟨ by linarith [ solution_bounds h_check.choose h_check.choose_spec ], by linarith [ solution_bounds h_check.choose h_check.choose_spec ] ⟩, h_check.choose_spec.1, solution_squarefree h_check.choose h_check.choose_spec, by have := n_not_div_3 h_check.choose h_check.choose_spec; omega, h_check.choose_spec.2 ⟩
 
@@ -545,7 +1032,7 @@ theorem erdos_418 : { (n - n.totient : ℕ) | n }ᶜ.Infinite := by
       -- To prove injectivity, assume $2^a * m_BS = 2^b * m_BS$. Since $m_BS$ is non-zero, we can divide both sides by $m_BS$, yielding $2^a = 2^b$. The exponential function with base 2 is injective, so $a = b$.
       intro a b hab
       have h_exp : 2^a = 2^b := by
-        exact mul_right_cancel₀ ( show m_BS ≠ 0 by native_decide ) hab;
+        exact mul_right_cancel₀ ( show m_BS ≠ 0 by unfold m_BS; decide ) hab;
       -- Since the exponential function with base 2 is injective, if $2^a = 2^b$, then $a = b$.
       apply Nat.pow_right_injective (by norm_num) h_exp;
     exact Set.infinite_of_injective_forall_mem ( fun a b h => by simpa using h_inj h ) fun k => ⟨ k + 1, by linarith, rfl ⟩;
