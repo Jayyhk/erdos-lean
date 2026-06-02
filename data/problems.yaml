@@ -1317,3 +1317,16 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/729#post-2899"
+- number: "741"
+  proof:
+    path: "problems/741/"
+    theorem: "Erdos741.erdos_741"
+    state: "complete"
+    last_update: "2026-06-02"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/741#post-5489"
+      - "https://www.erdosproblems.com/forum/thread/741#post-5135"
+      - "https://github.com/google-deepmind/formal-conjectures/blob/9d492049e42167b0d2fd58a9e91da3bf160172b5/FormalConjectures/ErdosProblems/741.lean#L228"
+      - "https://github.com/mo271/formal-conjectures/blob/486bc8afae062b6711cd16d3466d651ee2880a52/FormalConjectures/ErdosProblems/741.lean#L1630"
