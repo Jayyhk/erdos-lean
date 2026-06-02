@@ -1307,3 +1307,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/728#post-2828"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos728b.lean"
+- number: "729"
+  proof:
+    path: "problems/729/"
+    theorem: "Erdos729.erdos_729"
+    state: "complete"
+    last_update: "2026-06-02"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/729#post-2899"
