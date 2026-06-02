@@ -443,7 +443,7 @@ theorem _root_.SimpleGraph.clique_bad_total_bound {V : Type*} [Fintype V] [Decid
       have h_exp : 6 * Nat.choose (Fintype.card V) (4 * Nat.clog 2 (Fintype.card V) + 1) ≤ 2 ^ ((4 * Nat.clog 2 (Fintype.card V) + 1).choose 2) := by
         apply six_choose_le_pow_choose2';
         · exact Nat.le_pow_clog ( by decide ) _;
-        · exact Nat.le_trans ( by native_decide ) ( Nat.clog_mono_right _ hn );
+        · exact Nat.le_trans ( by decide ) ( Nat.clog_mono_right _ hn );
       by_cases h₂ : (4 * Nat.clog 2 (Fintype.card V) + 1).choose 2 ≤ G.edgeFinset.card;
       · rw [ ← mul_assoc ];
         refine' le_trans ( Nat.mul_le_mul_right _ ( Nat.mul_le_mul_left _ h_card ) ) _;
@@ -1048,6 +1048,6 @@ theorem erdos_760 : ∃ C : ℕ, 0 < C ∧
 end
 
 #print axioms erdos_760
--- 'erdos_760' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
+-- 'erdos_760' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos760
