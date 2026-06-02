@@ -3463,7 +3463,10 @@ uniform bound 2: any such G has two distinct cycle lengths within distance 2,
 so the minimum consecutive-pair gap in the sorted list is ≤ 2, hence not
 arbitrarily large. -/
 
-theorem erdos_751
+/-- The constructive witness: for any finite 4-chromatic graph G there exist two
+distinct cycle lengths `a < b` in G with `b − a ≤ 2`, derived from
+`Main.erdos_751_strong` (Bondy–Vince). -/
+theorem erdos_751_witness
     {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj]
     (hχ : G.chromaticNumber = 4) :
@@ -3482,6 +3485,29 @@ theorem erdos_751
   · refine ⟨_, _, hgt, ?_, ⟨C2, rfl⟩, ⟨C1, rfl⟩⟩
     unfold Nat.dist at h
     omega
+
+/-- The conjecture refuted by problem 751: that the minimum gap between
+consecutive distinct cycle lengths in a 4-chromatic graph can be made
+arbitrarily large. Formalized as: for every `K`, there exists a finite
+4-chromatic graph in which every pair of distinct cycle lengths differs by
+strictly more than `K`. -/
+def Erdos751Conjecture : Prop :=
+    ∀ K : ℕ, ∃ (V : Type) (_ : Fintype V) (_ : DecidableEq V)
+                (G : SimpleGraph V) (_ : DecidableRel G.Adj),
+        G.chromaticNumber = 4 ∧
+        ∀ a b : ℕ, a < b →
+            (∃ C : BV.Cycle (G := G), BV.Cycle.length (G := G) C = a) →
+            (∃ C : BV.Cycle (G := G), BV.Cycle.length (G := G) C = b) →
+            K < b - a
+
+/-- **Erdős Problem 751** (DISPROVED). The minimum gap between consecutive distinct
+cycle lengths in a 4-chromatic graph cannot be made arbitrarily large — `K = 2`
+already fails to be a strict lower bound, by Bondy–Vince. -/
+theorem erdos_751 : ¬ Erdos751Conjecture := by
+  intro h
+  obtain ⟨V, _, _, G, _, hχ, hall⟩ := h 2
+  obtain ⟨a, b, hab, hba_le, ha, hb⟩ := erdos_751_witness G hχ
+  exact absurd hba_le (not_le.mpr (hall a b hab ha hb))
 
 #print axioms erdos_751
 -- 'erdos_751' depends on axioms: [propext, Classical.choice, Quot.sound]
