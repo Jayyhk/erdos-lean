@@ -1624,6 +1624,6 @@ theorem erdos_498 (n : ℕ) (z : Fin n → ℂ) (hz : ∀ i, 1 ≤ ‖z i‖) (c
   exact bound
 
 #print axioms erdos_498
-
 -- 'Erdos498.erdos_498' depends on axioms: [propext, Classical.choice, Quot.sound]
+
 end Erdos498

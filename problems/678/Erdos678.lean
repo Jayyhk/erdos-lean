@@ -2389,9 +2389,9 @@ theorem erdos_678 :
     exact ⟨ k, hk ⟩;
   obtain ⟨ k, hk₁, n, m, hnm, hkm ⟩ := h_contradiction; exact hkm.not_le <| hK k hk₁ n m hnm;
 
+end
+
 #print axioms erdos_678
 -- 'Erdos678.erdos_678' depends on axioms: [propext, Classical.choice, Erdos678.pi_alt, Quot.sound]
-
-end
 
 end Erdos678

@@ -3050,7 +3050,6 @@ theorem erdos_392 :
   exact hup
 
 #print axioms erdos_392
--- 'Erdos392.erdos_392' depends on axioms:
--- [propext, Classical.choice, pi_alt', Quot.sound]
+-- 'Erdos392.erdos_392' depends on axioms: [propext, Classical.choice, pi_alt', Quot.sound]
 
 end Erdos392
