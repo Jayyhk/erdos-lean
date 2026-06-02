@@ -1341,3 +1341,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/751#post-3835"
       - "https://github.com/SpringSense-Innovation-Institute/ai-for-math-lean/tree/main/erdos-problems/erdos751"
+- number: "753"
+  proof:
+    path: "problems/753/"
+    theorem: "Erdos753.erdos_753"
+    state: "complete"
+    last_update: "2026-06-02"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/753#post-5373"
+      - "https://gist.github.com/madeve-unipi/80eaf8008c7c798b4f7b5baeb8c1812b"
