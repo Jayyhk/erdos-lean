@@ -1509,3 +1509,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/867#post-5279"
       - "https://gist.github.com/pitmonticone/5c1b173e3140f869d7425d8f1003ac70#file-erdos867-lean"
+- number: "871"
+  proof:
+    path: "problems/871/"
+    theorem: "Erdos871.erdos_871"
+    state: "complete"
+    last_update: "2026-06-03"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/871#post-2733"
