@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos487
+
 /- ===== Vendored: Erdős 447 (Kleitman union-free bound), needed by 487 ===== -/
 
 namespace Erdos447
@@ -823,8 +825,15 @@ lemma card_starred_ge {n : ℕ} (F : Finset (Finset (Fin n))) (hF : UnionFree F)
           -- Using the binomial coefficient identity, we can rewrite the inequality.
           have h_binom_identity : (A.card.choose k) * (n - A.card).factorial * k.factorial * (A.card - k).factorial - ((bad_k_subsets F A k).card * k.factorial * (A.card - k).factorial * (n - A.card).factorial) ≥ (A.card - 1).choose (k - 1) * (n - A.card).factorial * k.factorial * (A.card - k).factorial := by
             refine' le_trans ( Nat.mul_le_mul_right _ ( Nat.mul_le_mul_right _ ( Nat.mul_le_mul_right _ h_binom ) ) ) _;
-            simp +decide [ mul_assoc, mul_comm, mul_left_comm, tsub_mul ];
-            rw [ Nat.mul_sub_left_distrib ] ; ring_nf ; norm_num;
+            -- goal: (C - B) * X * Y * Z ≤ C * X * Y * Z - B * Y * Z * X  (X,Y,Z = factorials)
+            -- where C = A.card.choose k, B = (bad_k_subsets F A k).card
+            rw [show (bad_k_subsets F A k).card * k.factorial * (A.card - k).factorial * (n - A.card).factorial =
+                  (bad_k_subsets F A k).card * (n - A.card).factorial * k.factorial * (A.card - k).factorial from by ring]
+            -- now goal: (C - B) * X * Y * Z ≤ C * X * Y * Z - B * X * Y * Z, with aligned product order
+            rw [show (A.card.choose k - (bad_k_subsets F A k).card) * (n - A.card).factorial * k.factorial * (A.card - k).factorial =
+                  A.card.choose k * (n - A.card).factorial * k.factorial * (A.card - k).factorial -
+                    (bad_k_subsets F A k).card * (n - A.card).factorial * k.factorial * (A.card - k).factorial from by
+                rw [Nat.sub_mul, Nat.sub_mul, Nat.sub_mul]]
           convert h_binom_identity using 1;
           · rw [ ← Nat.choose_mul_factorial_mul_factorial ( show k ≤ A.card from hAk ) ] ; ring_nf;
           · rcases k with ( _ | k ) <;> rcases A with ⟨ ⟨ _, _ ⟩ ⟩ <;> simp_all +decide [ Nat.factorial_succ, mul_assoc, mul_comm, mul_left_comm ];
@@ -880,10 +889,19 @@ theorem kleitman_inequality {n : ℕ} (F : Finset (Finset (Fin n))) (hF : UnionF
           simp +decide only [Finset.sum_filter];
           rw [ Finset.sum_comm ] ; simp +decide [ Finset.sum_ite ];
         simp_all +decide [ div_eq_mul_inv, mul_assoc, mul_comm, mul_left_comm ];
-        convert h_sum_starred_ge using 3 ; ring!;
+        convert h_sum_starred_ge using 3 ;
       simp_all +decide [ div_eq_mul_inv, mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _ ];
       norm_num [ ← mul_assoc, ← Finset.sum_mul _ _ _ ] at *;
-      rw [ ← @Nat.cast_le ℝ ] at * ; push_cast at * ; nlinarith [ show 0 < ( n ! : ℝ ) by positivity ]
+      rw [ ← @Nat.cast_le ℝ ] at * ; push_cast at *
+      have hnf : (0 : ℝ) < (n ! : ℝ) := by positivity
+      rw [show (1 : ℝ) = (n ! : ℝ) / (n ! : ℝ) from (div_self hnf.ne').symm,
+          le_div_iff₀ hnf]
+      have key : (∑ x ∈ Finset.Icc k (k * 2), (k : ℝ) * (↑x)⁻¹ * (↑(n.choose x))⁻¹ * ↑(x_j F x)) * (n ! : ℝ) =
+                 ∑ x ∈ Finset.Icc k (k * 2), (k : ℝ) * (↑x)⁻¹ * (↑(n.choose x))⁻¹ * ↑n ! * ↑(x_j F x) := by
+        rw [Finset.sum_mul]
+        exact Finset.sum_congr rfl (fun x _ => by ring)
+      rw [key]
+      linarith [h_sum_starred_ge, h_sum_starred]
 
 /-
 Definition of the linear program for Kleitman's bound.
@@ -1544,12 +1562,24 @@ lemma dual_constraint_m_plus_1 {m : ℕ} (hm : m ≥ 1) :
         -- By dividing both sides of h_sum by (m + 1) * binom(2m, m + 1), we obtain the desired inequality.
         have h_div : (Y_sol (2 * m) (m / 2) + ∑ k ∈ Finset.Icc (m / 2 + 1) m, Y_sol (2 * m) k) / ((m + 1) * Nat.choose (2 * m) (m + 1)) = 1 := by
           rw [ h_sum, div_self <| by exact mul_ne_zero ( by positivity ) <| Nat.cast_ne_zero.mpr <| Nat.ne_of_gt <| Nat.choose_pos <| by linarith ];
-        convert h_div.ge using 1;
-        unfold Z_final; norm_num [ Nat.add_div, heven ] ; ring_nf;
-        norm_num [ Nat.add_mod, Nat.mul_mod, heven ] ; ring_nf;
-        rw [ show m * 2 / 4 = m / 2 by omega ] ; ring_nf;
-        norm_num [ add_comm, Finset.mul_sum _ _ _, mul_assoc, mul_comm, mul_left_comm ];
-        exact Or.inl ( by rw [ ← mul_inv ] ; ring );
+        convert h_div.ge using 1
+        rw [show (m + 1 + 1) / 2 = m / 2 + 1 from by omega,
+            show min (m + 1) (2 * m / 2) = m from by omega]
+        have hzf : Z_final (2 * m) (m + 1) = Y_sol (2 * m) (m / 2) / ((m + 1 : ℕ) : ℝ) := by
+          unfold Z_final
+          have h1 : ¬ ((m + 1 : ℕ) = 0) := by omega
+          rw [if_neg h1]
+          have hdiv2m : (2 * m) / 2 = m := by omega
+          have hcond : (m + 1 : ℕ) = 2 * m / 2 + 1 ∧ ((2 * m : ℕ) / 2) % 2 == 0 := by
+            refine ⟨by omega, ?_⟩
+            rw [hdiv2m]; simp [heven]
+          rw [if_pos hcond]
+          have hd4 : (2 * m) / 4 = m / 2 := by omega
+          rw [hd4]
+          push_cast; ring
+        rw [hzf, ← Finset.sum_div, div_div, ← add_div]
+        push_cast
+        ring
       · unfold Z_final;
         -- Since $m$ is odd, we have $LHS n m (m + 1) \geq RHS n (m + 1)$.
         have h_ineq : (∑ k ∈ Finset.Icc ((m + 1) / 2) m, Y_sol (2 * m) k) ≥ ((m + 1) : ℝ) * (2 * m).choose (m + 1) := by
@@ -2912,8 +2942,6 @@ set_option linter.style.longLine false
 set_option linter.style.multiGoal false
 set_option linter.style.openClassical false
 set_option linter.style.refine false
-
-namespace Erdos487
 
 open scoped Nat
 open scoped Classical
