@@ -1397,3 +1397,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/765#post-6480"
       - "https://gist.github.com/Parcly-Taxel/13d3bd0f1390b0832a42994a09cf91c5#file-erdos765-lean"
+- number: "775"
+  proof:
+    path: "problems/775/"
+    theorem: "Erdos775.erdos_775"
+    state: "complete"
+    last_update: "2026-06-02"
+    lean_toolchain: "leanprover/lean4:v4.28.1"
+    mathlib_revision: "1f9fffd5ff0b854b8a1f1f69adc11c61f05f2515"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/775#post-5619"
+      - "https://gist.github.com/LorenzoLuccioli/dc7dac92dff47aac05b50f2562dbe8c1#file-erdos775-lean"
