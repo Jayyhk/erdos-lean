@@ -1351,7 +1351,7 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/753#post-5373"
-      - "https://gist.github.com/madeve-unipi/80eaf8008c7c798b4f7b5baeb8c1812b"
+      - "https://gist.github.com/madeve-unipi/80eaf8008c7c798b4f7b5baeb8c1812b#file-erdos753-lean"
 - number: "756"
   proof:
     path: "problems/756/"
@@ -1373,7 +1373,7 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/760#post-5727"
-      - "https://gist.github.com/madeve-unipi/a7ae50d445f95e73c360f442c3c84143"
+      - "https://gist.github.com/madeve-unipi/a7ae50d445f95e73c360f442c3c84143#file-erdos760-lean"
 - number: "762"
   proof:
     path: "problems/762/"
@@ -1385,3 +1385,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/762#post-4237"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos762.lean"
+- number: "765"
+  proof:
+    path: "problems/765/"
+    theorem: "Erdos765.erdos_765"
+    state: "axiomatic"
+    extra_axioms: ["Erdos765.prime_between"]
+    last_update: "2026-06-02"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/765#post-6480"
+      - "https://gist.github.com/Parcly-Taxel/13d3bd0f1390b0832a42994a09cf91c5#file-erdos765-lean"

@@ -26,10 +26,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-126 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
+127 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
 - 111 `complete`
 - 3 `trust_extended`
-- 12 `axiomatic`
+- 13 `axiomatic`
 - 0 `sorry`
 
 | # | State | Lean | Notes |
@@ -62,7 +62,7 @@ lake build
 | [199](https://www.erdosproblems.com/199) | `complete` | [problems/199/](problems/199/) | |
 | [202](https://www.erdosproblems.com/202) | `complete` | [problems/202/](problems/202/) | |
 | [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) | |
-| [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`nth_prime_asymp`) |
+| [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L952) (`nth_prime_asymp`) |
 | [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |
 | [214](https://www.erdosproblems.com/214) | `complete` | [problems/214/](problems/214/) | |
 | [221](https://www.erdosproblems.com/221) | `complete` | [problems/221/](problems/221/) | |
@@ -99,7 +99,7 @@ lake build
 | [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
 | [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
 | [379](https://www.erdosproblems.com/379) | `complete` | [problems/379/](problems/379/) | |
-| [392](https://www.erdosproblems.com/392) | `axiomatic` | [problems/392/](problems/392/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt'`) |
+| [392](https://www.erdosproblems.com/392) | `axiomatic` | [problems/392/](problems/392/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L901) (`pi_alt'`) |
 | [397](https://www.erdosproblems.com/397) | `complete` | [problems/397/](problems/397/) | |
 | [399](https://www.erdosproblems.com/399) | `complete` | [problems/399/](problems/399/) | |
 | [401](https://www.erdosproblems.com/401) | `complete` | [problems/401/](problems/401/) | |
@@ -139,14 +139,14 @@ lake build
 | [639](https://www.erdosproblems.com/639) | `complete` | [problems/639/](problems/639/) | |
 | [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) | |
 | [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) | |
-| [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt`) |
+| [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L875) (`pi_alt`) |
 | [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
 | [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
 | [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes Theorem 2.2 of [Solymosi](https://jayyhk.github.io/papers/solymosi2004.pdf) (`frankl_roedl_theorem`) |
 | [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes Theorems 1 and 2 on page 92 of [Bernays](https://jayyhk.github.io/papers/bernays1912.pdf) (`bernays`) |
 | [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) | |
 | [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
-| [678](https://www.erdosproblems.com/678) | `axiomatic` | [problems/678/](problems/678/) | assumes [PNT](https://en.wikipedia.org/wiki/Prime_number_theorem) (`pi_alt`) |
+| [678](https://www.erdosproblems.com/678) | `axiomatic` | [problems/678/](problems/678/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L875) (`pi_alt`) |
 | [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
 | [694](https://www.erdosproblems.com/694) | `axiomatic` | [problems/694/](problems/694/) | assumes equation 15 of [Mertens](https://jayyhk.github.io/papers/mertens1874.pdf) (`mertens_product`) and equation 2 of [Linnik](https://jayyhk.github.io/papers/linnik1944.pdf) (`linnik_dvd`) |
 | [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) and equation 1.10 of [Montgomery–Vaughan](https://jayyhk.github.io/papers/montgomery-vaughan1973.pdf) (`brun_titchmarsh`) |
@@ -160,5 +160,6 @@ lake build
 | [756](https://www.erdosproblems.com/756) | `complete` | [problems/756/](problems/756/) | |
 | [760](https://www.erdosproblems.com/760) | `complete` | [problems/760/](problems/760/) | |
 | [762](https://www.erdosproblems.com/762) | `complete` | [problems/762/](problems/762/) | |
+| [765](https://www.erdosproblems.com/765) | `axiomatic` | [problems/765/](problems/765/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L1555) (`prime_between`) |
 
 <!-- TABLE:END -->
