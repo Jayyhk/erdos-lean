@@ -1408,3 +1408,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/775#post-5619"
       - "https://gist.github.com/LorenzoLuccioli/dc7dac92dff47aac05b50f2562dbe8c1#file-erdos775-lean"
+- number: "785"
+  proof:
+    path: "problems/785/"
+    theorem: "Erdos785.erdos_785"
+    state: "complete"
+    last_update: "2026-06-02"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/785#post-4642"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem785.lean"

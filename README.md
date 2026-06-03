@@ -26,8 +26,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-128 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
-- 112 `complete`
+129 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
+- 113 `complete`
 - 3 `trust_extended`
 - 13 `axiomatic`
 - 0 `sorry`
@@ -162,5 +162,6 @@ lake build
 | [762](https://www.erdosproblems.com/762) | `complete` | [problems/762/](problems/762/) | |
 | [765](https://www.erdosproblems.com/765) | `axiomatic` | [problems/765/](problems/765/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L1555) (`prime_between`) |
 | [775](https://www.erdosproblems.com/775) | `complete` | [problems/775/](problems/775/) | |
+| [785](https://www.erdosproblems.com/785) | `complete` | [problems/785/](problems/785/) | |
 
 <!-- TABLE:END -->
