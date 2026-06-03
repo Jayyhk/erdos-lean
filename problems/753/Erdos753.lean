@@ -513,6 +513,6 @@ theorem erdos_753 :
 end
 
 #print axioms erdos_753
--- 'erdos_753' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos753.erdos_753' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos753

@@ -495,6 +495,6 @@ theorem erdos_765 : (fun n ↦ (extremalNumber n C4 : ℝ)) ~[atTop] fun n ↦ n
       add_le_add_right hn_ub _
 
 #print axioms erdos_765
--- 'erdos_765' depends on axioms: [propext, Classical.choice, Erdos765.prime_between, Quot.sound]
+-- 'Erdos765.erdos_765' depends on axioms: [propext, Classical.choice, Erdos765.prime_between, Quot.sound]
 
 end Erdos765

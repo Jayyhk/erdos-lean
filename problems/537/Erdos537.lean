@@ -1260,6 +1260,6 @@ theorem erdos_537 : ¬(∀ (ε : ℝ), 0 < ε → ∃ (N₀ : ℕ), ∀ (N : ℕ
       exact hN₀ N hN A hA_Icc hA_card
 
 #print axioms erdos_537
--- 'erdos_537' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos537.erdos_537' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos537

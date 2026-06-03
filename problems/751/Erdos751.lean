@@ -3510,6 +3510,6 @@ theorem erdos_751 : ¬ Erdos751Conjecture := by
   exact absurd hba_le (not_le.mpr (hall a b hab ha hb))
 
 #print axioms erdos_751
--- 'erdos_751' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos751.erdos_751' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos751

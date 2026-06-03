@@ -474,6 +474,6 @@ theorem erdos_741 :
   ⟨erdos_741_variants_upper, erdos_741_parts_ii⟩
 
 #print axioms erdos_741
--- 'erdos_741' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos741.erdos_741' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos741

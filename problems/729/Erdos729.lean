@@ -1051,6 +1051,6 @@ theorem erdos_729 (C : ℝ) (hC : C > 0) :
 end
 
 #print axioms erdos_729
--- 'erdos_729' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos729.erdos_729' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos729

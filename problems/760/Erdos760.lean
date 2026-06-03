@@ -1048,6 +1048,6 @@ theorem erdos_760 : ∃ C : ℕ, 0 < C ∧
 end
 
 #print axioms erdos_760
--- 'erdos_760' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos760.erdos_760' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos760

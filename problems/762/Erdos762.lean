@@ -1341,6 +1341,6 @@ theorem erdos_762 : ¬ Erdos762Conjecture := by
   exact this hcontra
 
 #print axioms erdos_762
--- 'erdos_762' depends on axioms: [propext, Classical.choice, Quot.sound]
+-- 'Erdos762.erdos_762' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos762
