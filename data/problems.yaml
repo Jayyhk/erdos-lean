@@ -1485,3 +1485,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/846#post-4447"
       - "https://github.com/google-deepmind/formal-conjectures/blob/2404258180688283e5141021c75464dc2acfb798/FormalConjectures/ErdosProblems/846.lean"
+- number: "862"
+  proof:
+    path: "problems/862/"
+    theorem: "Erdos862.erdos_862"
+    state: "axiomatic"
+    extra_axioms: ["Erdos862.prime_between"]
+    last_update: "2026-06-03"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/862#post-3596"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos862.lean"
+      - "https://www.erdosproblems.com/forum/thread/43#post-2354"
