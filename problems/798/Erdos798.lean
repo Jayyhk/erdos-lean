@@ -811,10 +811,30 @@ theorem isBigO_minCoverSize :
     _ ≤ _ := cardS
     _ = _ := by rw [logb]; ring
 
-theorem erdos_798 : (fun n ↦ (minCoverSize 2 n : ℝ)) =O[atTop] fun n ↦ n ^ (2 / 3 : ℝ) * log n := by
+theorem erdos_798_explicit :
+    (fun n ↦ (minCoverSize 2 n : ℝ)) =O[atTop] fun n ↦ n ^ (2 / 3 : ℝ) * log n := by
   convert isBigO_minCoverSize using 4
   · norm_num [K]
   · infer_instance
+
+/-- Site-form statement of Erdős #798: `t(n) = o(n)`, where `t(n) = minCoverSize 2 n`
+is the minimum number of points in `{1,…,n}²` whose pairwise lines cover the grid. -/
+theorem erdos_798 :
+    Tendsto (fun n : ℕ => (minCoverSize 2 n : ℝ) / n) atTop (𝓝 0) := by
+  have h_O := erdos_798_explicit
+  have h_log_o : (fun n : ℕ => Real.log n) =o[atTop] (fun n : ℕ => (n : ℝ) ^ (1/3 : ℝ)) :=
+    (isLittleO_log_rpow_atTop (show (0 : ℝ) < 1/3 by norm_num)).comp_tendsto
+      tendsto_natCast_atTop_atTop
+  have h_o : (fun n : ℕ => (n : ℝ) ^ (2/3 : ℝ) * Real.log n) =o[atTop] (fun n : ℕ => (n : ℝ)) := by
+    have hmul := (Asymptotics.isBigO_refl (fun n : ℕ => (n : ℝ) ^ (2/3 : ℝ)) atTop).mul_isLittleO h_log_o
+    have heq : (fun n : ℕ => (n : ℝ) ^ (2/3 : ℝ) * (n : ℝ) ^ (1/3 : ℝ)) =ᶠ[atTop]
+               (fun n : ℕ => (n : ℝ)) := by
+      filter_upwards [Filter.eventually_gt_atTop 0] with n hn
+      have hpos : (0 : ℝ) < n := Nat.cast_pos.mpr hn
+      rw [← Real.rpow_add hpos]
+      norm_num
+    exact hmul.trans_eventuallyEq heq
+  exact (h_O.trans_isLittleO h_o).tendsto_div_nhds_zero
 
 end
 
