@@ -82,4 +82,3 @@ theorem erdos_794 : ¬conjecture_794 := by
 -- 'Erdos794.erdos_794' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos794
-
