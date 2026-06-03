@@ -2304,4 +2304,3 @@ end
 -- 'Erdos785.erdos_785' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos785
-
