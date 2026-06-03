@@ -1419,3 +1419,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/785#post-4642"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem785.lean"
+- number: "794"
+  proof:
+    path: "problems/794/"
+    theorem: "Erdos794.erdos_794"
+    state: "complete"
+    last_update: "2026-06-02"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/794#post-4200"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos794.lean"
