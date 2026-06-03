@@ -1474,3 +1474,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/845#post-3601"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem845.lean"
+- number: "846"
+  proof:
+    path: "problems/846/"
+    theorem: "Erdos846.erdos_846"
+    state: "complete"
+    last_update: "2026-06-03"
+    lean_toolchain: "leanprover/lean4:v4.22.0"
+    mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/846#post-4447"
+      - "https://github.com/google-deepmind/formal-conjectures/blob/2404258180688283e5141021c75464dc2acfb798/FormalConjectures/ErdosProblems/846.lean"
