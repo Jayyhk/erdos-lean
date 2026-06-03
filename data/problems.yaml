@@ -1452,3 +1452,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/818#post-5890"
       - "https://gist.github.com/tomaz1502/d8f3632157bae289e5d0ed68ccdc9433#file-erdos_818-lean"
+- number: "844"
+  proof:
+    path: "problems/844/"
+    theorem: "Erdos844.erdos_844"
+    state: "complete"
+    last_update: "2026-06-03"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/844#post-5919"
+      - "https://gist.github.com/JohnEdwardJennings/e32f2c412b0225091e7519d60741bd2d#file-erdos844-lean"
