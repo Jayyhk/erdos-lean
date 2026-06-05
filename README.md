@@ -2,11 +2,7 @@
 
 A collection of Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
 
-Not every proof will be fully legitimate. Some might depend on extra axioms declared in the proof itself, or on mechanisms that expand Lean's trusted base. The table below records every such qualification explicitly, with the catalog in [data/problems.yaml](data/problems.yaml) as the ground truth. Field definitions and the meaning of each `state` value / `trust_extensions` tag live in [schema/problems.schema.json](schema/problems.schema.json).
-
-Files may be lightly modified from their original source, typically renaming the headline theorem to fit the `Erdos<N>.erdos_<N>` convention and wrapping in a `namespace Erdos<N>` block. Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
-
-## Conventions
+Not every proof will be fully legitimate. Some might depend on extra axioms declared in the proof itself, or on mechanisms that expand Lean's trusted base. The table below shows the state of each problem and any axioms or trust extensions it relies on (state definitions live in [schema/problems.schema.json](schema/problems.schema.json)). Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
 
 For problem `N`, `problems/N/` contains:
 
