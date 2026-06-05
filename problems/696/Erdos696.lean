@@ -2705,26 +2705,6 @@ section LPSieveMainResults
 
 open scoped BigOperators ArithmeticFunction.zeta ArithmeticFunction.Moebius ArithmeticFunction.omega
   LPSieve Nat Nat.Prime
-
-theorem fundamental_theorem_simple (s : LPSelbergSieve) :
-    s.siftedSum ≤
-      s.totalMass / s.selbergBoundingSum +
-        ∑ d ∈ s.prodPrimes.divisors, if (d : ℝ) ≤ s.level then (3:ℝ) ^ ω d * |s.rem d| else 0 :=
-  s.selberg_bound_simple
-
-theorem primeCounting_isBigO_atTop :
-    (fun N => (π N:ℝ)) =O[Filter.atTop] (fun N => N / Real.log N) :=
-  PrimeUpperBound.pi_ll
-
-theorem primeCounting_le_mul : ∃ N C, ∀ n ≥ N, π n ≤ C*n/Real.log n :=
-  PrimeUpperBound.pi_le_mul
-
-theorem primesBetween_le (x y z : ℝ) (hx : 0 < x) (hy : 0 < y) (hz : 1 < z) :
-    Set.ncard {p : ℕ | x ≤ p ∧ p ≤ (x+y) ∧ p.Prime}
-      ≤ 2 * y / Real.log z + 6 * z * (1+Real.log z)^3 := by
-  rw [← BrunTitchmarsh.primesBetween_eq_ncard (by linarith)]
-  exact BrunTitchmarsh.primesBetween_le _ _ _ hx hy hz
-
 end LPSieveMainResults
 
 
@@ -5960,139 +5940,6 @@ def almostAll (P : ℕ → Prop) : Prop :=
     Filter.atTop (nhds 0)
 
 /-! ### Trivial monotonicity lemma -/
-
-/-- Every prime chain dividing `n` is also a divisor chain (with the chain
-length unchanged), so `hChain n ≤ HChain n`. -/
-lemma hChain_le_HChain (n : ℕ) : hChain n ≤ HChain n := by
-  classical
-  have prime_to_divisor :
-      ∀ {m : ℕ} {ps : List ℕ}, IsPrimeChain m ps → IsDivisorChain m ps := by
-    intro m ps hps
-    rcases hps with ⟨hprime, hpair, hmod⟩
-    refine ⟨fun d hd => ⟨(hprime d hd).1.one_le, (hprime d hd).2⟩, hpair, ?_⟩
-    intro i hi
-    -- IsPrimeChain has `% = 1` form; IsDivisorChain has `Nat.ModEq` form.
-    -- For primes p ≥ 2, `1 % p = 1`, so the two forms agree.
-    have hp_mem : ps.get i ∈ ps := List.get_mem _ i
-    have hp_one_lt : 1 < ps.get i := (hprime _ hp_mem).1.one_lt
-    show ps.get ⟨i.val + 1, hi⟩ % ps.get i = 1 % ps.get i
-    rw [Nat.mod_eq_of_lt hp_one_lt]
-    exact hmod i hi
-  by_cases hn : n = 0
-  · subst n
-    have prime_chain_len0 :
-        ∀ m : ℕ, ∃ ps : List ℕ, IsPrimeChain 0 ps ∧ ps.length = m := by
-      let next : ℕ → ℕ := fun p =>
-        if hp0 : p = 0 then 2 else Classical.choose (Nat.exists_prime_gt_modEq_one p hp0)
-      have next_spec :
-          ∀ {p : ℕ}, p.Prime → (next p).Prime ∧ p < next p ∧ next p % p = 1 := by
-        intro p hp
-        have hp0 : p ≠ 0 := hp.ne_zero
-        dsimp [next]
-        rw [dif_neg hp0]
-        rcases Classical.choose_spec (Nat.exists_prime_gt_modEq_one p hp0) with
-          ⟨hq, hpq, hmod⟩
-        exact ⟨hq, hpq, by simpa [Nat.ModEq, Nat.mod_eq_of_lt hp.one_lt] using hmod⟩
-      let a : ℕ → ℕ := fun k => Nat.rec 2 (fun _ prev => next prev) k
-      have a_succ : ∀ k : ℕ, a (k + 1) = next (a k) := by
-        intro k
-        rfl
-      have a_prime : ∀ k : ℕ, (a k).Prime := by
-        intro k
-        induction k with
-        | zero => norm_num [a]
-        | succ k ih =>
-            rw [a_succ]
-            exact (next_spec ih).1
-      have a_step : ∀ k : ℕ, a k < a (k + 1) := by
-        intro k
-        rw [a_succ]
-        exact (next_spec (a_prime k)).2.1
-      have a_strict : StrictMono a := strictMono_nat_of_lt_succ a_step
-      have a_mod : ∀ k : ℕ, a (k + 1) % a k = 1 := by
-        intro k
-        rw [a_succ]
-        exact (next_spec (a_prime k)).2.2
-      intro m
-      let ps : List ℕ := List.ofFn (fun i : Fin m => a i)
-      refine ⟨ps, ?_, by simp [ps]⟩
-      constructor
-      · intro p hp
-        simp [ps, List.mem_ofFn] at hp
-        rcases hp with ⟨i, rfl⟩
-        exact ⟨a_prime i, dvd_zero _⟩
-      constructor
-      · simp [ps, List.pairwise_ofFn]
-        intro i j hij
-        exact a_strict hij
-      · intro i hi
-        simp [ps, a_mod]
-    have hPrimeUnbdd :
-        ¬BddAbove {ℓ | ∃ ps : List ℕ, IsPrimeChain 0 ps ∧ ps.length = ℓ} := by
-      rintro ⟨B, hB⟩
-      rcases prime_chain_len0 (B + 1) with ⟨ps, hps, hlen⟩
-      have : B + 1 ≤ B := hB ⟨ps, hps, hlen⟩
-      omega
-    have hDivUnbdd :
-        ¬BddAbove {u | ∃ ds : List ℕ, IsDivisorChain 0 ds ∧ ds.length = u} := by
-      rintro ⟨B, hB⟩
-      rcases prime_chain_len0 (B + 1) with ⟨ps, hps, hlen⟩
-      have : B + 1 ≤ B := hB ⟨ps, prime_to_divisor hps, hlen⟩
-      omega
-    rw [hChain, HChain, Nat.sSup_of_not_bddAbove hPrimeUnbdd,
-      if_neg (by decide : (0 : ℕ) ≠ 1), Nat.sSup_of_not_bddAbove hDivUnbdd]
-  · have hlen_le : ∀ {ds : List ℕ}, IsDivisorChain n ds → ds.length ≤ n := by
-      intro ds hds
-      rcases hds with ⟨hdiv, hpair, _hmod⟩
-      have hnodup : ds.Nodup := hpair.nodup
-      rw [← List.toFinset_card_of_nodup hnodup]
-      have hsub : ds.toFinset ⊆ Finset.Icc 1 n := by
-        intro d hd
-        rw [List.mem_toFinset] at hd
-        simpa [Finset.mem_Icc] using
-          (show 1 ≤ d ∧ d ≤ n from
-            ⟨(hdiv d hd).1, Nat.le_of_dvd (Nat.pos_of_ne_zero hn) (hdiv d hd).2⟩)
-      exact (Finset.card_le_card hsub).trans (by simp)
-    have hDivBdd :
-        BddAbove {u | ∃ ds : List ℕ, IsDivisorChain n ds ∧ ds.length = u} := by
-      refine ⟨n, ?_⟩
-      intro u hu
-      rcases hu with ⟨ds, hds, rfl⟩
-      exact hlen_le hds
-    -- Case-split on n = 1.  For n = 1, both hChain 1 and HChain 1 are 0:
-    -- hChain 1 = 0 because no primes divide 1; HChain 1 = 0 by paper convention.
-    by_cases hn1 : n = 1
-    · subst hn1
-      have hPrime1_empty : ∀ {ps : List ℕ}, IsPrimeChain 1 ps → ps = [] := by
-        intro ps hps
-        rcases hps with ⟨hprime, _, _⟩
-        cases ps with
-        | nil => rfl
-        | cons p _ =>
-          exfalso
-          have hp_dvd_1 := (hprime p (by simp)).2
-          have hp_eq_1 : p = 1 := Nat.eq_one_of_dvd_one hp_dvd_1
-          have hp_prime := (hprime p (by simp)).1
-          exact hp_prime.one_lt.ne' hp_eq_1
-      have hSetEq : {ℓ : ℕ | ∃ ps, IsPrimeChain 1 ps ∧ ps.length = ℓ} = {0} := by
-        ext ℓ
-        simp only [Set.mem_setOf_eq, Set.mem_singleton_iff]
-        constructor
-        · rintro ⟨ps, hps, rfl⟩
-          rw [hPrime1_empty hps]; rfl
-        · rintro rfl
-          refine ⟨[], ⟨fun _ => by simp, by simp, ?_⟩, rfl⟩
-          intro i _; exact i.elim0
-      show hChain 1 ≤ HChain 1
-      rw [hChain, HChain, hSetEq, csSup_singleton, if_pos rfl]
-    · -- n ≥ 2: HChain unfolds to sSup directly via `if_neg hn1`.
-      show hChain n ≤ HChain n
-      rw [hChain, HChain, if_neg hn1]
-      refine csSup_le_csSup' hDivBdd ?_
-      intro ℓ hℓ
-      rcases hℓ with ⟨ps, hps, rfl⟩
-      exact ⟨ps, prime_to_divisor hps, rfl⟩
-
 /-! ### `almostAll` helpers (moved here from Main.lean to break import cycles) -/
 
 /-- `almostAll` is monotone under pointwise implication. -/
@@ -10209,32 +10056,6 @@ private lemma apCoeff_sum_eq_piMod (t : ℝ) (p : ℕ) :
   intro x
   simp
 
-private lemma sum_filter_eq_Ioc_indicator {p N : ℕ} {Q : ℝ} (hQnonneg : 0 ≤ Q)
-    (hp1 : 1 % p = 1) :
-    (∑ q ∈ Finset.filter
-        (fun q => q.Prime ∧ q % p = 1 ∧ (N : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
-        (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ))
-      = ∑ q ∈ Finset.Ioc N ⌊Q⌋₊,
-          ((1 : ℝ) / (q : ℝ)) * (if q.Prime ∧ q % p = 1 % p then (1 : ℝ) else 0) := by
-  conv_rhs =>
-    enter [2, q]
-    rw [mul_ite, mul_one, mul_zero]
-  rw [← Finset.sum_filter]
-  apply Finset.sum_congr
-  · ext q
-    simp only [Finset.mem_filter, Finset.mem_Iic, Finset.mem_Ioc]
-    constructor
-    · rintro ⟨hqfloor, hprime, hmod, hNreal, _hqQ⟩
-      have hNq : N < q := by exact_mod_cast hNreal
-      have hmod' : q % p = 1 % p := by simpa [hp1] using hmod
-      exact ⟨⟨hNq, hqfloor⟩, hprime, hmod'⟩
-    · rintro ⟨⟨hNq, hqfloor⟩, hprime, hmod⟩
-      have hmod' : q % p = 1 := by simpa [hp1] using hmod
-      exact ⟨hqfloor, hprime, hmod', by exact_mod_cast hNq,
-        (Nat.cast_le.mpr hqfloor).trans (Nat.floor_le hQnonneg)⟩
-  · intro q hq
-    rfl
-
 private lemma low_AP_sum_le_inv {p : ℕ} (hp : p.Prime) :
     (∑ q ∈ Finset.filter
         (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ (2 * p : ℝ))
@@ -10289,41 +10110,6 @@ private lemma low_AP_sum_le_inv {p : ℕ} (hp : p.Prime) :
       have hcardreal : (s.card : ℝ) ≤ 1 := by exact_mod_cast hs_card
       nlinarith
 
-private lemma abel_high_formula (p : ℕ) (Q : ℝ) (hp : p.Prime)
-    (hQ : (((2 * p : ℕ) : ℝ)) ≤ Q) :
-    ∑ k ∈ Finset.Ioc (2 * p) ⌊Q⌋₊, ((1 : ℝ) / (k : ℝ)) * apCoeff p k =
-      ((1 : ℝ) / Q) * (∑ k ∈ Finset.Icc 0 ⌊Q⌋₊, apCoeff p k)
-        - ((1 : ℝ) / (((2 * p : ℕ) : ℝ))) *
-            (∑ k ∈ Finset.Icc 0 (2 * p), apCoeff p k)
-        - ∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q,
-            deriv (fun u : ℝ => (1 : ℝ) / u) t * ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, apCoeff p k := by
-  have ha_nonneg : (0 : ℝ) ≤ (((2 * p : ℕ) : ℝ)) := by positivity
-  have h2p_pos : (0 : ℝ) < (((2 * p : ℕ) : ℝ)) := by
-    exact_mod_cast (Nat.mul_pos (by decide : 0 < 2) hp.pos)
-  have hf_diff : ∀ t ∈ Set.Icc (((2 * p : ℕ) : ℝ)) Q,
-      DifferentiableAt ℝ (fun u : ℝ => (1 : ℝ) / u) t := by
-    intro t ht
-    have htpos : 0 < t := h2p_pos.trans_le ht.1
-    simpa [one_div] using
-      (differentiableAt_id : DifferentiableAt ℝ (fun u : ℝ => u) t).inv (ne_of_gt htpos)
-  have hf_int : IntegrableOn (deriv (fun u : ℝ => (1 : ℝ) / u))
-      (Set.Icc (((2 * p : ℕ) : ℝ)) Q) := by
-    have hcont : ContinuousOn (fun u : ℝ => - (u ^ 2)⁻¹)
-        (Set.Icc (((2 * p : ℕ) : ℝ)) Q) := by
-      apply ContinuousOn.neg
-      apply ContinuousOn.inv₀
-      · exact (continuousOn_id.pow 2)
-      · intro u hu hzero
-        have hu_pos : 0 < u := h2p_pos.trans_le hu.1
-        exact (ne_of_gt hu_pos) (sq_eq_zero_iff.mp hzero)
-    simpa [one_div, deriv_inv'] using hcont.integrableOn_Icc
-  have hfloor2p : ⌊(2 * (p : ℝ))⌋₊ = 2 * p := by
-    rw [show (2 * (p : ℝ)) = ((2 * p : ℕ) : ℝ) by norm_num]
-    exact Nat.floor_natCast (2 * p)
-  simpa [hfloor2p] using
-    (sum_mul_eq_sub_sub_integral_mul (c := apCoeff p) (f := fun u : ℝ => (1 : ℝ) / u)
-      ha_nonneg hQ hf_diff hf_int)
-
 private lemma integral_inv_mul_log_div {p a b : ℝ} (hp : 0 < p) (ha : p < a)
     (hab : a ≤ b) :
     (∫ t in a..b, (t * Real.log (t / p))⁻¹) =
@@ -10365,47 +10151,6 @@ private lemma integral_inv_mul_log_div {p a b : ℝ} (hp : 0 < p) (ha : p < a)
   have hint : IntervalIntegrable (fun t : ℝ => (t * Real.log (t / p))⁻¹) volume a b :=
     hg_cont_u.intervalIntegrable
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab hf_cont hderiv hint
-
-private lemma high_sum_le_boundary_integral {p : ℕ} {Q : ℝ} (hp : p.Prime)
-    (hQ : (((2 * p : ℕ) : ℝ)) ≤ Q) :
-    (∑ q ∈ Finset.Ioc (2 * p) ⌊Q⌋₊, ((1 : ℝ) / (q : ℝ)) * apCoeff p q) ≤
-      ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ) +
-        ∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ) := by
-  have habel := abel_high_formula p Q hp hQ
-  rw [apCoeff_sum_eq_piMod Q p] at habel
-  have hA2_nonneg : 0 ≤ ((1 : ℝ) / (((2 * p : ℕ) : ℝ))) *
-      (∑ k ∈ Finset.Icc 0 (2 * p), apCoeff p k) := by
-    have hsum_nonneg : 0 ≤ (∑ k ∈ Finset.Icc 0 (2 * p), apCoeff p k) := by
-      apply Finset.sum_nonneg
-      intro k hk
-      unfold apCoeff
-      split_ifs <;> norm_num
-    positivity
-  have hint_eq :
-      -∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q,
-          deriv (fun u : ℝ => (1 : ℝ) / u) t * ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, apCoeff p k
-        = ∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ) := by
-    rw [← integral_neg]
-    apply setIntegral_congr_fun measurableSet_Ioc
-    intro t ht
-    change -(deriv (fun u : ℝ => (1 : ℝ) / u) t *
-        (∑ k ∈ Finset.Icc 0 ⌊t⌋₊, apCoeff p k)) = (t ^ 2)⁻¹ * (piMod t p 1 : ℝ)
-    rw [apCoeff_sum_eq_piMod t p]
-    simp [one_div, deriv_inv']
-  calc
-    (∑ q ∈ Finset.Ioc (2 * p) ⌊Q⌋₊, ((1 : ℝ) / (q : ℝ)) * apCoeff p q)
-        = ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ) -
-          ((1 : ℝ) / (((2 * p : ℕ) : ℝ))) *
-            (∑ k ∈ Finset.Icc 0 (2 * p), apCoeff p k) -
-          ∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q,
-            deriv (fun u : ℝ => (1 : ℝ) / u) t * ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, apCoeff p k := habel
-    _ ≤ ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ) -
-          ∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q,
-            deriv (fun u : ℝ => (1 : ℝ) / u) t * ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, apCoeff p k := by
-          linarith
-    _ = ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ) +
-        ∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ) := by
-          rw [sub_eq_add_neg, hint_eq]
 
 private lemma tail_integral_le {CBT : ℝ} {p : ℕ} {Q : ℝ} (hCBT : 0 < CBT)
     (hp : p.Prime) (hQ : (256 : ℝ) * (p : ℝ) ^ 9 ≤ Q)
@@ -10758,33 +10503,6 @@ private lemma explicit_tail_bound {CBT : ℝ} {p : ℕ} (hCBT : 0 < CBT) (hp : p
             dsimp [A]
             field_simp [ne_of_gt hp_pos, ne_of_gt hlogpsq_pos]
   linarith [hterm1, hterm2]
-
-private lemma scale_one_div_log {K : ℝ} {p : ℕ} (hK : 0 ≤ K) (hp : p.Prime) :
-    K * (1 / (p : ℝ) + 1 / (Real.log p) ^ 2) ≤
-      (K / Real.log 2 + K) * (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2) := by
-  have hp_pos : (0 : ℝ) < p := by exact_mod_cast hp.pos
-  have hlog2_pos : 0 < Real.log 2 := Real.log_pos (by norm_num)
-  have hlogp_ge : Real.log 2 ≤ Real.log (p : ℝ) := by
-    exact Real.log_le_log (by norm_num) (by exact_mod_cast hp.two_le)
-  have hlogp_pos : 0 < Real.log (p : ℝ) := lt_of_lt_of_le hlog2_pos hlogp_ge
-  have hinvlogsq_nonneg : 0 ≤ 1 / (Real.log (p : ℝ)) ^ 2 := by positivity
-  have hlogp_div_nonneg : 0 ≤ Real.log (p : ℝ) / (p : ℝ) :=
-    div_nonneg hlogp_pos.le hp_pos.le
-  have hKdiv_nonneg : 0 ≤ K / Real.log 2 := div_nonneg hK hlog2_pos.le
-  have hloginv_coeff : K * (1 / (p : ℝ)) ≤
-      (K / Real.log 2) * (Real.log p / (p : ℝ)) := by
-    field_simp [ne_of_gt hp_pos, ne_of_gt hlog2_pos]
-    nlinarith [mul_le_mul_of_nonneg_left hlogp_ge hK]
-  calc
-    K * (1 / (p : ℝ) + 1 / (Real.log p) ^ 2)
-        = K * (1 / (p : ℝ)) + K * (1 / (Real.log p) ^ 2) := by ring
-    _ ≤ (K / Real.log 2) * (Real.log p / (p : ℝ)) + K * (1 / (Real.log p) ^ 2) := by
-      exact add_le_add hloginv_coeff le_rfl
-    _ ≤ (K / Real.log 2 + K) * (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2) := by
-      have h_extra1 : 0 ≤ (K / Real.log 2) * (1 / (Real.log p) ^ 2) :=
-        mul_nonneg hKdiv_nonneg hinvlogsq_nonneg
-      have h_extra2 : 0 ≤ K * (Real.log p / (p : ℝ)) := mul_nonneg hK hlogp_div_nonneg
-      nlinarith [h_extra1, h_extra2]
 
 /-- The chunk `2p < q ≤ 256·p⁹` (q prime, q ≡ 1 mod p), bounded by a harmonic-sum
 estimate.  This is the small-q range in the path-2 surgery for `bt_reciprocal_AP_tail`,
@@ -11373,11 +11091,6 @@ lemma tower_tendsto_atTop :
   have h3 : ((⌈b⌉₊ : ℕ) : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
   linarith
 
-/-- `U_m := T_m^3` is positive. -/
-lemma Um_pos (m : ℕ) : 0 < Um m := by
-  unfold Um
-  exact pow_pos (tower_pos m) 3
-
 /-- `log U_m = 3 T_{m-1}` for `m ≥ 1`. -/
 lemma log_Um_succ (m : ℕ) :
     Real.log (Um (m + 1)) = 3 * tower m := by
@@ -11517,53 +11230,6 @@ lemma U_tower_h (Cf : ℝ) (hCf : 0 < Cf) :
   rw [show m = (m - 2) + 2 by omega, fH_Um_succ_succ]
   simpa [Um] using hNm
 
-/-- A consequence used in §4 (cf. equation (4.13)–(4.14)): if a prime `p`
-satisfies `e^{p / (log p)^2} ≥ log log q` for some `q`, then
-`p ≤ C_f (log log q)(log log log q)^2` for an absolute constant `C_f`.
-
-This is the *algebraic-inequality solution* underlying the descent
-`p_i ≤ f(p_{i+1})` in (4.15) of the paper.
-
-Algebraic inequality (fixed-point inversion of `e^a ≤ a^2 b`). -/
-lemma p_bound_from_Q (p q : ℕ) (hp : (100 : ℝ) ≤ (p : ℝ)) (hq : (100 : ℝ) ≤ (q : ℝ))
-    (_hineq : (p : ℝ) / ((Real.log p) ^ 2) ≤ Real.log (Real.log q)) :
-    ∃ Cf : ℝ, 0 < Cf ∧
-      (p : ℝ) ≤ Cf * Real.log (Real.log q) * (Real.log (Real.log (Real.log q))) ^ 2 := by
-  let A : ℝ := Real.log (Real.log q) * (Real.log (Real.log (Real.log q))) ^ 2
-  have hq0 : 0 < (q : ℝ) := by
-    linarith
-  have hlogq : 1 < Real.log q := by
-    rw [Real.lt_log_iff_exp_lt hq0]
-    linarith [exp_one_lt_d9, hq]
-  have hloglogq : 1 < Real.log (Real.log q) := by
-    have h₁ : Real.exp (Real.exp 1) < Real.exp 3 := Real.exp_lt_exp.mpr exp_one_lt_three
-    have h₂ : Real.exp 3 < (100 : ℝ) := by
-      calc
-        Real.exp 3 = (Real.exp 1) ^ 3 := by simp [Real.exp_one_pow]
-        _ < (3 : ℝ) ^ 3 := by
-          gcongr
-          exact exp_one_lt_three
-        _ = 27 := by norm_num
-        _ < 100 := by norm_num
-    have hexp1 : Real.exp 1 < Real.log q := by
-      exact (Real.lt_log_iff_exp_lt hq0).2 <| lt_of_lt_of_le (h₁.trans h₂) hq
-    have hlogq_pos : 0 < Real.log q := by
-      linarith
-    exact (Real.lt_log_iff_exp_lt (x := (1 : ℝ)) (y := Real.log q) hlogq_pos).2 hexp1
-  have hApos : 0 < A := by
-    have hloglog_pos : 0 < Real.log (Real.log q) := by
-      exact Real.log_pos (x := Real.log q) hlogq
-    have hlogloglog_pos : 0 < Real.log (Real.log (Real.log q)) := by
-      exact Real.log_pos (x := Real.log (Real.log q)) hloglogq
-    positivity
-  refine ⟨(p : ℝ) / A + 1, by positivity, ?_⟩
-  have hbound : (p : ℝ) ≤ ((p : ℝ) / A + 1) * A := by
-    field_simp [A, hApos.ne']
-    nlinarith
-  simpa [A, mul_assoc, mul_left_comm, mul_comm] using hbound
-
-
--- === Inlined from Erdos696/SubsetProduct.lean ===
 /-
 # The subset-product successor lemma (abstract form)
 
@@ -11597,11 +11263,6 @@ variable {G : Type*} [CommGroup G] [Fintype G] [DecidableEq G]
 a subset `S` of `Fin K`. -/
 noncomputable def subsetProd {K : ℕ} (S : Finset (Fin K)) (f : Fin K → G) : G :=
   ∏ i ∈ S, f i
-
-/-- The random variable `Z(g) = #{∅ ≠ S ⊆ Fin K : subsetProd S g = 1}`. -/
-noncomputable def Zsubset {K : ℕ} (g : Fin K → G) : ℕ :=
-  ((Finset.univ : Finset (Finset (Fin K))).filter
-    (fun S => S.Nonempty ∧ subsetProd S g = 1)).card
 
 /-- For a fixed nonempty `S`, the pushforward of the uniform distribution
 on `G^K` under `g ↦ subsetProd S g` is uniform on `G`.
@@ -11865,48 +11526,6 @@ lemma subsetProd_pair_uniform {K : ℕ}
     congr 1
     ext g
     simp [and_comm]
-
-/-- **Subset-product successor lemma (abstract form), inequality (5.4).**
-
-`Σ_{∅ ≠ S} P(X_S = 1) = (2^K - 1) / N`.
-
-This follows from `subsetProd_uniform` (each summand is `N^(K-1)`) and the
-fact that the number of nonempty subsets of `Fin K` is `2^K - 1`.  The
-proof is "structurally trivial" given `subsetProd_uniform`, but requires
-elementary `Finset.card` / `Finset.sum_const` bookkeeping. -/
-lemma subset_product_mean_count {K : ℕ} :
-    let N := Fintype.card G
-    (∑ S ∈ (Finset.univ : Finset (Finset (Fin K))).filter (·.Nonempty),
-        (Finset.univ.filter (fun g : Fin K → G => subsetProd S g = 1)).card)
-        =
-    (2 ^ K - 1) * N ^ (K - 1) := by
-  -- Each summand is `N^(K-1)` by `subsetProd_uniform` with `a = 1`.  Then
-  -- the sum is constant across the filter, so it equals `(filter.card) ·
-  -- N^(K-1)`.  The filter `Finset.univ.filter (·.Nonempty)` over
-  -- `Finset (Fin K)` has cardinality `2^K - 1` (= card of all subsets minus
-  -- the empty subset).
-  intro N
-  -- Step 1: each summand = N^(K-1).
-  have step1 : ∀ S ∈ (Finset.univ : Finset (Finset (Fin K))).filter (·.Nonempty),
-      (Finset.univ.filter (fun g : Fin K → G => subsetProd S g = 1)).card = N ^ (K - 1) := by
-    intro S hS
-    have hSne : S.Nonempty := (Finset.mem_filter.mp hS).2
-    exact subsetProd_uniform S hSne 1
-  rw [Finset.sum_congr rfl step1, Finset.sum_const]
-  -- Step 2: filter card = 2^K - 1.
-  have card_filter :
-      ((Finset.univ : Finset (Finset (Fin K))).filter (·.Nonempty)).card = 2 ^ K - 1 := by
-    -- `Finset.univ : Finset (Finset (Fin K))` has card `2^K`.
-    -- Filter excludes only `S = ∅`, so we lose 1.
-    have huniv : (Finset.univ : Finset (Finset (Fin K))).card = 2 ^ K := by
-      rw [Finset.card_univ, Fintype.card_finset, Fintype.card_fin]
-    -- Express filter as univ.erase ∅
-    rw [show ((Finset.univ : Finset (Finset (Fin K))).filter (·.Nonempty)) =
-        Finset.univ.erase (∅ : Finset (Fin K)) from ?_]
-    · rw [Finset.card_erase_of_mem (Finset.mem_univ _), huniv]
-    · ext S
-      simp [Finset.mem_filter, Finset.mem_erase, Finset.nonempty_iff_ne_empty]
-  rw [card_filter, smul_eq_mul]
 
 /-- **Subset-product successor lemma (Lemma 5.1 / Lemma 6.1 of paper).**
 
@@ -12314,11 +11933,6 @@ lemma IsHBadPair.mul_dvd {d e n : ℕ} (h : IsHBadPair d e) (hd : d ∣ n)
   rcases hdk with ⟨l, rfl⟩
   refine ⟨l, by ring⟩
 
-/-- Consequently, for positive `n`, any `n` divisible by an `H`-bad pair is at least `d * e`. -/
-lemma IsHBadPair.mul_le_of_dvd {d e n : ℕ} (hn : 0 < n) (h : IsHBadPair d e)
-    (hd : d ∣ n) (he : e ∣ n) : d * e ≤ n := by
-  exact Nat.le_of_dvd hn (h.mul_dvd hd he)
-
 /-- The smaller entry in an `H`-bad pair is at least `2`. -/
 lemma IsHBadPair.two_le_left {d e : ℕ} (h : IsHBadPair d e) : 2 ≤ d := by
   by_contra hd
@@ -12344,29 +11958,6 @@ lemma IsHBadPair.exists_mul_add_one {d e : ℕ} (h : IsHBadPair d e) :
       e = d * (e / d) + e % d := (Nat.div_add_mod e d).symm
       _ = e / d * d + e % d := by rw [mul_comm d]
       _ = e / d * d + 1 := by rw [h.2.1]
-
-/-- The positive multiples of `m` up to `N` have cardinality `⌊N / m⌋`. -/
-lemma card_pos_multiples_le (N m : ℕ) :
-    Nat.card {n : ℕ | 0 < n ∧ n ≤ N ∧ m ∣ n} = N / m := by
-  classical
-  rw [Nat.subtype_card ({n ∈ Finset.Ioc 0 N | m ∣ n})]
-  · exact Nat.Ioc_filter_dvd_card_eq_div N m
-  · intro n
-    simp [and_assoc]
-
-/-- For a fixed bad pair, the positive integers up to `N` divisible by both entries are
-bounded by `⌊N / (d * e)⌋`. -/
-lemma IsHBadPair.card_multiples_le {d e : ℕ} (h : IsHBadPair d e) (N : ℕ) :
-    Nat.card {n : ℕ | 0 < n ∧ n ≤ N ∧ d ∣ n ∧ e ∣ n} ≤ N / (d * e) := by
-  classical
-  rw [Nat.subtype_card ({n ∈ Finset.Ioc 0 N | d ∣ n ∧ e ∣ n})]
-  · rw [← Nat.Ioc_filter_dvd_card_eq_div N (d * e)]
-    exact Finset.card_le_card (by
-      intro n hn
-      simp only [Finset.mem_filter, Finset.mem_Ioc] at hn ⊢
-      exact ⟨hn.1, h.mul_dvd hn.2.1 hn.2.2⟩)
-  · intro n
-    simp [and_assoc]
 
 /-- A telescoping bound for the `d^{-3/2}` tail, written using square roots. -/
 lemma inv_mul_sqrt_le_tel (d : ℕ) (hd : 1 ≤ d) :
@@ -12770,39 +12361,12 @@ lemma tower_le_Um (m : ℕ) : tower m ≤ Um m := by
   have ht0 : 0 ≤ tower m := le_trans (by norm_num) ht
   nlinarith [sq_nonneg (tower m), mul_nonneg ht0 (sq_nonneg (tower m))]
 
-/-- A number below `T_m` has `U`-rank at most `m`. -/
-lemma Urank_le_of_le_tower {d m : ℕ} (h : (d : ℝ) ≤ tower m) : Urank d ≤ m :=
-  Urank_le_of_le_Um (h.trans (tower_le_Um m))
-
 /-- Anything above `U_5` has `U`-rank at least `6`. -/
 lemma six_le_Urank_of_Um_five_lt {d : ℕ} (h : Um 5 < (d : ℝ)) : 6 ≤ Urank d := by
   by_contra h6
   have hr : Urank d ≤ 5 := by omega
   have hle : (d : ℝ) ≤ Um 5 := (Urank_spec d).trans (Um_mono hr)
   exact (not_lt_of_ge hle) h
-
-/-- Iterating the logarithm `k` times down a tower of height `m + k` gives `T_m`. -/
-lemma iteratedLog_tower_add (k m : ℕ) : iteratedLog k (tower (m + k)) = tower m := by
-  induction k generalizing m with
-  | zero => simp [iteratedLog]
-  | succ k ih =>
-      change Real.log (iteratedLog k (tower (m + (k + 1)))) = tower m
-      rw [show m + (k + 1) = (m + 1) + k by omega, ih (m + 1)]
-      exact log_tower_succ m
-
-/-- Iterating the logarithm `m` times on `T_m` lands at `e`. -/
-lemma iteratedLog_tower_self (m : ℕ) : iteratedLog m (tower m) = Real.exp 1 := by
-  simpa using iteratedLog_tower_add m 0
-
-/-- The custom `logStar` of a tower is at most the tower height. -/
-lemma logStar_tower_le (m : ℕ) : logStar (tower m) ≤ m := by
-  classical
-  have h : ∃ k : ℕ, iteratedLog k (tower m) ≤ Real.exp 1 := by
-    refine ⟨m, ?_⟩
-    rw [iteratedLog_tower_self]
-  unfold logStar
-  rw [dif_pos h]
-  exact Nat.find_min' h (by rw [iteratedLog_tower_self])
 
 /-- If an iterated logarithm lands below a tower level, then the original
 number lies below the correspondingly higher tower level. -/
@@ -12895,34 +12459,6 @@ lemma eventually_logStar_ge (L₀ : ℕ) :
       exact (Nat.floor_lt hnonneg).mp (Nat.lt_succ_self _)
     have hn_real_ge : (N : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
     linarith
-
-/-- Any divisor chain of a positive `n` has length at most `n`. -/
-lemma IsDivisorChain.length_le_self {n : ℕ} (hn : n ≠ 0) {ds : List ℕ}
-    (hds : IsDivisorChain n ds) : ds.length ≤ n := by
-  rcases hds with ⟨hdiv, hpair, _hmod⟩
-  have hnodup : ds.Nodup := hpair.nodup
-  rw [← List.toFinset_card_of_nodup hnodup]
-  have hsub : ds.toFinset ⊆ Finset.Icc 1 n := by
-    intro d hd
-    rw [List.mem_toFinset] at hd
-    simpa [Finset.mem_Icc] using
-      (show 1 ≤ d ∧ d ≤ n from
-        ⟨(hdiv d hd).1, Nat.le_of_dvd (Nat.pos_of_ne_zero hn) (hdiv d hd).2⟩)
-  exact (Finset.card_le_card hsub).trans (by simp)
-
-/-- The extremal divisor-chain length is bounded by `n` for positive `n`. -/
-lemma HChain_le_self {n : ℕ} (hn : n ≠ 0) : HChain n ≤ n := by
-  classical
-  by_cases hn1 : n = 1
-  · subst hn1; simp [HChain]
-  have hne : ({u | ∃ ds : List ℕ, IsDivisorChain n ds ∧ ds.length = u} : Set ℕ).Nonempty :=
-    ⟨0, ⟨[], by simp [IsDivisorChain]⟩⟩
-  show HChain n ≤ n
-  rw [HChain, if_neg hn1]
-  exact csSup_le hne (by
-    intro u hu
-    rcases hu with ⟨ds, hds, rfl⟩
-    exact hds.length_le_self hn)
 
 /-- A property that holds above a fixed natural threshold holds for almost all integers. -/
 lemma almostAll_of_forall_ge {P : ℕ → Prop} (N : ℕ) (hN : ∀ n : ℕ, N ≤ n → P n) :
@@ -13327,27 +12863,6 @@ private lemma IsHBadPrimePair.mul_dvd_of_dvd {p q n : ℕ}
   have hcop : Nat.Coprime p q := (Nat.coprime_primes hp hq).2 (Nat.ne_of_lt hpq_lt)
   exact hcop.mul_dvd_of_dvd_of_dvd hpdvd hqdvd
 
-/-- If a bad prime pair divides a positive integer, then its product is bounded by it. -/
-private lemma IsHBadPrimePair.mul_le_of_dvd {p q n : ℕ}
-    (hpq : IsHBadPrimePair p q) (hn : 0 < n) (hpdvd : p ∣ n) (hqdvd : q ∣ n) :
-    p * q ≤ n :=
-  Nat.le_of_dvd hn (hpq.mul_dvd_of_dvd hpdvd hqdvd)
-
-/-- For a fixed bad prime pair, the positive integers up to `N` divisible by both entries
-are bounded by the number of multiples of `p * q`. -/
-private lemma IsHBadPrimePair.card_multiples_le {p q : ℕ} (hpq : IsHBadPrimePair p q)
-    (N : ℕ) :
-    Nat.card {n : ℕ | 0 < n ∧ n ≤ N ∧ p ∣ n ∧ q ∣ n} ≤ N / (p * q) := by
-  classical
-  rw [Nat.subtype_card ({n ∈ Finset.Ioc 0 N | p ∣ n ∧ q ∣ n})]
-  · rw [← Nat.Ioc_filter_dvd_card_eq_div N (p * q)]
-    exact Finset.card_le_card (by
-      intro n hn
-      simp only [Finset.mem_filter, Finset.mem_Ioc] at hn ⊢
-      exact ⟨hn.1, hpq.mul_dvd_of_dvd hn.2.1 hn.2.2⟩)
-  · intro n
-    simp [and_assoc]
-
 /-- Finset version of `IsHBadPrimePair.card_multiples_le`. -/
 private lemma IsHBadPrimePair.finset_card_multiples_le {p q N : ℕ}
     (hpq : IsHBadPrimePair p q) :
@@ -13358,19 +12873,6 @@ private lemma IsHBadPrimePair.finset_card_multiples_le {p q N : ℕ}
     intro n hn
     simp only [Finset.mem_filter, Finset.mem_Ioc] at hn ⊢
     exact ⟨hn.1, hpq.mul_dvd_of_dvd hn.2.1 hn.2.2⟩)
-
-/-- Brun--Titchmarsh specialized to the residue class `1 mod p` for prime moduli.
-Uses the strengthened hypothesis `256 p^9 ≤ t`. -/
-private lemma brun_titchmarsh_for_prime :
-    ∃ CBT : ℝ, 0 < CBT ∧
-      ∀ p : ℕ, p.Prime →
-        ∀ t : ℝ, (256 * (p : ℝ)^9 : ℝ) ≤ t →
-          ((piMod t p 1 : ℝ)) ≤ CBT * t / (((p - 1 : ℕ) : ℝ) * Real.log (t / p)) := by
-  rcases brun_titchmarsh with ⟨CBT, hCBT, hBT⟩
-  refine ⟨CBT, hCBT, ?_⟩
-  intro p hp t ht
-  have hp1 : 1 ≤ p := hp.one_le
-  simpa [Nat.totient_prime hp] using hBT p hp1 1 (by simp) t ht
 
 /-- The possible larger entries in an `h`-bad prime pair with fixed smaller
 prime, truncated at `N`. -/
@@ -13395,16 +12897,6 @@ private lemma logOverSq_nonneg (n : ℕ) : 0 ≤ logOverSq n := by
   · have hlog_nonneg : 0 ≤ Real.log (n : ℝ) := Real.log_nonneg (by exact_mod_cast hn)
     positivity
   · positivity
-
-private lemma invNatLogSq_nonneg (n : ℕ) : 0 ≤ invNatLogSq n := by
-  dsimp [invNatLogSq]
-  split_ifs with hn
-  · positivity
-  · positivity
-
-private lemma badPrimePairMajorant_nonneg (n : ℕ) : 0 ≤ badPrimePairMajorant n := by
-  dsimp [badPrimePairMajorant]
-  exact add_nonneg (logOverSq_nonneg n) (invNatLogSq_nonneg n)
 
 private lemma inv_nat_mul_log_sq_antitone {m n : ℕ} (hm : 2 ≤ m) (hmn : m ≤ n) :
     (1 : ℝ) / ((n : ℝ) * (Real.log n) ^ 2) ≤
@@ -14415,13 +13907,6 @@ private lemma lower_bound_from_good_prime_chains {ε : ℝ}
     almostAll (fun n => (hChain n : ℝ) ≥ (1 / 2 - ε) * (logStar n : ℝ)) :=
   almostAll_mono hgood (fun _ hn => lower_bound_of_good_prime_chain hn)
 
-private lemma greedy_h_chain_from_good_prime_chains
-    (hgood : ∀ ε : ℝ, 0 < ε → almostAll (GoodLowerPrimeChain ε)) :
-    ∀ ε : ℝ, 0 < ε →
-      almostAll (fun n => (hChain n : ℝ) ≥ (1 / 2 - ε) * (logStar n : ℝ)) := by
-  intro ε hε
-  exact lower_bound_from_good_prime_chains (hgood ε hε)
-
 /-- The paper §5.2 window parameter `B = L^2`, where `L = log_* x`. -/
 private noncomputable def lowerHWindowB (L : ℕ) : ℝ :=
   (L : ℝ) ^ 2
@@ -15067,34 +14552,6 @@ private lemma LowerHStageFailure_iff_of_mod {L j n n' : ℕ}
       (p := p) (n := n) (n' := n') hB le_rfl hmod
     exact ⟨p, by simpa [hgp_eq] using hgp, by simpa [hsucc_eq] using hnone⟩
 
-private lemma lowerHInitialSelectedPrimes_eq_of_mod_initial {L n n' : ℕ}
-    (hmod : n % primorial ⌊lowerHWindowY L 0⌋₊ =
-      n' % primorial ⌊lowerHWindowY L 0⌋₊) :
-    lowerHInitialSelectedPrimes L n = lowerHInitialSelectedPrimes L n' := by
-  classical
-  apply Finset.ext
-  intro q
-  constructor
-  · intro hq
-    rw [lowerHInitialSelectedPrimes] at hq ⊢
-    simp only [Finset.mem_filter, Finset.mem_Iic] at hq ⊢
-    rcases hq with ⟨hqfloor, hqprime, hqdiv, hqY⟩
-    exact ⟨hqfloor, hqprime, (dvd_iff_of_mod_primorial_eq hqprime hqfloor hmod).mp hqdiv,
-      hqY⟩
-  · intro hq
-    rw [lowerHInitialSelectedPrimes] at hq ⊢
-    simp only [Finset.mem_filter, Finset.mem_Iic] at hq ⊢
-    rcases hq with ⟨hqfloor, hqprime, hqdiv, hqY⟩
-    exact ⟨hqfloor, hqprime, (dvd_iff_of_mod_primorial_eq hqprime hqfloor hmod).mpr hqdiv,
-      hqY⟩
-
-private lemma LowerHInitialFailure_iff_of_mod {L n n' : ℕ}
-    (hmod : n % primorial ⌊lowerHWindowY L 0⌋₊ =
-      n' % primorial ⌊lowerHWindowY L 0⌋₊) :
-    LowerHInitialFailure L n ↔ LowerHInitialFailure L n' := by
-  have hsel := lowerHInitialSelectedPrimes_eq_of_mod_initial (L := L) hmod
-  simp [LowerHInitialFailure, lowerHGreedyPrime?, hsel]
-
 private lemma lowerHInitialFailure_not_dvd {L n p : ℕ}
     (hp : p.Prime) (hpY : (p : ℝ) ≤ lowerHWindowY L 0)
     (hfail : LowerHInitialFailure L n) :
@@ -15107,59 +14564,6 @@ private lemma lowerHInitialFailure_not_dvd {L n p : ℕ}
   have hne : (lowerHInitialSelectedPrimes L n).Nonempty := ⟨p, hmem⟩
   unfold LowerHInitialFailure at hfail
   simp [lowerHGreedyPrime?, finsetLeastNat?, hne] at hfail
-
-private lemma lowerHInitialFailure_coprime_primorial {L r : ℕ}
-    (hfail : LowerHInitialFailure L r) :
-    (primorial ⌊lowerHWindowY L 0⌋₊).Coprime r := by
-  classical
-  by_contra hcop
-  rcases Nat.Prime.not_coprime_iff_dvd.mp hcop with ⟨p, hp, hpM, hpr⟩
-  have hp_mem :
-      p ∈ Finset.filter Nat.Prime (Finset.Iic ⌊lowerHWindowY L 0⌋₊) := by
-    unfold primorial at hpM
-    rcases (Prime.dvd_finset_prod_iff hp.prime (fun q : ℕ => q)).mp hpM with
-      ⟨q, hq, hpq⟩
-    have hqprime : q.Prime := (Finset.mem_filter.mp hq).2
-    have hpq_eq : p = q := (Nat.prime_dvd_prime_iff_eq hp hqprime).mp hpq
-    simpa [hpq_eq] using hq
-  have hp_floor : p ≤ ⌊lowerHWindowY L 0⌋₊ :=
-    Finset.mem_Iic.mp (Finset.mem_filter.mp hp_mem).1
-  have hpY : (p : ℝ) ≤ lowerHWindowY L 0 := by
-    have hp_pos : 0 < p := hp.pos
-    have hfloor_ne_zero : ⌊lowerHWindowY L 0⌋₊ ≠ 0 := by omega
-    have hy_ge_one : (1 : ℝ) ≤ lowerHWindowY L 0 := by
-      by_contra hy
-      have hlt : lowerHWindowY L 0 < 1 := lt_of_not_ge hy
-      exact hfloor_ne_zero ((Nat.floor_eq_zero).2 hlt)
-    have hp_le_floor : (p : ℝ) ≤ (⌊lowerHWindowY L 0⌋₊ : ℕ) := by
-      exact_mod_cast hp_floor
-    exact hp_le_floor.trans (Nat.floor_le (by linarith))
-  exact lowerHInitialFailure_not_dvd hp hpY hfail hpr
-
-private lemma lowerHInitialFailure_residue_card_le_totient (L : ℕ) :
-    Nat.card {r : Fin (primorial ⌊lowerHWindowY L 0⌋₊) //
-        LowerHInitialFailure L r.val} ≤
-      (primorial ⌊lowerHWindowY L 0⌋₊).totient := by
-  classical
-  let M := primorial ⌊lowerHWindowY L 0⌋₊
-  let f :
-      {r : Fin M // LowerHInitialFailure L r.val} ↪
-        {m : ℕ | m < M ∧ M.Coprime m} :=
-    { toFun := fun r =>
-        ⟨r.1.val, r.1.isLt, by simpa [M] using lowerHInitialFailure_coprime_primorial r.2⟩
-      inj' := by
-        intro a b hab
-        apply Subtype.ext
-        apply Fin.ext
-        exact congrArg Subtype.val hab }
-  have htarget_finite : Set.Finite {m : ℕ | m < M ∧ M.Coprime m} :=
-    (Set.finite_Iio M).subset (by
-      intro m hm
-      exact hm.1)
-  haveI : Finite {m : ℕ | m < M ∧ M.Coprime m} := htarget_finite.to_subtype
-  have hle := Finite.card_le_of_embedding f
-  have htot := Nat.totient_eq_card_lt_and_coprime M
-  simpa [M, htot] using hle
 
 private lemma card_bounded_periodic {P : ℕ → Prop} [DecidablePred P] {M N : ℕ}
     (hM : 0 < M) (hperiod : ∀ n, P n ↔ P (n % M)) :
@@ -15212,50 +14616,6 @@ private lemma periodic_count_le {P : ℕ → Prop} [DecidablePred P] {M N : ℕ}
       field_simp [hMne]
     _ ≤ ((C : ℝ) / (M : ℝ)) * (N : ℝ) + (M : ℝ) := by
       linarith
-
-private lemma initial_failure_count_le_sieve_product (L N : ℕ) :
-    let P := ⌊lowerHWindowY L 0⌋₊
-    let M := primorial P
-    let T := Finset.filter Nat.Prime (Finset.Iic P)
-    (Nat.card {n : ℕ | n ≤ N ∧ LowerHInitialFailure L n} : ℝ) ≤
-      (∏ p ∈ T, (1 - (1 : ℝ) / (p : ℝ))) * (N : ℝ) + (M : ℝ) := by
-  classical
-  let P := ⌊lowerHWindowY L 0⌋₊
-  let M := primorial P
-  let T := Finset.filter Nat.Prime (Finset.Iic P)
-  have hMpos : 0 < M := by exact primorial_pos P
-  have hperiod : ∀ n : ℕ, LowerHInitialFailure L n ↔ LowerHInitialFailure L (n % M) := by
-    intro n
-    apply LowerHInitialFailure_iff_of_mod
-    have hmod : n % M = (n % M) % M := by
-      rw [Nat.mod_eq_of_lt (Nat.mod_lt n hMpos)]
-    simpa [P, M] using hmod
-  have hcount := periodic_count_le
-    (P := fun n : ℕ => LowerHInitialFailure L n) (M := M) (N := N) hMpos hperiod
-  let C := Nat.card {r : Fin M // LowerHInitialFailure L r.val}
-  have hC_le_tot_nat : C ≤ M.totient := by
-    dsimp [C, M, P]
-    exact lowerHInitialFailure_residue_card_le_totient L
-  have hC_le_tot : (C : ℝ) ≤ (M.totient : ℝ) := by exact_mod_cast hC_le_tot_nat
-  have hpf : M.primeFactors = T := by
-    dsimp [M, T, primorial]
-    exact Nat.primeFactors_prod (by
-      intro p hp
-      exact (Finset.mem_filter.mp hp).2)
-  have htot :
-      (M.totient : ℝ) = (M : ℝ) * ∏ p ∈ T, (1 - (1 : ℝ) / (p : ℝ)) := by
-    have hq := congrArg (fun q : ℚ => (q : ℝ)) (Nat.totient_eq_mul_prod_factors M)
-    simpa [hpf, one_div, Rat.cast_natCast, Rat.cast_mul, Rat.cast_sub, Rat.cast_inv,
-      map_prod] using hq
-  have hratio : (C : ℝ) / (M : ℝ) ≤ ∏ p ∈ T, (1 - (1 : ℝ) / (p : ℝ)) := by
-    rw [div_le_iff₀ (by exact_mod_cast hMpos)]
-    simpa [htot, mul_comm] using hC_le_tot
-  calc
-    (Nat.card {n : ℕ | n ≤ N ∧ LowerHInitialFailure L n} : ℝ)
-        ≤ ((C : ℝ) / (M : ℝ)) * (N : ℝ) + (M : ℝ) := by
-          simpa [C] using hcount
-    _ ≤ (∏ p ∈ T, (1 - (1 : ℝ) / (p : ℝ))) * (N : ℝ) + (M : ℝ) := by
-          gcongr
 
 private lemma coprime_to_primorial_count_le_sieve_product (P N : ℕ) :
     let M := primorial P
@@ -15336,61 +14696,6 @@ Proof structure:
 These compose with `prod_one_sub_inv_le_exp_neg_sum` (1−x ≤ e^{−x}) and
 `prime_successor_mass` (∑1/q ≥ B/8) to bound `lowerHStageFailureResidueProb` by
 `exp(−B/8)`, matching paper line 1170 exactly. -/
-
-/-- Count of multiples of `p` in `[0, M)` is exactly `M / p` when `p ∣ M`. -/
-private lemma pmodel_count_multiples_of_p_in_range
-    {p M : ℕ} (hp_pos : 0 < p) (hp_dvd : p ∣ M) :
-    ((Finset.range M).filter (fun r => p ∣ r)).card = M / p := by
-  rcases hp_dvd with ⟨k, hk⟩
-  subst hk
-  have : (Finset.range (p * k)).filter (fun r => p ∣ r) = (Finset.range k).image (· * p) := by
-    ext r
-    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image]
-    constructor
-    · rintro ⟨hr_lt, hp_dvd_r⟩
-      rcases hp_dvd_r with ⟨m, rfl⟩
-      refine ⟨m, ?_, by ring⟩
-      rcases Nat.lt_or_ge m k with h | h
-      · exact h
-      · exfalso
-        have : p * k ≤ p * m := Nat.mul_le_mul_left p h
-        omega
-    · rintro ⟨m, hm_lt, rfl⟩
-      refine ⟨?_, ⟨m, by ring⟩⟩
-      have : m * p < k * p := Nat.mul_lt_mul_of_pos_right hm_lt hp_pos
-      linarith [Nat.mul_comm k p]
-  rw [this]
-  rw [Finset.card_image_of_injective _ (fun a b hab => by
-    have : a * p = b * p := hab
-    exact Nat.eq_of_mul_eq_mul_right hp_pos this)]
-  rw [Finset.card_range]
-  rw [Nat.mul_div_cancel_left k hp_pos]
-
-/-- **Paper §5.2 line 1162 (one-prime Bernoulli marginal) — exact.**
-
-For prime `p ∣ M`, the count of `r ∈ [0, M)` with `p ∤ r` is exactly `(M/p) · (p − 1)`.
--/
-private lemma pmodel_count_avoid_one_prime
-    {p M : ℕ} (hp_prime : p.Prime) (hp_dvd : p ∣ M) :
-    ((Finset.range M).filter (fun r => ¬ (p : ℕ) ∣ r)).card = (M / p) * (p - 1) := by
-  classical
-  have hp_pos : 0 < p := hp_prime.pos
-  have hsplit : ((Finset.range M).filter (fun r => p ∣ r)).card +
-                ((Finset.range M).filter (fun r => ¬ p ∣ r)).card = M := by
-    have hbase := Finset.card_filter_add_card_filter_not
-      (s := Finset.range M) (p := fun r => p ∣ r)
-    rw [Finset.card_range] at hbase
-    exact hbase
-  rw [pmodel_count_multiples_of_p_in_range hp_pos hp_dvd] at hsplit
-  have hcomp : ((Finset.range M).filter (fun r => ¬ p ∣ r)).card = M - M / p := by omega
-  rw [hcomp]
-  rcases hp_dvd with ⟨k, hk⟩
-  subst hk
-  rw [Nat.mul_div_cancel_left k hp_pos]
-  rcases Nat.exists_eq_succ_of_ne_zero (Nat.pos_iff_ne_zero.mp hp_pos) with ⟨p', rfl⟩
-  simp only [Nat.succ_sub_one, Nat.succ_mul, Nat.add_sub_cancel]
-  ring
-
 /-- **Paper §5.2 line 1158 ("independent Bernoulli with probabilities `1/q`")** —
 formalised as `totient(∏Q) = ∏(q − 1)` for distinct primes. Iterated `Nat.totient_mul`. -/
 private lemma pmodel_totient_prod_distinct_primes :
@@ -17014,106 +16319,6 @@ private lemma stage_h_pmodel_failure_prob (j L : ℕ)
     _ ≤ Real.exp (-(lowerHWindowB L) / 8) * (M : ℝ) :=
         mul_le_mul_of_nonneg_left hsum_disjoint (Real.exp_pos _).le
 
-/-- CRT transfer for the one-stage `h` failure estimate.
-
-The event `LowerHStageFailure L j n` is periodic modulo the primorial of the stage
-cutoff, because all divisibility tests used by the greedy construction up to stage
-`j + 1` involve primes in that window.  Applying `crt_transfer` and the product-model
-bound gives the stated integer-density estimate with the single period error `Mj`. -/
-private lemma stage_h_crt_transfer (j : ℕ)
-    (hpmodel : ∀ L : ℕ, 2 ≤ lowerHWindowB L →
-      Classical.choose (prime_successor_mass 2 (by norm_num : (2:ℝ) ≤ 2))
-        ≤ lowerHWindowY L j →
-      lowerHStageFailureResidueProb L j ≤ Real.exp (-(lowerHWindowB L) / 8)) :
-    ∀ η : ℝ, 0 < η →
-      ∃ x₀ : ℝ, 0 < x₀ ∧
-        ∀ x : ℝ, x₀ ≤ x →
-          let L := logStar x
-          let B := lowerHWindowB L
-          let yj := lowerHWindowY L j
-          let Mj := primorial ⌊Real.exp (Real.exp ((B / 2) * yj))⌋₊
-          (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ) ≤
-            Real.exp (-B / 8) * x + (Mj : ℝ) + η * x := by
-  classical
-  intro η hη
-  rcases eventually_logStar_ge 2 with ⟨N₁, hN₁⟩
-  -- Paper line 1146 "for L large": enlarge x₀ to ensure y_j ≥ y₀ (threshold).
-  set y₀ := Classical.choose (prime_successor_mass 2 (by norm_num : (2:ℝ) ≤ 2)) with hy₀_def
-  rcases lowerHWindowY_eventually_ge j y₀ with ⟨N_y, hN_y⟩
-  rcases eventually_logStar_ge N_y with ⟨N₂, hN₂⟩
-  let N := max N₁ N₂
-  refine ⟨((N : ℝ) + 1), by positivity, ?_⟩
-  intro x hx
-  let L := logStar x
-  let B := lowerHWindowB L
-  let yj := lowerHWindowY L j
-  let P := lowerHStageCutoff L j
-  let M := primorial P
-  have hx_nonneg : 0 ≤ x := by
-    have hx0 : (0 : ℝ) < N + 1 := by positivity
-    linarith
-  have hfloor_ge : N ≤ ⌊x⌋₊ := by
-    apply Nat.le_floor
-    have : (N : ℝ) ≤ (N + 1 : ℝ) := by norm_num
-    linarith
-  have hN₁_le_floor : N₁ ≤ ⌊x⌋₊ := le_trans (Nat.le_max_left _ _) hfloor_ge
-  have hN₂_le_floor : N₂ ≤ ⌊x⌋₊ := le_trans (Nat.le_max_right _ _) hfloor_ge
-  have hL_ge : 2 ≤ L := by
-    have hfloor_log : 2 ≤ logStar ((⌊x⌋₊ : ℕ) : ℝ) := hN₁ ⌊x⌋₊ hN₁_le_floor
-    exact hfloor_log.trans
-      (logStar_nat_le_logStar_of_le_floor hx_nonneg (Nat.le_refl ⌊x⌋₊))
-  have hL_ge_Ny : N_y ≤ L := by
-    have hfloor_log : N_y ≤ logStar ((⌊x⌋₊ : ℕ) : ℝ) := hN₂ ⌊x⌋₊ hN₂_le_floor
-    exact hfloor_log.trans
-      (logStar_nat_le_logStar_of_le_floor hx_nonneg (Nat.le_refl ⌊x⌋₊))
-  have hB : 2 ≤ B := by
-    have hLreal : (2 : ℝ) ≤ (L : ℝ) := by exact_mod_cast hL_ge
-    dsimp [B, lowerHWindowB]
-    nlinarith [sq_nonneg ((L : ℝ) - 2)]
-  have hMpos : 0 < M := by
-    exact primorial_pos P
-  have hperiod : ∀ n : ℕ, LowerHStageFailure L j n ↔ LowerHStageFailure L j (n % M) := by
-    intro n
-    apply LowerHStageFailure_iff_of_mod hB
-    have hmod : n % M = (n % M) % M := by
-      rw [Nat.mod_eq_of_lt (Nat.mod_lt n hMpos)]
-    exact hmod
-  have hcount := periodic_count_le
-    (P := fun n : ℕ => LowerHStageFailure L j n) (M := M) (N := ⌊x⌋₊) hMpos hperiod
-  have hcount' :
-      (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ) ≤
-        lowerHStageFailureResidueProb L j * (⌊x⌋₊ : ℝ) + (M : ℝ) := by
-    simpa [lowerHStageFailureResidueProb, P, M, mul_comm, mul_left_comm, mul_assoc]
-      using hcount
-  have hfloor_le_x : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le hx_nonneg
-  have hprob_nonneg : 0 ≤ lowerHStageFailureResidueProb L j := by
-    unfold lowerHStageFailureResidueProb
-    exact div_nonneg (by positivity) (by exact_mod_cast (primorial_pos (lowerHStageCutoff L j)).le)
-  have hcount_x :
-      (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ) ≤
-        lowerHStageFailureResidueProb L j * x + (M : ℝ) := by
-    calc
-      (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ)
-          ≤ lowerHStageFailureResidueProb L j * (⌊x⌋₊ : ℝ) + (M : ℝ) := hcount'
-      _ ≤ lowerHStageFailureResidueProb L j * x + (M : ℝ) := by
-        gcongr
-  -- Paper line 1146 "for L large": y_j ≥ y₀ via enlarged x₀.
-  have hyj_thresh : y₀ ≤ lowerHWindowY L j := hN_y L hL_ge_Ny
-  have hprob := hpmodel L hB hyj_thresh
-  have hmain :
-      (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ) ≤
-        Real.exp (-B / 8) * x + (M : ℝ) := by
-    calc
-      (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ)
-          ≤ lowerHStageFailureResidueProb L j * x + (M : ℝ) := hcount_x
-      _ ≤ Real.exp (-B / 8) * x + (M : ℝ) := by
-        gcongr
-  have heta_nonneg : 0 ≤ η * x := mul_nonneg hη.le hx_nonneg
-  change
-    (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ) ≤
-      Real.exp (-B / 8) * x + (M : ℝ) + η * x
-  linarith
-
 /-- Uniform version of `stage_h_crt_transfer` for summing over the stages present at
 one scale `x`.
 
@@ -17742,27 +16947,6 @@ private lemma stage_failure_sum_h_of_bookkeeping
     linarith
   simpa [L, R] using htotal
 
-/-- Paper §5.2 one-stage failure-density estimate.
-
-For a fixed stage `j`, after conditioning on the greedy construction up to that
-stage, `prime_successor_mass` gives total reciprocal mass at least `B/8` in
-`Q_j(p_j)`.  Independence in the product model and `crt_transfer` then give an
-integer-density bound of the shape `exp(-B/8) · x + M_j + o(x)`, where `M_j` is
-the primorial/CRT-period error for the stage window. -/
-private lemma stage_failure_density_h (j : ℕ) :
-    ∀ η : ℝ, 0 < η →
-      ∃ x₀ : ℝ, 0 < x₀ ∧
-        ∀ x : ℝ, x₀ ≤ x →
-          let L := logStar x
-          let B := lowerHWindowB L
-          let yj := lowerHWindowY L j
-          let Mj := primorial ⌊Real.exp (Real.exp ((B / 2) * yj))⌋₊
-          (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ LowerHStageFailure L j n} : ℝ) ≤
-            Real.exp (-B / 8) * x + (Mj : ℝ) + η * x := by
-  classical
-  intro η hη
-  exact stage_h_crt_transfer j (stage_h_pmodel_failure_prob j) η hη
-
 /-- Paper §5.2 union bound over all greedy stages.
 
 The initial failure is `o(x)`, and the sum over `j < R` of the one-stage bounds
@@ -17940,22 +17124,6 @@ We give the formal statement and defer all seven steps.
 
 
 open scoped Topology
-
-/-- The "independent prime model" probability of an event depending on the
-selection of primes up to `y`.  We do not formalize the underlying
-probability space here; instead we encode the statement of
-`composite_successor` purely as a *combinatorial* claim about the
-density of integers, which can be transferred from the product model
-via `crt_transfer`.
-
-Concretely, we say that a property `Q` of a set `S ⊆ {primes in (y, y^{A-1}]}`
-holds with *prime-model probability `≥ p`* if, in the product measure
-where each prime is selected independently with probability `1/q`, the
-event `Q(S)` has probability at least `p`. -/
-noncomputable def primeModelProb (_y : ℝ) (_A : ℝ)
-    (_Q : Finset ℕ → Prop) : ℝ := 0  -- placeholder definition; not used numerically
-
-
 /-! ### Paper §6.2 finite product-model objects
 
 The seven deferred steps below use an explicit finite prime-selection model on the
@@ -18225,41 +17393,6 @@ private lemma block_joint_good_residue_prob {B : Finset ℕ} {d a : ℕ}
     rw [hB_empty]
     simp
   · field_simp
-
-/-- Selection weight factorizes over disjoint subsets.  Paper §6.2 line 1722-1726:
-"Since the blocks are disjoint, the selected prime in each conditioned-good block is
-independent of the selected primes in the other conditioned-good blocks."  Underlies
-the mixture identity (paper line 1732). -/
-private lemma selectionWeight_disjoint_factor (U₁ U₂ : Finset ℕ) (h_disj : Disjoint U₁ U₂)
-    (S : Finset ℕ) :
-    selectionWeight (U₁ ∪ U₂) S =
-      selectionWeight U₁ (S ∩ U₁) * selectionWeight U₂ (S ∩ U₂) := by
-  unfold selectionWeight
-  rw [Finset.prod_union h_disj]
-  congr 1
-  · apply Finset.prod_congr rfl
-    intro q hq
-    by_cases hqS : q ∈ S
-    · have : q ∈ S ∩ U₁ := Finset.mem_inter.mpr ⟨hqS, hq⟩
-      simp [hqS, this]
-    · have : q ∉ S ∩ U₁ := fun hin => hqS (Finset.mem_inter.mp hin).1
-      simp [hqS, this]
-  · apply Finset.prod_congr rfl
-    intro q hq
-    by_cases hqS : q ∈ S
-    · have : q ∈ S ∩ U₂ := Finset.mem_inter.mpr ⟨hqS, hq⟩
-      simp [hqS, this]
-    · have : q ∉ S ∩ U₂ := fun hin => hqS (Finset.mem_inter.mp hin).1
-      simp [hqS, this]
-
-/-- Selection weight factorization by a single block within a window.  Direct corollary
-of `selectionWeight_disjoint_factor` using `W = B ∪ (W \ B)` for `B ⊆ W`. -/
-private lemma selectionWeight_factor_block_window
-    (W B : Finset ℕ) (h_subset : B ⊆ W) (S : Finset ℕ) :
-    selectionWeight W S =
-      selectionWeight B (S ∩ B) * selectionWeight (W \ B) (S ∩ (W \ B)) := by
-  conv_lhs => rw [show W = B ∪ (W \ B) from (Finset.union_sdiff_of_subset h_subset).symm]
-  exact selectionWeight_disjoint_factor B (W \ B) Finset.disjoint_sdiff S
 
 /-- Independent finite prime-model probability of a predicate on selected subsets. -/
 private noncomputable def finitePrimeModelProb
@@ -18566,27 +17699,6 @@ private lemma finitePrimeModelProb_union_inter {U V : Finset ℕ} (hUV : Disjoin
     _ = (∑ S ∈ U.powerset.filter P, selectionWeight U S) *
           ∑ T ∈ V.powerset.filter Q, selectionWeight V T := by
       rw [Finset.sum_filter, Finset.sum_filter]
-
-/-- Per-block good-with-residue probability lifted to a window U ⊇ B.
-Uses `finitePrimeModelProb_union_inter` to factor over the disjoint partition
-W = B ∪ (W \ B), where the W\B side is unconstrained (sums to 1). -/
-private lemma finitePrimeModelProb_good_block_with_residue_in_window
-    {U : Finset ℕ} {B : Finset ℕ} (h_subset : B ⊆ U) {d a : ℕ}
-    (h_prime : ∀ q ∈ B, q.Prime) :
-    finitePrimeModelProb U
-        (fun S => ∃ q ∈ B, q % d = a % d ∧ S ∩ B = ({q} : Finset ℕ)) =
-      blockGoodProbability B * blockConditionalResidueProbability B d a := by
-  classical
-  rw [show U = B ∪ (U \ B) from (Finset.union_sdiff_of_subset h_subset).symm]
-  rw [show (fun S : Finset ℕ =>
-      ∃ q ∈ B, q % d = a % d ∧ S ∩ B = ({q} : Finset ℕ)) =
-      (fun S => (∃ q ∈ B, q % d = a % d ∧ S ∩ B = ({q} : Finset ℕ)) ∧
-        True) from by funext S; simp]
-  rw [finitePrimeModelProb_union_inter Finset.disjoint_sdiff
-      (fun S' => ∃ q ∈ B, q % d = a % d ∧ S' = ({q} : Finset ℕ))
-      (fun _ => True)]
-  rw [finitePrimeModelProb_block_good_with_residue h_prime, finitePrimeModelProb_true]
-  ring
 
 private lemma finitePrimeModelProb_congr {U : Finset ℕ} {Q R : Finset ℕ → Prop}
     (h : ∀ S, S ⊆ U → (Q S ↔ R S)) :
@@ -19070,14 +18182,6 @@ squarefree products of primes from the window. -/
 noncomputable def compositeSuccessorCRTPeriod (A y : ℝ) (d : ℕ) : ℕ :=
   d * primorial (compositeSuccessorCutoff A y)
 
-/-- The primes from the composite-successor window that divide a residue. -/
-private noncomputable def compositeSelectedPrimes (A y : ℝ) (n : ℕ) : Finset ℕ :=
-  (compositePrimeWindow A y).filter (fun q => q ∣ n)
-
-/-- Integers that avoid every member of a finite set of candidate successor divisors. -/
-private def AvoidsSelectedSuccessors (S : Finset ℕ) (d : ℕ) (x : ℝ) : Set ℕ :=
-  {n : ℕ | 0 < n ∧ n ≤ ⌊x⌋₊ ∧ d ∣ n ∧ ∀ e ∈ S, ¬ e ∣ n}
-
 lemma compositeSuccessorCRTPeriod_pos {A y : ℝ} {d : ℕ} (hd : 1 ≤ d) :
     0 < compositeSuccessorCRTPeriod A y d := by
   dsimp [compositeSuccessorCRTPeriod]
@@ -19087,57 +18191,6 @@ private lemma d_dvd_compositeSuccessorCRTPeriod (A y : ℝ) (d : ℕ) :
     d ∣ compositeSuccessorCRTPeriod A y d := by
   dsimp [compositeSuccessorCRTPeriod]
   exact dvd_mul_right d (primorial (compositeSuccessorCutoff A y))
-
-private lemma compositePrimeWindow20_le_cutoff {y : ℝ} (hy : 1 ≤ y) {q : ℕ}
-    (hq : q ∈ compositePrimeWindow 20 y) :
-    q ≤ compositeSuccessorCutoff 20 y := by
-  rw [compositePrimeWindow] at hq
-  simp only [Finset.mem_filter, Finset.mem_Iic] at hq
-  rcases hq with ⟨_hqfloor, _hqprime, _hqgt, hqle⟩
-  apply Nat.le_floor
-  have hpow : y ^ ((20 : ℝ) - 1) ≤ y ^ (20 : ℝ) := by
-    have hpow19 : y ^ (19 : ℝ) ≤ y ^ (20 : ℝ) :=
-      Real.rpow_le_rpow_of_exponent_le hy (by norm_num : (19 : ℝ) ≤ 20)
-    convert hpow19 using 1
-    norm_num
-  exact hqle.trans (Real.exp_le_exp.mpr hpow)
-
-private lemma compositeSelectedPrimes20_eq_of_mod {y : ℝ} (hy : 1 ≤ y) {n n' : ℕ}
-    (hmod : n % primorial (compositeSuccessorCutoff 20 y) =
-      n' % primorial (compositeSuccessorCutoff 20 y)) :
-    compositeSelectedPrimes 20 y n = compositeSelectedPrimes 20 y n' := by
-  classical
-  apply Finset.ext
-  intro q
-  constructor
-  · intro hq
-    rw [compositeSelectedPrimes] at hq ⊢
-    simp only [Finset.mem_filter] at hq ⊢
-    rcases hq with ⟨hqwin, hqdiv⟩
-    have hqwin' := hqwin
-    rw [compositePrimeWindow] at hqwin'
-    simp only [Finset.mem_filter, Finset.mem_Iic] at hqwin'
-    have hqprime : q.Prime := hqwin'.2.1
-    have hqle := compositePrimeWindow20_le_cutoff hy hqwin
-    exact ⟨hqwin, (dvd_iff_of_mod_primorial_eq hqprime hqle hmod).mp hqdiv⟩
-  · intro hq
-    rw [compositeSelectedPrimes] at hq ⊢
-    simp only [Finset.mem_filter] at hq ⊢
-    rcases hq with ⟨hqwin, hqdiv⟩
-    have hqwin' := hqwin
-    rw [compositePrimeWindow] at hqwin'
-    simp only [Finset.mem_filter, Finset.mem_Iic] at hqwin'
-    have hqprime : q.Prime := hqwin'.2.1
-    have hqle := compositePrimeWindow20_le_cutoff hy hqwin
-    exact ⟨hqwin, (dvd_iff_of_mod_primorial_eq hqprime hqle hmod).mpr hqdiv⟩
-
-private lemma CompositeProductFailure_selected_iff_of_mod {y : ℝ} (hy : 1 ≤ y)
-    {d n n' : ℕ}
-    (hmod : n % primorial (compositeSuccessorCutoff 20 y) =
-      n' % primorial (compositeSuccessorCutoff 20 y)) :
-    CompositeProductFailure 20 y d (compositeSelectedPrimes 20 y n) ↔
-      CompositeProductFailure 20 y d (compositeSelectedPrimes 20 y n') := by
-  rw [compositeSelectedPrimes20_eq_of_mod hy hmod]
 
 private lemma finset_prod_dvd_of_forall_prime_dvd {T : Finset ℕ} {n : ℕ}
     (hprime : ∀ q ∈ T, q.Prime) (hdiv : ∀ q ∈ T, q ∣ n) :
@@ -19165,31 +18218,6 @@ private lemma finset_prod_dvd_of_forall_prime_dvd {T : Finset ℕ} {n : ℕ}
       exact (Nat.coprime_primes (hprime q (Finset.mem_insert_self q T))
         (hprime r (Finset.mem_insert_of_mem hr))).mpr hqr
     exact Nat.Coprime.mul_dvd_of_dvd_of_dvd hcop hqdiv hTdiv
-
-private lemma GoodCompositeSuccessor_of_admissible_selected {A y : ℝ} {d n : ℕ}
-    {T : Finset ℕ} (hTsel : T ⊆ compositeSelectedPrimes A y n)
-    (hadm : AdmissibleCompositeProduct A y d T) :
-    GoodCompositeSuccessor A y d n := by
-  classical
-  have hwindow : ∀ q ∈ T, q.Prime ∧ Real.exp y < (q : ℝ) ∧
-      (q : ℝ) ≤ Real.exp (y ^ (A - 1)) :=
-    hadm.2.1
-  have hprime : ∀ q ∈ T, q.Prime := fun q hq => (hwindow q hq).1
-  have hdiv : ∀ q ∈ T, q ∣ n := by
-    intro q hq
-    have hsel := hTsel hq
-    rw [compositeSelectedPrimes] at hsel
-    exact (Finset.mem_filter.mp hsel).2
-  have hediv : (∏ q ∈ T, q) ∣ n := finset_prod_dvd_of_forall_prime_dvd hprime hdiv
-  exact ⟨T, hadm, hediv⟩
-
-private lemma CompositeSuccessorBadSet_product_failure {A y x : ℝ} {d n : ℕ}
-    (hn : n ∈ CompositeSuccessorBadSet A y d x) :
-    CompositeProductFailure A y d (compositeSelectedPrimes A y n) := by
-  intro hsuccess
-  rcases hn with ⟨_hnpos, _hnle, _hddvd, hnotgood⟩
-  rcases hsuccess with ⟨T, hTsub, hadm⟩
-  exact hnotgood (GoodCompositeSuccessor_of_admissible_selected hTsub hadm)
 
 /-- Product of admissible primes from window divides the primorial CRT period.
 Each prime `q ∈ T` lies in `(exp y, exp(y^{A-1})]` so `q ≤ exp(y^A) = cutoff`,
@@ -19322,494 +18350,6 @@ lemma composite_successor_bad_count_le_periodic {A y : ℝ} {d : ℕ}
       have hmul := mul_le_mul_of_nonneg_left hfloor_le hratio_nonneg
       linarith
 
-private lemma modEq_finset_prod_iff {T : Finset ℕ} {a b : ℕ}
-    (hpair : ∀ e ∈ T, ∀ f ∈ T, e ≠ f → Nat.Coprime e f) :
-    a ≡ b [MOD ∏ e ∈ T, e] ↔ ∀ e ∈ T, a ≡ b [MOD e] := by
-  classical
-  revert hpair
-  refine Finset.induction_on T ?base ?step
-  · intro _hpair
-    constructor
-    · intro _ e he
-      simp at he
-    · intro _
-      rw [Finset.prod_empty]
-      change a % 1 = b % 1
-      rw [Nat.mod_one, Nat.mod_one]
-  · intro e T heT ih hpair_ins
-    have hpair_T : ∀ x ∈ T, ∀ y ∈ T, x ≠ y → Nat.Coprime x y := by
-      intro x hx y hy hxy
-      exact hpair_ins x (Finset.mem_insert_of_mem hx) y (Finset.mem_insert_of_mem hy) hxy
-    have ih' := ih hpair_T
-    have hcop : Nat.Coprime e (∏ x ∈ T, x) := by
-      apply Nat.Coprime.prod_right
-      intro x hx
-      exact hpair_ins e (Finset.mem_insert_self e T) x (Finset.mem_insert_of_mem hx) (by
-        intro hxe
-        exact heT (by simpa [hxe] using hx))
-    have hcrt := Nat.modEq_and_modEq_iff_modEq_mul (a := a) (b := b) hcop
-    rw [Finset.prod_insert heT]
-    constructor
-    · intro h
-      have hp : a ≡ b [MOD e] ∧ a ≡ b [MOD ∏ x ∈ T, x] := hcrt.mpr h
-      exact fun y hy => by
-        rw [Finset.mem_insert] at hy
-        rcases hy with rfl | hyT
-        · exact hp.1
-        · exact ih'.mp hp.2 y hyT
-    · intro h
-      apply hcrt.mp
-      constructor
-      · exact h e (Finset.mem_insert_self e T)
-      · exact ih'.mpr (fun y hy => h y (Finset.mem_insert_of_mem hy))
-
-private lemma residue_card_le_prod_pred (T : Finset ℕ) (hTpos : ∀ e ∈ T, 0 < e)
-    (hpair : ∀ e ∈ T, ∀ f ∈ T, e ≠ f → Nat.Coprime e f) :
-    Nat.card {r : Fin (∏ e ∈ T, e) // ∀ e ∈ T, ¬ e ∣ r.val} ≤
-      ∏ e ∈ T, (e - 1) := by
-  classical
-  let M := ∏ e ∈ T, e
-  have hMpos : 0 < M := by
-    dsimp [M]
-    exact Finset.prod_pos (fun e he => hTpos e he)
-  let F := ∀ i : {e // e ∈ T}, Fin (i.1 - 1)
-  let g : {r : Fin M // ∀ e ∈ T, ¬ e ∣ r.val} ↪ F :=
-  { toFun := fun r i => by
-      by_cases hi1 : i.1 = 1
-      · exact False.elim (r.2 i.1 i.2 (by rw [hi1]; exact one_dvd r.1.val))
-      · let a := r.1.val % i.1
-        have hi2 : 2 ≤ i.1 := by
-          have hipos := hTpos i.1 i.2
-          omega
-        have hane : a ≠ 0 := by
-          intro ha
-          exact r.2 i.1 i.2 (Nat.dvd_iff_mod_eq_zero.mpr ha)
-        have hapos : 0 < a := Nat.pos_of_ne_zero hane
-        have halt : a < i.1 := Nat.mod_lt _ (by omega)
-        exact ⟨a - 1, by omega⟩
-    inj' := by
-      intro r s hrs
-      apply Subtype.ext
-      apply Fin.ext
-      have hmods : ∀ e ∈ T, r.1.val ≡ s.1.val [MOD e] := by
-        intro e he
-        by_cases he1 : e = 1
-        · subst e
-          change r.1.val % 1 = s.1.val % 1
-          rw [Nat.mod_one, Nat.mod_one]
-        · have he2 : 2 ≤ e := by
-            have hepos := hTpos e he
-            omega
-          have hrne : r.1.val % e ≠ 0 := by
-            intro hzero
-            exact r.2 e he (Nat.dvd_iff_mod_eq_zero.mpr hzero)
-          have hsne : s.1.val % e ≠ 0 := by
-            intro hzero
-            exact s.2 e he (Nat.dvd_iff_mod_eq_zero.mpr hzero)
-          have hrpos : 0 < r.1.val % e := Nat.pos_of_ne_zero hrne
-          have hspos : 0 < s.1.val % e := Nat.pos_of_ne_zero hsne
-          have hreq : (r.1.val % e) - 1 = (s.1.val % e) - 1 := by
-            simpa [F, he1] using congrArg (fun f : F => (f ⟨e, he⟩).val) hrs
-          change r.1.val % e = s.1.val % e
-          omega
-      have hprod : r.1.val ≡ s.1.val [MOD M] :=
-        (modEq_finset_prod_iff (T := T) (a := r.1.val) (b := s.1.val) hpair).mpr
-          hmods
-      change r.1.val % M = s.1.val % M at hprod
-      rw [Nat.mod_eq_of_lt r.1.isLt, Nat.mod_eq_of_lt s.1.isLt] at hprod
-      exact hprod }
-  have hle := Finite.card_le_of_embedding g
-  have hF : Nat.card F = ∏ e ∈ T, (e - 1) := by
-    dsimp [F]
-    rw [Nat.card_eq_fintype_card]
-    rw [Fintype.card_pi]
-    rw [show (∏ x : {e // e ∈ T}, Fintype.card (Fin (x.1 - 1))) =
-        ∏ x : {e // e ∈ T}, (x.1 - 1) by simp]
-    simpa using (Finset.prod_attach T (fun e : ℕ => e - 1))
-  rw [hF] at hle
-  simpa [M, F] using hle
-
-private lemma prod_ratio_le_exp_neg_sum (T : Finset ℕ) (hpos : ∀ e ∈ T, 0 < e) :
-    ((↑(∏ e ∈ T, (e - 1)) : ℝ) / (↑(∏ e ∈ T, e) : ℝ)) ≤
-      Real.exp (-(∑ e ∈ T, (1 : ℝ) / (e : ℝ))) := by
-  classical
-  have hratio_eq :
-      ((↑(∏ e ∈ T, (e - 1)) : ℝ) / (↑(∏ e ∈ T, e) : ℝ)) =
-        ∏ e ∈ T, (((e : ℝ) - 1) / (e : ℝ)) := by
-    simp_rw [Nat.cast_prod]
-    rw [← Finset.prod_div_distrib]
-    apply Finset.prod_congr rfl
-    intro e he
-    have hepos : 0 < e := hpos e he
-    have he1 : 1 ≤ e := Nat.succ_le_of_lt hepos
-    rw [Nat.cast_sub he1]
-    norm_num
-  rw [hratio_eq]
-  calc
-    (∏ e ∈ T, (((e : ℝ) - 1) / (e : ℝ)))
-        ≤ ∏ e ∈ T, Real.exp (-(1 : ℝ) / (e : ℝ)) := by
-          apply Finset.prod_le_prod
-          · intro e he
-            have heposR : 0 < (e : ℝ) := by exact_mod_cast hpos e he
-            have hle : (1 : ℝ) ≤ e := by exact_mod_cast Nat.succ_le_of_lt (hpos e he)
-            exact div_nonneg (sub_nonneg.mpr hle) heposR.le
-          · intro e he
-            have heposR : 0 < (e : ℝ) := by exact_mod_cast hpos e he
-            have hfac : ((e : ℝ) - 1) / (e : ℝ) = -(1 : ℝ) / (e : ℝ) + 1 := by
-              field_simp [ne_of_gt heposR]
-              ring
-            rw [hfac]
-            exact Real.add_one_le_exp (-(1 : ℝ) / (e : ℝ))
-    _ = Real.exp (∑ e ∈ T, (-(1 : ℝ) / (e : ℝ))) := by
-          rw [Real.exp_sum]
-    _ = Real.exp (-(∑ e ∈ T, (1 : ℝ) / (e : ℝ))) := by
-          congr 1
-          have hterm : (∑ e ∈ T, (-(1 : ℝ) / (e : ℝ))) =
-              ∑ e ∈ T, -((1 : ℝ) / (e : ℝ)) := by
-            apply Finset.sum_congr rfl
-            intro e _he
-            ring
-          rw [hterm, Finset.sum_neg_distrib]
-
-/-- Finite sieve count for integers avoiding the multiplicative successor conditions.
-
-This is the direct integer-counting replacement for the former product-model step:
-after the Mertens/BT bridge supplies a finite candidate set `S`, this lemma bounds the
-density of integers divisible by `d` but avoiding every `e ∈ S`.
-
-The intended proof is by inclusion-exclusion/CRT on the finite family of divisibility
-conditions, with the reciprocal-mass lower bound coming from the analytic bridge below. -/
-private lemma finite_sieve_count_avoiding_multiplicative_conditions :
-    ∀ ε : ℝ, 0 < ε →
-      ∃ R : ℝ, 0 < R ∧
-        ∀ (d : ℕ) (S : Finset ℕ),
-          (∀ e ∈ S, Nat.Coprime d e) →
-          (∀ e ∈ S, ∀ f ∈ S, e ≠ f → Nat.Coprime e f) →
-          R ≤ ∑ e ∈ S, (1 : ℝ) / (e : ℝ) →
-            ∃ x₀ : ℝ, 0 < x₀ ∧
-              ∀ x : ℝ, x₀ ≤ x →
-                (Nat.card (AvoidsSelectedSuccessors S d x) : ℝ) ≤ ε * x := by
-  classical
-  intro ε hε
-  let δ : ℝ := ε / 4
-  have hδpos : 0 < δ := by positivity
-  let R : ℝ := max 1 (-Real.log δ)
-  have hRpos : 0 < R := lt_of_lt_of_le zero_lt_one (le_max_left _ _)
-  refine ⟨R, hRpos, ?_⟩
-  intro d S _hd_coprime hpair hmass
-  let T : Finset ℕ := S.filter (fun e => 0 < e)
-  let M : ℕ := ∏ e ∈ T, e
-  let C : ℕ := ∏ e ∈ T, (e - 1)
-  have hTpos : ∀ e ∈ T, 0 < e := by
-    intro e he
-    exact (Finset.mem_filter.mp he).2
-  have hTsub : ∀ ⦃e⦄, e ∈ T → e ∈ S := by
-    intro e he
-    exact (Finset.mem_filter.mp he).1
-  have hpairT : ∀ e ∈ T, ∀ f ∈ T, e ≠ f → Nat.Coprime e f := by
-    intro e he f hf hne
-    exact hpair e (hTsub he) f (hTsub hf) hne
-  have hMpos : 0 < M := by
-    dsimp [M]
-    exact Finset.prod_pos (fun e he => hTpos e he)
-  have hsum_eq : (∑ e ∈ T, (1 : ℝ) / (e : ℝ)) =
-      ∑ e ∈ S, (1 : ℝ) / (e : ℝ) := by
-    dsimp [T]
-    rw [Finset.sum_filter]
-    apply Finset.sum_congr rfl
-    intro e _he
-    by_cases h : 0 < e
-    · simp [h]
-    · have hz : e = 0 := Nat.eq_zero_of_not_pos h
-      simp [hz]
-  have hmassT : R ≤ ∑ e ∈ T, (1 : ℝ) / (e : ℝ) := by
-    rwa [hsum_eq]
-  have hR_ge_log : -Real.log δ ≤ R := le_max_right _ _
-  have h_exp_sum_le_delta : Real.exp (-(∑ e ∈ T, (1 : ℝ) / (e : ℝ))) ≤ δ := by
-    have hneg : -(∑ e ∈ T, (1 : ℝ) / (e : ℝ)) ≤ -R := neg_le_neg hmassT
-    have hRlog : -R ≤ Real.log δ := by linarith
-    calc
-      Real.exp (-(∑ e ∈ T, (1 : ℝ) / (e : ℝ))) ≤ Real.exp (Real.log δ) := by
-        exact Real.exp_le_exp.mpr (hneg.trans hRlog)
-      _ = δ := Real.exp_log hδpos
-  have hratio_le_delta : ((C : ℝ) / (M : ℝ)) ≤ δ := by
-    have hratio := prod_ratio_le_exp_neg_sum T hTpos
-    dsimp [C, M]
-    exact hratio.trans h_exp_sum_le_delta
-  let x₀ : ℝ := max 1 ((4 * (C : ℝ) + 4) / ε)
-  have hx₀pos : 0 < x₀ := lt_of_lt_of_le zero_lt_one (le_max_left _ _)
-  refine ⟨x₀, hx₀pos, ?_⟩
-  intro x hx
-  have hx_ge1 : 1 ≤ x := (le_max_left _ _).trans hx
-  have hxpos : 0 < x := zero_lt_one.trans_le hx_ge1
-  let N : ℕ := ⌊x⌋₊
-  let P : ℕ → Prop := fun n => ∀ e ∈ T, ¬ e ∣ n
-  have hperiod : ∀ n, P n ↔ P (n % M) := by
-    intro n
-    constructor
-    · intro hn e he hedvd
-      exact hn e he ((Nat.dvd_iff_mod_eq_zero).2 (by
-        have hdivM : e ∣ M := by
-          dsimp [M]
-          exact Finset.dvd_prod_of_mem (fun e => e) he
-        rw [← Nat.mod_mod_of_dvd n hdivM]
-        exact (Nat.dvd_iff_mod_eq_zero).1 hedvd))
-    · intro hn e he hedvd
-      exact hn e he ((Nat.dvd_iff_mod_eq_zero).2 (by
-        have hdivM : e ∣ M := by
-          dsimp [M]
-          exact Finset.dvd_prod_of_mem (fun e => e) he
-        rw [Nat.mod_mod_of_dvd n hdivM]
-        exact (Nat.dvd_iff_mod_eq_zero).1 hedvd))
-  have hfiniteP : ({n : ℕ | n ≤ N ∧ P n} : Set ℕ).Finite :=
-    (Set.finite_Iic N).subset (by intro n hn; exact hn.1)
-  have hsub : AvoidsSelectedSuccessors S d x ⊆ {n : ℕ | n ≤ N ∧ P n} := by
-    intro n hn
-    rcases hn with ⟨_hnpos, hnle, _hdvd, hav⟩
-    refine ⟨hnle, ?_⟩
-    intro e heT
-    exact hav e (hTsub heT)
-  have hcard_subset :
-      Nat.card (AvoidsSelectedSuccessors S d x) ≤ Nat.card {n : ℕ | n ≤ N ∧ P n} :=
-    Nat.card_mono hfiniteP hsub
-  have hper_nat :
-      Nat.card {n : ℕ | n ≤ N ∧ P n} ≤ Nat.card {r : Fin M // P r.val} *
-        (N / M + 1) :=
-    card_bounded_periodic (P := P) hMpos hperiod
-  have hres_nat : Nat.card {r : Fin M // P r.val} ≤ C := by
-    dsimp [P, C, M]
-    exact residue_card_le_prod_pred T hTpos hpairT
-  have hmain_nat : Nat.card (AvoidsSelectedSuccessors S d x) ≤ C * (N / M + 1) := by
-    calc
-      Nat.card (AvoidsSelectedSuccessors S d x) ≤ Nat.card {n : ℕ | n ≤ N ∧ P n} :=
-        hcard_subset
-      _ ≤ Nat.card {r : Fin M // P r.val} * (N / M + 1) := hper_nat
-      _ ≤ C * (N / M + 1) := Nat.mul_le_mul_right _ hres_nat
-  have hmain_real : (Nat.card (AvoidsSelectedSuccessors S d x) : ℝ) ≤
-      (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) := by
-    have hdivadd : ((N / M + 1 : ℕ) : ℝ) ≤ (N : ℝ) / (M : ℝ) + 1 := by
-      have h := Nat.cast_div_le (m := N) (n := M) (α := ℝ)
-      norm_num at h ⊢
-      linarith
-    calc
-      (Nat.card (AvoidsSelectedSuccessors S d x) : ℝ) ≤ (C * (N / M + 1) : ℕ) := by
-        exact_mod_cast hmain_nat
-      _ = (C : ℝ) * ((N / M + 1 : ℕ) : ℝ) := by norm_num
-      _ ≤ (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) := by
-        exact mul_le_mul_of_nonneg_left hdivadd (by positivity)
-  have hN_le_x : (N : ℝ) ≤ x := by
-    dsimp [N]
-    exact Nat.floor_le (le_of_lt hxpos)
-  have hbound1 : (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) ≤ δ * x + (C : ℝ) := by
-    calc
-      (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) =
-          (C : ℝ) / (M : ℝ) * (N : ℝ) + (C : ℝ) := by ring
-      _ ≤ δ * x + (C : ℝ) := by
-        gcongr
-  have hx_large : (4 * (C : ℝ) + 4) / ε ≤ x := (le_max_right _ _).trans hx
-  have hlarge_mul : 4 * (C : ℝ) + 4 ≤ ε * x := by
-    have hmul := mul_le_mul_of_nonneg_left hx_large hε.le
-    field_simp [ne_of_gt hε] at hmul
-    linarith
-  have hC_le : (C : ℝ) ≤ δ * x := by
-    dsimp [δ]
-    nlinarith
-  have hfinal_alg : δ * x + (C : ℝ) ≤ ε * x := by
-    dsimp [δ] at hC_le ⊢
-    nlinarith [hC_le, hε, hxpos]
-  exact hmain_real.trans (hbound1.trans hfinal_alg)
-
-/-- Uniform finite sieve count for integers avoiding the multiplicative successor
-conditions.
-
-This is the same CRT/counting argument as
-`finite_sieve_count_avoiding_multiplicative_conditions`, but it keeps the periodic
-bookkeeping term instead of absorbing it into an `x₀`.  This is the form needed when
-the same sieve estimate is inserted into a longer chain and the eventual CRT error is
-handled only once at the end. -/
-private lemma finite_sieve_count_uniform_bound_explicit :
-    ∀ ε : ℝ, 0 < ε →
-      let R : ℝ := max 1 (-Real.log (ε / 4))
-      0 < R ∧
-      ∀ (d : ℕ) (S : Finset ℕ),
-        (∀ e ∈ S, Nat.Coprime d e) →
-        (∀ e ∈ S, ∀ f ∈ S, e ≠ f → Nat.Coprime e f) →
-        R ≤ ∑ e ∈ S, (1 : ℝ) / (e : ℝ) →
-          ∀ x : ℝ, 1 ≤ x →
-            (Nat.card (AvoidsSelectedSuccessors S d x) : ℝ) ≤
-              ε * x + (∏ e ∈ S, (e : ℝ)) := by
-  classical
-  intro ε hε
-  let δ : ℝ := ε / 4
-  have hδpos : 0 < δ := by positivity
-  let R : ℝ := max 1 (-Real.log δ)
-  have hRpos : 0 < R := lt_of_lt_of_le zero_lt_one (le_max_left _ _)
-  refine ⟨hRpos, ?_⟩
-  intro d S _hd_coprime hpair hmass x hx_ge1
-  have hx_nonneg : 0 ≤ x := le_trans (by norm_num) hx_ge1
-  by_cases hzero : 0 ∈ S
-  · have hone_mem : 1 ∈ S := by
-      by_contra hone_not
-      have hall_zero : ∀ e ∈ S, e = 0 := by
-        intro e he
-        by_cases he0 : e = 0
-        · exact he0
-        · have hcop : Nat.Coprime 0 e := hpair 0 hzero e he (by simpa [eq_comm] using he0)
-          have he1 : e = 1 := (Nat.coprime_zero_left e).mp hcop
-          exact False.elim (hone_not (by simpa [he1] using he))
-      have hsum_zero : (∑ e ∈ S, (1 : ℝ) / (e : ℝ)) = 0 := by
-        apply Finset.sum_eq_zero
-        intro e he
-        simp [hall_zero e he]
-      have hone_le_sum : (1 : ℝ) ≤ ∑ e ∈ S, (1 : ℝ) / (e : ℝ) :=
-        (le_max_left (1 : ℝ) (-Real.log δ)).trans (by simpa [R, δ] using hmass)
-      have : (1 : ℝ) ≤ 0 := by
-        rw [← hsum_zero]
-        exact hone_le_sum
-      linarith
-    have hempty : AvoidsSelectedSuccessors S d x = (∅ : Set ℕ) := by
-      ext n
-      constructor
-      · intro hn
-        exact False.elim (hn.2.2.2 1 hone_mem (one_dvd n))
-      · intro hn
-        simp at hn
-    have hprod_zero : (∏ e ∈ S, (e : ℝ)) = 0 := by
-      exact Finset.prod_eq_zero hzero (by simp)
-    have hrhs_nonneg : 0 ≤ ε * x + (∏ e ∈ S, (e : ℝ)) := by
-      rw [hprod_zero, add_zero]
-      exact mul_nonneg hε.le hx_nonneg
-    simpa [hempty] using hrhs_nonneg
-  · let M : ℕ := ∏ e ∈ S, e
-    let C : ℕ := ∏ e ∈ S, (e - 1)
-    have hSpos : ∀ e ∈ S, 0 < e := by
-      intro e he
-      exact Nat.pos_of_ne_zero (by intro he0; exact hzero (by simpa [he0] using he))
-    have hMpos : 0 < M := by
-      dsimp [M]
-      exact Finset.prod_pos (fun e he => hSpos e he)
-    have hmassR : R ≤ ∑ e ∈ S, (1 : ℝ) / (e : ℝ) := by
-      simpa [R, δ] using hmass
-    have hR_ge_log : -Real.log δ ≤ R := le_max_right _ _
-    have h_exp_sum_le_delta : Real.exp (-(∑ e ∈ S, (1 : ℝ) / (e : ℝ))) ≤ δ := by
-      have hneg : -(∑ e ∈ S, (1 : ℝ) / (e : ℝ)) ≤ -R := neg_le_neg hmassR
-      have hRlog : -R ≤ Real.log δ := by linarith
-      calc
-        Real.exp (-(∑ e ∈ S, (1 : ℝ) / (e : ℝ))) ≤ Real.exp (Real.log δ) := by
-          exact Real.exp_le_exp.mpr (hneg.trans hRlog)
-        _ = δ := Real.exp_log hδpos
-    have hratio_le_delta : ((C : ℝ) / (M : ℝ)) ≤ δ := by
-      have hratio := prod_ratio_le_exp_neg_sum S hSpos
-      dsimp [C, M]
-      exact hratio.trans h_exp_sum_le_delta
-    let N : ℕ := ⌊x⌋₊
-    let P : ℕ → Prop := fun n => ∀ e ∈ S, ¬ e ∣ n
-    have hperiod : ∀ n, P n ↔ P (n % M) := by
-      intro n
-      constructor
-      · intro hn e he hedvd
-        exact hn e he ((Nat.dvd_iff_mod_eq_zero).2 (by
-          have hdivM : e ∣ M := by
-            dsimp [M]
-            exact Finset.dvd_prod_of_mem (fun e => e) he
-          rw [← Nat.mod_mod_of_dvd n hdivM]
-          exact (Nat.dvd_iff_mod_eq_zero).1 hedvd))
-      · intro hn e he hedvd
-        exact hn e he ((Nat.dvd_iff_mod_eq_zero).2 (by
-          have hdivM : e ∣ M := by
-            dsimp [M]
-            exact Finset.dvd_prod_of_mem (fun e => e) he
-          rw [Nat.mod_mod_of_dvd n hdivM]
-          exact (Nat.dvd_iff_mod_eq_zero).1 hedvd))
-    have hfiniteP : ({n : ℕ | n ≤ N ∧ P n} : Set ℕ).Finite :=
-      (Set.finite_Iic N).subset (by intro n hn; exact hn.1)
-    have hsub : AvoidsSelectedSuccessors S d x ⊆ {n : ℕ | n ≤ N ∧ P n} := by
-      intro n hn
-      rcases hn with ⟨_hnpos, hnle, _hdvd, hav⟩
-      exact ⟨hnle, hav⟩
-    have hcard_subset :
-        Nat.card (AvoidsSelectedSuccessors S d x) ≤ Nat.card {n : ℕ | n ≤ N ∧ P n} :=
-      Nat.card_mono hfiniteP hsub
-    have hper_nat :
-        Nat.card {n : ℕ | n ≤ N ∧ P n} ≤ Nat.card {r : Fin M // P r.val} *
-          (N / M + 1) :=
-      card_bounded_periodic (P := P) hMpos hperiod
-    have hres_nat : Nat.card {r : Fin M // P r.val} ≤ C := by
-      dsimp [P, C, M]
-      exact residue_card_le_prod_pred S hSpos hpair
-    have hmain_nat : Nat.card (AvoidsSelectedSuccessors S d x) ≤ C * (N / M + 1) := by
-      calc
-        Nat.card (AvoidsSelectedSuccessors S d x) ≤ Nat.card {n : ℕ | n ≤ N ∧ P n} :=
-          hcard_subset
-        _ ≤ Nat.card {r : Fin M // P r.val} * (N / M + 1) := hper_nat
-        _ ≤ C * (N / M + 1) := Nat.mul_le_mul_right _ hres_nat
-    have hmain_real : (Nat.card (AvoidsSelectedSuccessors S d x) : ℝ) ≤
-        (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) := by
-      have hdivadd : ((N / M + 1 : ℕ) : ℝ) ≤ (N : ℝ) / (M : ℝ) + 1 := by
-        have h := Nat.cast_div_le (m := N) (n := M) (α := ℝ)
-        norm_num at h ⊢
-        linarith
-      calc
-        (Nat.card (AvoidsSelectedSuccessors S d x) : ℝ) ≤ (C * (N / M + 1) : ℕ) := by
-          exact_mod_cast hmain_nat
-        _ = (C : ℝ) * ((N / M + 1 : ℕ) : ℝ) := by norm_num
-        _ ≤ (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) := by
-          exact mul_le_mul_of_nonneg_left hdivadd (by positivity)
-    have hxpos : 0 < x := zero_lt_one.trans_le hx_ge1
-    have hN_le_x : (N : ℝ) ≤ x := by
-      dsimp [N]
-      exact Nat.floor_le (le_of_lt hxpos)
-    have hbound1 : (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) ≤ δ * x + (C : ℝ) := by
-      calc
-        (C : ℝ) * ((N : ℝ) / (M : ℝ) + 1) =
-            (C : ℝ) / (M : ℝ) * (N : ℝ) + (C : ℝ) := by ring
-        _ ≤ δ * x + (C : ℝ) := by
-          gcongr
-    have hδ_le_ε : δ ≤ ε := by
-      dsimp [δ]
-      linarith
-    have hδx_le_εx : δ * x ≤ ε * x := mul_le_mul_of_nonneg_right hδ_le_ε hx_nonneg
-    have hC_le_M_nat : C ≤ M := by
-      dsimp [C, M]
-      apply Finset.prod_le_prod
-      · intro e he
-        exact Nat.zero_le _
-      · intro e he
-        exact Nat.sub_le e 1
-    have hC_le_M : (C : ℝ) ≤ (M : ℝ) := by exact_mod_cast hC_le_M_nat
-    have hfinal_alg : δ * x + (C : ℝ) ≤ ε * x + (M : ℝ) := add_le_add hδx_le_εx hC_le_M
-    exact hmain_real.trans (hbound1.trans (by simpa [M] using hfinal_alg))
-
-private lemma finite_sieve_count_uniform_bound :
-    ∃ R₀ : ℝ → ℝ, ∀ ε : ℝ, 0 < ε →
-      let R := R₀ ε
-      0 < R ∧
-      ∀ (d : ℕ) (S : Finset ℕ),
-        (∀ e ∈ S, Nat.Coprime d e) →
-        (∀ e ∈ S, ∀ f ∈ S, e ≠ f → Nat.Coprime e f) →
-        R ≤ ∑ e ∈ S, (1 : ℝ) / (e : ℝ) →
-          ∀ x : ℝ, 1 ≤ x →
-            (Nat.card (AvoidsSelectedSuccessors S d x) : ℝ) ≤
-              ε * x + (∏ e ∈ S, (e : ℝ)) := by
-  refine ⟨fun ε => max 1 (-Real.log (ε / 4)), ?_⟩
-  intro ε hε
-  simpa using finite_sieve_count_uniform_bound_explicit ε hε
-
-/-- Closed AP reciprocal-mass input obtained from the Brun--Titchmarsh tail bound.
-
-This aliases the proved helper in `AnalyticInputs.lean`; keeping the name here records
-where the direct integer-counting proof uses the AP reciprocal-mass estimate. -/
-private lemma ap_reciprocal_mass_via_bt :
-    ∃ C : ℝ, 0 < C ∧
-      ∀ p : ℕ, p.Prime → 2 ≤ p →
-        (∑ q ∈ Finset.filter
-            (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧
-                  (q : ℝ) ≤ Real.exp (Real.exp ((p : ℝ) / (Real.log p) ^ 2)))
-            (Finset.Iic ⌊Real.exp (Real.exp ((p : ℝ) / (Real.log p) ^ 2))⌋₊),
-          (1 : ℝ) / (q : ℝ)) ≤
-            C * (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2) := by
-  exact bt_reciprocal_AP_tail
-
 private lemma compositeBlock_mem_cumulative_sdiff (y : ℝ) (k q : ℕ) :
     q ∈ compositeBlock y k ↔
       q ∈ (Finset.filter Nat.Prime
@@ -19911,98 +18451,6 @@ private lemma reciprocalPrimeMass_prime_window_eq_sub (L U : ℝ)
     exact ⟨Nat.le_trans hq.1 (Nat.floor_le_floor hLU), hq.2⟩
   rw [hset]
   exact Finset.sum_sdiff_eq_sub hsub
-
-/-- Step 1: Mertens reciprocal mass on the full prime window.
-
-For `A = 20`, the selected-prime window `(exp y, exp(y^19)]` has reciprocal
-prime mass `18 log y + O(1)`. -/
-private lemma step1_mertens_window_mass :
-    ∃ C : ℝ, 0 < C ∧
-      ∃ y₀ : ℝ, 2 ≤ y₀ ∧
-        ∀ y : ℝ, y₀ ≤ y →
-          |reciprocalPrimeMass (compositePrimeWindow 20 y) - 18 * Real.log y| ≤ C := by
-  -- Paper §6.2 Step 1, from `mertens` applied at `exp y` and `exp(y^19)`.
-  rcases mertens with ⟨M, Cm, hCm, hmertens⟩
-  refine ⟨2 * Cm, by positivity, 2, by norm_num, ?_⟩
-  intro y hy
-  let L : ℝ := Real.exp y
-  let U : ℝ := Real.exp (y ^ ((20 : ℝ) - 1))
-  let primeSum : ℝ → ℝ :=
-    fun t => ∑ p ∈ Finset.filter Nat.Prime (Finset.Iic ⌊t⌋₊), (1 : ℝ) / (p : ℝ)
-  have hy_ge1 : (1 : ℝ) ≤ y := by linarith
-  have hy_le_y19 : y ≤ y ^ ((20 : ℝ) - 1) := by
-    norm_num
-    simpa using Real.rpow_le_rpow_of_exponent_le hy_ge1 (by norm_num : (1 : ℝ) ≤ 19)
-  have hL_nonneg : 0 ≤ L := le_of_lt (Real.exp_pos y)
-  have hU_nonneg : 0 ≤ U := le_of_lt (Real.exp_pos _)
-  have hLU : L ≤ U := by
-    dsimp [L, U]
-    exact Real.exp_le_exp.mpr hy_le_y19
-  have h2exp1 : (2 : ℝ) ≤ Real.exp 1 := by
-    simpa using (Real.two_mul_le_exp (x := 1))
-  have hL_ge2 : 2 ≤ L := by
-    dsimp [L]
-    exact h2exp1.trans (Real.exp_le_exp.mpr hy_ge1)
-  have hU_ge2 : 2 ≤ U := hL_ge2.trans hLU
-  have hwindow : reciprocalPrimeMass (compositePrimeWindow 20 y) = primeSum U - primeSum L := by
-    dsimp [reciprocalPrimeMass, compositePrimeWindow, primeSum, L, U]
-    change
-      (∑ q ∈ Finset.filter
-          (fun q : ℕ =>
-            q.Prime ∧ Real.exp y < (q : ℝ) ∧
-              (q : ℝ) ≤ Real.exp (y ^ ((20 : ℝ) - 1)))
-          (Finset.Iic ⌊Real.exp (y ^ ((20 : ℝ) - 1))⌋₊),
-        (1 : ℝ) / (q : ℝ)) =
-        (∑ q ∈ Finset.filter Nat.Prime
-            (Finset.Iic ⌊Real.exp (y ^ ((20 : ℝ) - 1))⌋₊),
-          (1 : ℝ) / (q : ℝ)) -
-          ∑ q ∈ Finset.filter Nat.Prime (Finset.Iic ⌊Real.exp y⌋₊),
-            (1 : ℝ) / (q : ℝ)
-    exact reciprocalPrimeMass_prime_window_eq_sub L U hL_nonneg hU_nonneg hLU
-  have hLm : |primeSum L - Real.log (Real.log L) - M| ≤ Cm / Real.log L := by
-    simpa [primeSum] using hmertens L hL_ge2
-  have hUm : |primeSum U - Real.log (Real.log U) - M| ≤ Cm / Real.log U := by
-    simpa [primeSum] using hmertens U hU_ge2
-  have hlogU : Real.log (Real.log U) = 19 * Real.log y := by
-    dsimp [U]
-    rw [Real.log_exp]
-    norm_num
-  have hlogL : Real.log (Real.log L) = Real.log y := by
-    dsimp [L]
-    rw [Real.log_exp]
-  have hmainlog : Real.log (Real.log U) - Real.log (Real.log L) = 18 * Real.log y := by
-    rw [hlogU, hlogL]
-    ring
-  have htri : |(primeSum U - primeSum L) -
-      (Real.log (Real.log U) - Real.log (Real.log L))| ≤
-      |primeSum L - Real.log (Real.log L) - M| +
-        |primeSum U - Real.log (Real.log U) - M| := by
-    have hident : (primeSum U - primeSum L) -
-        (Real.log (Real.log U) - Real.log (Real.log L)) =
-        -(primeSum L - Real.log (Real.log L) - M) +
-          (primeSum U - Real.log (Real.log U) - M) := by
-      ring
-    rw [hident]
-    simpa only [abs_neg] using
-      (abs_add_le (-(primeSum L - Real.log (Real.log L) - M))
-        (primeSum U - Real.log (Real.log U) - M))
-  have hbound : |(primeSum U - primeSum L) -
-      (Real.log (Real.log U) - Real.log (Real.log L))| ≤
-      Cm / Real.log L + Cm / Real.log U :=
-    htri.trans (add_le_add hLm hUm)
-  have hy19_ge1 : (1 : ℝ) ≤ y ^ ((20 : ℝ) - 1) := by
-    norm_num
-    simpa using Real.one_le_rpow hy_ge1 (by norm_num : (0 : ℝ) ≤ 19)
-  have hdivU_le : Cm / Real.log U ≤ Cm := by
-    dsimp [U]
-    rw [Real.log_exp, div_eq_mul_inv]
-    exact mul_le_of_le_one_right (le_of_lt hCm) (inv_le_one_of_one_le₀ hy19_ge1)
-  have hdivL_le : Cm / Real.log L ≤ Cm := by
-    dsimp [L]
-    rw [Real.log_exp, div_eq_mul_inv]
-    exact mul_le_of_le_one_right (le_of_lt hCm) (inv_le_one_of_one_le₀ hy_ge1)
-  rw [hwindow, ← hmainlog]
-  exact hbound.trans (by linarith)
 
 /-- Paper §6.2 line 1534-1540 (d=1 dispatch): Mertens reciprocal mass on the d=1 sub-window
 `(exp y, exp(y^2)]` equals `log y + O(1)`. -/
@@ -21420,21 +19868,6 @@ private lemma prod_tv_le_sum_tv {G : Type*} [Fintype G] [DecidableEq G]
     -- Combine.
     have hKε_succ : (K : ℝ) * ε + ε = (↑(K + 1)) * ε := by push_cast; ring
     linarith
-
-/-- Paper §6.2 line 1741: per-block conditional residue distribution is ε_y-close to
-uniform on `G = (ZMod d)ˣ`.  Lifts `hstep5` from `Nat.Coprime`-indexed `a : ℕ` to
-`a : (ZMod d)ˣ` via `ZMod.val_coe_unit_coprime`. -/
-private lemma block_marginal_near_uniform_units
-    {y : ℝ} {d : ℕ} [NeZero d] {C_step5 : ℝ}
-    (hstep5 :
-      ∀ k : ℕ, k < compositeBlockCount y →
-        ∀ a : ℕ, Nat.Coprime a d →
-          |blockConditionalResidueProbability (compositeBlock y k) d a -
-              (1 : ℝ) / (d.totient : ℝ)| ≤ C_step5 * y ^ (-(1 : ℝ) / 2))
-    (k : ℕ) (hk : k < compositeBlockCount y) (a : (ZMod d)ˣ) :
-    |blockConditionalResidueProbability (compositeBlock y k) d (a : ZMod d).val -
-        (1 : ℝ) / (d.totient : ℝ)| ≤ C_step5 * y ^ (-(1 : ℝ) / 2) :=
-  hstep5 k hk _ (ZMod.val_coe_unit_coprime a)
 
 /-- Top-level `extractKVec`: when `K ≤ goodBlockCount S y`, projects `firstKGoodBlockIndices`
 to `Fin K → Fin (compositeBlockCount y)`.  Otherwise defaults to constant 0 (requires `M > 0`).
@@ -24070,23 +22503,6 @@ private lemma step5_combined :
   block_uniform_total_variation_bound
 
 
-/-- Step 5: conditional residue distribution in a good block.
-
-Given that a block is good, the residue class of its unique selected prime is
-`O(y^{-1/2})`-close to uniform on `(ℤ/dℤ)ˣ`, uniformly for `2 ≤ d ≤ y` and for all
-blocks in the Step-2 range. -/
-private lemma step5_conditional_residue :
-    ∃ C : ℝ, 0 < C ∧
-      ∃ y₀ : ℝ, 2 ≤ y₀ ∧
-        ∀ y : ℝ, y₀ ≤ y →
-          ∀ d : ℕ, 2 ≤ d → (d : ℝ) ≤ y →
-            let M := compositeBlockCount y
-            ∀ k : ℕ, k < M →
-              ∀ a : ℕ, Nat.Coprime a d →
-                |blockConditionalResidueProbability (compositeBlock y k) d a -
-                    (1 : ℝ) / (d.totient : ℝ)| ≤ C * y ^ (-(1 : ℝ) / 2) := by
-  exact step5_combined
-
 /-- Step 6: application of the subset-product lemma.
 
 Conditioned on having the first `K` good blocks, the near-uniform independent
@@ -24189,14 +22605,6 @@ private lemma compositePrimeWindow_coprime_d {y : ℝ} (hy : 2 ≤ y)
 -- Helper: for a window prime q (coprime to d), q ∣ (d * r') iff q ∣ r'.
 -- This is the key fact for the CRT bridge: window-prime divisibility of r = d · r'
 -- is determined entirely by r'.
-private lemma compositeWindow_dvd_mul_iff_dvd {y : ℝ} (hy : 2 ≤ y)
-    {d : ℕ} (hd : 1 ≤ d) (hd_le_y : (d : ℝ) ≤ y)
-    {q : ℕ} (hq : q ∈ compositePrimeWindow 20 y) (r' : ℕ) :
-    q ∣ (d * r') ↔ q ∣ r' :=
-  (compositePrimeWindow_coprime_d hy hd hd_le_y hq).dvd_mul_left
-
--- Helper: an admissible product T ⊆ window has T ⊆ compositePrimeWindow 20 y as a Finset.
--- Follows from the per-prime conditions in AdmissibleCompositeProduct.
 private lemma admissible_subset_window {y : ℝ} {d : ℕ} {T : Finset ℕ}
     (hT : AdmissibleCompositeProduct 20 y d T) :
     T ⊆ compositePrimeWindow 20 y := by
@@ -24300,28 +22708,6 @@ private lemma cs_fin_card_subtype_eq_range_filter_card {M : ℕ} (P : ℕ → Pr
 -- Helper: count of multiples of d in [0, d*P) = P.
 -- Standard counting fact, used in Step A of the CRT bridge:
 -- {r ∈ Fin (d * P) : d ∣ r} ≃ Fin P via r ↦ r/d.
-private lemma card_dvd_in_range_mul {d P : ℕ} (hd_pos : 0 < d) :
-    ((Finset.range (d * P)).filter (fun r => d ∣ r)).card = P := by
-  classical
-  have h_eq : (Finset.range (d * P)).filter (fun r => d ∣ r) =
-      (Finset.range P).image (fun k => k * d) := by
-    ext r
-    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image]
-    constructor
-    · rintro ⟨hr_lt, k, rfl⟩
-      refine ⟨k, ?_, by ring⟩
-      have hdk_lt_dP : d * k < d * P := by
-        rw [show d * P = d * P from rfl]; exact hr_lt
-      exact Nat.lt_of_mul_lt_mul_left hdk_lt_dP
-    · rintro ⟨k, hk_lt, rfl⟩
-      refine ⟨?_, k, by ring⟩
-      calc k * d < P * d := (Nat.mul_lt_mul_right hd_pos).mpr hk_lt
-        _ = d * P := by ring
-  rw [h_eq, Finset.card_image_of_injective _ (mul_left_injective₀ hd_pos.ne'),
-      Finset.card_range]
-
--- Helper: bijection between {r ∈ range (d*P) : d ∣ r ∧ Q r} and {k ∈ range P : Q (d*k)}.
--- The map r ↦ r/d gives a bijection (with inverse k ↦ d*k).
 lemma card_filter_dvd_range_mul {d P : ℕ} (hd_pos : 0 < d) (Q : ℕ → Prop)
     [DecidablePred Q] :
     ((Finset.range (d * P)).filter (fun r => d ∣ r ∧ Q r)).card =
@@ -24355,45 +22741,6 @@ private lemma cs_primorial_pos (P : ℕ) : 0 < primorial P := by
 
 -- Helper: distinct primes in a finset are pairwise coprime.
 -- Used in primorial CRT decomposition (`ZMod.prodEquivPi`).
-private lemma primes_pairwise_coprime (T : Finset ℕ) (hT_prime : ∀ q ∈ T, q.Prime) :
-    Set.Pairwise (T : Set ℕ) Nat.Coprime := by
-  intro p hp q hq hpq
-  exact (Nat.coprime_primes (hT_prime p hp) (hT_prime q hq)).mpr hpq
-
--- Helper: count of residues coprime to N in a length-N interval [i·N, (i+1)·N) = totient(N).
--- Re-proved from LBL's private `pmodel_count_coprime_in_block`.
-private lemma cs_pmodel_count_coprime_in_block (N i : ℕ) :
-    ((Finset.Ico (i * N) ((i + 1) * N)).filter (fun r => N.Coprime r)).card = N.totient := by
-  have h_eq : (i + 1) * N = i * N + N := by ring
-  rw [h_eq]
-  exact Nat.filter_coprime_Ico_eq_totient N (i * N)
-
--- Helper: totient(∏Q) = ∏(q-1) for distinct primes Q.
--- Re-proved from LBL's private `pmodel_totient_prod_distinct_primes`.
--- Paper §5.2 line 1158 (independent Bernoulli with probabilities 1/q).
-private lemma cs_pmodel_totient_prod_distinct_primes :
-    ∀ {Q : Finset ℕ}, (∀ q ∈ Q, q.Prime) →
-      Nat.totient (∏ q ∈ Q, q) = ∏ q ∈ Q, (q - 1) := by
-  classical
-  intro Q
-  induction Q using Finset.induction_on with
-  | empty => intro _; simp
-  | insert p P hpP ih =>
-    intro hQ_prime
-    have hp_prime : p.Prime := hQ_prime p (Finset.mem_insert_self p P)
-    have hP_prime : ∀ q ∈ P, q.Prime := fun q hq =>
-      hQ_prime q (Finset.mem_insert_of_mem hq)
-    rw [Finset.prod_insert hpP, Finset.prod_insert hpP]
-    have hp_cop : p.Coprime (∏ q ∈ P, q) := by
-      apply Nat.Coprime.prod_right
-      intro q hqP
-      have hq_prime : q.Prime := hP_prime q hqP
-      have hpq : p ≠ q := fun heq => hpP (heq ▸ hqP)
-      exact (Nat.coprime_primes hp_prime hq_prime).mpr hpq
-    rw [Nat.totient_mul hp_cop, Nat.totient_prime hp_prime, ih hP_prime]
-
--- Helper: window primes are among primes up to the composite-successor cutoff.
--- compositePrimeWindow 20 y ⊆ {primes ≤ compositeSuccessorCutoff 20 y}.
 private lemma compositePrimeWindow_subset_primesIic_cutoff {y : ℝ} (hy : 1 ≤ y) :
     compositePrimeWindow 20 y ⊆
       (Finset.Iic (compositeSuccessorCutoff 20 y)).filter Nat.Prime := by
@@ -26089,85 +24436,6 @@ private lemma step7_residue_density_bound :
   exact (residue_density_le_pmodel_bridge hy_two hd_pos hd_le_y).trans
     (hpmodel y hy_y₀ d hd_pos hd_le_y)
 
-/-- Step 7: combine the product-model estimates and transfer them to integer density.
-
-Reduction to `step7_residue_density_bound` via existing periodicity infrastructure
-(`composite_successor_bad_count_le_periodic`) and `x₀` bookkeeping to absorb the
-additive `M`-period error term. -/
-private lemma step7_combine_and_crt_transfer :
-    ∃ c : ℝ, 0 < c ∧
-      ∃ y₀ : ℝ, 0 < y₀ ∧
-        ∀ y : ℝ, y₀ ≤ y →
-          ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-            ∃ x₀ : ℝ, 0 < x₀ ∧
-              ∀ x : ℝ, x₀ ≤ x →
-                (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤
-                  Real.exp (-c * Real.log y) * x := by
-  classical
-  rcases step7_residue_density_bound with ⟨c, hc, y₀, hy₀, hresidue⟩
-  refine ⟨c, hc, max y₀ 1, ?_, ?_⟩
-  · exact lt_of_lt_of_le hy₀ (le_max_left _ _)
-  intro y hy d hd_pos hd_le_y
-  have hy_y₀ : y₀ ≤ y := (le_max_left _ _).trans hy
-  have hy_one : (1 : ℝ) ≤ y := (le_max_right _ _).trans hy
-  have hdens := hresidue y hy_y₀ d hd_pos hd_le_y
-  -- Set M := compositeSuccessorCRTPeriod 20 y d.  Use periodicity to get
-  -- integer count ≤ residue_density · x + M.
-  set M : ℕ := compositeSuccessorCRTPeriod 20 y d with hM_def
-  have hMpos : 0 < M := compositeSuccessorCRTPeriod_pos (A := 20) (y := y) hd_pos
-  have hMR_pos : (0 : ℝ) < M := by exact_mod_cast hMpos
-  -- exp(-c log y) > 0
-  have hexp_pos : 0 < Real.exp (-c * Real.log y) := Real.exp_pos _
-  -- Choose x₀ ≥ 2 M / exp(-c log y) so that M ≤ (1/2) exp(-c log y) x for x ≥ x₀.
-  let x₀ : ℝ := 2 * (M : ℝ) / Real.exp (-c * Real.log y) + 1
-  have hx₀_pos : 0 < x₀ := by
-    have h1 : 0 ≤ 2 * (M : ℝ) / Real.exp (-c * Real.log y) := by positivity
-    linarith
-  refine ⟨x₀, hx₀_pos, ?_⟩
-  intro x hx
-  have hx_pos : 0 < x := hx₀_pos.trans_le hx
-  have hx_nonneg : 0 ≤ x := hx_pos.le
-  -- Apply periodicity bound.
-  have hperiodic := composite_successor_bad_count_le_periodic
-    (A := 20) (y := y) (d := d) hd_pos hy_one hx_nonneg
-  -- residue_density = (residue count) / M
-  set ρ : ℝ := (Nat.card {r : Fin M // CompositeSuccessorCoreBad 20 y d r.val} : ℝ) /
-    (M : ℝ) with hρ_def
-  have hρ_le : ρ ≤ Real.exp (-c * Real.log y) / 2 := hdens
-  have hρ_nonneg : 0 ≤ ρ := by
-    apply div_nonneg
-    · exact Nat.cast_nonneg _
-    · exact hMR_pos.le
-  -- Bound: count ≤ ρ · x + M.
-  have hcount_le : (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤ ρ * x + (M : ℝ) := by
-    have hperiodic' := hperiodic
-    show (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤ ρ * x + (M : ℝ)
-    -- M is definitionally `compositeSuccessorCRTPeriod 20 y d`, ρ is the same residue density.
-    convert hperiodic' using 2
-  -- Bound M ≤ (1/2) exp(-c log y) x for x ≥ x₀.
-  have hM_le_half_exp_x : (M : ℝ) ≤ (1/2) * Real.exp (-c * Real.log y) * x := by
-    have hx₀_le : x₀ ≤ x := hx
-    have hineq1 : 2 * (M : ℝ) / Real.exp (-c * Real.log y) ≤ x := by linarith
-    rw [div_le_iff₀ hexp_pos] at hineq1
-    have : 2 * (M : ℝ) ≤ Real.exp (-c * Real.log y) * x := by linarith
-    linarith
-  -- Combine: count ≤ ρ x + M ≤ (1/2) exp(-c log y) x + (1/2) exp(-c log y) x = exp(-c log y) x.
-  have hρx_bound : ρ * x ≤ (1/2) * Real.exp (-c * Real.log y) * x := by
-    have := mul_le_mul_of_nonneg_right hρ_le hx_nonneg
-    linarith
-  linarith
-
-private lemma composite_successor_pmodel_density_core_A20 :
-    ∃ c : ℝ, 0 < c ∧
-      ∃ y₀ : ℝ, 0 < y₀ ∧
-        ∀ y : ℝ, y₀ ≤ y →
-          ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-            ∃ x₀ : ℝ, 0 < x₀ ∧
-              ∀ x : ℝ, x₀ ≤ x →
-                (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤
-                  Real.exp (-c * Real.log y) * x := by
-  exact step7_combine_and_crt_transfer
-
 /-! ### The paper-§6.2-faithful integer-density form of Lemma 6.2.
 
 The previous decomposition (Mertens bridge + finite-sieve-count, removed 2026-04-28)
@@ -26183,183 +24451,6 @@ The single deferred lemma `composite_successor_pmodel_density` encodes the
 combined statement of paper Lemma 6.2 + Lemma 2.7. Its proof (paper §6.2 Steps
 1-7 + §7.4 CRT bookkeeping) is the only remaining analytic obligation in this
 file. -/
-/-- **Paper Lemma 6.2 (composite successor) + Lemma 2.7 (CRT transfer): integer
-density form.**
-
-For absolute constants `A > 10` and `c > 0`, and all sufficiently large `y` and
-`1 ≤ d ≤ y`, the count of integers `n ≤ x` with `d ∣ n` but no admissible
-composite successor divisor `e` is at most `y^{-c} · x` for `x` large.
-
-This combines:
-- Paper Lemma 6.2 (paper lines 1516-1815): in the product model, the failure
-  probability is `O(y^{-c})` via the 7-step block decomposition + Chernoff +
-  subset-product (Lemma 6.1, formalized as `subset_product_main`) argument.
-- Paper Lemma 2.7 (CRT transfer, our `crt_transfer` theorem, paper §2.7): the
-  failure event is `M`-periodic for `M = primorial(⌊exp(y^A)⌋)`, and
-  paper §7.4 lines 1980-2007 establish `M = x^{o(1)} = o(x)`.
-
-The single analytic obligation needed by both `composite_successor`
-and `composite_successor_uniform` is the 7-step paper §6.2 argument; the
-product-model probability framework is built up in this file (Steps 1-6
-proved here, Step 7 assembled in `step7_combine_and_crt_transfer`).
-
-**Soundness of statement:** a theorem of analytic number theory (paper
-Theorem 6.2 + paper Lemma 2.7). Depends only on the 3 cited NT axioms
-(siegel_walfisz, brun_titchmarsh, mertens) plus the proved theorems
-chebyshev_theta and
-crt_transfer) plus subset_product_main (already proved in `SubsetProduct.lean`). -/
-private lemma composite_successor_pmodel_density :
-    ∃ A : ℝ, 10 < A ∧
-      ∃ c : ℝ, 0 < c ∧
-        ∃ y₀ : ℝ, 0 < y₀ ∧
-          ∀ y : ℝ, y₀ ≤ y →
-            ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-              ∃ x₀ : ℝ, 0 < x₀ ∧
-                ∀ x : ℝ, x₀ ≤ x →
-                  (Nat.card (CompositeSuccessorBadSet A y d x) : ℝ) ≤
-                    Real.exp (-c * Real.log y) * x := by
-  rcases composite_successor_pmodel_density_core_A20 with ⟨c, hc, y₀, hy₀_pos, h⟩
-  exact ⟨20, by norm_num, c, hc, y₀, hy₀_pos, h⟩
-
-/-- Uniform integer-density form of the composite-successor lemma.
-
-The coefficient is the paper's product-model failure scale `y^{-c}` (written
-as `exp (-c log y)`); the additive term `M` records the finite CRT bookkeeping
-absorbed into the small-`x` regime.
-
-Refactored 2026-04-28 (third refactor): the proof now uses
-`composite_successor_pmodel_density` directly, replacing the
-unsound `bridge → finite_sieve_count` chain that could not capture paper §6.2's
-subset-product argument for `d > (log y)^A`. -/
-theorem composite_successor_uniform :
-    ∃ A : ℝ, 10 < A ∧
-      ∃ c : ℝ, 0 < c ∧
-        ∀ ε : ℝ, 0 < ε →
-          ∃ y₀ : ℝ, 0 < y₀ ∧
-            ∀ y : ℝ, y₀ ≤ y →
-              ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-                ∃ M : ℝ, 0 ≤ M ∧
-                  ∀ x : ℝ, 1 ≤ x →
-                    (Nat.card (CompositeSuccessorBadSet A y d x) : ℝ) ≤
-                      Real.exp (-c * Real.log y) * x + M := by
-  classical
-  rcases composite_successor_pmodel_density with ⟨A, hA, c, hc, y₁, hy₁_pos, h⟩
-  refine ⟨A, hA, c, hc, ?_⟩
-  intro ε _hε
-  refine ⟨y₁, hy₁_pos, ?_⟩
-  intro y hy d hd_pos hd_le_y
-  rcases h y hy d hd_pos hd_le_y with ⟨x₀, hx₀_pos, hx₀⟩
-  -- Set M := x₀ + 1.  For x ≥ x₀: pmodel bound suffices.
-  -- For 1 ≤ x < x₀: trivial |bad| ≤ ⌊x⌋ + 1 ≤ x + 1 ≤ x₀ + 1 ≤ exp(...)·x + M.
-  refine ⟨x₀ + 1, by linarith, ?_⟩
-  intro x hx
-  have hx_nonneg : 0 ≤ x := by linarith
-  have hexp_pos : 0 < Real.exp (-c * Real.log y) := Real.exp_pos _
-  have hexp_x_nonneg : 0 ≤ Real.exp (-c * Real.log y) * x := by positivity
-  by_cases hx_large : x₀ ≤ x
-  · have h1 : (Nat.card (CompositeSuccessorBadSet A y d x) : ℝ) ≤
-        Real.exp (-c * Real.log y) * x := hx₀ x hx_large
-    linarith
-  · push_neg at hx_large
-    have hbad_sub : CompositeSuccessorBadSet A y d x ⊆ Set.Iic ⌊x⌋₊ := by
-      intro n hn; exact hn.2.1
-    have hfin : (Set.Iic ⌊x⌋₊ : Set ℕ).Finite := Set.finite_Iic _
-    have hcard_nat_le : Nat.card (CompositeSuccessorBadSet A y d x) ≤
-        Nat.card (Set.Iic ⌊x⌋₊ : Set ℕ) := Nat.card_mono hfin hbad_sub
-    have hcard_iic : Nat.card (Set.Iic ⌊x⌋₊ : Set ℕ) = ⌊x⌋₊ + 1 := by
-      simp [Nat.card_Iic]
-    rw [hcard_iic] at hcard_nat_le
-    have hcard_real :
-        (Nat.card (CompositeSuccessorBadSet A y d x) : ℝ) ≤ (⌊x⌋₊ : ℝ) + 1 := by
-      have := (Nat.cast_le (α := ℝ)).mpr hcard_nat_le
-      push_cast at this
-      linarith
-    have hfloor_le : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le hx_nonneg
-    -- |bad| ≤ ⌊x⌋ + 1 ≤ x + 1 ≤ x₀ + 1 ≤ exp(...)·x + (x₀ + 1)
-    linarith
-
-/-- **Composite-successor lemma (Lemma 6.2 of the paper).**
-
-There exist absolute constants `A > 10` and `c > 0` such that, for all
-sufficiently large `y` and all `1 ≤ d ≤ y`,
-the prime-model probability that there is a squarefree product `e` of
-selected primes in `(exp y, exp(y^{A-1})]` satisfying
-`e ≡ 1 (mod d)`, `e > d`, `e ≤ exp(y^A)`, is at least `1 - y^{-c}`.
-
-Steps 1-7 of §6.2 (proved in this file).
-
-Refactored 2026-04-28 to integer-density form (was `True` stub). The
-content carried by the lemma is: for almost-all n divisible by d (in
-the integer model, post-CRT), n admits a good squarefree divisor e
-≡ 1 (mod d) made of primes from the window (exp y, exp(y^{A-1})],
-e ≤ exp(y^A). This form chains naturally through `greedy_H_chain`.
-
-Refactored again 2026-04-28: af-021 found two bugs:
-(1) `e % d = 1` is impossible for d = 1 (since e % 1 = 0). Replaced
-with `e ≡ 1 [MOD d]` (Nat.ModEq), which correctly holds for d = 1.
-(2) Non-quantitative `almostAll` form does not chain through `greedy_H_chain`'s
-R-fold iteration with R varying. Replaced with explicit ε-quantitative
-density bound, which permits union bound over R steps.
-
-Refactored 3rd time 2026-04-28: af-026 found the prior ε-form was
-provably FALSE at ε=1/2, d=1, x=1, n=1 (bad count=1 > ε·x=0.5). Added
-`∃ x₀, ∀ x ≥ x₀` to require sufficiently large x, matching paper §6.2's
-asymptotic regime. -/
-theorem composite_successor :
-    ∃ A : ℝ, 10 < A ∧
-      ∀ ε : ℝ, 0 < ε →
-        ∃ y₀ : ℝ, 0 < y₀ ∧
-          ∀ y : ℝ, y₀ ≤ y →
-            ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-              ∃ x₀ : ℝ, 0 < x₀ ∧
-                ∀ x : ℝ, x₀ ≤ x →
-                  -- Paper §6.2 Lemma 6.2 line 1521-1525: bad n's are those with
-                  -- no admissible squarefree product `e = ∏_{q ∈ T} q` of selected
-                  -- primes from the window `(exp y, exp(y^{A-1})]` with
-                  -- `e ≡ 1 [MOD d]`, `d < e`, `e ≤ exp(y^A)`, dividing n.
-                  (Nat.card (CompositeSuccessorBadSet A y d x) : ℝ) ≤ ε * x := by
-  -- The proof uses the corrected `composite_successor_pmodel_density`.  For each
-  -- ε > 0 we choose y₀ large enough that exp(-c log y) ≤ ε, then the pmodel
-  -- bound gives |bad| ≤ exp(-c log y)·x ≤ ε·x.
-  classical
-  rcases composite_successor_pmodel_density with ⟨A, hA, c, hc, y₁, hy₁_pos, h⟩
-  refine ⟨A, hA, ?_⟩
-  intro ε hε
-  -- y₀ := max y₁ (exp ((-log ε) / c) ⊔ 1) ensures both: y ≥ y₁ AND log y ≥ -log ε / c.
-  -- The "⊔ 1" handles ε ≥ 1 (where -log ε ≤ 0) without issue.
-  let logBound : ℝ := max (-Real.log ε / c) 0
-  let y₀ : ℝ := max y₁ (Real.exp logBound)
-  have hy₀_pos : 0 < y₀ := lt_of_lt_of_le hy₁_pos (le_max_left _ _)
-  refine ⟨y₀, hy₀_pos, ?_⟩
-  intro y hy d hd_pos hd_le_y
-  have hy_ge_y₁ : y₁ ≤ y := (le_max_left _ _).trans hy
-  have hy_pos : 0 < y := hy₁_pos.trans_le hy_ge_y₁
-  have hy_ge_exp : Real.exp logBound ≤ y := (le_max_right _ _).trans hy
-  have hlogBound_le_log : logBound ≤ Real.log y :=
-    (Real.le_log_iff_exp_le hy_pos).mpr hy_ge_exp
-  have hlog_y_bound : -Real.log ε / c ≤ Real.log y :=
-    (le_max_left _ _).trans hlogBound_le_log
-  have hexp_le_eps : Real.exp (-c * Real.log y) ≤ ε := by
-    have hmul : c * (-Real.log ε / c) ≤ c * Real.log y :=
-      mul_le_mul_of_nonneg_left hlog_y_bound hc.le
-    have hcalc : c * (-Real.log ε / c) = -Real.log ε := by
-      field_simp [ne_of_gt hc]
-    rw [hcalc] at hmul
-    have hneg : -c * Real.log y ≤ Real.log ε := by linarith
-    calc
-      Real.exp (-c * Real.log y) ≤ Real.exp (Real.log ε) :=
-        Real.exp_le_exp.mpr hneg
-      _ = ε := Real.exp_log hε
-  rcases h y hy_ge_y₁ d hd_pos hd_le_y with ⟨x₀, hx₀_pos, hx₀⟩
-  refine ⟨x₀, hx₀_pos, ?_⟩
-  intro x hx
-  have hx_pos : 0 < x := hx₀_pos.trans_le hx
-  have hbound := hx₀ x hx
-  -- |bad| ≤ exp(-c log y)·x ≤ ε·x
-  have hcompare : Real.exp (-c * Real.log y) * x ≤ ε * x :=
-    mul_le_mul_of_nonneg_right hexp_le_eps hx_pos.le
-  exact hbound.trans hcompare
-
 /-! ### d-conditional strengthening of Lemma 6.2.
 
 The naive integer-density bound `|bad(A,y,d,x)| ≤ exp(-c log y) · x` becomes
@@ -26451,157 +24542,6 @@ lemma step7_residue_density_bound_strong :
         apply div_le_div_of_nonneg_right hpb hd_pos_R.le
     _ = Real.exp (-c * Real.log y) / (2 * (d : ℝ)) := by
         field_simp
-
-/-- Strong d-conditional integer-density form: combine residue bound + periodicity. -/
-lemma step7_combine_and_crt_transfer_strong :
-    ∃ c : ℝ, 0 < c ∧
-      ∃ y₀ : ℝ, 0 < y₀ ∧
-        ∀ y : ℝ, y₀ ≤ y →
-          ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-            ∃ x₀ : ℝ, 0 < x₀ ∧
-              ∀ x : ℝ, x₀ ≤ x →
-                (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤
-                  Real.exp (-c * Real.log y) * x / (d : ℝ) := by
-  classical
-  rcases step7_residue_density_bound_strong with ⟨c, hc, y₀, hy₀, hresidue⟩
-  refine ⟨c, hc, max y₀ 1, ?_, ?_⟩
-  · exact lt_of_lt_of_le hy₀ (le_max_left _ _)
-  intro y hy d hd_pos hd_le_y
-  have hy_y₀ : y₀ ≤ y := (le_max_left _ _).trans hy
-  have hy_one : (1 : ℝ) ≤ y := (le_max_right _ _).trans hy
-  have hdens := hresidue y hy_y₀ d hd_pos hd_le_y
-  set M : ℕ := compositeSuccessorCRTPeriod 20 y d with hM_def
-  have hMpos : 0 < M := compositeSuccessorCRTPeriod_pos (A := 20) (y := y) hd_pos
-  have hMR_pos : (0 : ℝ) < M := by exact_mod_cast hMpos
-  have hexp_pos : 0 < Real.exp (-c * Real.log y) := Real.exp_pos _
-  have hd_pos_R : (0 : ℝ) < d := by exact_mod_cast hd_pos
-  -- Choose x₀ ≥ 4 d M / exp(-c log y) so that M ≤ (1/2) (exp(-c log y) / d) x for x ≥ x₀.
-  let x₀ : ℝ := 4 * (d : ℝ) * (M : ℝ) / Real.exp (-c * Real.log y) + 1
-  have hx₀_pos : 0 < x₀ := by
-    have h1 : 0 ≤ 4 * (d : ℝ) * (M : ℝ) / Real.exp (-c * Real.log y) := by positivity
-    linarith
-  refine ⟨x₀, hx₀_pos, ?_⟩
-  intro x hx
-  have hx_pos : 0 < x := hx₀_pos.trans_le hx
-  have hx_nonneg : 0 ≤ x := hx_pos.le
-  have hperiodic := composite_successor_bad_count_le_periodic
-    (A := 20) (y := y) (d := d) hd_pos hy_one hx_nonneg
-  set ρ : ℝ := (Nat.card {r : Fin M // CompositeSuccessorCoreBad 20 y d r.val} : ℝ) /
-    (M : ℝ) with hρ_def
-  have hρ_le : ρ ≤ Real.exp (-c * Real.log y) / (2 * (d : ℝ)) := hdens
-  have hρ_nonneg : 0 ≤ ρ := by
-    apply div_nonneg
-    · exact Nat.cast_nonneg _
-    · exact hMR_pos.le
-  have hcount_le : (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤ ρ * x + (M : ℝ) := by
-    have hperiodic' := hperiodic
-    show (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤ ρ * x + (M : ℝ)
-    convert hperiodic' using 2
-  -- M ≤ (1/2) · (exp(-c log y) / d) · x for x ≥ x₀.
-  have hd_ne : (d : ℝ) ≠ 0 := ne_of_gt hd_pos_R
-  have hM_le_half_exp_x : (M : ℝ) ≤ (1/2) * (Real.exp (-c * Real.log y) / (d : ℝ)) * x := by
-    have hx₀_le : x₀ ≤ x := hx
-    have hineq1 : 4 * (d : ℝ) * (M : ℝ) / Real.exp (-c * Real.log y) ≤ x := by linarith
-    rw [div_le_iff₀ hexp_pos] at hineq1
-    have h1 : 4 * (d : ℝ) * (M : ℝ) ≤ Real.exp (-c * Real.log y) * x := by linarith
-    -- Goal: M ≤ (1/2) · (exp/d) · x.  Equivalently: M · (2d) ≤ exp · x.  Use h1.
-    have hkey : (M : ℝ) * (2 * (d : ℝ)) ≤ Real.exp (-c * Real.log y) * x := by nlinarith
-    have h_eq : (1/2) * (Real.exp (-c * Real.log y) / (d : ℝ)) * x =
-        Real.exp (-c * Real.log y) * x / (2 * (d : ℝ)) := by
-      field_simp
-    rw [h_eq, le_div_iff₀ (by positivity : (0 : ℝ) < 2 * (d : ℝ))]
-    exact hkey
-  -- Bound: count ≤ ρ x + M ≤ (exp/(2d)) x + (1/2) (exp/d) x = (exp/d) x.
-  have hρx_bound : ρ * x ≤ (1/2) * (Real.exp (-c * Real.log y) / (d : ℝ)) * x := by
-    have hmul := mul_le_mul_of_nonneg_right hρ_le hx_nonneg
-    have h_eq : Real.exp (-c * Real.log y) / (2 * (d : ℝ)) =
-        (1/2) * (Real.exp (-c * Real.log y) / (d : ℝ)) := by
-      field_simp
-    rw [h_eq] at hmul
-    exact hmul
-  -- Combine.
-  have h_target_eq : Real.exp (-c * Real.log y) * x / (d : ℝ) =
-      (1/2) * (Real.exp (-c * Real.log y) / (d : ℝ)) * x +
-        (1/2) * (Real.exp (-c * Real.log y) / (d : ℝ)) * x := by
-    field_simp
-    ring
-  linarith [hcount_le, hρx_bound, hM_le_half_exp_x, h_target_eq]
-
-/-- **Strong d-conditional uniform form of Lemma 6.2.**
-
-For absolute constants `A > 10` and `c > 0`, sufficiently large `y`, and any
-`1 ≤ d ≤ y`: `|bad(A,y,d,x)| ≤ exp(-c log y) · x / d + M`.
-
-The `/d` factor is essential for the d-summation in H-chain proofs:
-`∑_{d ≤ y} (exp(-c log y) · x / d + M) = (log y) · exp(-c log y) · x + y · M`,
-which decays geometrically in stage `j`.  Without the `/d` factor, the sum
-gives `y · exp(-c log y) · x = y^{1-c} · x → ∞` for `c < 1`. -/
-theorem composite_successor_uniform_d_conditional :
-    ∃ A : ℝ, 10 < A ∧
-      ∃ c : ℝ, 0 < c ∧
-        ∀ ε : ℝ, 0 < ε →
-          ∃ y₀ : ℝ, 0 < y₀ ∧
-            ∀ y : ℝ, y₀ ≤ y →
-              ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-                ∃ M : ℝ, 0 ≤ M ∧
-                  ∀ x : ℝ, 1 ≤ x →
-                    (Nat.card (CompositeSuccessorBadSet A y d x) : ℝ) ≤
-                      Real.exp (-c * Real.log y) * x / (d : ℝ) + M := by
-  classical
-  rcases step7_combine_and_crt_transfer_strong with ⟨c, hc, y₁, hy₁_pos, h⟩
-  refine ⟨20, by norm_num, c, hc, ?_⟩
-  intro ε _hε
-  refine ⟨y₁, hy₁_pos, ?_⟩
-  intro y hy d hd_pos hd_le_y
-  rcases h y hy d hd_pos hd_le_y with ⟨x₀, hx₀_pos, hx₀⟩
-  refine ⟨x₀ + 1, by linarith, ?_⟩
-  intro x hx
-  have hx_nonneg : 0 ≤ x := by linarith
-  have hd_pos_R : (0 : ℝ) < d := by exact_mod_cast hd_pos
-  have hexp_pos : 0 < Real.exp (-c * Real.log y) := Real.exp_pos _
-  have hexp_x_nonneg : 0 ≤ Real.exp (-c * Real.log y) * x / (d : ℝ) := by positivity
-  by_cases hx_large : x₀ ≤ x
-  · have h1 : (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤
-        Real.exp (-c * Real.log y) * x / (d : ℝ) := hx₀ x hx_large
-    linarith
-  · push_neg at hx_large
-    have hbad_sub : CompositeSuccessorBadSet 20 y d x ⊆ Set.Iic ⌊x⌋₊ := by
-      intro n hn; exact hn.2.1
-    have hfin : (Set.Iic ⌊x⌋₊ : Set ℕ).Finite := Set.finite_Iic _
-    have hcard_nat_le : Nat.card (CompositeSuccessorBadSet 20 y d x) ≤
-        Nat.card (Set.Iic ⌊x⌋₊ : Set ℕ) := Nat.card_mono hfin hbad_sub
-    have hcard_iic : Nat.card (Set.Iic ⌊x⌋₊ : Set ℕ) = ⌊x⌋₊ + 1 := by
-      simp [Nat.card_Iic]
-    rw [hcard_iic] at hcard_nat_le
-    have hcard_real :
-        (Nat.card (CompositeSuccessorBadSet 20 y d x) : ℝ) ≤ (⌊x⌋₊ : ℝ) + 1 := by
-      have := (Nat.cast_le (α := ℝ)).mpr hcard_nat_le
-      push_cast at this
-      linarith
-    have hfloor_le : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le hx_nonneg
-    linarith
-
-/-- **Chain-extension extraction.**
-
-If `n ∉ CompositeSuccessorBadSet A y d x` while `n` is a positive multiple of `d`
-with `n ≤ ⌊x⌋`, then there is an admissible squarefree successor `e` with
-`e ∣ n`, `d < e`, `e ≡ 1 [MOD d]`, and `e ≤ exp(y^A)`.
-
-This is the chain-extension primitive used in the H-chain greedy construction
-(paper §7.2 lines 1903-1923).  It unwraps `GoodCompositeSuccessor` to extract
-the witness as a concrete divisor of `n`. -/
-theorem composite_successor_extension {A y : ℝ} {d : ℕ} {x : ℝ} {n : ℕ}
-    (hn_pos : 0 < n) (hn_le : n ≤ ⌊x⌋₊) (hd_dvd : d ∣ n)
-    (hnot_bad : n ∉ CompositeSuccessorBadSet A y d x) :
-    ∃ e : ℕ, e ∣ n ∧ d < e ∧ Nat.ModEq d e 1 ∧ (e : ℝ) ≤ Real.exp (y ^ A) := by
-  classical
-  -- n ∉ bad ⟹ GoodCompositeSuccessor (since other conjuncts hold by hypothesis).
-  have h_good : GoodCompositeSuccessor A y d n := by
-    by_contra hng
-    exact hnot_bad ⟨hn_pos, hn_le, hd_dvd, hng⟩
-  rcases h_good with ⟨T, hadm, hprod_dvd⟩
-  rcases hadm with ⟨_hne, _hprime, hcong, hgt, hle⟩
-  exact ⟨∏ q ∈ T, q, hprod_dvd, hgt, hcong, hle⟩
 
 /-- **Public residue-density form of Lemma 6.2 (paper §6.2 line 1517-1525).**
 
@@ -26842,33 +24782,6 @@ private def ChebyshevThetaWitness (Cθ : ℝ) : Prop :=
   ∀ t : ℝ, 2 ≤ t →
     (∑ p ∈ Finset.filter Nat.Prime (Finset.Iic ⌊t⌋₊), Real.log (p : ℝ)) ≤ Cθ * t
 
-/-- A one-stage failure-density certificate for the `H`-chain iteration.
-
-For the stage `j`, this packages the paper §7.3 application of
-`composite_successor_uniform`: after choosing the tower scale `y_j`, every
-admissible current divisor `d ≤ y_j` has a CONCRETE bad set
-`{n : 0 < n ∧ n ≤ ⌊x⌋ ∧ d ∣ n ∧ no good composite-successor e ≤ exp(y^A) divides n}`
-whose counting function is bounded by `exp(-c log y) * x + M`.
-
-**Refactored 2026-04-28 (audit fix):** the previous formulation existentially
-quantified `Bad : ℝ → Set ℕ`, which was vacuously satisfied by the empty set
-(the agent's "closure" used `Bad := fun _ => ∅`).  The current form fixes the
-bad set to the concrete `composite_successor_uniform` exception set, mirroring
-`LowerBoundLittleH`'s paper-faithful `LowerHStageFailure` pattern.  Empty-set
-witnesses do not trivially satisfy this version. -/
-private def StageFailureDensityH (A c y₀ : ℝ) (j : ℕ) : Prop :=
-  10 < A ∧
-    ∀ η : ℝ, 0 < η →
-      ∃ y : ℝ, y₀ ≤ y ∧ (j + 1 : ℝ) ≤ y ∧
-        ∀ d : ℕ, 1 ≤ d → (d : ℝ) ≤ y →
-          ∃ M : ℝ, 0 ≤ M ∧
-            ∀ x : ℝ, 1 ≤ x →
-              -- Paper §6.2 Lemma 6.2 + §7.4 CRT: paper-faithful bad set per
-              -- `CompositeSuccessorBadSet` definition (squarefree product of
-              -- selected window primes).
-              (Nat.card (CompositeSuccessorBadSet A y d x) : ℝ)
-              ≤ Real.exp (-c * Real.log y) * x + M
-
 /-- The summed stage-failure estimate: the union of all failed stages has
 density `0`, hence only `o(x)` integers fail to carry the requested lower
 divisor chain. -/
@@ -26878,33 +24791,6 @@ private def StageFailureSumH (ε A c y₀ : ℝ) : Prop :=
       ∃ x₀ : ℝ, 0 < x₀ ∧
         ∀ x : ℝ, x₀ ≤ x →
           (Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ ¬ GoodLowerDivisorChain ε n} : ℝ) ≤ η * x
-
-/-- The per-stage failure-density bound, derived from `composite_successor_uniform`.
-
-This lemma is the **paper-faithful, parameter-free** form: the witnesses (A, c, y₀)
-are obtained from `composite_successor_uniform` (paper Lemma 6.2 + 2.7), and
-each stage's bound follows by re-application at scale `y_j`.  The previous form
-took (A, c, y₀) as inputs and was vacuously closeable with an empty `Bad`; this
-version forces the concrete bad set defined in `StageFailureDensityH`. -/
-private lemma stage_failure_density_H_witness :
-    ∃ A : ℝ, 10 < A ∧ ∃ c : ℝ, 0 < c ∧ ∃ y₀ : ℝ, 0 < y₀ ∧
-      ∀ j : ℕ, StageFailureDensityH A c y₀ j := by
-  rcases composite_successor_uniform with ⟨A, hA, c, hc, huniform⟩
-  refine ⟨A, hA, c, hc, 1, by norm_num, fun j => ?_⟩
-  refine ⟨hA, ?_⟩
-  intro η hη
-  rcases huniform η hη with ⟨y₀', hy₀'_pos, hstep⟩
-  refine ⟨max y₀' (j + 1 : ℝ), ?_, le_max_right _ _, ?_⟩
-  · -- 1 ≤ max y₀' (j+1)  via 1 ≤ j+1 ≤ RHS
-    have : (1 : ℝ) ≤ (j + 1 : ℝ) := by
-      have h := Nat.zero_le j
-      have : (0 : ℝ) ≤ (j : ℝ) := by exact_mod_cast h
-      linarith
-    exact this.trans (le_max_right _ _)
-  intro d hd_pos hd_le_y
-  have hy₀'_le : y₀' ≤ max y₀' (j + 1 : ℝ) := le_max_left _ _
-  rcases hstep (max y₀' (j + 1 : ℝ)) hy₀'_le d hd_pos hd_le_y with ⟨M, hM_nonneg, hbound⟩
-  exact ⟨M, hM_nonneg, hbound⟩
 
 /-! ### Paper §7.4 chain event (paper line 2031-2045).
 
@@ -26998,19 +24884,6 @@ private lemma HChainEvent_periodic (A B : ℝ) (m₀ R : ℕ) (P : ℕ)
       first | exact (hmodeq.dvd_iff hd_dvd_M).mp h_old |
              exact (hmodeq.symm.dvd_iff hd_dvd_M).mp h_old
   }
-
-/-- Paper §7.4 line 2049: apply `crt_transfer` (Lemma 2.7) once to the
-`M`-periodic chain event.  This gives the integer-density bound
-`|density(HChainEvent) - p_prod| ≤ M/x`. -/
-private lemma HChainEvent_density_via_crt (A B : ℝ) (m₀ R : ℕ) (P : ℕ) (hP : 2 ≤ P)
-    (hP_bound : ∀ k : ℕ, k < R →
-      Real.exp ((Real.exp (tower (m₀ + k) / B)) ^ (A - 1)) ≤ (P : ℝ)) :
-    ∃ p_prod : ℝ, ∀ x : ℝ, 1 ≤ x →
-      |((Nat.card {n : ℕ | n ≤ ⌊x⌋₊ ∧ HChainEvent A B m₀ R n} : ℝ)) / x - p_prod| ≤
-        (primorial P : ℝ) / x := by
-  classical
-  exact crt_transfer P hP (HChainEvent A B m₀ R)
-    (HChainEvent_periodic A B m₀ R P hP_bound)
 
 /-- Companion to `HChainEvent_density_via_crt` for the BAD event: density of
 `¬HChainEvent` is within `M/x` of some `q_prod`.  By `crt_transfer` applied to
@@ -27282,118 +25155,6 @@ private lemma hasDivisorChainLengthAtLeast_of_HChainEvent
   rcases h with ⟨ds, hchain, hlen, _⟩
   exact ⟨ds, hchain, hlen.symm.le⟩
 
-/-- Truncation: a chain of length `R+1` truncates to a chain of length `R`.
-
-Paper line 1898-1899: at stage j, "$d_j$ has already been constructed,
-$d_j\le y_j$, and $d_j$ is determined by the selections in the earlier
-windows $W_1,\dots,W_{j-1}$." This monotonicity says: if a length-(R+1) chain
-exists, its length-R prefix is also a valid chain. -/
-private lemma HChainEvent_truncate
-    {A B : ℝ} {m₀ R : ℕ} {n : ℕ} (h : HChainEvent A B m₀ (R + 1) n) :
-    HChainEvent A B m₀ R n := by
-  rcases h with ⟨ds, hchain, hlen, hprop⟩
-  -- ds has length R+1.  Take its first R elements.
-  have hlen_take : (ds.take R).length = R := by
-    rw [List.length_take]
-    omega
-  refine ⟨ds.take R, ?_, hlen_take, ?_⟩
-  · -- IsDivisorChain n (ds.take R).
-    rcases hchain with ⟨hdiv, hpair, hmod⟩
-    refine ⟨?_, ?_, ?_⟩
-    · -- Each d ∈ ds.take R divides n.
-      intro d hd
-      exact hdiv d (List.mem_of_mem_take hd)
-    · -- ds.take R is strictly increasing.
-      exact hpair.sublist (List.take_sublist R ds)
-    · -- consecutive mod 1 condition.
-      intro i hi
-      have hi_R : i.val + 1 < R := Nat.lt_of_lt_of_eq hi hlen_take
-      have hi_lt_ds : i.val + 1 < ds.length := by
-        rw [hlen]; omega
-      have hi_lt_ds_val : i.val < ds.length := by
-        rw [hlen]; omega
-      have h_get_succ : (ds.take R).get ⟨i.val + 1, hi⟩ = ds.get ⟨i.val + 1, hi_lt_ds⟩ := by
-        simp [List.get_eq_getElem, List.getElem_take]
-      have h_get_val : (ds.take R).get i = ds.get ⟨i.val, hi_lt_ds_val⟩ := by
-        simp [List.get_eq_getElem, List.getElem_take]
-      rw [h_get_succ, h_get_val]
-      exact hmod ⟨i.val, hi_lt_ds_val⟩ hi_lt_ds
-  · -- Constraints carry over.
-    intro k hk
-    have hk_R : k < R := by rw [hlen_take] at hk; exact hk
-    have hk_lt_ds : k < ds.length := by rw [hlen]; omega
-    have h_get_eq : (ds.take R).get ⟨k, hk⟩ = ds.get ⟨k, hk_lt_ds⟩ := by
-      simp [List.get_eq_getElem, List.getElem_take]
-    rw [h_get_eq]
-    exact hprop k hk_lt_ds
-
-/-- Iteration of `HChainEvent_truncate`: if a chain of length R₂ exists, so does any
-shorter chain (length R₁ ≤ R₂). -/
-private lemma HChainEvent_mono_le
-    {A B : ℝ} {m₀ R₁ R₂ : ℕ} {n : ℕ} (hR : R₁ ≤ R₂)
-    (h : HChainEvent A B m₀ R₂ n) :
-    HChainEvent A B m₀ R₁ n := by
-  induction R₂, hR using Nat.le_induction with
-  | base => exact h
-  | succ k hk ih =>
-    apply ih
-    exact HChainEvent_truncate h
-
-/-- Trivial: a chain of length 0 always exists (empty chain). -/
-private lemma HChainEvent_zero (A B : ℝ) (m₀ : ℕ) (n : ℕ) :
-    HChainEvent A B m₀ 0 n := by
-  refine ⟨[], ?_, by rfl, ?_⟩
-  · -- IsDivisorChain n [] holds vacuously.
-    refine ⟨?_, List.Pairwise.nil, ?_⟩
-    · intro d hd; simp at hd
-    · intro i _
-      exact absurd i.isLt (Nat.not_lt_zero _)
-  · -- Constraints vacuously hold (no k < 0).
-    intro k hk
-    exact absurd hk (Nat.not_lt_zero _)
-
-/-- A chain of length 1 always exists via `ds = [1]`.
-
-This is a Lean-encoding artifact: the trivial chain `[1]` satisfies all
-constraints vacuously (`Squarefree 1`, `primeFactors 1 = ∅`, `1 ≤ exp(…)`).
-The constraint that paper's `d_2 > d_1 = 1` is enforced only when EXTENDING
-to length ≥ 2 (mod constraint `d_3 % d_2 = 1` requires `d_2 ≥ 2`).
-
-Hence `H_0 ∧ ¬H_1` is always false / empty (the per-stage failure at k=0 is
-vacuous), and the per-stage residue-density bound holds trivially at k=0. -/
-private lemma HChainEvent_one (A B : ℝ) (m₀ : ℕ) (n : ℕ) :
-    HChainEvent A B m₀ 1 n := by
-  refine ⟨[1], ?_, by rfl, ?_⟩
-  · -- IsDivisorChain n [1].
-    refine ⟨?_, ?_, ?_⟩
-    · intro d hd
-      rw [List.mem_singleton] at hd
-      subst hd
-      exact ⟨le_refl 1, one_dvd _⟩
-    · -- [1].Pairwise (· < ·): vacuous (single element).
-      exact List.pairwise_singleton _ _
-    · intro i hi
-      -- i : Fin [1].length = Fin 1.  i.val + 1 < 1 is impossible.
-      exact absurd hi (by simp)
-  · -- Squarefree, prime, size constraints for [1]:
-    intro k hk
-    have hk_eq : k = 0 := by
-      have : k < 1 := hk
-      omega
-    subst hk_eq
-    refine ⟨?_, ?_, ?_⟩
-    · -- Squarefree 1.
-      exact squarefree_one
-    · -- ∀ p ∈ primeFactors 1, … : vacuous.
-      intro p hp
-      simp at hp
-    · -- (1 : ℝ) ≤ exp(…).
-      have h_exp_pos : (0 : ℝ) < Real.exp ((Real.exp (tower (m₀ + 0) / B)) ^ A) :=
-        Real.exp_pos _
-      have h_one_le_exp : (1 : ℝ) ≤ Real.exp ((Real.exp (tower (m₀ + 0) / B)) ^ A) :=
-        Real.one_le_exp_iff.mpr (Real.rpow_nonneg (Real.exp_pos _).le A)
-      simpa using h_one_le_exp
-
 /-- **Strict variant of HChainEvent (paper-faithful, forbids trivial `ds = [1]`).**
 
 `HChainEventStrict A B m₀ R n` holds iff there's a chain `ds : List ℕ` of length R
@@ -27527,64 +25288,6 @@ private lemma hChainEndpoint?_succ_mem_admissible {A B : ℝ} {m₀ n k d : ℕ}
   rw [hd_prev] at hk
   exact hFinsetLeastNat?_mem hk
 
-/-- **Periodicity of `hChainAdmissibleNext` (paper line 1916, 1923 — measurability).**
-
-Paper line 1916: "the selection variables for primes in W_j still have the
-independent Bernoulli law".  In the residue density model, this corresponds to:
-membership in `hChainAdmissibleNext A B m₀ k d_prev n` depends only on
-`n mod primorial P` for any `P ≥ exp(y_{k+1}^{A-1})` (since all primes in
-`W_{k+1}` and all squarefree products thereof divide `primorial P`).
-
-Proof: the only `n`-dependent constraint in the filter is `e ∣ n`.  For e in
-the candidate set (squarefree with primes ≤ exp(y_{k+1}^{A-1})), `e ∣ primorial P`.
-Hence `n ≡ n' [MOD primorial P]` ⟹ `e ∣ n ↔ e ∣ n'`. -/
-private lemma hChainAdmissibleNext_eq_of_mod_primorial
-    {A B : ℝ} (_hA : 1 ≤ A) {m₀ k d_prev n n' P : ℕ}
-    (hP_bound : Real.exp ((Real.exp (tower (m₀ + k) / B)) ^ (A - 1)) ≤ (P : ℝ))
-    (hmod : n ≡ n' [MOD primorial P]) :
-    hChainAdmissibleNext A B m₀ k d_prev n = hChainAdmissibleNext A B m₀ k d_prev n' := by
-  classical
-  unfold hChainAdmissibleNext
-  apply Finset.filter_congr
-  intro e _he
-  -- The conjunction's only `n`-dependent term is `e ∣ n`.
-  refine ⟨?_, ?_⟩
-  · rintro ⟨h1, h2, h_dvd, h_sqf, h_primes, h_size⟩
-    refine ⟨h1, h2, ?_, h_sqf, h_primes, h_size⟩
-    -- Show e ∣ n'.  Step 1: e ∣ primorial P.
-    have h_e_dvd_M : e ∣ primorial P := by
-      -- e = ∏ p ∈ e.primeFactors, p (since e is squarefree).
-      rw [← Nat.prod_primeFactors_of_squarefree h_sqf]
-      -- Show every prime factor of e is in primorial P's product.
-      apply Finset.prod_dvd_prod_of_subset
-      intro p hp
-      have hp_data := h_primes p hp
-      -- hp_data : exp(exp(tower/B)) < p ∧ (p : ℝ) ≤ exp((exp(tower/B))^(A-1)).
-      have hp_prime : p.Prime := Nat.prime_of_mem_primeFactors hp
-      -- p ≤ exp((exp(tower/B))^(A-1)) ≤ P, so p ≤ P (in ℕ).
-      have hp_le_P : p ≤ P := by
-        have hp_le_real : (p : ℝ) ≤ (P : ℝ) := hp_data.2.trans hP_bound
-        exact_mod_cast hp_le_real
-      simp only [Finset.mem_filter, Finset.mem_Iic]
-      exact ⟨hp_le_P, hp_prime⟩
-    -- Step 2: hmod + e ∣ primorial P ⟹ e ∣ n ↔ e ∣ n'.
-    exact (hmod.dvd_iff h_e_dvd_M).mp h_dvd
-  · rintro ⟨h1, h2, h_dvd, h_sqf, h_primes, h_size⟩
-    refine ⟨h1, h2, ?_, h_sqf, h_primes, h_size⟩
-    -- Symmetric direction.
-    have h_e_dvd_M : e ∣ primorial P := by
-      rw [← Nat.prod_primeFactors_of_squarefree h_sqf]
-      apply Finset.prod_dvd_prod_of_subset
-      intro p hp
-      have hp_data := h_primes p hp
-      have hp_prime : p.Prime := Nat.prime_of_mem_primeFactors hp
-      have hp_le_P : p ≤ P := by
-        have hp_le_real : (p : ℝ) ≤ (P : ℝ) := hp_data.2.trans hP_bound
-        exact_mod_cast hp_le_real
-      simp only [Finset.mem_filter, Finset.mem_Iic]
-      exact ⟨hp_le_P, hp_prime⟩
-    exact (hmod.dvd_iff h_e_dvd_M).mpr h_dvd
-
 /-- **Nat-form periodicity (paper line 1916, 1923 — paper-faithful).**
 
 Strengthened version of `hChainAdmissibleNext_eq_of_mod_primorial` using a
@@ -27673,42 +25376,6 @@ private lemma hChainEndpoint?_one_ge_two {A B : ℝ} {m₀ n d : ℕ}
   rw [h_eq] at h_lt
   -- h_lt : 1 < d
   omega
-
-/-- **Descending success: greedy succeeds at level k ⟹ greedy succeeds at all levels j ≤ k.**
-
-This is just iterating `hChainEndpoint?_succ_prev_some`. -/
-private lemma hChainEndpoint?_some_descending {A B : ℝ} {m₀ n : ℕ} :
-    ∀ {k : ℕ} {d : ℕ}, hChainEndpoint? A B m₀ n k = some d →
-    ∀ j : ℕ, j ≤ k → ∃ d', hChainEndpoint? A B m₀ n j = some d' := by
-  intro k
-  induction k with
-  | zero =>
-    intros d hk j hj
-    interval_cases j
-    exact ⟨1, hChainEndpoint?_zero A B m₀ n⟩
-  | succ k ih =>
-    intros d hk j hj
-    by_cases hj_eq : j = k + 1
-    · subst hj_eq
-      exact ⟨d, hk⟩
-    · have hj_le_k : j ≤ k := by omega
-      rcases hChainEndpoint?_succ_prev_some hk with ⟨d_prev, hd_prev⟩
-      exact ih hd_prev j hj_le_k
-
-/-- **`hChainEndpoint?` value at level `k+1` exceeds `d_prev = hChainEndpoint? at k`.**
-
-Iterating this gives strict monotonicity of the greedy chain values.
-Paper line 1927: `d_{j+1} > d_j`. -/
-private lemma hChainEndpoint?_succ_strict_lt {A B : ℝ} {m₀ n k d_prev d : ℕ}
-    (hprev : hChainEndpoint? A B m₀ n k = some d_prev)
-    (hsucc : hChainEndpoint? A B m₀ n (k + 1) = some d) :
-    d_prev < d := by
-  rcases hChainEndpoint?_succ_constraints hsucc with ⟨d_prev', hd_prev', h_lt, _, _, _, _, _⟩
-  -- hd_prev' = hprev (both : hChainEndpoint? A B m₀ n k = some d_prev / some d_prev').
-  rw [hd_prev'] at hprev
-  injection hprev with h_eq
-  rw [← h_eq]
-  exact h_lt
 
 /-- **All hChainEndpoint? values are ≥ 1.** -/
 private lemma hChainEndpoint?_some_ge_one {A B : ℝ} {m₀ : ℕ} :
@@ -27949,50 +25616,6 @@ private lemma HCEStrict_of_hChainEndpoint?_some {A B : ℝ} {m₀ : ℕ} :
       have h_idx_eq : (k + 1) - 1 = ds_prev.length := by rw [hlen_prev]; omega
       simp [List.get_eq_getElem, List.getElem_append_right, h_idx_eq]
 
-/-- **Periodicity of `hChainEndpoint?` (paper line 1913, 1923).**
-
-By induction on `k`: `hChainEndpoint? A B m₀ n k` depends only on `n mod primorial P`
-for any `P` ≥ all the past windows' upper bounds.
-
-This is paper's "d_j is measurable with respect to the selections in the earlier
-windows W_1, ..., W_{j-1}" (paper line 1913), translated to the residue density model:
-each prime selection in W_i is determined by `(n mod p)` for `p ∈ W_i`, hence by
-`n mod primorial P`. -/
-private lemma hChainEndpoint?_eq_of_mod_primorial
-    {A B : ℝ} (hA : 1 ≤ A) {m₀ : ℕ} :
-    ∀ {k n n' P : ℕ},
-      (∀ j : ℕ, j < k → Real.exp ((Real.exp (tower (m₀ + j) / B)) ^ (A - 1)) ≤ (P : ℝ)) →
-      n ≡ n' [MOD primorial P] →
-      hChainEndpoint? A B m₀ n k = hChainEndpoint? A B m₀ n' k := by
-  intro k
-  induction k with
-  | zero =>
-    intros n n' P _hP_bound _hmod
-    rfl
-  | succ j ih =>
-    intros n n' P hP_bound hmod
-    -- Apply IH for level j (using hP_bound restricted to indices < j).
-    have ih_j : hChainEndpoint? A B m₀ n j = hChainEndpoint? A B m₀ n' j := by
-      apply ih (P := P) ?_ hmod
-      intro j' hj'
-      exact hP_bound j' (Nat.lt_succ_of_lt hj')
-    -- Unfold the recursive case for level (j+1).
-    show (match hChainEndpoint? A B m₀ n j with
-          | none => none
-          | some d_prev => hFinsetLeastNat? (hChainAdmissibleNext A B m₀ j d_prev n)) =
-         (match hChainEndpoint? A B m₀ n' j with
-          | none => none
-          | some d_prev => hFinsetLeastNat? (hChainAdmissibleNext A B m₀ j d_prev n'))
-    rw [ih_j]
-    -- Both sides now match on hChainEndpoint? n' j.  Case split on it.
-    cases hChainEndpoint? A B m₀ n' j with
-    | none => rfl
-    | some d_prev =>
-      -- Apply periodicity of hChainAdmissibleNext at index j.
-      have hP_at_j : Real.exp ((Real.exp (tower (m₀ + j) / B)) ^ (A - 1)) ≤ (P : ℝ) :=
-        hP_bound j (Nat.lt_succ_self j)
-      simp only [hChainAdmissibleNext_eq_of_mod_primorial hA hP_at_j hmod]
-
 /-- **Nat-form periodicity for `hChainEndpoint?` (paper line 1913, 1923 — paper-faithful).**
 
 Strengthened version using Nat-form hypothesis `⌊exp(...)⌋₊ ≤ P` instead of
@@ -28068,19 +25691,6 @@ private noncomputable instance hGreedySucc_decidable {A B : ℝ} {m₀ k n : ℕ
     rw [Option.not_isSome_iff_eq_none] at h_some
     rw [h_some] at hd
     cases hd
-
-/-- **`hGreedySucc` periodicity** — direct corollary of
-`hChainEndpoint?_eq_of_mod_primorial`.
-
-If `n ≡ n' [MOD primorial P]` with `P` ≥ all past-window upper bounds, then
-`hGreedySucc k n ↔ hGreedySucc k n'`. -/
-private lemma hGreedySucc_eq_of_mod_primorial
-    {A B : ℝ} (hA : 1 ≤ A) {m₀ k n n' P : ℕ}
-    (hP_bound : ∀ j : ℕ, j < k → Real.exp ((Real.exp (tower (m₀ + j) / B)) ^ (A - 1)) ≤ (P : ℝ))
-    (hmod : n ≡ n' [MOD primorial P]) :
-    hGreedySucc A B m₀ k n ↔ hGreedySucc A B m₀ k n' := by
-  unfold hGreedySucc
-  rw [hChainEndpoint?_eq_of_mod_primorial hA hP_bound hmod]
 
 /-- **Equivalence: `hChainAdmissibleNext` non-empty iff `GoodCompositeSuccessor`.**
 
@@ -28212,159 +25822,6 @@ private lemma hGreedyStageFailure_iff
 -- forward direction (`HChainEvent_of_strict`) is true.  Callers that need the
 -- forward direction use `HChainEvent_of_strict` directly.
 
-/-- **HCEStrict at length 1 = GoodCompositeSuccessor at modulus 1 (paper line 1888-1909).**
-
-Both events express "∃ nontrivial squarefree divisor of r with primes in W_1, ≤ exp(y_1^A)",
-just expressed via different data structures (chain ds = [d] vs Finset T = primeFactors(d)).
-
-`y_1 := exp(tower(m₀)/B)` is the paper's first window scale.
-
-Bijection: `T = primeFactors(d) ↔ d = ∏ T` via `Nat.prod_primeFactors_of_squarefree` and
-`Nat.primeFactors_prod`.  -/
-private lemma HCEStrict_one_iff_GoodComposite
-    {A B : ℝ} {m₀ : ℕ} (n : ℕ) :
-    HChainEventStrict A B m₀ 1 n ↔
-      GoodCompositeSuccessor A (Real.exp (tower m₀ / B)) 1 n := by
-  unfold HChainEventStrict GoodCompositeSuccessor AdmissibleCompositeProduct
-  constructor
-  · -- Forward: HCEStrict_1 → GoodCompositeSuccessor.
-    rintro ⟨ds, hchain, hlen, hprop, hstrict⟩
-    have h_pos : 0 < ds.length := by rw [hlen]; omega
-    set d := ds.get ⟨0, h_pos⟩ with hd_def
-    rcases hprop 0 h_pos with ⟨hd_sqf, hd_primes, hd_size⟩
-    rcases hchain with ⟨hdiv_all, _, _⟩
-    have hd_dvd : d ∣ n := (hdiv_all d (List.get_mem _ _)).2
-    -- Strictness gives d ≥ 2.
-    rcases hstrict with h_zero | ⟨_, h_d_ge_2⟩
-    · exact absurd h_zero (by omega)
-    -- T := primeFactors(d).
-    refine ⟨Nat.primeFactors d, ⟨?_, ?_, ?_, ?_, ?_⟩, ?_⟩
-    · -- T.Nonempty: d ≥ 2 has prime factors.
-      rw [Finset.nonempty_iff_ne_empty]
-      intro h_empty
-      have : d = 1 := by
-        have h_eq := Nat.prod_primeFactors_of_squarefree hd_sqf
-        rw [h_empty] at h_eq
-        simpa using h_eq.symm
-      omega
-    · intro q hq
-      exact ⟨Nat.prime_of_mem_primeFactors hq, (hd_primes q hq).1, (hd_primes q hq).2⟩
-    · -- ModEq 1: any number ≡ any (mod 1).
-      simp [Nat.ModEq, Nat.mod_one]
-    · -- d < ∏ T = d.  Need 1 < d.
-      rw [Nat.prod_primeFactors_of_squarefree hd_sqf]
-      omega
-    · -- (∏ T : ℝ) = (d : ℝ) ≤ exp(y_1^A).
-      rw [Nat.prod_primeFactors_of_squarefree hd_sqf]
-      exact hd_size
-    · -- (∏ T) ∣ n.
-      rw [Nat.prod_primeFactors_of_squarefree hd_sqf]
-      exact hd_dvd
-  · -- Backward: GoodCompositeSuccessor → HCEStrict_1.
-    rintro ⟨T, ⟨hTne, hTprime, _hTcong, hTgt, hTle⟩, hTdvd⟩
-    set d := ∏ q ∈ T, q with hd_def
-    have h_d_prime : ∀ q ∈ T, Nat.Prime q := fun q hq => (hTprime q hq).1
-    -- d ≥ 2 since 1 < d (from hTgt with d > 1 = 1).
-    have h_d_ge_2 : 2 ≤ d := by
-      have : 1 < d := hTgt
-      omega
-    -- d is squarefree (product of distinct primes).
-    have h_d_sqf : Squarefree d := by
-      rw [hd_def]
-      apply Finset.squarefree_prod_of_pairwise_isCoprime
-      · -- Pairwise IsRelPrime on the identity function.
-        intro a ha b hb hab
-        have h_a_prime := h_d_prime a ha
-        have h_b_prime := h_d_prime b hb
-        have h_coprime : Nat.Coprime a b := (Nat.coprime_primes h_a_prime h_b_prime).mpr hab
-        exact Nat.coprime_iff_isRelPrime.mp h_coprime
-      · intro i hi
-        exact (h_d_prime i hi).squarefree
-    -- primeFactors d = T.
-    have h_pf : Nat.primeFactors d = T := by
-      rw [hd_def]
-      exact Nat.primeFactors_prod h_d_prime
-    -- ds := [d].
-    refine ⟨[d], ?_, by rfl, ?_, ?_⟩
-    · -- IsDivisorChain n [d].
-      refine ⟨?_, List.pairwise_singleton _ _, ?_⟩
-      · intro x hx
-        rw [List.mem_singleton] at hx
-        subst hx
-        exact ⟨by omega, hTdvd⟩
-      · intro i hi
-        exact absurd hi (by simp)
-    · -- Squarefree, prime, size constraints.
-      intro k hk
-      have hk_eq : k = 0 := by
-        have : k < 1 := hk
-        omega
-      subst hk_eq
-      have h_get_eq : [d].get ⟨0, hk⟩ = d := by simp
-      rw [h_get_eq]
-      refine ⟨h_d_sqf, ?_, ?_⟩
-      · intro p hp
-        rw [h_pf] at hp
-        exact ⟨(hTprime p hp).2.1, (hTprime p hp).2.2⟩
-      · exact_mod_cast hTle
-    · -- Strictness: d ≥ 2.
-      right
-      refine ⟨by simp, ?_⟩
-      have h_get_eq : [d].get ⟨0, by simp⟩ = d := by simp
-      rw [h_get_eq]
-      exact h_d_ge_2
-
-/-- **Density lift via periodicity (key technical helper for paper Lemma 7.3 line 1942-1952).**
-
-For a `P : ℕ → Prop` that is `M_d`-periodic (i.e., `P n ↔ P (n % M_d)`), and for an outer
-modulus `M_outer = k * M_d` (so `M_d ∣ M_outer`):
-  `((Finset.range M_outer).filter P).card = k * ((Finset.range M_d).filter P).card`.
-
-This lifts density: `density on Fin M_outer of P = density on Fin M_d of P` (exact equality).
-
-Proof by induction on k, using `Finset.range_eq_Ico` and `Nat.filter_Ico_card_eq_of_periodic`.
--/
-private lemma card_filter_range_mul_periodic_eq
-    {P : ℕ → Prop} [DecidablePred P] {M_d : ℕ} (hM_d_pos : 0 < M_d)
-    (hperiod : Function.Periodic P M_d) (k : ℕ) :
-    ((Finset.range (M_d * k)).filter P).card = k * ((Finset.range M_d).filter P).card := by
-  induction k with
-  | zero => simp
-  | succ n ih =>
-    -- range (M_d * (n+1)) = range (M_d * n) ∪ Ico (M_d * n) (M_d * (n+1))
-    -- These are disjoint, and the second piece has the same count as range M_d (by periodicity).
-    have h_split : Finset.range (M_d * (n + 1)) =
-        Finset.range (M_d * n) ∪ Finset.Ico (M_d * n) (M_d * (n + 1)) := by
-      ext x
-      simp only [Finset.mem_range, Finset.mem_Ico, Finset.mem_union]
-      have h_mul_succ : M_d * (n + 1) = M_d * n + M_d := by ring
-      rw [h_mul_succ]
-      omega
-    have h_disj : Disjoint (Finset.range (M_d * n)) (Finset.Ico (M_d * n) (M_d * (n + 1))) := by
-      rw [Finset.disjoint_left]
-      intro a ha hb
-      rw [Finset.mem_range] at ha
-      rw [Finset.mem_Ico] at hb
-      omega
-    rw [h_split, Finset.filter_union]
-    have h_disj_filt : Disjoint
-        ((Finset.range (M_d * n)).filter P)
-        ((Finset.Ico (M_d * n) (M_d * (n + 1))).filter P) := by
-      apply Finset.disjoint_filter_filter h_disj
-    rw [Finset.card_union_of_disjoint h_disj_filt]
-    -- The Ico piece has count = ((Finset.range M_d).filter P).card by periodicity.
-    have h_Ico_count : ((Finset.Ico (M_d * n) (M_d * (n + 1))).filter P).card =
-        ((Finset.range M_d).filter P).card := by
-      have h_eq : M_d * (n + 1) = M_d * n + M_d := by ring
-      rw [h_eq]
-      have h1 := Nat.filter_Ico_card_eq_of_periodic (M_d * n) M_d P hperiod
-      have h2 := Nat.filter_Ico_card_eq_of_periodic 0 M_d P hperiod
-      have h3 : Finset.Ico 0 (0 + M_d) = Finset.range M_d := by
-        rw [zero_add, ← Finset.range_eq_Ico]
-      rw [h1, ← h2, h3]
-    rw [h_Ico_count, ih]
-    ring
-
 /-- Helper: convert subtype card on Fin M to filter card on Finset.range M. -/
 private lemma h_fin_subtype_card_eq_range {M : ℕ} (P : ℕ → Prop) [DecidablePred P] :
     Nat.card {r : Fin M // P r.val} = ((Finset.range M).filter P).card := by
@@ -28382,371 +25839,6 @@ private lemma h_fin_subtype_card_eq_range {M : ℕ} (P : ℕ → Prop) [Decidabl
     simp only [Finset.mem_filter, Finset.mem_range] at hv
     refine ⟨⟨v, hv.1⟩, ?_, rfl⟩
     simp [Finset.mem_filter, hv.2]
-
-/-- **Chain extension via good_composite (paper line 1898-1923, contrapositive).**
-
-For r with `HCEStrict_k(r) ∧ ¬HCEStrict_{k+1}(r)` and k ≥ 1, exists chain prefix
-endpoint `d := ds[k-1] ≥ 2` such that `¬good_composite(20, y_{k+1}, d, r)`.
-
-Proof: from `HCEStrict_k`, get chain `ds` and `d := ds[k-1] ≥ 2`. By contradiction,
-if `good_composite` holds, the witness extends `ds` to a length-(k+1) chain witnessing
-`HCEStrict_{k+1}` (paper line 1925-1928). -/
-private lemma HCEStrict_failure_extract_d
-    {A B : ℝ} (_hA_pos : 10 < A) {m₀ k : ℕ} (hk_pos : 1 ≤ k) {r : ℕ}
-    (hH_k : HChainEventStrict A B m₀ k r)
-    (hnotH_succ : ¬ HChainEventStrict A B m₀ (k + 1) r) :
-    ∃ d : ℕ, 2 ≤ d ∧ d ∣ r ∧ Squarefree d ∧
-      (∀ p ∈ Nat.primeFactors d,
-        Real.exp (Real.exp (tower (m₀ + (k - 1)) / B)) < (p : ℝ) ∧
-        (p : ℝ) ≤ Real.exp ((Real.exp (tower (m₀ + (k - 1)) / B)) ^ (A - 1))) ∧
-      (d : ℝ) ≤ Real.exp ((Real.exp (tower (m₀ + (k - 1)) / B)) ^ A) ∧
-      ¬ GoodCompositeSuccessor A (Real.exp (tower (m₀ + k) / B)) d r := by
-  rcases hH_k with ⟨ds, hchain, hlen, hprop, hstrict⟩
-  have hk_minus_1_lt : k - 1 < ds.length := by rw [hlen]; omega
-  set d : ℕ := ds.get ⟨k - 1, hk_minus_1_lt⟩ with hd_def
-  rcases hprop (k - 1) hk_minus_1_lt with ⟨hd_sqf, hd_primes_at_kk, hd_size⟩
-  rcases hchain with ⟨hdiv_all, hpair, hmod⟩
-  have hd_in_ds : d ∈ ds := List.get_mem _ _
-  have hd_dvd : d ∣ r := (hdiv_all d hd_in_ds).2
-  -- Strictness: ds[0] ≥ 2 (or k = 0, not our case).  Use to derive d ≥ 2.
-  -- For k = 1: ds = [d_0] of length 1, so d = ds[0] ≥ 2 directly.
-  -- For k ≥ 2: ds has length ≥ 2; mod constraint forces ds[i] ≥ 2 for all i (in particular d).
-  have hd_ge_2 : 2 ≤ d := by
-    -- If k = 1: d = ds[0]. Strictness gives ds[0] ≥ 2.
-    -- If k ≥ 2: by IsDivisorChain mod constraint at index k-2, ds[k-1] % ds[k-2] = 1, so ds[k-1] ≥ 2.
-    rcases hstrict with hk_zero | ⟨h_ds_pos, h_ds0_ge⟩
-    · exfalso; omega  -- k = 0 contradicts hk_pos.
-    -- For k = 1: d = ds[0] = ds.get ⟨0, h_ds_pos⟩.
-    by_cases hk_one : k = 1
-    · subst hk_one
-      have h_get_eq : ds.get ⟨1 - 1, hk_minus_1_lt⟩ = ds.get ⟨0, h_ds_pos⟩ := by
-        congr 1
-      rw [hd_def, h_get_eq]; exact h_ds0_ge
-    -- For k ≥ 2: use mod constraint.
-    have hk_ge_2 : 2 ≤ k := by omega
-    -- ds[k-1] % ds[k-2] = 1 (mod constraint at index k-2).
-    have h_pos_succ : (k - 2) + 1 < ds.length := by rw [hlen]; omega
-    have h_pos_prev : k - 2 < ds.length := by rw [hlen]; omega
-    have h_mod_at := hmod ⟨k - 2, h_pos_prev⟩ h_pos_succ
-    -- ds.get ⟨(k-2)+1, _⟩ = ds.get ⟨k-1, _⟩ = d.
-    have h_succ_eq : ds.get ⟨k - 2 + 1, h_pos_succ⟩ = d := by
-      rw [hd_def]
-      congr 1
-      apply Fin.ext
-      simp; omega
-    rw [h_succ_eq] at h_mod_at
-    -- ds[k-2] ≥ 1 (from IsDivisorChain).
-    have h_prev_ge_1 : 1 ≤ ds.get ⟨k - 2, h_pos_prev⟩ :=
-      (hdiv_all _ (List.get_mem _ _)).1
-    -- d % ds[k-2] = 1, so d ≥ ds[k-2] + 1 ≥ 2.
-    -- Or simpler: d = (ds[k-2]) * q + 1 for some q ≥ 0 (from mod). d ≥ 1.
-    -- Since d ∈ ds and d satisfies pairwise <, d > all earlier elements.
-    -- For Pairwise <: ds[k-1] > ds[k-2] ≥ 1, so ds[k-1] ≥ 2.
-    have h_lt_d : ds.get ⟨k - 2, h_pos_prev⟩ < d := by
-      rw [hd_def]
-      have : k - 2 < k - 1 := by omega
-      exact List.pairwise_iff_get.mp hpair ⟨k - 2, h_pos_prev⟩ ⟨k - 1, hk_minus_1_lt⟩ this
-    omega
-  refine ⟨d, hd_ge_2, hd_dvd, hd_sqf, hd_primes_at_kk, hd_size, ?_⟩
-  -- ¬good_composite by contradiction.
-  intro hgood
-  rcases hgood with ⟨T, hadm, hTdvd⟩
-  rcases hadm with ⟨hTne, hTprime, hTcong, hTgt, hTle⟩
-  -- e := ∏ T ∈ ℕ, satisfies admissibility for d at scale y_{k+1}.
-  set e : ℕ := ∏ q ∈ T, q with he_def
-  have he_pos : 0 < e := by
-    rw [he_def]
-    apply Finset.prod_pos
-    intro q hq
-    exact (hTprime q hq).1.pos
-  have he_ge_2 : 2 ≤ e := by
-    -- hTgt : d < e, hd_ge_2 : 2 ≤ d, so 2 ≤ d < e gives 2 ≤ e.
-    have : d < e := hTgt
-    omega
-  -- e ≥ d + 1 (from mod constraint and e > d).
-  -- Build ds_ext = ds ++ [e]; show HCEStrict_{k+1}(r) holds via this chain.
-  apply hnotH_succ
-  refine ⟨ds ++ [e], ?_, ?_, ?_, ?_⟩
-  · -- IsDivisorChain r (ds ++ [e]).
-    refine ⟨?_, ?_, ?_⟩
-    · -- divisibility / 1 ≤ for each element.
-      intro x hx
-      rw [List.mem_append] at hx
-      rcases hx with hx | hx
-      · exact hdiv_all x hx
-      · rw [List.mem_singleton] at hx; subst hx
-        exact ⟨by omega, hTdvd⟩
-    · -- Pairwise <.
-      rw [List.pairwise_append]
-      refine ⟨hpair, List.pairwise_singleton _ _, ?_⟩
-      intro x hx y hy
-      rw [List.mem_singleton] at hy; subst hy
-      -- Need x < e for x ∈ ds.
-      -- Since ds is Pairwise <, all x ∈ ds satisfy x ≤ ds.get ⟨k-1, _⟩ = d.  e > d.
-      rcases List.mem_iff_get.mp hx with ⟨⟨i, hi⟩, hi_eq⟩
-      have hi_R : i < ds.length := hi
-      have hi_lt_k : i < k := by rw [hlen] at hi_R; exact hi_R
-      have hi_le_k1 : i ≤ k - 1 := by omega
-      rcases lt_or_eq_of_le hi_le_k1 with h_lt | h_eq
-      · -- i < k - 1: by Pairwise, ds.get i < ds.get k-1 = d.
-        have h_lt_d : ds.get ⟨i, hi⟩ < d := by
-          rw [hd_def]
-          exact List.pairwise_iff_get.mp hpair ⟨i, hi⟩ ⟨k - 1, hk_minus_1_lt⟩ h_lt
-        rw [← hi_eq]; linarith [hTgt]
-      · -- i = k - 1: ds.get i = d.
-        have h_eq_d : ds.get ⟨i, hi⟩ = d := by
-          rw [hd_def]
-          congr 1
-          apply Fin.ext
-          simp; exact h_eq
-        rw [← hi_eq, h_eq_d]; exact hTgt
-    · -- mod constraints.
-      intro i hi
-      have h_total_len : (ds ++ [e]).length = k + 1 := by
-        rw [List.length_append, List.length_singleton, hlen]
-      have hi_R1 : i.val + 1 < k + 1 := h_total_len ▸ hi
-      by_cases hi_lt : i.val + 1 < k
-      · -- (i, i+1) within ds.
-        have hi_in_ds : i.val < ds.length := by rw [hlen]; omega
-        have hi1_in_ds : i.val + 1 < ds.length := by rw [hlen]; exact hi_lt
-        have h_get_i : (ds ++ [e]).get i = ds.get ⟨i.val, hi_in_ds⟩ := by
-          simp [List.get_eq_getElem, List.getElem_append_left, hi_in_ds]
-        have h_get_i1 : (ds ++ [e]).get ⟨i.val + 1, hi⟩ = ds.get ⟨i.val + 1, hi1_in_ds⟩ := by
-          simp [List.get_eq_getElem, List.getElem_append_left, hi1_in_ds]
-        rw [h_get_i, h_get_i1]
-        exact hmod ⟨i.val, hi_in_ds⟩ hi1_in_ds
-      · -- i.val + 1 = k (boundary): ds[k-1] = d, e is at position k.
-        push_neg at hi_lt
-        have hi_val_eq : i.val = k - 1 := by omega
-        have hi_in_ds : i.val < ds.length := by rw [hlen]; omega
-        have h_get_i : (ds ++ [e]).get i = d := by
-          have h_idx_eq : (ds ++ [e]).get i = ds.get ⟨i.val, hi_in_ds⟩ := by
-            simp [List.get_eq_getElem, List.getElem_append_left, hi_in_ds]
-          rw [h_idx_eq, hd_def]
-          congr 1
-          ext; exact hi_val_eq
-        have h_get_i1 : (ds ++ [e]).get ⟨i.val + 1, hi⟩ = e := by
-          have h_idx_eq : i.val + 1 = ds.length := by rw [hlen]; omega
-          simp [List.get_eq_getElem, List.getElem_append_right, h_idx_eq]
-        rw [h_get_i, h_get_i1]
-        -- Goal is `Nat.ModEq d e 1` (paper-faithful form), which is exactly hTcong.
-        exact hTcong
-  · -- length = k + 1.
-    rw [List.length_append, List.length_singleton, hlen]
-  · -- Constraints for each index k_idx < k+1.
-    intro k_idx hk_idx
-    have h_total_len : (ds ++ [e]).length = k + 1 := by
-      rw [List.length_append, List.length_singleton, hlen]
-    have hk_idx_le : k_idx < k + 1 := by rw [h_total_len] at hk_idx; exact hk_idx
-    by_cases hk_idx_lt : k_idx < k
-    · -- Index in ds.
-      have hk_idx_in_ds : k_idx < ds.length := by rw [hlen]; exact hk_idx_lt
-      have h_get_eq : (ds ++ [e]).get ⟨k_idx, hk_idx⟩ = ds.get ⟨k_idx, hk_idx_in_ds⟩ := by
-        simp [List.get_eq_getElem, List.getElem_append_left, hk_idx_in_ds]
-      rw [h_get_eq]
-      exact hprop k_idx hk_idx_in_ds
-    · -- k_idx = k (the new element e).  Replace k_idx by k via cases.
-      have hk_idx_eq : k_idx = k := by omega
-      cases hk_idx_eq
-      have h_idx_eq : k = ds.length := by rw [hlen]
-      have h_get_eq : (ds ++ [e]).get ⟨k, hk_idx⟩ = e := by
-        simp [List.get_eq_getElem, List.getElem_append_right, h_idx_eq]
-      rw [h_get_eq]
-      refine ⟨?_, ?_, ?_⟩
-      · -- Squarefree e = ∏ T (T's elements are distinct primes).
-        rw [he_def]
-        apply Finset.squarefree_prod_of_pairwise_isCoprime
-        · intro a ha b hb hab
-          have h_a_prime := (hTprime a ha).1
-          have h_b_prime := (hTprime b hb).1
-          have h_coprime : Nat.Coprime a b := (Nat.coprime_primes h_a_prime h_b_prime).mpr hab
-          exact Nat.coprime_iff_isRelPrime.mp h_coprime
-        · intro i hi
-          exact (hTprime i hi).1.squarefree
-      · -- Primes(e) = T ⊂ W_{k+1}.
-        intro p hp
-        have h_pf : Nat.primeFactors e = T := by
-          rw [he_def]; exact Nat.primeFactors_prod (fun q hq => (hTprime q hq).1)
-        rw [h_pf] at hp
-        exact ⟨(hTprime p hp).2.1, (hTprime p hp).2.2⟩
-      · exact_mod_cast hTle
-  · -- Strictness for k+1: ds_ext[0] ≥ 2 (since ds[0] ≥ 2 from hstrict).
-    right
-    have h_pos_ext : 0 < (ds ++ [e]).length := by
-      rw [List.length_append, List.length_singleton, hlen]; omega
-    refine ⟨h_pos_ext, ?_⟩
-    -- (ds ++ [e]).get 0 = ds.get 0 (since k ≥ 1, ds nonempty).
-    rcases hstrict with hk_zero | ⟨h_ds_pos, h_ds0_ge⟩
-    · exfalso; omega
-    have h_get_eq : (ds ++ [e]).get ⟨0, h_pos_ext⟩ = ds.get ⟨0, h_ds_pos⟩ := by
-      simp [List.get_eq_getElem, List.getElem_append_left, h_ds_pos]
-    rw [h_get_eq]; exact h_ds0_ge
-
-/-- HChainEventStrict at length 0 always holds (empty chain). -/
-private lemma HChainEventStrict_zero (A B : ℝ) (m₀ : ℕ) (n : ℕ) :
-    HChainEventStrict A B m₀ 0 n := by
-  refine ⟨[], ?_, by rfl, ?_, Or.inl rfl⟩
-  · refine ⟨?_, List.Pairwise.nil, ?_⟩
-    · intro d hd; simp at hd
-    · intro i _; exact absurd i.isLt (Nat.not_lt_zero _)
-  · intro k hk; exact absurd hk (Nat.not_lt_zero _)
-
-/-- HChainEventStrict truncates: chain of length R+1 → chain of length R.
-
-Construct the truncated witness directly via `ds.take R`. For R ≥ 1, the
-first element is preserved: `(ds.take R).get ⟨0, _⟩ = ds.get ⟨0, _⟩ ≥ 2`. -/
-private lemma HChainEventStrict_truncate
-    {A B : ℝ} {m₀ R : ℕ} {n : ℕ} (h : HChainEventStrict A B m₀ (R + 1) n) :
-    HChainEventStrict A B m₀ R n := by
-  by_cases hR : R = 0
-  · subst hR
-    exact HChainEventStrict_zero A B m₀ n
-  -- R ≥ 1.
-  rcases h with ⟨ds, hchain, hlen, hprop, hstrict⟩
-  -- Build truncated witness directly via ds.take R.
-  have hlen_take : (ds.take R).length = R := by
-    rw [List.length_take]
-    omega
-  -- Use the proven HChainEvent_truncate for the chain part.
-  rcases (HChainEvent_truncate (A := A) (B := B) (m₀ := m₀) (R := R) (n := n)
-    ⟨ds, hchain, hlen, hprop⟩) with ⟨_, _, _, _⟩
-  -- Hmm, the rcases approach doesn't preserve ds.take R syntactically.
-  -- Build directly: use ds.take R as the explicit witness.
-  refine ⟨ds.take R, ?_, hlen_take, ?_, ?_⟩
-  · -- IsDivisorChain n (ds.take R).
-    rcases hchain with ⟨hdiv, hpair, hmod⟩
-    refine ⟨?_, ?_, ?_⟩
-    · intro d hd; exact hdiv d (List.mem_of_mem_take hd)
-    · exact hpair.sublist (List.take_sublist R ds)
-    · intro i hi
-      have hi_R : i.val + 1 < R := Nat.lt_of_lt_of_eq hi hlen_take
-      have hi_lt_ds : i.val + 1 < ds.length := by rw [hlen]; omega
-      have hi_lt_ds_val : i.val < ds.length := by rw [hlen]; omega
-      have h_get_succ : (ds.take R).get ⟨i.val + 1, hi⟩ = ds.get ⟨i.val + 1, hi_lt_ds⟩ := by
-        simp [List.get_eq_getElem, List.getElem_take]
-      have h_get_val : (ds.take R).get i = ds.get ⟨i.val, hi_lt_ds_val⟩ := by
-        simp [List.get_eq_getElem, List.getElem_take]
-      rw [h_get_succ, h_get_val]
-      exact hmod ⟨i.val, hi_lt_ds_val⟩ hi_lt_ds
-  · -- Constraints carry over.
-    intro k hk
-    have hk_R : k < R := by rw [hlen_take] at hk; exact hk
-    have hk_lt_ds : k < ds.length := by rw [hlen]; omega
-    have h_get_eq : (ds.take R).get ⟨k, hk⟩ = ds.get ⟨k, hk_lt_ds⟩ := by
-      simp [List.get_eq_getElem, List.getElem_take]
-    rw [h_get_eq]
-    exact hprop k hk_lt_ds
-  · -- Strictness: R = 0 (handled above) ∨ ds.take R [0] ≥ 2.
-    right
-    have h_take_pos : 0 < (ds.take R).length := by rw [hlen_take]; omega
-    have h_ds_pos : 0 < ds.length := by rw [hlen]; omega
-    refine ⟨h_take_pos, ?_⟩
-    -- (ds.take R).get 0 = ds.get 0.
-    have h_get_eq : (ds.take R).get ⟨0, h_take_pos⟩ = ds.get ⟨0, h_ds_pos⟩ := by
-      simp [List.get_eq_getElem, List.getElem_take]
-    rw [h_get_eq]
-    -- ds.get 0 ≥ 2 from hstrict (since R+1 ≥ 1 not zero).
-    rcases hstrict with hRplus1_zero | ⟨h_orig_pos, h_ds0_ge⟩
-    · exfalso; omega
-    · -- h_orig_pos : 0 < ds.length, h_ds0_ge : 2 ≤ ds.get ⟨0, h_orig_pos⟩.
-      -- Note ds.get ⟨0, h_ds_pos⟩ = ds.get ⟨0, h_orig_pos⟩ since same index.
-      exact h_ds0_ge
-
-/-- **Stage decomposition (paper line 1957-1962, union bound).**
-
-The residue density of `¬HChainEvent` decomposes as a sum over stages of the
-"first failure" event `H_j ∧ ¬H_{j+1}`.
-
-Paper line 1957-1962: $\PP(\text{some stage fails}) \le \sum_{j=1}^R O(y_j^{-c})$.
-
-We provide the cardinality form: at each stage `j ∈ {0, …, R-1}`, count the
-residues that have a chain prefix of length `j` but no extension to length
-`j+1`.  By `HChainEvent_truncate` (contrapositive: `¬H_j ⟹ ¬H_{j+1}`),
-the failure events at different stages combine coherently:
-`¬H_{R} ⊆ ⋃_{j=0}^{R-1} (H_j ∧ ¬H_{j+1})`. -/
-private lemma HChainEvent_failure_telescope_le
-    (A B : ℝ) (m₀ R : ℕ) (M : ℕ) :
-    (Nat.card {r : Fin M // ¬ HChainEvent A B m₀ R r.val} : ℝ) ≤
-      ∑ j ∈ Finset.range R,
-        (Nat.card {r : Fin M // HChainEvent A B m₀ j r.val ∧
-                              ¬ HChainEvent A B m₀ (j+1) r.val} : ℝ) := by
-  classical
-  -- Induction on R.
-  induction R with
-  | zero =>
-    -- Base case: R = 0.  HChainEvent_0 always true, so |{¬H_0}| = 0.
-    simp only [Finset.range_zero, Finset.sum_empty]
-    have h_empty : {r : Fin M // ¬ HChainEvent A B m₀ 0 r.val} → False := by
-      intro ⟨r, hr⟩
-      exact hr (HChainEvent_zero A B m₀ r.val)
-    have h_card_zero : Nat.card {r : Fin M // ¬ HChainEvent A B m₀ 0 r.val} = 0 := by
-      rw [Nat.card_eq_zero]
-      left
-      exact ⟨fun ⟨r, hr⟩ => h_empty ⟨r, hr⟩⟩
-    rw [h_card_zero]
-    simp
-  | succ R ih =>
-    -- Inductive step: |{r : ¬H_{R+1}}| ≤ |{r : ¬H_R}| + |{r : H_R ∧ ¬H_{R+1}}|.
-    -- Then apply IH to |{r : ¬H_R}|.
-    rw [Finset.sum_range_succ]
-    have h_decomp : ∀ r : Fin M,
-        ¬ HChainEvent A B m₀ (R + 1) r.val ↔
-          (¬ HChainEvent A B m₀ R r.val) ∨
-          (HChainEvent A B m₀ R r.val ∧ ¬ HChainEvent A B m₀ (R + 1) r.val) := by
-      intro r
-      constructor
-      · intro hnotR1
-        by_cases hR : HChainEvent A B m₀ R r.val
-        · exact Or.inr ⟨hR, hnotR1⟩
-        · exact Or.inl hR
-      · rintro (hnotR | ⟨_, hnotR1⟩)
-        · -- ¬H_R ⟹ ¬H_{R+1} via truncate contrapositive.
-          intro hR1
-          exact hnotR (HChainEvent_truncate hR1)
-        · exact hnotR1
-    -- Convert subtype counts to Finset counts via Finset partition.
-    set notR1 := {r : Fin M // ¬ HChainEvent A B m₀ (R + 1) r.val}
-    set notR := {r : Fin M // ¬ HChainEvent A B m₀ R r.val}
-    set transR := {r : Fin M // HChainEvent A B m₀ R r.val ∧ ¬ HChainEvent A B m₀ (R + 1) r.val}
-    -- |notR1| ≤ |notR| + |transR| via h_decomp.
-    have h_card_le :
-        (Nat.card notR1 : ℝ) ≤ (Nat.card notR : ℝ) + (Nat.card transR : ℝ) := by
-      have h_finset_notR1 : Finset.univ.filter
-          (fun r : Fin M => ¬ HChainEvent A B m₀ (R + 1) r.val) ⊆
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEvent A B m₀ R r.val) ∪
-           Finset.univ.filter (fun r : Fin M => HChainEvent A B m₀ R r.val ∧
-                                                ¬ HChainEvent A B m₀ (R + 1) r.val)) := by
-        intro r hr
-        rw [Finset.mem_filter] at hr
-        rcases (h_decomp r).mp hr.2 with hnotR | hboth
-        · simp [hnotR, hr.1]
-        · simp [hboth.1, hboth.2, hr.1]
-      have h_card_finset :
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEvent A B m₀ (R + 1) r.val)).card ≤
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEvent A B m₀ R r.val)).card +
-          (Finset.univ.filter (fun r : Fin M => HChainEvent A B m₀ R r.val ∧
-                                                ¬ HChainEvent A B m₀ (R + 1) r.val)).card := by
-        have h_un := Finset.card_union_le
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEvent A B m₀ R r.val))
-          (Finset.univ.filter (fun r : Fin M => HChainEvent A B m₀ R r.val ∧
-                                                ¬ HChainEvent A B m₀ (R + 1) r.val))
-        have h_subset_card := Finset.card_le_card h_finset_notR1
-        omega
-      -- Convert Nat.card to Finset.card via subtype.
-      have h_notR1_eq : Nat.card notR1 =
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEvent A B m₀ (R + 1) r.val)).card := by
-        rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-      have h_notR_eq : Nat.card notR =
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEvent A B m₀ R r.val)).card := by
-        rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-      have h_transR_eq : Nat.card transR =
-          (Finset.univ.filter (fun r : Fin M => HChainEvent A B m₀ R r.val ∧
-                                                ¬ HChainEvent A B m₀ (R + 1) r.val)).card := by
-        rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-      rw [h_notR1_eq, h_notR_eq, h_transR_eq]
-      exact_mod_cast h_card_finset
-    calc (Nat.card notR1 : ℝ) ≤ (Nat.card notR : ℝ) + (Nat.card transR : ℝ) := h_card_le
-      _ ≤ _ := by linarith [ih]
 
 /-- **Greedy success at higher level implies greedy success at lower level.**
 
@@ -28841,89 +25933,6 @@ private lemma hGreedySucc_failure_telescope_le
         (Nat.card {r : Fin M // hGreedySucc A B m₀ j r.val ∧
             ¬ hGreedySucc A B m₀ (j+1) r.val} : ℝ)) + (Nat.card transR : ℝ)
     linarith
-
-/-- **Strict variant of stage decomposition (paper line 1957-1962, paper-faithful).**
-
-Identical structure to `HChainEvent_failure_telescope_le` but using `HChainEventStrict`,
-which forbids the trivial `[1]` chain.  This is the paper-faithful telescope:
-- k=0 captures "no nontrivial d_paper_2" (paper's stage 1 failure, density ≤ y_1^{-c}/2).
-- k≥1 captures "chain prefix exists, no extension" (paper's stage k+1 failure, density ≤ y_{k+1}^{-c}/2). -/
-private lemma HChainEventStrict_failure_telescope_le
-    (A B : ℝ) (m₀ R : ℕ) (M : ℕ) :
-    (Nat.card {r : Fin M // ¬ HChainEventStrict A B m₀ R r.val} : ℝ) ≤
-      ∑ j ∈ Finset.range R,
-        (Nat.card {r : Fin M // HChainEventStrict A B m₀ j r.val ∧
-                              ¬ HChainEventStrict A B m₀ (j+1) r.val} : ℝ) := by
-  classical
-  induction R with
-  | zero =>
-    simp only [Finset.range_zero, Finset.sum_empty]
-    have h_empty : {r : Fin M // ¬ HChainEventStrict A B m₀ 0 r.val} → False := by
-      intro ⟨r, hr⟩
-      exact hr (HChainEventStrict_zero A B m₀ r.val)
-    have h_card_zero : Nat.card {r : Fin M // ¬ HChainEventStrict A B m₀ 0 r.val} = 0 := by
-      rw [Nat.card_eq_zero]
-      left
-      exact ⟨fun ⟨r, hr⟩ => h_empty ⟨r, hr⟩⟩
-    rw [h_card_zero]
-    simp
-  | succ R ih =>
-    rw [Finset.sum_range_succ]
-    have h_decomp : ∀ r : Fin M,
-        ¬ HChainEventStrict A B m₀ (R + 1) r.val ↔
-          (¬ HChainEventStrict A B m₀ R r.val) ∨
-          (HChainEventStrict A B m₀ R r.val ∧ ¬ HChainEventStrict A B m₀ (R + 1) r.val) := by
-      intro r
-      constructor
-      · intro hnotR1
-        by_cases hR : HChainEventStrict A B m₀ R r.val
-        · exact Or.inr ⟨hR, hnotR1⟩
-        · exact Or.inl hR
-      · rintro (hnotR | ⟨_, hnotR1⟩)
-        · intro hR1
-          exact hnotR (HChainEventStrict_truncate hR1)
-        · exact hnotR1
-    set notR1 := {r : Fin M // ¬ HChainEventStrict A B m₀ (R + 1) r.val}
-    set notR := {r : Fin M // ¬ HChainEventStrict A B m₀ R r.val}
-    set transR := {r : Fin M // HChainEventStrict A B m₀ R r.val ∧
-        ¬ HChainEventStrict A B m₀ (R + 1) r.val}
-    have h_card_le :
-        (Nat.card notR1 : ℝ) ≤ (Nat.card notR : ℝ) + (Nat.card transR : ℝ) := by
-      have h_finset_notR1 : Finset.univ.filter
-          (fun r : Fin M => ¬ HChainEventStrict A B m₀ (R + 1) r.val) ⊆
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEventStrict A B m₀ R r.val) ∪
-           Finset.univ.filter (fun r : Fin M => HChainEventStrict A B m₀ R r.val ∧
-                                                ¬ HChainEventStrict A B m₀ (R + 1) r.val)) := by
-        intro r hr
-        rw [Finset.mem_filter] at hr
-        rcases (h_decomp r).mp hr.2 with hnotR | hboth
-        · simp [hnotR, hr.1]
-        · simp [hboth.1, hboth.2, hr.1]
-      have h_card_finset :
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEventStrict A B m₀ (R + 1) r.val)).card ≤
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEventStrict A B m₀ R r.val)).card +
-          (Finset.univ.filter (fun r : Fin M => HChainEventStrict A B m₀ R r.val ∧
-                                                ¬ HChainEventStrict A B m₀ (R + 1) r.val)).card := by
-        have h_un := Finset.card_union_le
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEventStrict A B m₀ R r.val))
-          (Finset.univ.filter (fun r : Fin M => HChainEventStrict A B m₀ R r.val ∧
-                                                ¬ HChainEventStrict A B m₀ (R + 1) r.val))
-        have h_subset_card := Finset.card_le_card h_finset_notR1
-        omega
-      have h_notR1_eq : Nat.card notR1 =
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEventStrict A B m₀ (R + 1) r.val)).card := by
-        rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-      have h_notR_eq : Nat.card notR =
-          (Finset.univ.filter (fun r : Fin M => ¬ HChainEventStrict A B m₀ R r.val)).card := by
-        rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-      have h_transR_eq : Nat.card transR =
-          (Finset.univ.filter (fun r : Fin M => HChainEventStrict A B m₀ R r.val ∧
-                                                ¬ HChainEventStrict A B m₀ (R + 1) r.val)).card := by
-        rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-      rw [h_notR1_eq, h_notR_eq, h_transR_eq]
-      exact_mod_cast h_card_finset
-    calc (Nat.card notR1 : ℝ) ≤ (Nat.card notR : ℝ) + (Nat.card transR : ℝ) := h_card_le
-      _ ≤ _ := by linarith [ih]
 
 /-! ### Paper §7.3 + §7.4 summation
 
@@ -29199,38 +26208,6 @@ private lemma chebyshev_primorial_bound
     exact h_p_pos.ne'
   rw [h_log_prod]
   exact htheta t ht
-
-/-- **Logical reduction (paper line 1898-1923, sub-claim, sorry'd).**
-
-For r with `H_k(r) ∧ ¬H_{k+1}(r)`, there's a chain ds witnessing H_k(r)
-such that `d := ds[k-1]` satisfies the chain extension failure condition
-at scale y_{k+1}.  Sketch — paper line 1898-1909: stage j fails iff no
-admissible squarefree e in W_j extends d_j.  This is the existential
-reduction of "¬H_{k+1} given H_k holds via ds".
-
-The Lean formalization requires careful list-extension bookkeeping
-(IsDivisorChain.cons or List.append-based).  Since `GoodCompositeSuccessor`
-and `CompositeSuccessorCoreBad` are `private` in CompositeSuccessor.lean,
-we work with the unfolded existential form here. -/
-private lemma H_chain_last_element_extract
-    {A B : ℝ} {m₀ k : ℕ} (hk_pos : 1 ≤ k) {r : ℕ}
-    (hH_k : HChainEvent A B m₀ k r) :
-    ∃ d : ℕ, 1 ≤ d ∧ d ∣ r ∧ Squarefree d ∧
-      (∀ p ∈ Nat.primeFactors d,
-        Real.exp (Real.exp (tower (m₀ + (k - 1)) / B)) < (p : ℝ) ∧
-        (p : ℝ) ≤ Real.exp ((Real.exp (tower (m₀ + (k - 1)) / B)) ^ (A - 1))) ∧
-      (d : ℝ) ≤ Real.exp ((Real.exp (tower (m₀ + (k - 1)) / B)) ^ A) := by
-  rcases hH_k with ⟨ds, hchain, hlen, hprop⟩
-  -- ds has length k ≥ 1.
-  have hk_minus_1_lt : k - 1 < ds.length := by rw [hlen]; omega
-  set d : ℕ := ds.get ⟨k - 1, hk_minus_1_lt⟩ with hd_def
-  -- Constraints for d at index k-1.
-  rcases hprop (k - 1) hk_minus_1_lt with ⟨hd_sqf, hd_primes_at_kk, hd_size⟩
-  -- d ∣ r and 1 ≤ d from IsDivisorChain.
-  rcases hchain with ⟨hdiv_all, _hpair, _hmod⟩
-  have hd_in_ds : d ∈ ds := List.get_mem _ _
-  have hd_props_chain := hdiv_all d hd_in_ds
-  exact ⟨d, hd_props_chain.1, hd_props_chain.2, hd_sqf, hd_primes_at_kk, hd_size⟩
 
 /-- **Threshold inequality** (paper-faithful: y_target ≥ exp(c+2) sufficient).
 
