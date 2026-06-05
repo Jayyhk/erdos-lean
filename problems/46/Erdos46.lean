@@ -9,8 +9,7 @@ specialized to Erdős problem 46.
 Source files (under `src4/` of `https://github.com/plby/unit-fractions`)
 are concatenated in topological dependency order. Project-internal `import`
 statements have been removed; Mathlib imports are deduplicated and lifted
-above. The whole body is wrapped in `namespace Erdos46 ... end Erdos46`
-to avoid collisions with Mathlib.
+above.
 
 The headline theorem `erdos_46` (the original repo's `erdos46`) states that
 every finite colouring of the integers has a monochromatic finite set of

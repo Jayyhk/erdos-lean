@@ -9,8 +9,7 @@ of Bloom's unit-fractions theorem (Bloom-Mehta) — the same source as problem 2
 Source files (under `src4/` of `https://github.com/plby/unit-fractions`)
 are concatenated in topological dependency order. Project-internal `import`
 statements have been removed; Mathlib imports are deduplicated and lifted
-above. The whole body is wrapped in `namespace Erdos47 ... end Erdos47`
-to avoid collisions with Mathlib.
+above.
 
 The headline theorem `erdos_47` is the literal Erdős #47 statement (if
 `A ⊆ {1,…,N}` has `∑_{a∈A} 1/a > δ·log N` for `N` large in terms of `δ`,

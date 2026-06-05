@@ -19,7 +19,7 @@ This file is self-contained and **axiom-free**.  To discharge
 Lean 4 formalization of Bloom's theorem from our problem-298 file (the
 `plby/unit-fractions` port of Bloom–Mehta), and then runs the problem-296
 greedy argument on top of it (`bloom_quantitative`, `erdos296_answer`,
-`erdos_296`).  The whole body is wrapped in `namespace Erdos296 … end Erdos296`.
+`erdos_296`).
 
 The Bloom development below was concatenated from `plby/unit-fractions`'s
 `src4/` in dependency order, with project-internal `import`s removed and

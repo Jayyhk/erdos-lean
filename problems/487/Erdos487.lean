@@ -4,7 +4,7 @@ namespace Erdos487
 
 /- ===== Vendored: Erdős 447 (Kleitman union-free bound), needed by 487 ===== -/
 
-namespace Erdos447
+namespace KleitmanUnionFree
 
 set_option linter.mathlibStandardSet false
 
@@ -2890,7 +2890,7 @@ theorem erdos_447 :
       exact ⟨ _, h_even_bound, by filter_upwards [ Filter.eventually_gt_atTop 0 ] with n hn; rw [ Pi.mul_apply, div_mul_cancel₀ _ ( Nat.cast_ne_zero.mpr <| Nat.ne_of_gt <| Nat.choose_pos <| Nat.div_le_self _ _ ) ] ⟩
 
 
-end Erdos447
+end KleitmanUnionFree
 
 
 /- ===== Erdős Problem 487 ===== -/
@@ -2946,7 +2946,7 @@ set_option linter.style.refine false
 open scoped Nat
 open scoped Classical
 open Asymptotics Filter
-open Erdos447
+open KleitmanUnionFree
 
 /-
 Definition of lower asymptotic density of a set A of natural numbers.

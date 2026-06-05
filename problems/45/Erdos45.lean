@@ -9,8 +9,7 @@ specialized to Erdős problem 45.
 Source files (under `src4/` of `https://github.com/plby/unit-fractions`)
 are concatenated in topological dependency order. Project-internal `import`
 statements have been removed; Mathlib imports are deduplicated and lifted
-above. The whole body is wrapped in `namespace Erdos45 ... end Erdos45`
-to avoid collisions with Mathlib.
+above.
 
 The headline theorem `erdos_45` (the original repo's `erdos45`): for every
 `k ≥ 2` there is an `nₖ` such that every `k`-colouring of the proper divisors

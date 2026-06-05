@@ -9,9 +9,7 @@ of Erdős problem 298 (Bloom-Mehta).
 Source files (under `src4/` of `https://github.com/plby/unit-fractions`)
 are concatenated in topological dependency order. Project-internal `import`
 statements have been removed; Mathlib imports are deduplicated and lifted
-above. The whole body is wrapped in `namespace Erdos298 ... end Erdos298`
-to avoid collisions with Mathlib. The headline theorem `erdos298` has been
-renamed to `erdos_298` (snake_case).
+above.
 -/
 
 namespace Erdos298
