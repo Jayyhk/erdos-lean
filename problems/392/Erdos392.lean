@@ -4,10 +4,27 @@ namespace Erdos392
 
 open Finset Nat Real Multiset Asymptotics
 
-/-- **Prime Number Theorem** (axiomatized). Proved in the `PrimeNumberTheoremAnd`
-project but not available in core Mathlib; here `π(⌊x⌋) ~ x / log x`. -/
-axiom pi_alt' :
-    (fun (x : ℝ) ↦ (primeCounting ⌊x⌋₊ : ℝ)) ~[Filter.atTop] (fun x ↦ x / log x)
+/-- A Chebyshev-style upper bound on the prime counting function, sufficient
+for both score bounds below. We use `Real.log_two_lt_d9` to show
+`Real.log 4 + 1/10 ≤ 3/2`, then take the constant `(Real.log 4 + 1/10)` from
+`Chebyshev.eventually_primeCounting_le` and dominate it by `3/2`. -/
+private lemma chebyshev_upper_bound :
+    ∀ᶠ x : ℝ in Filter.atTop,
+      (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ 3/2 * (x / Real.log x) := by
+  have hlog4_bd : Real.log 4 + 1/10 ≤ 3/2 := by
+    have h2 := Real.log_two_lt_d9
+    have hlog4_eq : Real.log 4 = 2 * Real.log 2 := by
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]; ring
+    linarith
+  filter_upwards [Chebyshev.eventually_primeCounting_le (show (0 : ℝ) < 1/10 by norm_num),
+    Filter.eventually_gt_atTop (1 : ℝ)] with x hx hx1
+  have hlogx : 0 < Real.log x := Real.log_pos hx1
+  have hxpos : 0 < x := by linarith
+  have hdiv : 0 < x / Real.log x := div_pos hxpos hlogx
+  calc (Nat.primeCounting ⌊x⌋₊ : ℝ)
+      ≤ (Real.log 4 + 1/10) * x / Real.log x := hx
+    _ = (Real.log 4 + 1/10) * (x / Real.log x) := by ring
+    _ ≤ 3/2 * (x / Real.log x) := mul_le_mul_of_nonneg_right hlog4_bd hdiv.le
 
 structure Factorization (n : ℕ) where
   a : Multiset ℕ
@@ -1730,7 +1747,7 @@ lemma Params.primeCounting_ge_log (n : ℕ) (hn : n ≥ 2) :
         linarith
       · rw [show primeCounting 7 = 4 by rfl]; norm_num
         have h8 : Real.log 7 ≤ 3 * Real.log 2 := by
-          calc Real.log 7 ≤ Real.log 8 := by gcongr <;> norm_num
+          calc Real.log 7 ≤ Real.log 8 := by gcongr; norm_num
             _ = 3 * Real.log 2 := by rw [show (8:ℝ) = 2 ^ 3 by norm_num, Real.log_pow]; push_cast; ring
         linarith [Real.log_two_lt_d9]
     · grw [h_log_le, log_two_lt_d9, ← h_pi_ge_k]; norm_num
@@ -2232,11 +2249,7 @@ theorem Params.initial.bound_score_2 (ε : ℝ) (hε : ε > 0) (M : ℕ) :
       P.L = L → P.n = n → P.M = M →
         ∑ _p ∈ Finset.filter (·.Prime) (Finset.Iic (P.n / P.L)),
         P.M * Real.log P.n ≤ ε * P.n := by
-  have pi_equiv := pi_alt'
-  rw [IsEquivalent, isLittleO_iff] at pi_equiv
-  specialize pi_equiv (by norm_num : (1 : ℝ) / 2 > 0)
-  rw [Filter.eventually_atTop] at pi_equiv
-  obtain ⟨N₀, hN₀⟩ := pi_equiv
+  obtain ⟨N₀, hN₀⟩ := Filter.eventually_atTop.mp chebyshev_upper_bound
   filter_upwards [Filter.eventually_ge_atTop
     (max 2 (max (⌈N₀⌉₊ + 1) (⌈4 * M / ε⌉₊ + 1)))] with L hL
   have hL2 : L ≥ 2 := le_of_max_le_left hL
@@ -2264,8 +2277,7 @@ theorem Params.initial.bound_score_2 (ε : ℝ) (hε : ε > 0) (M : ℕ) :
   have hπ : (primeCounting (n / L) : ℝ) ≤
       3 / 2 * ((n / L : ℕ) / Real.log (n / L : ℕ)) := by
     have h := hN₀ ((n / L : ℕ) : ℝ) hnLN₀.le
-    simp only [Pi.sub_apply, floor_natCast, norm_eq_abs, abs_of_pos hdivPos] at h
-    linarith [abs_sub_le_iff.mp h]
+    rwa [Nat.floor_natCast] at h
   have hn4 : n ≥ 4 := (Nat.pow_le_pow_left hL2 2).trans hnL2
   have hnpos : (n : ℝ) > 0 := cast_pos.mpr (by positivity)
   have hn_gt_1 : (1 : ℝ) < n := by exact_mod_cast (by grind)
@@ -2323,7 +2335,7 @@ theorem Params.initial.bound_score_3 (ε : ℝ) (hε : ε > 0) (M : ℕ) :
   obtain ⟨N₀, hN₀⟩ := Metric.tendsto_atTop.mp
     (h_littleO.tendsto_div_nhds_zero.comp tendsto_natCast_atTop_atTop)
       (ε * Real.log 2 / (8 * (M + 1))) (by positivity)
-  obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp <| isLittleO_iff.mp pi_alt' one_half_pos
+  obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp chebyshev_upper_bound
   filter_upwards [Filter.eventually_ge_atTop
     (max 16 (max N₀ ((⌈N₁⌉₊ + 1) ^ 2)))] with n hn P hPM hPn
   simp only [hPM, hPn]; have hn16 : n ≥ 16 := le_of_max_le_left hn
@@ -2351,10 +2363,8 @@ theorem Params.initial.bound_score_3 (ε : ℝ) (hε : ε > 0) (M : ℕ) :
   have hlog_floor_pos : Real.log ⌊Real.sqrt n⌋₊ > 0 := log_pos hfloor_gt_1
   have hπ : (primeCounting ⌊Real.sqrt n⌋₊ : ℝ) ≤
       3 / 2 * (⌊Real.sqrt n⌋₊ / Real.log ⌊Real.sqrt n⌋₊) := by
-    have := hN₁ ⌊Real.sqrt n⌋₊ hsqrt_N₁.le
-    simp only [Pi.sub_apply, floor_natCast, norm_eq_abs, abs_of_pos (by positivity :
-      (0 : ℝ) < ⌊Real.sqrt n⌋₊ / Real.log ⌊Real.sqrt n⌋₊)] at this
-    linarith [(abs_le.mp this).2]
+    have h := hN₁ ((⌊Real.sqrt n⌋₊ : ℕ) : ℝ) hsqrt_N₁.le
+    rwa [Nat.floor_natCast] at h
   have hlog_floor_ge : Real.log ⌊Real.sqrt n⌋₊ ≥ Real.log n / 4 := by
     have hfloor_ge : (⌊Real.sqrt n⌋₊ : ℝ) ≥ Real.sqrt n / 2 := by
       linarith [sub_one_lt_floor (Real.sqrt n)]
@@ -3034,8 +3044,8 @@ lemma A_lower_nonneg :
 
 /-- **Erdős Problem 392.** With `A n` the least number of factors `≤ n²` whose product is
 `n!`, we have `A(n) = n/2 - n/(2 log n) + o(n / log n)`. (Upper bound: van Doorn / Cambie
-pairing via `Solution_2`; lower bound: Stirling.) Depends on the Prime Number Theorem
-(axiom `pi_alt'`). -/
+pairing via `Solution_2`; lower bound: Stirling. Prime-count bookkeeping uses
+Mathlib's Chebyshev bound via `chebyshev_upper_bound`.) -/
 theorem erdos_392 :
     (fun n : ℕ ↦ (A n : ℝ) - ((n : ℝ) / 2 - n / (2 * Real.log n)))
       =o[Filter.atTop] (fun n : ℕ ↦ (n : ℝ) / Real.log n) := by
@@ -3050,6 +3060,6 @@ theorem erdos_392 :
   exact hup
 
 #print axioms erdos_392
--- 'Erdos392.erdos_392' depends on axioms: [propext, Classical.choice, pi_alt', Quot.sound]
+-- 'Erdos392.erdos_392' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos392
