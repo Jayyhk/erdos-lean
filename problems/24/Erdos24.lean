@@ -383,15 +383,15 @@ private lemma σ₂FI_eq : σ₂FI = σ₂FlagIdx := by
 
 set_option maxHeartbeats 6400000 in
 private lemma P_cert_eq_int : ∀ i j : Fin 8, P_cert i j = (P_int_fin i j : ℚ) := by
-  intro i j; fin_cases i <;> fin_cases j <;> simp [P_cert, P_int_fin] <;> norm_num
+  intro i j; fin_cases i <;> fin_cases j <;> simp [P_cert, P_int_fin]
 
 set_option maxHeartbeats 3200000 in
 private lemma Q_cert_eq_int : ∀ i j : Fin 6, Q_cert i j = (Q_int_fin i j : ℚ) := by
-  intro i j; fin_cases i <;> fin_cases j <;> simp [Q_cert, Q_int_fin] <;> norm_num
+  intro i j; fin_cases i <;> fin_cases j <;> simp [Q_cert, Q_int_fin]
 
 set_option maxHeartbeats 1600000 in
 private lemma R_cert_eq_int : ∀ i j : Fin 5, R_cert i j = (R_int_fin i j : ℚ) := by
-  intro i j; fin_cases i <;> fin_cases j <;> simp [R_cert, R_int_fin] <;> norm_num
+  intro i j; fin_cases i <;> fin_cases j <;> simp [R_cert, R_int_fin]
 
 private lemma quintContrib_eq_intQC_div (adj : Fin 5 → Fin 5 → Bool)
     (p : Equiv.Perm (Fin 5)) :
@@ -400,13 +400,13 @@ private lemma quintContrib_eq_intQC_div (adj : Fin 5 → Fin 5 → Bool)
   rw [ show σ₀FI = σ₀FlagIdx from σ₀FI_eq, show σ₁FI = σ₁FlagIdx from σ₁FI_eq, show σ₂FI = σ₂FlagIdx from σ₂FI_eq ];
   rw [ show P_cert = _ from funext fun i => funext fun j => P_cert_eq_int i j ] ; rw [ show Q_cert = _ from funext fun i => funext fun j => Q_cert_eq_int i j ] ; rw [ show R_cert = _ from funext fun i => funext fun j => R_cert_eq_int i j ] ;
   cases h : σ₁FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₁FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
-  · split_ifs <;> ring;
+  · split_ifs <;> first | ring1 | ring_nf;
     cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
     ring;
-  · split_ifs <;> ring;
+  · split_ifs <;> first | ring1 | ring_nf;
     cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
     ring;
-  · split_ifs <;> ring;
+  · split_ifs <;> first | ring1 | ring_nf;
     cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
     ring;
   · cases h : σ₂FlagIdx ( adj ( p 3 ) ( p 0 ) ) ( adj ( p 3 ) ( p 1 ) ) ( adj ( p 3 ) ( p 2 ) ) <;> cases h' : σ₂FlagIdx ( adj ( p 4 ) ( p 0 ) ) ( adj ( p 4 ) ( p 1 ) ) ( adj ( p 4 ) ( p 2 ) ) <;> simp +decide [ h, h' ] at *;
@@ -441,7 +441,7 @@ private lemma encodeGraph_eq_bit (e : Fin 10 → Bool) :
   simp only [encodeGraph, Nat.bit_val]
   cases e 0 <;> cases e 1 <;> cases e 2 <;> cases e 3 <;> cases e 4 <;>
     cases e 5 <;> cases e 6 <;> cases e 7 <;> cases e 8 <;> cases e 9 <;>
-    simp [Bool.toNat] <;> omega
+    simp [Bool.toNat]
 
 private lemma getBitN_eq_testBit (n i : Nat) : getBitN n i = n.testBit i := by
   simp [getBitN, Nat.testBit]
@@ -449,12 +449,12 @@ private lemma getBitN_eq_testBit (n i : Nat) : getBitN n i = n.testBit i := by
 private lemma getBitN_encode (e : Fin 10 → Bool) (i : Fin 10) :
     getBitN (encodeGraph e) i.val = e i := by
   rw [getBitN_eq_testBit, encodeGraph_eq_bit]
-  fin_cases i <;> simp [Nat.testBit_bit_zero, Nat.testBit_bit_succ]
+  fin_cases i <;> simp [Nat.testBit_bit_succ]
 
 private lemma adj5N_encode (e : Fin 10 → Bool) :
     adj5N (encodeGraph e) = mkAdj5 e := by
   ext i j;
-  fin_cases i <;> fin_cases j <;> simp +decide [ adj5N, mkAdj5, getBitN_encode ];
+  fin_cases i <;> fin_cases j <;> simp +decide [adj5N, mkAdj5];
   all_goals exact getBitN_encode e ⟨ _, by decide ⟩ ;
 
 private lemma isTriFreeN_of_triFree (e : Fin 10 → Bool)
@@ -515,7 +515,7 @@ theorem flag_bound_with_c5 : ∀ e : Fin 10 → Bool,
   have htfN := isTriFreeN_of_triFree e htf
   have hcheck := checkRangeN_sound _ 0 1024 intCheck_flag_bound_c5 (encodeGraph e) hlt
   simp [htfN, hadj] at hcheck
-  convert div_le_div_of_nonneg_right ( Int.cast_le.mpr hcheck ) ( by norm_num : ( 0 : ℚ ) ≤ 2500 ) using 1 ; norm_num [ Finset.sum_ite ] ; ring!;
+  convert div_le_div_of_nonneg_right ( Int.cast_le.mpr hcheck ) ( by norm_num : ( 0 : ℚ ) ≤ 2500 ) using 1 ; norm_num [ Finset.sum_ite ] ; ring_nf!;
   · grind;
   · norm_num
 
