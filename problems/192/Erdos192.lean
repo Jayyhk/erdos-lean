@@ -203,9 +203,6 @@ theorem isFinASF_complete (w : List (Fin 4)) (hw : FinAbelianSquareFree w) :
   unfold hasAbelianSquareAtFin at h;
   simp_all +decide [ List.isPerm_iff ];
   exact fun H => H i ( j + 1 ) ( Nat.succ_pos _ ) h.1 h.2
-
-end Erdos192
-
 /-!
 ## Source: `KeranenBounded.lean`
 -/
@@ -230,9 +227,6 @@ letter. Together they verify all 1024 length-5 words.
 -/
 
 set_option maxHeartbeats 4000000
-
-namespace Erdos192
-
 /-- Morphism preservation verified for all words of length 4 by `native_decide`.
 For every word `[a,b,c,d]` over `{0,1,2,3}` that is abelian-square-free,
 its morphism image `g([a,b,c,d])` (of length 340) is also abelian-square-free. -/
@@ -240,9 +234,6 @@ theorem morphism_check_4 :
     ∀ a b c d : Fin 4, isFinASF [a, b, c, d] = true →
     isFinASF (applyKeranenG [a, b, c, d]) = true := by
   native_decide
-
-end Erdos192
-
 /-!
 ## Source: `KeranenBounded5a.lean`
 -/
@@ -251,9 +242,6 @@ end Erdos192
 /-! # Morphism preservation for length-5 words starting with letter 0 -/
 
 set_option maxHeartbeats 4000000
-
-namespace Erdos192
-
 /-- Morphism preservation for length-5 words starting with letter 0.
 Verified by `native_decide` over all 4⁴ = 256 inputs. -/
 theorem morphism_check_5a :
@@ -261,9 +249,6 @@ theorem morphism_check_5a :
     isFinASF [(0 : Fin 4), b, c, d, e] = true →
     isFinASF (applyKeranenG [(0 : Fin 4), b, c, d, e]) = true := by
   native_decide
-
-end Erdos192
-
 /-!
 ## Source: `KeranenBounded5b.lean`
 -/
@@ -272,9 +257,6 @@ end Erdos192
 /-! # Morphism preservation for length-5 words starting with letter 1 -/
 
 set_option maxHeartbeats 4000000
-
-namespace Erdos192
-
 /-- Morphism preservation for length-5 words starting with letter 1.
 Verified by `native_decide` over all 4⁴ = 256 inputs. -/
 theorem morphism_check_5b :
@@ -282,9 +264,6 @@ theorem morphism_check_5b :
     isFinASF [(1 : Fin 4), b, c, d, e] = true →
     isFinASF (applyKeranenG [(1 : Fin 4), b, c, d, e]) = true := by
   native_decide
-
-end Erdos192
-
 /-!
 ## Source: `KeranenBounded5c.lean`
 -/
@@ -293,9 +272,6 @@ end Erdos192
 /-! # Morphism preservation for length-5 words starting with letter 2 -/
 
 set_option maxHeartbeats 4000000
-
-namespace Erdos192
-
 /-- Morphism preservation for length-5 words starting with letter 2.
 Verified by `native_decide` over all 4⁴ = 256 inputs. -/
 theorem morphism_check_5c :
@@ -303,9 +279,6 @@ theorem morphism_check_5c :
     isFinASF [(2 : Fin 4), b, c, d, e] = true →
     isFinASF (applyKeranenG [(2 : Fin 4), b, c, d, e]) = true := by
   native_decide
-
-end Erdos192
-
 /-!
 ## Source: `KeranenBounded5d.lean`
 -/
@@ -314,9 +287,6 @@ end Erdos192
 /-! # Morphism preservation for length-5 words starting with letter 3 -/
 
 set_option maxHeartbeats 4000000
-
-namespace Erdos192
-
 /-- Morphism preservation for length-5 words starting with letter 3.
 Verified by `native_decide` over all 4⁴ = 256 inputs. -/
 theorem morphism_check_5d :
@@ -324,9 +294,6 @@ theorem morphism_check_5d :
     isFinASF [(3 : Fin 4), b, c, d, e] = true →
     isFinASF (applyKeranenG [(3 : Fin 4), b, c, d, e]) = true := by
   native_decide
-
-end Erdos192
-
 /-!
 ## Source: `BlockBound.lean`
 -/
@@ -341,9 +308,6 @@ are in separate files to manage native_decide compilation time.
 -/
 
 set_option maxHeartbeats 8000000
-
-namespace Erdos192
-
 /-! ### Spanning-6 abelian square check -/
 
 def hasSpanning6AS (w : List (Fin 4)) : Bool :=
@@ -384,9 +348,6 @@ def adjMTtimesDelta (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
   | 1 => (-2316) * d 0 + (-701) * d 1 + (-531) * d 2 + 4059 * d 3
   | 2 => 4059 * d 0 + (-2316) * d 1 + (-701) * d 2 + (-531) * d 3
   | 3 => (-531) * d 0 + 4059 * d 1 + (-2316) * d 2 + (-701) * d 3
-
-end Erdos192
-
 /-!
 ## Source: `BlockBoundParikh.lean`
 -/
@@ -395,9 +356,6 @@ end Erdos192
 /-! # Parikh norm bound and 3-letter ASF bound -/
 
 set_option maxHeartbeats 8000000
-
-namespace Erdos192
-
 /-- Decidable ASF check for `Fin 3` words. -/
 def isFinASF3 (word : List (Fin 3)) : Bool :=
   !(List.range word.length |>.any fun i =>
@@ -410,9 +368,6 @@ def isFinASF3 (word : List (Fin 3)) : Bool :=
 theorem max_asf_3letters :
     ∀ a b c d e f g h : Fin 3,
       isFinASF3 [a, b, c, d, e, f, g, h] = false := by native_decide
-
-end Erdos192
-
 /-!
 ## Source: `BlockBoundParikhBridge.lean`
 -/
@@ -448,9 +403,6 @@ of the morphism.
 -/
 
 set_option maxHeartbeats 8000000
-
-namespace Erdos192
-
 /-! ### Computational verification of v-pattern structure -/
 
 /-- Helper: compute v from boundary configuration -/
@@ -463,9 +415,6 @@ def hasParikhSolution (wa wb we : Fin 4) (r s : Nat) : Bool :=
   adjMTtimesDelta wa wb we r s 1 % 43435 = 0 &&
   adjMTtimesDelta wa wb we r s 2 % 43435 = 0 &&
   adjMTtimesDelta wa wb we r s 3 % 43435 = 0
-
-end Erdos192
-
 /-!
 ## Source: `BlockBoundParikhFormal.lean`
 -/
@@ -500,9 +449,6 @@ so the full bridge argument is mathematically sound.
 -/
 
 set_option maxHeartbeats 8000000
-
-namespace Erdos192
-
 /-! ### Block take decomposition -/
 
 /-- Key block decomposition: taking 85k+s from g(w) splits into
@@ -523,9 +469,6 @@ theorem applyKeranenG_take_blocks (w : List (Fin 4)) (k s : ℕ)
       · simp +arith +decide [ List.take_append, keranenG_length ]
       · grind
       · grind
-
-end Erdos192
-
 /-!
 ## Source: `BlockBoundSpanning.lean`
 -/
@@ -536,9 +479,6 @@ end Erdos192
 -/
 
 set_option maxHeartbeats 8000000
-
-namespace Erdos192
-
 /-! ### Basic lemmas -/
 
 theorem count_flatMap_sum {α β : Type*} [DecidableEq β]
@@ -727,7 +667,7 @@ theorem inner_count_bridge (w : List (Fin 4)) (r L : ℕ) (c : Fin 4)
     unfold sliceParikhCount;
     unfold cumParikhCount;
     split_ifs <;> simp_all +decide
-    · rw [ show ( 2 * ( ( r + L ) % 85 ) + 85000 - r ) % 85 = 0 from ?_ ] ; norm_num ; ring;
+    · rw [ show ( 2 * ( ( r + L ) % 85 ) + 85000 - r ) % 85 = 0 from ?_ ] ; norm_num ; (first | ring1 | ring_nf);
       · rw [ show List.take 85 ( keranenG w[0] ) = keranenG w[0] from ?_, show List.take 85 ( keranenG w[w.length - 1] ) = keranenG w[w.length - 1] from ?_ ] at * <;> norm_num at *;
         · rw [ show List.take 85 ( keranenG w[(r + L) / 85] ) = keranenG w[(r + L) / 85] from ?_ ] at *
           · grind;
@@ -792,9 +732,6 @@ theorem adjRow_add (d : Fin 4) (f g : Fin 4 → Int) :
 theorem adjRow_ite_parikhM (d we : Fin 4) :
     adjRow d (fun c => (parikhM c we : Int)) = 43435 * if d = we then 1 else 0 := by
   exact adj_times_M d we
-
-end Erdos192
-
 /-!
 ## Source: `BlockBoundSpanningChain.lean`
 -/
@@ -805,9 +742,6 @@ end Erdos192
 -/
 
 set_option maxHeartbeats 8000000
-
-namespace Erdos192
-
 theorem inner_defect_gives_AS (w : List (Fin 4))
     (hm_ge : w.length ≥ 7) (r L : ℕ) (hL : L > 0) (hr : r < 85)
     (hlen : r + 2 * L ≤ 85 * w.length)
@@ -870,7 +804,7 @@ theorem inner_defect_gives_AS (w : List (Fin 4))
 
 theorem sum_count_eq_length (l : List (Fin 4)) :
     (l.count 0 : Int) + l.count 1 + l.count 2 + l.count 3 = l.length := by
-  induction l <;> simp +decide [ * ] ; ring;
+  induction l <;> simp +decide [ * ] ; (first | ring1 | ring_nf);
   rename_i k hk ih; fin_cases k <;> simp +decide at ih ⊢ <;> linarith;
 
 private theorem indicator_sum_fin4 (a : Fin 4) :
@@ -962,7 +896,7 @@ private theorem case5_false (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
   · rcases w with ( _ | ⟨ x, _ | ⟨ y, w ⟩ ⟩ ) <;> simp_all +decide [ Nat.mul_succ ];
     · cases hm;
     · rw [ List.drop_eq_getElem_cons ];
-      rw [ List.take_cons ] ; norm_num [ List.count_cons ] ; ring;
+      rw [ List.take_cons ] ; norm_num [ List.count_cons ] ; (first | ring1 | ring_nf);
       all_goals norm_num [ add_comm 1, List.take_add_one ] at *;
       grind +splitImp;
       grind +splitImp
@@ -1097,9 +1031,6 @@ theorem no_spanning_large (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
     have hirk : w.length - 2 - k = k := by omega
     exact case6_false w hw k hk1 hkm hmeq (fun c => by
       have := hc6 c; simp only [ir, hirk] at this; linarith)
-
-end Erdos192
-
 /-!
 ## Source: `BlockBoundBridge.lean`
 -/
@@ -1120,9 +1051,6 @@ spanning check remains as a single fast `native_decide`.
 -/
 
 set_option maxHeartbeats 4000000
-
-namespace Erdos192
-
 /-! ### Explicit localization -/
 
 theorem abelianSquare_localize_explicit (w : List (Fin 4))
@@ -1272,9 +1200,6 @@ theorem abelianSquare_block_bound_inductive :
         exact no_spanning6_perm w hw (by omega) r L hL hr_lt hlen' (by omega) hperm'
       · -- m ≥ 7: algebraic Parikh-matrix bridge
         exact no_spanning_large w hw (by omega) r L hL hr_lt hlen' (by omega) hperm'
-
-end Erdos192
-
 /-!
 ## Source: `KE92.lean`
 -/
@@ -1309,9 +1234,6 @@ Erdős problem files (`Erdos231.lean`, `Erdos192.lean`).
 -/
 
 set_option maxHeartbeats 4000000
-
-namespace Erdos192
-
 /-! ### Bounded verification for small lengths -/
 
 /-- Morphism preservation for length 1. -/
@@ -1577,16 +1499,14 @@ theorem exists_inf_from_all_lengths
   simp_all +decide [FinAbelianSquareFree]
   contrapose! hf
   refine ⟨i + 2 * l, i, l, hl, by linarith, ?_⟩
-  convert h using 1 <;> (refine List.ext_get ?_ ?_ <;> simp +decide [infBlock] <;> omega)
+  convert h using 1
+  all_goals refine List.ext_get ?_ ?_ <;> simp +decide [infBlock] <;> omega
 
 /-- **Keränen 1992, Theorem 1.** There exists an infinite abelian-square-free
 word over a four-letter alphabet. -/
 theorem exists_inf_abelianSquareFree_four :
     ∃ f : ℕ → Fin 4, InfAbelianSquareFree f :=
   exists_inf_from_all_lengths exists_finASF_all_lengths
-
-end Erdos192
-
 /-!
 ## Source: `Erdos192.lean`
 -/
@@ -1614,9 +1534,6 @@ abelian-square-free.
   positive-unit-step walk in `ℤ^d` (d ≤ 3) contains a 3-term AP, while `d ≥ 4`
   admits AP-free walks.
 -/
-
-namespace Erdos192
-
 /-! ### Classification helpers -/
 
 /-
