@@ -7,7 +7,7 @@ Not every proof will be fully legitimate. Some might depend on extra axioms decl
 For problem `N`, `problems/N/` contains:
 
 - `ErdosN.lean`: the proof
-- `lakefile.toml`: package `erdosN`, library `ErdosN`, Mathlib pinned to the catalog's revision
+- `lakefile.toml`: package `erdosN`, Mathlib revision, library `ErdosN`
 - `lean-toolchain`: the Lean version
 - `lake-manifest.json`: dependency lockfile
 

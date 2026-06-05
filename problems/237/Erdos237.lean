@@ -49,7 +49,7 @@ open Finset Real
 set_option maxHeartbeats 800000
 set_option maxRecDepth 4000
 
-section Erdos237Defs
+section Defs
 open Nat Set
 
 /-! ## Definitions -/
@@ -74,7 +74,7 @@ axiom maynard_prime_tuples (m : ℕ) (hm : 2 ≤ m) (B : Finset ℤ)
     (hB : Admissible B) (hk : exp (8 * m + 4) < B.card * Real.log B.card) :
     ∀ N : ℕ, ∃ n : ℤ, N < n ∧ m ≤ (B.filter (fun b ↦ (n + b).natAbs.Prime)).card
 
-end Erdos237Defs
+end Defs
 
 /-! ## Mertens' third theorem (effective form)
 
@@ -756,7 +756,7 @@ end
 
 end MertensThird
 
-section Erdos237Main
+section Main
 open Nat Set
 
 /-! ## Sieve infrastructure -/
@@ -967,7 +967,7 @@ theorem erdos_237 (A : Set ℕ) (hA : A.Infinite) :
   obtain ⟨n, hn⟩ := hℓ₀ S hS₂.ge
   exact ⟨n, (lt_of_succ_le hn).trans_le (repCount_mono hS₁ n)⟩
 
-end Erdos237Main
+end Main
 
 #print axioms erdos_237
 -- 'Erdos237.erdos_237' depends on axioms: [propext, Classical.choice, Erdos237.maynard_prime_tuples, Quot.sound]

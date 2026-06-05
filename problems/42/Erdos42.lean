@@ -50,9 +50,6 @@ def AvoidsNonzeroDiff {α : Type*} [DecidableEq α] [Zero α] [Sub α]
     (A B : Finset α) : Prop :=
   ∀ d ∈ DiffFinset A A, d ∈ DiffFinset B B → d = 0
 
-end Erdos42
-
-
 /-! =============================================================
     Section from: Erdos/P42/Sidon.lean
     ============================================================= -/
@@ -65,9 +62,6 @@ We define `IsSidonInt` over `Finset ℤ` (the natural setting for the analytic
 proof) and `IsSidonNat` over `Finset ℕ` / `Set ℕ` (the FC-aligned setting).
 Bridge lemmas live in `FC/Local.lean`.
 -/
-
-
-namespace Erdos42
 
 open Finset
 
@@ -220,9 +214,6 @@ lemma zero_mem_diffFinset_self {A : Finset ℤ} (hA : A.Nonempty) :
   obtain ⟨a, ha⟩ := hA
   exact mem_diffFinset.mpr ⟨a, ha, a, ha, by ring⟩
 
-end Erdos42
-
-
 /-! =============================================================
     Section from: Erdos/P42/FiniteFourier.lean
     ============================================================= -/
@@ -239,9 +230,6 @@ Fourier-positive notes.
 `FourierUpperIndicator` is used by Route B: upper bound `Re ≤ ε` at
 nontrivial characters.
 -/
-
-
-namespace Erdos42
 
 open scoped BigOperators ZMod
 
@@ -442,9 +430,6 @@ lemma normalizedDftCoeff_neg_eq_of_symmetric
     _ = ∑ x ∈ T, ZMod.stdAddChar (-(x * r)) :=
           (sum_stdAddChar_neg_mul_eq_sum_pos_mul_of_symmetric hT r).symm
 
-end Erdos42
-
-
 /-! =============================================================
     Section from: Erdos/P42/FiniteReduction.lean
     ============================================================= -/
@@ -468,9 +453,6 @@ This file contains the route-neutral finite pieces used by both the Fourier-posi
 The Route-specific theorem files import this module; this file imports no analytic
 trust-boundary axiom.
 -/
-
-
-namespace Erdos42
 
 open Finset Erdos42
 
@@ -1439,9 +1421,6 @@ theorem exists_large_intersection_cyclicInterval
       simpa [fiber] using hs
     exact (Nat.le_of_lt hs').trans hfiber_le
 
-end Erdos42
-
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Counterexample.lean
     ============================================================= -/
@@ -1457,7 +1436,7 @@ upper bias tending to zero, and no `K_ℓ` clique.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped Topology
@@ -1588,7 +1567,7 @@ theorem exists_cayleyCounterSeq_of_not_compactCayleyCliqueStatementExplicit
     no_clique := hnoclique
   }, trivial⟩
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -1606,7 +1585,7 @@ turns that tuple into an actual finite clique.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Finset Erdos42
 
@@ -1952,7 +1931,7 @@ lemma cliqueKernelDensity_re_pos_iff_exists_clique
   rw [cliqueKernelDensity_eq_cliqueTupleDensity_of_symmetric hTsym]
   exact cliqueTupleDensity_re_pos_iff_exists_clique hT0
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -1971,7 +1950,7 @@ definitions.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open scoped BigOperators ZMod
 
@@ -2490,7 +2469,7 @@ theorem cayleyCutBound_of_spectralBound
   intro φ ψ hφ hψ
   exact norm_cayleyCutFunctional_le_spectral a φ ψ hM hMnonneg hφ hψ
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -2506,7 +2485,7 @@ connects its indicator-specialized form to the existing finite clique endpoint.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Finset Erdos42 Filter
 open scoped Topology
@@ -3479,7 +3458,7 @@ theorem exists_clique_of_spectral_density_transfer_sq
   exact exists_clique_of_spectral_density_transfer hTsym hT0 hMnonneg hg hspec
     (lt_of_le_of_lt (mul_le_mul_of_nonneg_right hcard hMnonneg) hdensity)
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -3494,7 +3473,7 @@ file keeps that bookkeeping out of the later compactness files.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter
 open scoped Topology
@@ -3556,7 +3535,7 @@ lemma CayleyCounterSeq.subseq_tendsto_eps_zero
     Tendsto (fun n => S.eps (φ n)) atTop (𝓝 0) := by
   exact S.eps_tendsto_zero.comp hφ.tendsto_atTop
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -3573,7 +3552,7 @@ extraction specializes it to the indicators of the counterexample sets.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Finset Erdos42
 open scoped BigOperators Classical Topology
@@ -3814,7 +3793,7 @@ theorem FourierSeq.exists_labelFreq_for_largeSpectrum
   intro q n r hr
   exact F.exists_largeSpectrumLabelFreq_eq_of_mem q n hr
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -3832,7 +3811,7 @@ finite-lift injectivity-on-finite-sets facts needed later.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped Classical Topology
@@ -3959,7 +3938,7 @@ lemma FourierSeq.extractionGenerator_eq_iff_eventually_freq_eq
     FourierSeq.extractionQuotient_eq_iff_eventually_lift_eq]
   simp [FourierSeq.wordLiftHom_apply_of, FourierSeq.wordLift]
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -3976,7 +3955,7 @@ packages that diagonal step for a generic `FourierSeq`.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped Classical Topology
@@ -4132,7 +4111,7 @@ theorem FourierSeq.exists_stableSubseqData
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -4149,7 +4128,7 @@ recorded as eventual statements.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped Classical Topology
@@ -4366,7 +4345,7 @@ end FourierSeq.StableSubseqData
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -4382,7 +4361,7 @@ those cyclic groups, hence the eventual-kernel quotient is torsion-free.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped Classical Topology
@@ -4477,7 +4456,7 @@ end FourierSeq.StableSubseqData
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -4493,7 +4472,7 @@ large-spectrum covering consequence of the non-nested labels.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped BigOperators Classical Topology
@@ -4668,7 +4647,7 @@ end FourierSeq.StableSubseqData
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -4684,7 +4663,7 @@ hypotheses that later define the compact limit kernel.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped Classical Topology
@@ -4866,7 +4845,7 @@ theorem exists_cayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -4882,7 +4861,7 @@ endpoint can use additive notation and Haar probability measure.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open scoped Classical
 
@@ -5020,7 +4999,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -5032,7 +5011,7 @@ Erdős Problem 42 — characters on the compact-Cayley compact dual.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open MeasureTheory
 open scoped Classical ComplexConjugate Topology
@@ -5349,7 +5328,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -5365,7 +5344,7 @@ average convergence that follows from relation-stable quotient lifts.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Complex MeasureTheory
 open scoped BigOperators Classical ComplexConjugate Topology
@@ -5988,7 +5967,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -6000,7 +5979,7 @@ Erdős Problem 42 — generic finite pair-overlap predicates.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open scoped Classical
 
@@ -6080,7 +6059,7 @@ lemma of_lowerBound {Q B : Finset G} {M : ℝ}
 
 end PairCoeffRealBound
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -6092,7 +6071,7 @@ Erdős Problem 42 — Fejér kernels for compact-Cayley extraction.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Complex
 open scoped BigOperators Classical ComplexConjugate Topology
@@ -6877,7 +6856,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -6889,7 +6868,7 @@ Erdős Problem 42 — finite Fejér smoothing for compact-Cayley extraction.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Complex MeasureTheory
 open scoped BigOperators Classical Topology
@@ -8128,7 +8107,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -8145,7 +8124,7 @@ subgroups of the extraction group.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open scoped BigOperators Classical
 
@@ -8843,7 +8822,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -8868,9 +8847,6 @@ for `closed_proper_subgroup_haar_null` once we open that black box.
 
 
 set_option maxHeartbeats 400000
-
-namespace Erdos42
-
 open Filter Set Finset MeasureTheory
 open scoped Pointwise Topology
 
@@ -10069,9 +10045,6 @@ theorem tao_continuous_avoidance
     exact hx i j hij ((hH_eq (x i - x j)).mpr heq)
   exact lt_of_le_of_ne (hf_le _) h_ne_one
 
-end Erdos42
-
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/PositiveDefinite.lean
     ============================================================= -/
@@ -10089,12 +10062,7 @@ No new axiom is introduced here: the remaining Route B work is to derive
 coefficients.
 -/
 
-
-namespace Erdos42
-
 open MeasureTheory
-
-universe u
 
 /-- Compact-Cayley Lemma 2.7, first branch. If `g 0 < 1`, then the allowed
 kernel `1 - g` is positive at zero, hence has positive continuous clique
@@ -10445,9 +10413,6 @@ theorem continuousCliqueDensity_pos_of_lt_one_or_realHilbertKernelRepresentation
     hg_nonneg hg_le hη hmean ?_
   exact hbranch.imp id (fun hrep => levelOneSubgroupKernel_of_realHilbertKernelRepresentation hrep.some)
 
-end Erdos42
-
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/LimitKernel.lean
     ============================================================= -/
@@ -10462,7 +10427,7 @@ continuous Fourier-series construction are later steps.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42 MeasureTheory
 open scoped Classical Topology
@@ -12696,7 +12661,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -12711,7 +12676,7 @@ fixed-`Q` finite Fejér-smoothed clique density into a compact Haar integral.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter MeasureTheory
 open scoped BigOperators Classical Topology
@@ -14121,7 +14086,7 @@ end CayleyExtraction
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -14133,7 +14098,7 @@ Erdős Problem 42 — contradiction from a compact-Cayley counterexample sequenc
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Filter Erdos42
 open scoped Topology
@@ -14261,7 +14226,7 @@ theorem CayleyCounterSeq.false
 
 end
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
@@ -14284,9 +14249,6 @@ limit properties (2.4), spectral cut-norm control (2.5), counting convergence
 This file now closes the former Route B trust boundary by deriving the compact
 Cayley clique theorem from the axiom-free countersequence contradiction.
 -/
-
-
-namespace Erdos42
 
 namespace CompactCayley
 
@@ -14319,9 +14281,6 @@ theorem compact_cayley_clique
 
 end CompactCayley
 
-end Erdos42
-
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Main.lean
     ============================================================= -/
@@ -14336,7 +14295,7 @@ the compact-Cayley namespace, so Route A can reuse them independently.
 -/
 
 
-namespace Erdos42.CompactCayley
+namespace CompactCayley
 
 open Finset Erdos42
 
@@ -14452,15 +14411,12 @@ theorem theorem_1_1_from_compact_cayley
       rw [allowedDiffSetMod, Finset.mem_filter] at hcast
       exact hcast.2.2 a₁ ha₁ a₂ ha₂ rfl
 
-end Erdos42.CompactCayley
+end CompactCayley
 
 
 /-! =============================================================
     FC bridge: public `Set ℕ` wrapper + FC iff form (Route B)
     ============================================================= -/
-
-namespace Erdos42
-
 open Filter Set
 open scoped Pointwise
 

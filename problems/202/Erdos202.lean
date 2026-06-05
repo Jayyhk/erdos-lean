@@ -10,6 +10,8 @@ Trust boundary, verified at the bottom with `#print axioms`:
 
 import Mathlib
 
+namespace Erdos202
+
 set_option autoImplicit false
 
 
@@ -22,8 +24,7 @@ set_option autoImplicit false
 Erdős Problem 202 — Statement layer.
 
 Defines residue classes, admissible families, the extremal function `f(N)`,
-the BFV scale `L(α, N) = exp(α · sqrt(log N · log log N))`, and the sharp
-asymptotic predicate `HasErdos202Asymptotic`.
+and the BFV scale `L(α, N) = exp(α · sqrt(log N · log log N))`.
 
 Reference: PDF in `docs/`. BFV (de la Bretèche–Ford–Vandehey) for the
 unconditional bounds; spread-core variant for the matching upper bound
@@ -32,9 +33,6 @@ for Erdős Problem 202 (PDF Theorem 1.1).  The integral / partial-summation
 corollary about Erdős Problem 1190 (PDF Corollary 1.2) is formalized as
 `Erdos202.erdos1190_main` in `Erdos/P1190/Proof.lean`.
 -/
-
-
-namespace Erdos202
 
 open Filter
 open Asymptotics
@@ -381,22 +379,7 @@ lemma log_nat_mul_Lscale {N : ℕ} (hN : 0 < N) (α : ℝ) :
   have hL : Lscale α N ≠ 0 := (Lscale_pos α N).ne'
   rw [Real.log_mul hNreal hL, Lscale, Real.log_exp]
 
-/-! ## §3 The sharp asymptotic -/
-
-/-- `F : ℕ → ℕ` satisfies `F N = N · exp(-(1 + o(1)) · sqrt(log N · log log N))`,
-in epsilon form: for every `ε > 0`, eventually
-`N · L(-(1+ε), N) ≤ F N ≤ N · L(-(1-ε), N)`. -/
-def HasErdos202Asymptotic (F : ℕ → ℕ) : Prop :=
-  ∀ ε : ℝ, 0 < ε → ∀ᶠ N : ℕ in atTop,
-    (N : ℝ) * Lscale (-(1 + ε)) N ≤ (F N : ℝ) ∧
-    (F N : ℝ) ≤ (N : ℝ) * Lscale (-(1 - ε)) N
-
-/-- **Erdős Problem 202.** The sharp BFV-conjectured asymptotic for the
-extremal function `f`. Statement layer only. -/
-def Erdos202Statement : Prop :=
-  HasErdos202Asymptotic f
-
-/-! ## §4 The non-coprime gcd criterion (foundational lemma) -/
+/-! ## §3 The non-coprime gcd criterion (foundational lemma) -/
 
 /-- The gcd intersection criterion: residue classes `a mod q` and `b mod r`
 intersect iff `a ≡ b mod gcd(q, r)`. This is the formal version of equation
@@ -461,9 +444,6 @@ lemma residueClass_disjoint_iff
     · intro hn
       cases hn
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/P202Arithmetic.lean
     ============================================================= -/
@@ -477,9 +457,6 @@ and the exact prime-power block `exactBlock C q = ∏_{p ∈ C} p^{vₚ(q)}`.
 All built on top of `Nat.factorization` to avoid drift between
 `Nat.primeFactorsList`, `padicValNat`, and `multiplicity`.
 -/
-
-
-namespace Erdos202
 
 open Finset
 open scoped BigOperators
@@ -869,9 +846,6 @@ lemma gcd_dvd_of_disjoint_remainingSupport {P q r : ℕ}
   · have hqle : q.factorization p ≤ P.factorization p := le_of_not_gt hqextra
     exact le_trans (min_le_left _ _) hqle
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/SpreadDefs.lean
     ============================================================= -/
@@ -885,9 +859,6 @@ ParkPham layer can use these definitions without importing the
 spread-disjointness theorem (which would create an import cycle with
 `SpreadCore.lean` and the ParkPham proof).
 -/
-
-
-namespace Erdos202
 
 open Finset
 open scoped BigOperators
@@ -910,9 +881,6 @@ def PairwiseDisjointMembers {α : Type*} [DecidableEq α]
     (B : Finset (Finset α)) : Prop :=
   ∀ S ∈ B, ∀ T ∈ B, S ≠ T → Disjoint S T
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/BooleanFamilies.lean
     ============================================================= -/
@@ -929,8 +897,6 @@ avoid any general measure theory; subsets of `X` are represented as
 `Finset α` filtered by `S ⊆ X`.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -1388,8 +1354,6 @@ theorem ell_upClosure_eq {X : Finset α} {A : Finset (Finset α)} {k : ℕ}
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/ProductMeasure.lean
@@ -1403,8 +1367,6 @@ expressed as a finite sum (no `MeasureTheory`). Used by the expectation-
 threshold theorem and the random-partition argument downstream.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -3139,8 +3101,6 @@ lemma pow_ell_le_muP_of_nonempty_increasing
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/Smallness.lean
@@ -3158,8 +3118,6 @@ i.e. the threshold lies in `[0, q]`. This is the form consumed by the
 Park–Pham theorem in `Threshold.lean`.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -3987,8 +3945,6 @@ lemma qSmallUpper_of_forall_muP_gt_half
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/Fragments.lean
@@ -4009,8 +3965,6 @@ lemma is not proved here; this file only provides the finite set-system
 bookkeeping needed to state it cleanly.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -4731,8 +4685,6 @@ lemma empty_mem_minimalFragments_iff
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/Cost.lean
@@ -4747,8 +4699,6 @@ of a cover of weight at most `1/2`; this file packages the corresponding
 finite minimum over covers supported on the ground set `X`.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -5034,8 +4984,6 @@ lemma coverCost_union_le
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/FragmentCost.lean
@@ -5053,8 +5001,6 @@ into small and large parts, and cost subadditivity gives
 No probabilistic estimate is used here.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -5290,8 +5236,6 @@ lemma exposureUnion_mem_upClosureIn_of_largeMinimalFragments_one_iterated_cost_l
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/FragmentIteration.lean
@@ -5307,8 +5251,6 @@ initial cover cost, then the final cutoff-`1` small-fragment step forces an
 original generator to be contained in the union of the exposed sets.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -7083,8 +7025,6 @@ lemma half_lt_muP_of_not_pSmall_iteratedLargeCostSnoc_average_lt_quarter
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/Threshold.lean
@@ -7133,8 +7073,6 @@ cutoffs of length `Nat.log 2 m + 1`, reducing the recursive snoc budget to the
 finite geometric bound `∑ (1/16)^(2^j) < 1/4`.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -9471,8 +9409,6 @@ theorem park_pham_threshold_exists :
   exact hAt.trans hmono
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/ParkPhamTheorem.lean
@@ -9493,8 +9429,6 @@ Consequences of the Park–Pham threshold theorem for spread families:
    `κ ≥ Csp · r · log(ek)`. **Proved against the threshold package.**
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -9778,8 +9712,6 @@ theorem mu_at_partition_density_ge_half_of_threshold
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/ParkPham/SpreadDisjointness.lean
@@ -9810,8 +9742,6 @@ content.  This file proves that bookkeeping directly, then combines it
 with the named Park--Pham threshold package.
 -/
 
-
-namespace Erdos202
 namespace ParkPham
 
 open Finset
@@ -10354,8 +10284,6 @@ theorem spread_disjointness_theorem :
 end
 
 end ParkPham
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/SpreadCore.lean
@@ -10376,9 +10304,6 @@ Park–Pham theorem reference: arXiv:2203.17207. We do NOT formalize the full
 expectation-threshold theorem here; we isolate exactly the finite consequence
 the descending chain needs.
 -/
-
-
-namespace Erdos202
 
 open Finset
 open scoped BigOperators
@@ -10460,9 +10385,6 @@ theorem dense_core_from_spread :
   rcases Finset.one_lt_card.mp hBgt with ⟨S, hS, T, hT, hST⟩
   exact hIntersect S (hBA hS) T (hBA hT) hST (hBdisj S hS T hT hST)
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/Mertens.lean
     ============================================================= -/
@@ -10516,9 +10438,6 @@ which is `≤ Real.exp (ε * Zscale N)` eventually for any `ε > 0`, since
   supplies the historical `Erdos202.bfv_omega_count_input` interface.
 
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -11550,9 +11469,6 @@ theorem omega_weighted_sum_bfvz_bound :
   exact (hAnalytic y hy).trans
     (mul_le_mul_of_nonneg_left hExp_le (by positivity))
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/OmegaTail.lean
     ============================================================= -/
@@ -11564,9 +11480,6 @@ This file contains the elementary Rankin counting step used before the
 BFV/Hardy-Ramanujan analytic input.  The Euler-product estimate is proved in
 `Erdos.P202.BFV.Mertens`.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -11810,9 +11723,6 @@ theorem bfv_omega_tail_theorem :
               Real.exp ((-((t : ℝ) / Mscale N) / 2 + ε) * Zscale N) := by
               exact mul_le_mul_of_nonneg_left (hRankin t ht) hy_nonneg
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/OmegaExact.lean
     ============================================================= -/
@@ -11823,9 +11733,6 @@ Erdos Problem 202 -- exact omega-count reduction.
 This file reduces an exact omega level to the omega-tail estimate from
 `OmegaTail.lean` and performs the scale algebra for the BFV `W` factor.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -11901,9 +11808,6 @@ theorem bfv_omega_exact_theorem :
   dsimp only at hTailApplied ⊢
   exact hExactTail.trans (by simpa [htarget] using hTailApplied)
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/OmegaCountInput.lean
     ============================================================= -/
@@ -11914,9 +11818,6 @@ Erdos Problem 202 -- theorem-shaped BFV omega-count input.
 This file exposes the theorem name intended to replace
 `Erdos202.bfv_omega_count_input` in a later review step.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -11939,9 +11840,6 @@ theorem bfv_omega_count_theorem :
                 * Real.exp (((W : ℝ) / 2) * Real.log (Real.log (N : ℝ)))) :=
   bfv_omega_exact_theorem
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/PrimeIntervals.lean
     ============================================================= -/
@@ -11953,9 +11851,6 @@ This file defines the `dyadicPrimeInterval` used by the explicit lower
 construction. The analytic lower bound on its cardinality lives in
 `Erdos.P202.BFV.Chebyshev`; this file contains only definitions.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 
@@ -11970,9 +11865,6 @@ lemma mem_dyadicPrimeInterval {y : ℝ} {p : ℕ} :
     p ∈ dyadicPrimeInterval y ↔
       Nat.floor y < p ∧ p ≤ Nat.floor (2 * y) ∧ Nat.Prime p := by
   simp [dyadicPrimeInterval, and_assoc]
-
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/BFV/Chebyshev.lean
@@ -12011,9 +11903,6 @@ uses central-binomial/Bertrand-style estimates rather than PNT.
   → `Erdos.P202.BFV.LowerBoundInput.bfv_lower_bound_theorem`
   → supplies the historical `Erdos202.bfv_lower_bound_input` interface.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 
@@ -12439,9 +12328,6 @@ theorem dyadicPrimeInterval_card_lower_bound :
       ⟨by simpa [n] using hnp, hp2n.trans h2floor_le, hpprime⟩)
   exact hfloor_le_nat.trans (Finset.card_le_card hsubset)
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/LowerPathScales.lean
     ============================================================= -/
@@ -12462,9 +12348,6 @@ the lower-bound target.  These path scales are the product/capacity side of the
 BFV Section 2 construction, isolated so the later refactor can proceed without
 destabilizing the current proof path.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open Asymptotics
@@ -13439,9 +13322,6 @@ lemma eventually_lowerPathR_mul_log_eightZ_le_mul_Zscale
     _ = (1 + δ) * (M * Y) := by ring
     _ = (1 + δ) * Zscale N := by rw [hMY]
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/LowerPathConstruction.lean
     ============================================================= -/
@@ -13455,9 +13335,6 @@ the BFV-compatible lower-bound refactor.  It is intentionally not wired into
 `LowerConstruction.lean`.  The point here is to grow a fully proved replacement
 around the corrected path scales.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -14972,9 +14849,6 @@ theorem lowerPath_f_lower_bound_eventually :
   lowerPath_f_lower_bound_eventually_of_simple_bound
     lowerPath_simple_denominator_bound_eventually
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/LowerBoundInput.lean
     ============================================================= -/
@@ -14987,9 +14861,6 @@ This file proves the theorem with the same signature as
 construction from `LowerPathConstruction.lean`.
 -/
 
-
-namespace Erdos202
-
 open Filter
 
 /-- BFV lower-bound theorem, matching the old input interface. -/
@@ -14997,9 +14868,6 @@ theorem bfv_lower_bound_theorem :
     ∀ ε : ℝ, 0 < ε → ∀ᶠ N : ℕ in atTop,
       (N : ℝ) * Lscale (-(1 + ε)) N ≤ (f N : ℝ) :=
   lowerPath_f_lower_bound_eventually
-
-end Erdos202
-
 
 /-! =============================================================
     Section from: Erdos/P202/BFVInputs.lean
@@ -15020,9 +14888,6 @@ current BFV subdirectory replacements.  The pruning theorem is proved in
 `Erdos.P202.BFV.Pruning`, which imports this file for the `PrunedData`
 structure.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -15115,9 +14980,6 @@ theorem bfv_lower_bound_input :
     (N : ℝ) * Lscale (-(1 + ε)) N ≤ (f N : ℝ) :=
   bfv_lower_bound_theorem
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/P202Chain.lean
     ============================================================= -/
@@ -15137,9 +14999,6 @@ holds at each step.
 Combines the gcd criterion (`P202Basic.lean`), the dense-core lemma
 (`SpreadCore.lean`), and the BFV ω-count input (`BFVInputs.lean`).
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -17962,9 +17821,6 @@ theorem chain_inequality
   refine ⟨R, S, hR, hRpos, hRle, hStop, hBlocks, ?_⟩
   simpa [chainProductBoundWithLosses, hR] using hProd
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/Filtering.lean
     ============================================================= -/
@@ -17975,9 +17831,6 @@ Erdos Problem 202 -- finite filtering helpers for BFV pruning.
 These lemmas are deliberately elementary.  They isolate the finite-set
 bookkeeping used by the pruning step from the analytic BFV estimates.
 -/
-
-
-namespace Erdos202
 
 open Finset
 open scoped BigOperators
@@ -18157,9 +18010,6 @@ lemma choose_one_per_fiber_card_lower {α β : Type*} [DecidableEq α] [Decidabl
   simpa [chooseOnePerImage_card_eq_image_card s g] using
     image_card_mul_fiber_bound_ge s g C hC
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/RadMultiplicity.lean
     ============================================================= -/
@@ -18172,9 +18022,6 @@ finite multiplicity bound.  This is a finite combinatorial theorem, but the
 full exponent-vector encoding is kept isolated here so the final pruning file
 only consumes a single clean interface.
 -/
-
-
-namespace Erdos202
 
 open Finset
 open scoped BigOperators
@@ -18473,9 +18320,6 @@ theorem rad_multiplicity_bfv33
     have hnonneg : 0 ≤ H ^ 2 * (2 : ℝ) ^ K := by positivity
     simpa [hEmpty] using hnonneg
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/HExpRare.lean
     ============================================================= -/
@@ -18487,9 +18331,6 @@ The paper-shaped BFV Lemma 3.2 estimate is isolated as a named theorem stub.
 The super-`L` consumer form used by pruning is proved from that estimate by
 explicit scale algebra.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 open scoped BigOperators
@@ -19802,9 +19643,6 @@ theorem hExp_rare_subset_count
     exact Finset.mem_filter.2
       ⟨hS (Finset.mem_filter.1 hn).1, (Finset.mem_filter.1 hn).2⟩)).trans hN
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/BFV/Pruning.lean
     ============================================================= -/
@@ -19815,9 +19653,6 @@ Erdos Problem 202 -- BFV pruning theorem.
 This file proves `bfv_pruning_theorem`, the pruning interface consumed by the
 upper-bound argument.
 -/
-
-
-namespace Erdos202
 
 open Filter Finset
 
@@ -20829,9 +20664,6 @@ theorem bfv_pruning_theorem :
           (D.Q.card : ℝ) ≥ (Q.card : ℝ) * Lscale (-ε) N :=
   bfv_pruning_bookkeeping_from_bfv_inputs
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/P202Optimization.lean
     ============================================================= -/
@@ -20850,9 +20682,6 @@ Key explicit replacements (versus the PDF):
 The `o(1)` of the PDF is replaced by an explicit `η`-quantifier:
 "for every `η > 0`, eventually `1 - η ≤ c σ_N - c²/4 + η`".
 -/
-
-
-namespace Erdos202
 
 open Filter
 open Asymptotics
@@ -21696,9 +21525,6 @@ theorem f_upper_bound :
           exact mul_le_mul_of_nonneg_left
             (Lscale_mono_in_alpha (by linarith) N) (by positivity)
 
-end Erdos202
-
-
 /-! =============================================================
     Section from: Erdos/P202/P202Main.lean
     ============================================================= -/
@@ -21720,23 +21546,15 @@ the Park--Pham threshold package.
 Audit by uncommenting the `#print axioms` block below.
 -/
 
-
-namespace Erdos202
-
 open Filter
 open scoped BigOperators
 
-/-- **Conditional Erdős 202 upper bound.** From the BFV pruning theorem layer,
-omega-count theorem layer, and spread theorem layer, the upper half of the
-asymptotic holds. -/
-theorem erdos202_upper_bound_from_inputs :
-    ∀ ε : ℝ, 0 < ε → ∀ᶠ N in atTop,
-      (f N : ℝ) ≤ (N : ℝ) * Lscale (-(1 - ε)) N :=
-  f_upper_bound
-
 /-- **Erdős Problem 202 — main theorem.** The sharp BFV asymptotic
 `f(N) = N · exp(-(1 + o(1)) · sqrt(log N · log log N))`. -/
-theorem erdos_202 : Erdos202Statement := by
+theorem erdos_202 :
+    ∀ ε : ℝ, 0 < ε → ∀ᶠ N : ℕ in atTop,
+      (N : ℝ) * Lscale (-(1 + ε)) N ≤ (f N : ℝ) ∧
+      (f N : ℝ) ≤ (N : ℝ) * Lscale (-(1 - ε)) N := by
   intro ε hε
   filter_upwards [bfv_lower_bound_theorem ε hε, f_upper_bound ε hε] with N hLow hUp
   exact ⟨hLow, hUp⟩

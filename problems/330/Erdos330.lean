@@ -38,9 +38,6 @@ theorem Nat.ncard_Iio (b : ℕ) : (Set.Iio b).ncard = b := by
   rw [← Finset.coe_Iio, Set.ncard_coe_finset]
   exact Nat.card_Iio _
 
-end Erdos330
-
-
 /-! ### module: Basic -/
 
 /-!
@@ -55,9 +52,6 @@ can remain `sorry`-free while the construction is formalized.
 -/
 
 noncomputable section
-
-namespace Erdos330
-
 open Set
 open scoped Pointwise
 
@@ -141,9 +135,6 @@ theorem isAsymptoticBasisTwo_iff_add {A : Set ℕ} :
   unfold IsAsymptoticBasisTwo
   rw [twoFold_eq_add A]
 
-end Erdos330
-
-
 /-! ### module: Elementary -/
 
 /-!
@@ -153,9 +144,6 @@ These lemmas are independent of the main additive construction.  They support
 the finite reciprocal-budget replacement for the informal infinite product
 argument.
 -/
-
-namespace Erdos330
-
 open scoped BigOperators
 
 theorem one_sub_sum_le_prod_one_sub {ι : Type*} (s : Finset ι) (x : ι → ℝ)
@@ -185,9 +173,6 @@ theorem one_sub_sum_le_prod_one_sub {ι : Type*} (s : Finset ι) (x : ι → ℝ
           sub_le_sub_left hmul_le (s.prod fun i => 1 - x i)
         _ = (1 - x a) * s.prod (fun i => 1 - x i) := by ring
 
-end Erdos330
-
-
 /-! ### module: ResidueBlock -/
 
 /-!
@@ -196,9 +181,6 @@ end Erdos330
 The stage construction repeatedly adds long intervals restricted to a finite
 set of residue classes modulo a modulus `M`.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 /--
@@ -488,9 +470,6 @@ theorem residueBlockFinset_middle_mem_twoFold_self {M N L n : ℕ} [NeZero M]
     (residueBlockFinset_middle_mem_twoFold_union (M := M) (N := N) (L := L)
       (n := n) (Ω := Ω) (Θ := Ω) hML hnlo hnhi hres)
 
-end Erdos330
-
-
 /-! ### module: Stage -/
 
 /-!
@@ -500,9 +479,6 @@ This file records the finite state and CRT gadget interfaces used by the
 priority construction.  The hard quadratic-residue and CRT proofs can later
 instantiate these interfaces without changing the global construction layer.
 -/
-
-namespace Erdos330
-
 open scoped BigOperators
 open scoped Pointwise
 
@@ -730,9 +706,6 @@ structure ServiceExtension (st st' : StageState) (a : ℕ) where
   protectedEndpoint_le_X : protectedEndpoint ≤ st'.X
   protectedBlock : ProtectedBlockCertificate st'.S a protectedEndpoint
 
-end Erdos330
-
-
 /-! ### module: Global -/
 
 /-!
@@ -741,9 +714,6 @@ end Erdos330
 This file proves consequences of an infinite chain of finite stage states.
 The concrete stage construction will later supply such a chain.
 -/
-
-namespace Erdos330
-
 /-- The final set produced by an infinite sequence of finite stages. -/
 def finalSet (st : ℕ → StageState) : Set ℕ :=
   {n | ∃ k : ℕ, n ∈ (st k).S}
@@ -941,9 +911,6 @@ theorem mainTarget_of_finalSet_certificates {st : ℕ → StageState} (chain : S
   exact ⟨finalSet st, finalSet_isAsymptoticBasisTwo chain hR_unbounded, hA_density,
     hprivate_density⟩
 
-end Erdos330
-
-
 /-! ### module: UpperDensity -/
 
 /-!
@@ -952,9 +919,6 @@ end Erdos330
 The construction naturally produces dense finite blocks at arbitrarily large
 endpoints.  This file bridges those witnesses to the `Set.upperDensity` API.
 -/
-
-namespace Erdos330
-
 open Filter
 
 theorem partialDensity_univ_nat (S : Set ℕ) (b : ℕ) :
@@ -1134,9 +1098,6 @@ theorem mainTarget_of_frequent_stage_blocks_and_services {st : ℕ → StageStat
       hsetBlocks)
     hservices
 
-end Erdos330
-
-
 /-! ### module: PrimeSupply -/
 
 /-!
@@ -1146,9 +1107,6 @@ The roadmap suggests an elementary Euclid-style proof for primes `3 mod 4`.
 For now we use Mathlib's formalized Dirichlet theorem in arithmetic
 progressions as a reliable supply lemma.
 -/
-
-namespace Erdos330
-
 theorem exists_prime_three_mod_four_ge (N : ℕ) :
     ∃ p ≥ N, Nat.Prime p ∧ p % 4 = 3 := by
   obtain ⟨p, hpgt, hpprime, hpmod⟩ :=
@@ -1161,9 +1119,6 @@ theorem exists_prime_three_mod_four_gt (N : ℕ) :
   obtain ⟨p, hpge, hpprime, hpmod⟩ := exists_prime_three_mod_four_ge (N + 1)
   exact ⟨p, Nat.succ_le_iff.mp hpge, hpprime, hpmod⟩
 
-end Erdos330
-
-
 /-! ### module: QuadraticResidue -/
 
 /-!
@@ -1172,9 +1127,6 @@ end Erdos330
 This file contains the finite-field lemmas used by the selected coordinate of
 the CRT gadget.
 -/
-
-namespace Erdos330
-
 open Finset
 open MulChar
 open scoped Pointwise
@@ -1728,9 +1680,6 @@ theorem exists_selected_coordinate_strong_pair_data (p : ℕ) [Fact p.Prime] [Ne
     have hvQR : v ∈ QR p := by simpa [hrv] using hrQR
     exact hvnsq ((mem_QR.mp hvQR).2)
 
-end Erdos330
-
-
 /-! ### module: FiniteChoice -/
 
 /-!
@@ -1738,9 +1687,6 @@ end Erdos330
 
 These combinatorial lemmas support the safe-pairs part of the CRT gadget.
 -/
-
-namespace Erdos330
-
 theorem exists_disjoint_subsets_card_eq {ι : Type*} [DecidableEq ι]
     (U : Finset ι) (a b : ℕ) (hab : a + b ≤ U.card) :
     ∃ S T : Finset ι,
@@ -1898,9 +1844,6 @@ theorem choose_disjoint_avoiding_two_forbidden_sets {ι : Type*} [DecidableEq ι
     · intro i j hij
       exact Sum.inr.inj (hfinj hij)
 
-end Erdos330
-
-
 /-! ### module: SafePairs -/
 
 /-!
@@ -1909,9 +1852,6 @@ end Erdos330
 This file contains the finite-coordinate choices used in the two-safe-pairs
 part of the CRT gadget.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 structure SafePairData (α : Type*) [Zero α] [Add α] (e : α) where
@@ -2631,9 +2571,6 @@ theorem safePair_sum_union_eq_coordinateTarget {ι : Type*} [Fintype ι] [Decida
     · exact safePair_sum_subset_coordinateTarget_thresholds p e data false hz
   · exact coordinateTarget_subset_safePair_sum_union p hp7 e data
 
-end Erdos330
-
-
 /-! ### module: CRTBridge -/
 
 /-!
@@ -2642,9 +2579,6 @@ end Erdos330
 This file records the thin interface needed to pull product-coordinate sumset
 identities back through the Chinese remainder equivalence.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 theorem addEquiv_preimage_add {α β : Type*} [Add α] [Add β]
@@ -2856,9 +2790,6 @@ theorem crt_safePair_sum_union_eq_coordinateTarget_preimage {ι : Type*}
   rw [← Set.mem_union]
   rw [safePair_sum_union_eq_coordinateTarget p hp7 e data]
 
-end Erdos330
-
-
 /-! ### module: AffineSafePairs -/
 
 /-!
@@ -2868,9 +2799,6 @@ The nonselected CRT coordinates use allowed residues of the form `x_i ≠ β_i`.
 The safe-pair theorem is proved after subtracting `β`, where the allowed set
 is the nonzero box.  This file packages that affine normalization.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 def affineNormalize {ι : Type*} (p : ι → ℕ)
@@ -3061,9 +2989,6 @@ theorem shiftedNonzeroBox_add_self_eq_univ {ι : Type*}
     dsimp [left, right, target] at hsum ⊢
     linear_combination hsum
 
-end Erdos330
-
-
 /-! ### module: ProductGadget -/
 
 /-!
@@ -3073,9 +2998,6 @@ This file defines the product-coordinate version of the finite CRT gadget and
 proves the first structural inclusion: the constructed set `T` lies inside the
 allowed box.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 abbrev ProductSpace {ι : Type*} (p0 : ℕ) (p : ι → ℕ) :=
@@ -4011,9 +3933,6 @@ theorem exists_crtProduct_gadget_core {ι : Type*}
       hu1QR hu2QR hu12 hbase_sum
   · exact crtProduct_allowed_add_T_eq_univ M p0 p hp7 hp0_3 hp0_23 φ α h u1 u2 β e data
 
-end Erdos330
-
-
 /-! ### module: LocalReservoir -/
 
 /-!
@@ -4024,9 +3943,6 @@ gadget and the stored reservoir invariant.  They show how `D + T = univ`
 and the two-helper reservoir multiplicity produce actual old helpers from
 the finite set `S`.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 lemma nat_eq_of_zmod_eq_of_le_lt {p X u v : ℕ}
@@ -4240,9 +4156,6 @@ theorem exists_reservoir_helper_for_gadget_avoiding (st : StageState) {a p : ℕ
     ring
   rwa [hdiff]
 
-end Erdos330
-
-
 /-! ### module: ConcreteCRTGadget -/
 
 /-!
@@ -4253,9 +4166,6 @@ interface used by the stage construction.  The finite set equations and subset
 fields are supplied by `ProductGadget`; the remaining input is the cardinality
 formula for the translated private slice.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 abbrev NonselectedIndex (P : Finset ℕ) (a : ℕ) := {b // b ∈ P.erase a}
@@ -4814,9 +4724,6 @@ theorem exists_stage_CRTGadget (st : StageState) {a : ℕ} (ha : a ∈ st.P) :
     ∃ D : Finset (ZMod st.M), Nonempty (CRTGadget st.P st.m st.M a D) :=
   ⟨stageCRTAllowedFinsetAtM st ha, exists_stage_CRTGadget_on_allowedAtM st ha⟩
 
-end Erdos330
-
-
 /-! ### module: StageCoverage -/
 
 /-!
@@ -4825,9 +4732,6 @@ end Erdos330
 This file packages the local reservoir, middle-block, and canonical-tail
 coverage lemmas in the forms used by the eventual one-stage construction.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 theorem twoFoldFinset_subset_union_left {A B : Finset ℕ} :
@@ -4861,9 +4765,6 @@ theorem canonicalD_middle_cover_in_union (st : StageState) (hD : st.HasCanonical
   exact twoFoldFinset_subset_union_right
     (canonicalD_middle_residueBlock_cover st hD ha hML hnlo hnhi)
 
-end Erdos330
-
-
 /-! ### module: StageConstruction -/
 
 /-!
@@ -4872,9 +4773,6 @@ end Erdos330
 This file starts the concrete one-stage construction layer.  The first part is
 the fresh-prime package used when activating a dormant element.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 structure FreshPrimeData (st : StageState) (p : ℕ) where
@@ -7549,9 +7447,6 @@ noncomputable def serviceExtensionOfParamsFromOldProjectionLifts
     hCL hlower_start hlower_end hML hCLZ htail_start htail_end hMLZ
     hdensityDenominator_pos hlohi hlo_private hhi_private hlo_sum hhi_sum harith
 
-end Erdos330
-
-
 /-! ### module: Initial -/
 
 /-!
@@ -7561,9 +7456,6 @@ This file constructs the one-active-element reservoir state used to start the
 priority construction.  The numeric parameters are kept explicit: later global
 construction code can choose any sufficiently large `H` and `X`.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 /-- The allowed residues for a one-element active set. -/
@@ -7792,9 +7684,6 @@ theorem exists_initialStageState :
   refine ⟨initialStageState 1 m H X hmPrime hm23 hmMod4 (by omega) (by omega), ?_⟩
   exact initialStageState_hasCanonicalD 1 m H X hmPrime hm23 hmMod4 (by omega) (by omega)
 
-end Erdos330
-
-
 /-! ### module: StageArithmetic -/
 
 /-!
@@ -7804,9 +7693,6 @@ The concrete service step has many interval inequalities.  This file collects
 the reusable arithmetic consequences of the standard choice `N = X + 1` and
 large service/tail lengths.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 namespace StageParams
@@ -9063,9 +8949,6 @@ theorem exists_canonicalServiceExtension_of_active
   obtain ⟨p, hp⟩ := exists_freshPrimeData st
   exact exists_canonicalServiceExtension_of_active_dormant_fresh ha hbS hbDormant hp hCanon
 
-end Erdos330
-
-
 /-! ### module: Iteration -/
 
 /-!
@@ -9076,9 +8959,6 @@ iteration layer.  It constructs an infinite chain that repeatedly services one
 fixed active element while preserving the canonical residue set and strict
 reciprocal budget invariants.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 /-- A stage state together with the invariants needed to keep servicing `a`. -/
@@ -9326,9 +9206,6 @@ theorem exists_repeatedService_chain_certificates :
 
 end BudgetedActiveState
 
-end Erdos330
-
-
 /-! ### module: Scheduler -/
 
 /-!
@@ -9340,9 +9217,6 @@ a state with the persistent invariants, chooses the least currently dormant
 element, and proves a service step can activate that chosen dormant element
 while preserving the canonical-residue and strict reciprocal-budget invariants.
 -/
-
-namespace Erdos330
-
 open scoped Pointwise
 
 /-- A fixed fair request stream: every natural number is requested arbitrarily far out. -/
@@ -10223,6 +10097,8 @@ end ScheduledActiveState
 theorem erdos_330 : MainTarget := by
   obtain ⟨_seed, ⟨snode⟩⟩ := ScheduledActiveState.exists_initial
   exact snode.fair_mainTarget
+
+end
 
 #print axioms erdos_330
 -- 'Erdos330.erdos_330' depends on axioms: [propext, Classical.choice, Quot.sound]
