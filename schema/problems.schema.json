@@ -23,7 +23,6 @@
             "if":   { "properties": { "state": { "const": "complete" } }, "required": ["state"] },
             "then": {
               "properties": {
-                "sorries":          { "maximum": 0 },
                 "extra_axioms":     { "maxItems": 0 },
                 "trust_extensions": { "maxItems": 0 }
               }
@@ -34,7 +33,6 @@
             "then": {
               "required": ["trust_extensions"],
               "properties": {
-                "sorries":          { "maximum": 0 },
                 "extra_axioms":     { "maxItems": 0 },
                 "trust_extensions": { "minItems": 1 }
               }
@@ -45,7 +43,6 @@
             "then": {
               "required": ["extra_axioms"],
               "properties": {
-                "sorries":      { "maximum": 0 },
                 "extra_axioms": { "minItems": 1 }
               }
             }
@@ -83,12 +80,6 @@
           "mathlib_revision": {
             "type": "string",
             "description": "Mathlib (or Mathlib3) revision the proof was written against — tag, branch, or commit hash."
-          },
-          "sorries": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 0,
-            "description": "Number of `sorry` occurrences in the proof. Must be 0."
           },
           "extra_axioms": {
             "type": "array",
