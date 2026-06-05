@@ -1539,3 +1539,14 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/898#post-3882"
+- number: "904"
+  proof:
+    path: "problems/904/"
+    theorem: "Erdos904.erdos_904"
+    state: "complete"
+    last_update: "2026-06-05"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/904#post-5573"
+      - "https://gist.github.com/Parcly-Taxel/876d4eadd49a0d29db91ed2e790db733#file-e904-lean"

@@ -2,7 +2,7 @@
 
 A collection of Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
 
-Not every proof will be fully legitimate. Some might depend on extra axioms declared in the proof itself, or on mechanisms that expand Lean's trusted base. The table below shows the state of each problem and any axioms or trust extensions it relies on (state definitions live in [schema/problems.schema.json](schema/problems.schema.json)). Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
+Each proof is self-contained. Every `ErdosN.lean` file's only import is `import Mathlib`, with no cross-references to other files in the repository. Additionally, some proofs depend on extra axioms declared in the proof itself, or on mechanisms that expand Lean's trusted base. The table below shows the state of each problem and any axioms or trust extensions it relies on (state definitions live in [schema/problems.schema.json](schema/problems.schema.json)). Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
 
 For problem `N`, `problems/N/` contains:
 
@@ -22,8 +22,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-140 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
-- 124 `complete`
+141 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
+- 125 `complete`
 - 3 `trust_extended`
 - 13 `axiomatic`
 
@@ -169,5 +169,6 @@ lake build
 | [871](https://www.erdosproblems.com/871) | `complete` | [problems/871/](problems/871/) | |
 | [897](https://www.erdosproblems.com/897) | `complete` | [problems/897/](problems/897/) | |
 | [898](https://www.erdosproblems.com/898) | `complete` | [problems/898/](problems/898/) | |
+| [904](https://www.erdosproblems.com/904) | `complete` | [problems/904/](problems/904/) | |
 
 <!-- TABLE:END -->
