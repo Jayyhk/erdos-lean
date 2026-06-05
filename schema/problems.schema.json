@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "erdos-lean problems catalog",
-  "description": "Per-problem metadata for the erdos-lean repository. This repo is a *collection* of proofs from various sources; different problems may use different Lean toolchains and Mathlib revisions. The `proof` block records what the proof depends on (`sorry` gaps, extra axioms declared in this repo, mechanisms that expand the trusted base) and the Lean environment it was written against.",
+  "description": "Per-problem metadata for the erdos-lean repository. This repo is a *collection* of proofs from various sources; different problems may use different Lean toolchains and Mathlib revisions. The `proof` block records what the proof depends on (extra axioms declared in this repo, mechanisms that expand the trusted base) and the Lean environment it was written against.",
   "type": "array",
   "uniqueItems": true,
   "items": {
@@ -49,15 +49,6 @@
                 "extra_axioms": { "minItems": 1 }
               }
             }
-          },
-          {
-            "if":   { "properties": { "state": { "const": "sorry" } }, "required": ["state"] },
-            "then": {
-              "required": ["sorries"],
-              "properties": {
-                "sorries": { "minimum": 1 }
-              }
-            }
           }
         ],
         "properties": {
@@ -72,12 +63,11 @@
           },
           "state": {
             "type": "string",
-            "description": "The worst category that applies, determined by the dependency fields `sorries`, `extra_axioms`, and `trust_extensions`. Consistency is enforced by the schema (via the `allOf` constraint on the `proof` object). Ordering best → worst: complete > trust_extended > axiomatic > sorry.",
+            "description": "The worst category that applies, determined by the dependency fields `extra_axioms` and `trust_extensions`. Consistency is enforced by the schema (via the `allOf` constraint on the `proof` object). Ordering best → worst: complete > trust_extended > axiomatic.",
             "oneOf": [
-              { "const": "complete",       "description": "Proof has no unproven dependencies: no `sorry`, no extra axioms, no trust extensions." },
-              { "const": "trust_extended", "description": "No `sorry`, no extra axioms, but has entries in `trust_extensions` (mechanisms that expand the trusted base, like `native_decide`)." },
-              { "const": "axiomatic",      "description": "No `sorry`, but closes modulo axioms declared in this repo (listed in `extra_axioms`). May also have trust extensions." },
-              { "const": "sorry",          "description": "Proof contains at least one `sorry` (count in `sorries`). May also have any of the other dependency fields populated." }
+              { "const": "complete",       "description": "Proof has no unproven dependencies: no extra axioms, no trust extensions." },
+              { "const": "trust_extended", "description": "No extra axioms, but has entries in `trust_extensions` (mechanisms that expand the trusted base, like `native_decide`)." },
+              { "const": "axiomatic",      "description": "Closes modulo axioms declared in this repo (listed in `extra_axioms`). May also have trust extensions." }
             ]
           },
           "last_update": {
@@ -97,7 +87,8 @@
           "sorries": {
             "type": "integer",
             "minimum": 0,
-            "description": "Number of `sorry` occurrences in the proof. Must be ≥ 1 iff `state` is `sorry`; 0 (or absent) otherwise. Among sorry-state proofs, the count is a useful comparison metric (fewer = closer to complete), though one `sorry` hiding a hard step can still be worse than many hiding trivial ones."
+            "maximum": 0,
+            "description": "Number of `sorry` occurrences in the proof. Must be 0."
           },
           "extra_axioms": {
             "type": "array",
