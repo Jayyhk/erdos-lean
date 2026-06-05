@@ -1,4 +1,12 @@
 import Mathlib
+import SelbergSieve4
+import Mertens
+import Erdos696Common
+import BrunTitchmarshAP
+
+-- Mertens (from problems/694) is in `Mertens.lean` (sibling file).
+-- SelbergSieve4 (from lean-pool) is in `SelbergSieve4/` (sibling library).
+-- See `problems/696/PLAN-brun-titchmarsh.md` for context.
 
 -- === Inlined from Erdos696/Defs.lean ===
 /-
@@ -3234,10 +3242,8 @@ open scoped BigOperators
 open Real
 open MeasureTheory
 
-/-- The prime-counting function in arithmetic progressions:
-`piMod t q a = #{p ≤ t : p prime, p ≡ a (mod q)}`. -/
-noncomputable def piMod (t : ℝ) (q a : ℕ) : ℕ :=
-  Nat.card {p : ℕ | p ≤ ⌊t⌋₊ ∧ p.Prime ∧ p % q = a % q}
+-- `piMod` is now defined in `Erdos696Common.lean` to break the import
+-- cycle with `BrunTitchmarshAP.lean`.
 
 /-- The logarithmic integral `Li(t) = ∫₂^t dt / log t`.  We adopt the
 standard convention `Li(t) := ∫_{2}^{t} 1 / log u du`. -/
@@ -3280,28 +3286,26 @@ axiom siegel_walfisz :
               |((piMod t q a : ℝ)) - li t / (q.totient : ℝ)| ≤
                 C * t * Real.exp (-c * Real.sqrt (Real.log t))
 
-/--
-**Brun–Titchmarsh inequality** (Lemma 2.2 in the paper, classical
-reference Iwaniec–Kowalski, *Analytic Number Theory*, AMS Colloquium
-Publications Vol. 53, 2004, Theorem 6.6).
+/-- **Brun–Titchmarsh inequality** (strengthened-hypothesis form).
 
-**Textbook statement (Iwaniec–Kowalski Thm. 6.6 — interval form):**
-> For `(a, q) = 1` and `1 ≤ q < y`,
->     π(x + y; q, a) − π(x; q, a) < (2y) / (φ(q) log(y/q)) + O(y / (q log²(y/q)))
-> where the implied constant is absolute.
-
-This axiom records the consequence with `x = 0` and `y = t`:
-`π(t; q, a) ≤ C_BT · t / (φ(q) log(t/q))` (the additive `O(...)` term
-is absorbed into the constant `C_BT` for `t ≥ 2q`, where `log(t/q) ≥ log 2`).
-
-Proved unconditionally via Selberg's `Λ²`-sieve (IK §6.5–6.8). -/
-axiom brun_titchmarsh :
+The original axiom (commented out) required `2q ≤ t`. The full unconditional
+form with that hypothesis requires Möbius-inversion machinery not currently
+in Mathlib. We use here a strengthened form requiring `256 q^9 ≤ t`, which
+is sufficient for all downstream consumers (since they apply BT at
+`t = exp(exp(p / (log p)^2))` and similar enormous values). The proof is
+discharged via `Erdos696BT.brun_titchmarsh_large` (file `BrunTitchmarshAP.lean`),
+which proves the bound by applying the Selberg `Λ²`-sieve with sieve level
+`z = √(t/q)`. The hypothesis `256 q^9 ≤ t` guarantees `16 q^4 ≤ z`, which is
+exactly the hypothesis required by the AP-form bounding sum lower bound
+(`Erdos696BT.boundingSum_AP_ge`). -/
+theorem brun_titchmarsh :
     ∃ CBT : ℝ, 0 < CBT ∧
       ∀ q : ℕ, 1 ≤ q →
         ∀ a : ℕ, Nat.Coprime a q →
-          ∀ t : ℝ, (2 * q : ℝ) ≤ t →
+          ∀ t : ℝ, (256 * (q : ℝ)^9 : ℝ) ≤ t →
             ((piMod t q a : ℝ)) ≤
-              CBT * t / ((q.totient : ℝ) * Real.log (t / q))
+              CBT * t / ((q.totient : ℝ) * Real.log (t / q)) :=
+  Erdos696BT.brun_titchmarsh_large
 
 /--
 **Mertens' theorem with explicit error** (Lemma 2.3 in the paper).
@@ -4569,21 +4573,30 @@ private lemma high_sum_le_boundary_integral {p : ℕ} {Q : ℝ} (hp : p.Prime)
           rw [sub_eq_add_neg, hint_eq]
 
 private lemma tail_integral_le {CBT : ℝ} {p : ℕ} {Q : ℝ} (hCBT : 0 < CBT)
-    (hp : p.Prime) (hQ : (((2 * p : ℕ) : ℝ)) ≤ Q)
-    (hBT : ∀ t : ℝ, (((2 * p : ℕ) : ℝ)) ≤ t →
+    (hp : p.Prime) (hQ : (256 : ℝ) * (p : ℝ) ^ 9 ≤ Q)
+    (hBT : ∀ t : ℝ, (256 : ℝ) * (p : ℝ) ^ 9 ≤ t →
       (piMod t p 1 : ℝ) ≤ CBT * t / (((p - 1 : ℕ) : ℝ) * Real.log (t / p))) :
-    (∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ)) ≤
+    (∫ t in Set.Ioc ((256 : ℝ) * (p : ℝ) ^ 9) Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ)) ≤
       (CBT / ((p - 1 : ℕ) : ℝ)) *
-        (Real.log (Real.log (Q / p)) - Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p)))) := by
-  let a : ℝ := (((2 * p : ℕ) : ℝ))
+        (Real.log (Real.log (Q / p)) -
+          Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p))) := by
+  let a : ℝ := (256 : ℝ) * (p : ℝ) ^ 9
   have hp_pos : (0 : ℝ) < p := by exact_mod_cast hp.pos
-  have ha_nonneg : 0 ≤ a := by positivity
-  have ha_pos : 0 < a := by
+  have hp_ge_two : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
+  have ha_pos : 0 < a := by dsimp [a]; positivity
+  have ha_nonneg : 0 ≤ a := ha_pos.le
+  -- `a / p = 256 p⁸ ≥ 256 ≥ 2`
+  have ha_div_ge : (256 : ℝ) ≤ a / (p : ℝ) := by
     dsimp [a]
-    exact_mod_cast (Nat.mul_pos (by decide : 0 < 2) hp.pos)
+    rw [le_div_iff₀ hp_pos]
+    have hp8 : (1 : ℝ) ≤ (p : ℝ) ^ 8 := by
+      have : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.one_le
+      exact one_le_pow₀ this
+    nlinarith [hp_pos, hp8]
+  have ha_div_ge_two : (2 : ℝ) ≤ a / (p : ℝ) := le_trans (by norm_num) ha_div_ge
   have ha_gt : (p : ℝ) < a := by
-    dsimp [a]
-    exact_mod_cast (by nlinarith [hp.pos] : p < 2 * p)
+    have := (le_div_iff₀ hp_pos).mp ha_div_ge_two
+    linarith
   have hpminus_pos : (0 : ℝ) < ((p - 1 : ℕ) : ℝ) := by
     exact_mod_cast (Nat.sub_pos_of_lt hp.one_lt)
   have hg_left_cont : ContinuousOn (fun t : ℝ => (t ^ 2)⁻¹) (Set.Icc a Q) := by
@@ -4610,11 +4623,9 @@ private lemma tail_integral_le {CBT : ℝ} {p : ℕ} {Q : ℝ} (hCBT : 0 < CBT)
           exact div_ne_zero (ne_of_gt ht_pos) (ne_of_gt hp_pos)))
     · intro t ht hzero
       have ht_pos : 0 < t := ha_pos.trans_le ht.1
-      have ht_div_ge_two : 2 ≤ t / (p : ℝ) := by
-        rw [le_div_iff₀ hp_pos]
-        dsimp [a] at ht
-        norm_num at ht ⊢
-        exact ht.1
+      have ht_ge_a : a ≤ t := ht.1
+      have ht_div_ge_two : 2 ≤ t / (p : ℝ) :=
+        le_trans ha_div_ge_two ((div_le_div_iff_of_pos_right hp_pos).mpr ht_ge_a)
       have hlog_pos : 0 < Real.log (t / p) :=
         Real.log_pos (lt_of_lt_of_le (by norm_num) ht_div_ge_two)
       exact mul_ne_zero (ne_of_gt ht_pos) (ne_of_gt hlog_pos) hzero
@@ -4634,11 +4645,8 @@ private lemma tail_integral_le {CBT : ℝ} {p : ℕ} {Q : ℝ} (hCBT : 0 < CBT)
     have ht_ge_a : a ≤ t := ht.1
     have ht_pos : 0 < t := ha_pos.trans_le ht_ge_a
     have hpi := hBT t ht_ge_a
-    have ht_div_ge_two : 2 ≤ t / (p : ℝ) := by
-      rw [le_div_iff₀ hp_pos]
-      dsimp [a] at ht_ge_a
-      norm_num at ht_ge_a ⊢
-      exact ht_ge_a
+    have ht_div_ge_two : 2 ≤ t / (p : ℝ) :=
+      le_trans ha_div_ge_two ((div_le_div_iff_of_pos_right hp_pos).mpr ht_ge_a)
     have hlog_pos : 0 < Real.log (t / p) :=
       Real.log_pos (lt_of_lt_of_le (by norm_num) ht_div_ge_two)
     have ht2_pos : 0 < t ^ 2 := sq_pos_of_pos ht_pos
@@ -4656,38 +4664,47 @@ private lemma tail_integral_le {CBT : ℝ} {p : ℕ} {Q : ℝ} (hCBT : 0 < CBT)
           rw [intervalIntegral.integral_const_mul]
           rw [integral_inv_mul_log_div hp_pos ha_gt hQ]
     _ = (CBT / ((p - 1 : ℕ) : ℝ)) *
-        (Real.log (Real.log (Q / p)) - Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p)))) := by
+        (Real.log (Real.log (Q / p)) -
+          Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p))) := by
           rfl
 
 private lemma high_AP_sum_le_explicit {CBT : ℝ} {p : ℕ} {Q : ℝ} (hCBT : 0 < CBT)
-    (hp : p.Prime) (hQ : (((2 * p : ℕ) : ℝ)) ≤ Q)
-    (hBT : ∀ t : ℝ, (((2 * p : ℕ) : ℝ)) ≤ t →
+    (hp : p.Prime) (hQ : (256 : ℝ) * (p : ℝ) ^ 9 ≤ Q)
+    (hBT : ∀ t : ℝ, (256 : ℝ) * (p : ℝ) ^ 9 ≤ t →
       (piMod t p 1 : ℝ) ≤ CBT * t / (((p - 1 : ℕ) : ℝ) * Real.log (t / p))) :
     (∑ q ∈ Finset.filter
-        (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+        (fun q => q.Prime ∧ q % p = 1 ∧ (256 : ℝ) * (p : ℝ) ^ 9 < (q : ℝ) ∧ (q : ℝ) ≤ Q)
         (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
       CBT / (((p - 1 : ℕ) : ℝ) * Real.log (Q / p)) +
         (CBT / ((p - 1 : ℕ) : ℝ)) *
           (Real.log (Real.log (Q / p)) -
-            Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p)))) := by
+            Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p))) := by
   have hp_pos : (0 : ℝ) < p := by exact_mod_cast hp.pos
-  have h2p_pos : (0 : ℝ) < (((2 * p : ℕ) : ℝ)) := by
-    exact_mod_cast (Nat.mul_pos (by decide : 0 < 2) hp.pos)
-  have hQ_pos : 0 < Q := h2p_pos.trans_le hQ
+  have hp_ge_two : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
+  set a : ℝ := (256 : ℝ) * (p : ℝ) ^ 9 with ha_def
+  have ha_pos : 0 < a := by dsimp [a]; positivity
+  have ha_nonneg : 0 ≤ a := ha_pos.le
+  have ha_div_ge : (256 : ℝ) ≤ a / (p : ℝ) := by
+    dsimp [a]
+    rw [le_div_iff₀ hp_pos]
+    have hp8 : (1 : ℝ) ≤ (p : ℝ) ^ 8 := by
+      have : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.one_le
+      exact one_le_pow₀ this
+    nlinarith [hp_pos, hp8]
+  have ha_div_ge_two : (2 : ℝ) ≤ a / (p : ℝ) := le_trans (by norm_num) ha_div_ge
+  have hQ_pos : 0 < Q := ha_pos.trans_le hQ
   have hQnonneg : 0 ≤ Q := hQ_pos.le
-  have hp1 : 1 % p = 1 := Nat.mod_eq_of_lt hp.one_lt
+  have hp1 : 1 % p = 1 % p := rfl
   have hBTQ := hBT Q hQ
+  have hpminus_pos : (0 : ℝ) < ((p - 1 : ℕ) : ℝ) := by
+    exact_mod_cast (Nat.sub_pos_of_lt hp.one_lt)
+  have hQdiv_ge_two : (2 : ℝ) ≤ Q / p :=
+    le_trans ha_div_ge_two ((div_le_div_iff_of_pos_right hp_pos).mpr hQ)
+  have hQdivlog_pos : 0 < Real.log (Q / p) :=
+    Real.log_pos (lt_of_lt_of_le (by norm_num) hQdiv_ge_two)
   have hboundary :
       ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ) ≤
         CBT / (((p - 1 : ℕ) : ℝ) * Real.log (Q / p)) := by
-    have hpminus_pos : (0 : ℝ) < ((p - 1 : ℕ) : ℝ) := by
-      exact_mod_cast (Nat.sub_pos_of_lt hp.one_lt)
-    have hQdiv_ge_two : (2 : ℝ) ≤ Q / p := by
-      rw [le_div_iff₀ hp_pos]
-      norm_num at hQ ⊢
-      exact hQ
-    have hlog_pos : 0 < Real.log (Q / p) :=
-      Real.log_pos (lt_of_lt_of_le (by norm_num) hQdiv_ge_two)
     calc
       ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ) ≤
           (1 / Q) * (CBT * Q / (((p - 1 : ℕ) : ℝ) * Real.log (Q / p))) := by
@@ -4695,23 +4712,79 @@ private lemma high_AP_sum_le_explicit {CBT : ℝ} {p : ℕ} {Q : ℝ} (hCBT : 0 
       _ = CBT / (((p - 1 : ℕ) : ℝ) * Real.log (Q / p)) := by
         field_simp [ne_of_gt hQ_pos]
   have hint := tail_integral_le hCBT hp hQ hBT
+  -- Boundary at lower endpoint: piMod a p 1 ≥ 0, so (1/a)·piMod(a) ≥ 0
+  have hpiMod_a_nonneg : (0 : ℝ) ≤ (piMod a p 1 : ℝ) := by
+    exact_mod_cast (Nat.zero_le _)
+  -- apCoeff p = apCoeffMod p 1
+  have hapCoeff_eq : (fun n => apCoeff p n) = (fun n => apCoeffMod p 1 n) := by
+    funext n
+    rfl
+  -- Use abel_AP_formula_interval to get the boundary integral
+  have habel := abel_AP_formula_interval p 1 (show (0 : ℝ) < a from ha_pos) hQ
+  -- Recast sum from `Ioc ⌊a⌋ ⌊Q⌋` to apCoeff form
+  have hsum_eq : ∑ q ∈ Finset.Ioc ⌊a⌋₊ ⌊Q⌋₊, ((1 : ℝ) / (q : ℝ)) * apCoeff p q =
+      ∑ q ∈ Finset.Ioc ⌊a⌋₊ ⌊Q⌋₊, ((1 : ℝ) / (q : ℝ)) * apCoeffMod p 1 q := by
+    apply Finset.sum_congr rfl
+    intro q _
+    rfl
+  have habel' : ∑ q ∈ Finset.Ioc ⌊a⌋₊ ⌊Q⌋₊, ((1 : ℝ) / (q : ℝ)) * apCoeff p q =
+      ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ)
+        - ((1 : ℝ) / a) * (piMod a p 1 : ℝ)
+        + ∫ t in a..Q, (piMod t p 1 : ℝ) / t ^ 2 := by
+    rw [hsum_eq]; exact habel
+  -- Convert interval integral to set integral
+  have hQ_ge_a : a ≤ Q := hQ
+  have hint_conv : (∫ t in a..Q, (piMod t p 1 : ℝ) / t ^ 2) =
+      ∫ t in Set.Ioc a Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ) := by
+    rw [intervalIntegral.integral_of_le hQ_ge_a]
+    apply setIntegral_congr_fun measurableSet_Ioc
+    intro t _ht
+    simp [div_eq_mul_inv, mul_comm]
+  rw [hint_conv] at habel'
   calc
     (∑ q ∈ Finset.filter
-        (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+        (fun q => q.Prime ∧ q % p = 1 ∧ (256 : ℝ) * (p : ℝ) ^ 9 < (q : ℝ) ∧ (q : ℝ) ≤ Q)
         (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ))
-        = ∑ q ∈ Finset.Ioc (2 * p) ⌊Q⌋₊,
+        = (∑ q ∈ Finset.filter
+            (fun q => q.Prime ∧ q % p = 1 % p ∧ a < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+            (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) := by
+          apply Finset.sum_congr
+          · ext q
+            simp only [Finset.mem_filter, Finset.mem_Iic, ha_def]
+            constructor
+            · rintro ⟨hq, hprime, hmod, hlt, hle⟩
+              refine ⟨hq, hprime, ?_, hlt, hle⟩
+              rw [hmod]
+              exact (Nat.mod_eq_of_lt hp.one_lt).symm
+            · rintro ⟨hq, hprime, hmod, hlt, hle⟩
+              refine ⟨hq, hprime, ?_, hlt, hle⟩
+              have : 1 % p = 1 := Nat.mod_eq_of_lt hp.one_lt
+              rw [hmod, this]
+          · intros; rfl
+    _ = ∑ q ∈ Finset.Ioc ⌊a⌋₊ ⌊Q⌋₊,
           ((1 : ℝ) / (q : ℝ)) * (if q.Prime ∧ q % p = 1 % p then (1 : ℝ) else 0) := by
-          simpa using sum_filter_eq_Ioc_indicator (p := p) (N := 2 * p) (Q := Q) hQnonneg hp1
-    _ = ∑ q ∈ Finset.Ioc (2 * p) ⌊Q⌋₊, ((1 : ℝ) / (q : ℝ)) * apCoeff p q := by
+          exact sum_filter_eq_Ioc_indicator_real (q := p) (a := 1)
+            (X := a) (Y := Q) ha_nonneg hQnonneg
+    _ = ∑ q ∈ Finset.Ioc ⌊a⌋₊ ⌊Q⌋₊, ((1 : ℝ) / (q : ℝ)) * apCoeff p q := by
+          apply Finset.sum_congr rfl
+          intro q _
           rfl
-    _ ≤ ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ) +
-        ∫ t in Set.Ioc (((2 * p : ℕ) : ℝ)) Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ) :=
-          high_sum_le_boundary_integral hp hQ
+    _ = ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ)
+          - ((1 : ℝ) / a) * (piMod a p 1 : ℝ)
+          + ∫ t in Set.Ioc a Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ) := habel'
+    _ ≤ ((1 : ℝ) / Q) * (piMod Q p 1 : ℝ)
+          + ∫ t in Set.Ioc a Q, (t ^ 2)⁻¹ * (piMod t p 1 : ℝ) := by
+          have : 0 ≤ ((1 : ℝ) / a) * (piMod a p 1 : ℝ) := by
+            apply mul_nonneg
+            · positivity
+            · exact hpiMod_a_nonneg
+          linarith
     _ ≤ CBT / (((p - 1 : ℕ) : ℝ) * Real.log (Q / p)) +
         (CBT / ((p - 1 : ℕ) : ℝ)) *
           (Real.log (Real.log (Q / p)) -
-            Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p)))) := by
-          nlinarith
+            Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p))) := by
+          have := hint
+          linarith
 
 private lemma total_AP_sum_le_low_add_high {p : ℕ} {Q : ℝ} :
     (∑ q ∈ Finset.filter
@@ -4755,30 +4828,37 @@ private lemma total_AP_sum_le_low_add_high {p : ℕ} {Q : ℝ} :
 private lemma explicit_tail_bound {CBT : ℝ} {p : ℕ} (hCBT : 0 < CBT) (hp : p.Prime) :
     let A : ℝ := (p : ℝ) / (Real.log p) ^ 2
     let Q : ℝ := Real.exp (Real.exp A)
-    let D : ℝ := |Real.log (Real.log 2)|
-    (((2 * p : ℕ) : ℝ)) ≤ Q →
+    (256 : ℝ) * (p : ℝ) ^ 9 ≤ Q →
       CBT / (((p - 1 : ℕ) : ℝ) * Real.log (Q / p)) +
         (CBT / ((p - 1 : ℕ) : ℝ)) *
           (Real.log (Real.log (Q / p)) -
-            Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p)))) ≤
-      (2 * CBT / Real.log 2 + 2 * CBT * D) * (1 / (p : ℝ)) +
+            Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p))) ≤
+      (2 * CBT / Real.log 2) * (1 / (p : ℝ)) +
         2 * CBT * (1 / (Real.log p) ^ 2) := by
-  intro A Q D hQ
+  intro A Q hQ
   have hp_pos : (0 : ℝ) < p := by exact_mod_cast hp.pos
+  have hp_ge_two : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
   have hlog2_pos : 0 < Real.log 2 := Real.log_pos (by norm_num)
   have hlogp_ge : Real.log 2 ≤ Real.log (p : ℝ) := by
-    exact Real.log_le_log (by norm_num) (by exact_mod_cast hp.two_le)
+    exact Real.log_le_log (by norm_num) hp_ge_two
   have hlogp_pos : 0 < Real.log (p : ℝ) := lt_of_lt_of_le hlog2_pos hlogp_ge
   have hlogpsq_pos : 0 < (Real.log (p : ℝ)) ^ 2 := sq_pos_of_pos hlogp_pos
   have hpminus_pos : (0 : ℝ) < ((p - 1 : ℕ) : ℝ) := by
     exact_mod_cast (Nat.sub_pos_of_lt hp.one_lt)
   have hQ_pos : 0 < Q := by dsimp [Q]; positivity
-  have hQdiv_ge_two : (2 : ℝ) ≤ Q / p := by
+  -- a / p ≥ 256 ≥ 2
+  have ha_div_ge : (256 : ℝ) ≤ ((256 : ℝ) * (p : ℝ) ^ 9) / (p : ℝ) := by
     rw [le_div_iff₀ hp_pos]
-    norm_num at hQ ⊢
-    exact hQ
-  have hlogQp_ge_log2 : Real.log 2 ≤ Real.log (Q / p) := by
-    exact Real.log_le_log (by norm_num) hQdiv_ge_two
+    have hp8 : (1 : ℝ) ≤ (p : ℝ) ^ 8 := by
+      have : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.one_le
+      exact one_le_pow₀ this
+    nlinarith [hp_pos, hp8]
+  have ha_div_ge_two : (2 : ℝ) ≤ ((256 : ℝ) * (p : ℝ) ^ 9) / (p : ℝ) :=
+    le_trans (by norm_num) ha_div_ge
+  have hQdiv_ge_two : (2 : ℝ) ≤ Q / p :=
+    le_trans ha_div_ge_two ((div_le_div_iff_of_pos_right hp_pos).mpr hQ)
+  have hlogQp_ge_log2 : Real.log 2 ≤ Real.log (Q / p) :=
+    Real.log_le_log (by norm_num) hQdiv_ge_two
   have hterm1 : CBT / (((p - 1 : ℕ) : ℝ) * Real.log (Q / p)) ≤
       (2 * CBT / Real.log 2) * (1 / (p : ℝ)) := by
     have hLpos : 0 < Real.log (Q / p) := lt_of_lt_of_le hlog2_pos hlogQp_ge_log2
@@ -4800,16 +4880,24 @@ private lemma explicit_tail_bound {CBT : ℝ} {p : ℕ} (hCBT : 0 < CBT) (hp : p
       Real.log (Real.log (Q / p)) ≤ Real.log (Real.log Q) := by
         exact Real.log_le_log (lt_of_lt_of_le hlog2_pos hlogQp_ge_log2) hlog_le
       _ = A := by simp [hlogQ]
-  have h2p_div : (((2 * p : ℕ) : ℝ) / (p : ℝ)) = 2 := by
-    rw [show (((2 * p : ℕ) : ℝ)) = 2 * (p : ℝ) by norm_num]
-    field_simp [ne_of_gt hp_pos]
+  -- log log ((256·p⁹)/p) ≥ 0 because (256·p⁹)/p ≥ 256 ≥ e², so log ≥ 2 ≥ 1
+  have hlog_a_div_ge : (1 : ℝ) ≤ Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p) := by
+    have hlog256_ge : (1 : ℝ) ≤ Real.log (256 : ℝ) := by
+      have : Real.log (Real.exp 1) ≤ Real.log (256 : ℝ) := by
+        apply Real.log_le_log (Real.exp_pos _)
+        have : Real.exp 1 < 3 := Real.exp_one_lt_d9.trans_le (by norm_num)
+        linarith
+      simpa using this
+    have hmono : Real.log (256 : ℝ) ≤ Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p) := by
+      apply Real.log_le_log (by norm_num) ha_div_ge
+    linarith
+  have hloglog_a_nonneg : 0 ≤ Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p)) := by
+    have : Real.log 1 ≤ Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p)) :=
+      Real.log_le_log (by norm_num) hlog_a_div_ge
+    simpa using this
   have hB_le : Real.log (Real.log (Q / p)) -
-      Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p))) ≤ A + D := by
-    rw [h2p_div]
-    dsimp [D]
-    have hneg_le_abs : -Real.log (Real.log 2) ≤ |Real.log (Real.log 2)| := by
-      exact neg_le_abs _
-    nlinarith
+      Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p)) ≤ A := by
+    linarith
   have hcoef_nonneg : 0 ≤ CBT / ((p - 1 : ℕ) : ℝ) := div_nonneg hCBT.le hpminus_pos.le
   have hcoef_le : CBT / ((p - 1 : ℕ) : ℝ) ≤ 2 * CBT / (p : ℝ) := by
     have hp_le_nat : p ≤ 2 * (p - 1) := by
@@ -4818,26 +4906,23 @@ private lemma explicit_tail_bound {CBT : ℝ} {p : ℕ} (hCBT : 0 < CBT) (hp : p
     have hp_le : (p : ℝ) ≤ 2 * ((p - 1 : ℕ) : ℝ) := by exact_mod_cast hp_le_nat
     field_simp [ne_of_gt hp_pos, ne_of_gt hpminus_pos]
     nlinarith [hCBT.le, hp_le]
-  have hAD_nonneg : 0 ≤ A + D := by
-    have hA_nonneg : 0 ≤ A := by dsimp [A]; positivity
-    dsimp [D]
-    positivity
+  have hA_nonneg : 0 ≤ A := by dsimp [A]; positivity
   have hterm2 : (CBT / ((p - 1 : ℕ) : ℝ)) *
         (Real.log (Real.log (Q / p)) -
-          Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p)))) ≤
-      2 * CBT * (1 / (Real.log p) ^ 2) + (2 * CBT * D) * (1 / (p : ℝ)) := by
+          Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p))) ≤
+      2 * CBT * (1 / (Real.log p) ^ 2) := by
     calc
       (CBT / ((p - 1 : ℕ) : ℝ)) *
           (Real.log (Real.log (Q / p)) -
-            Real.log (Real.log ((((2 * p : ℕ) : ℝ) / p))))
-          ≤ (CBT / ((p - 1 : ℕ) : ℝ)) * (A + D) := by
+            Real.log (Real.log (((256 : ℝ) * (p : ℝ) ^ 9) / p)))
+          ≤ (CBT / ((p - 1 : ℕ) : ℝ)) * A := by
             exact mul_le_mul_of_nonneg_left hB_le hcoef_nonneg
-      _ ≤ (2 * CBT / (p : ℝ)) * (A + D) := by
-            exact mul_le_mul_of_nonneg_right hcoef_le hAD_nonneg
-      _ = 2 * CBT * (1 / (Real.log p) ^ 2) + (2 * CBT * D) * (1 / (p : ℝ)) := by
+      _ ≤ (2 * CBT / (p : ℝ)) * A := by
+            exact mul_le_mul_of_nonneg_right hcoef_le hA_nonneg
+      _ = 2 * CBT * (1 / (Real.log p) ^ 2) := by
             dsimp [A]
             field_simp [ne_of_gt hp_pos, ne_of_gt hlogpsq_pos]
-  nlinarith [hterm1, hterm2]
+  linarith [hterm1, hterm2]
 
 private lemma scale_one_div_log {K : ℝ} {p : ℕ} (hK : 0 ≤ K) (hp : p.Prime) :
     K * (1 / (p : ℝ) + 1 / (Real.log p) ^ 2) ≤
@@ -4866,6 +4951,209 @@ private lemma scale_one_div_log {K : ℝ} {p : ℕ} (hK : 0 ≤ K) (hp : p.Prime
       have h_extra2 : 0 ≤ K * (Real.log p / (p : ℝ)) := mul_nonneg hK hlogp_div_nonneg
       nlinarith [h_extra1, h_extra2]
 
+/-- The chunk `2p < q ≤ 256·p⁹` (q prime, q ≡ 1 mod p), bounded by a harmonic-sum
+estimate.  This is the small-q range in the path-2 surgery for `bt_reciprocal_AP_tail`,
+where Brun–Titchmarsh (in our strengthened form `t ≥ 256 q⁹`) is not yet available. -/
+private lemma chunk_AP_sum_le {p : ℕ} (hp : p.Prime) :
+    (∑ q ∈ Finset.filter
+        (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ)
+                  ∧ (q : ℝ) ≤ (256 : ℝ) * (p : ℝ) ^ 9)
+        (Finset.Iic ⌊(256 : ℝ) * (p : ℝ) ^ 9⌋₊),
+      (1 : ℝ) / (q : ℝ))
+    ≤ (1 + Real.log 256 + 8 * Real.log p) / (p : ℝ) := by
+  classical
+  have hp_pos_nat : 0 < p := hp.pos
+  have hp_pos : (0 : ℝ) < p := by exact_mod_cast hp_pos_nat
+  have hp_ge_two_nat : 2 ≤ p := hp.two_le
+  have hp_ge_two : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp_ge_two_nat
+  have hp_ge_one_nat : 1 ≤ p := hp.one_le
+  let L : ℝ := (256 : ℝ) * (p : ℝ) ^ 9
+  have hL_pos : 0 < L := by dsimp [L]; positivity
+  have hL_nonneg : 0 ≤ L := hL_pos.le
+  -- s = the filter we are summing over
+  let s := Finset.filter
+        (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ)
+                  ∧ (q : ℝ) ≤ L)
+        (Finset.Iic ⌊L⌋₊)
+  -- Drop primality to relax; bound 1/q ≤ 1/(((q-1)/p) * p) via q = kp + 1
+  -- The key map: q ↦ (q - 1) / p (integer division). For q ≡ 1 mod p, q = kp + 1, k = (q-1)/p.
+  -- Define M := 256 * p^8 (upper bound on k).
+  let M : ℕ := ⌊(256 : ℝ) * (p : ℝ) ^ 8⌋₊
+  -- For each q ∈ s, k := (q - 1) / p satisfies 2 ≤ k ≤ M, and q ≥ kp + 1.
+  have hMmono : (256 : ℝ) * (p : ℝ) ^ 8 ≤ (256 : ℝ) * (p : ℝ) ^ 9 / (p : ℝ) := by
+    have : (256 : ℝ) * (p : ℝ) ^ 8 * (p : ℝ) = (256 : ℝ) * (p : ℝ) ^ 9 := by ring
+    rw [le_div_iff₀ hp_pos]; linarith
+  -- Injection from s to Finset.Icc 2 M via q ↦ (q-1)/p.
+  have hinj : Set.InjOn (fun q : ℕ => (q - 1) / p) (↑s : Set ℕ) := by
+    intro q hq q' hq' heq
+    change q ∈ s at hq
+    change q' ∈ s at hq'
+    simp only [s, Finset.mem_filter, Finset.mem_Iic] at hq hq'
+    have hq_mod : q % p = 1 := hq.2.2.1
+    have hq'_mod : q' % p = 1 := hq'.2.2.1
+    have hq_ge1 : 1 ≤ q := by
+      have h2p_pos : 0 < 2 * p := by omega
+      have hreal : (((2 * p : ℕ) : ℝ)) < (q : ℝ) := hq.2.2.2.1
+      have : 2 * p < q := by exact_mod_cast hreal
+      omega
+    have hq'_ge1 : 1 ≤ q' := by
+      have hreal : (((2 * p : ℕ) : ℝ)) < (q' : ℝ) := hq'.2.2.2.1
+      have : 2 * p < q' := by exact_mod_cast hreal
+      omega
+    have heq' : (q - 1) / p = (q' - 1) / p := heq
+    have hp_gt_one : 1 < p := hp.one_lt
+    -- q = p · (q/p) + 1, so q - 1 = p · (q/p)
+    have hq_dm : q = p * (q / p) + q % p := (Nat.div_add_mod q p).symm
+    have hq'_dm : q' = p * (q' / p) + q' % p := (Nat.div_add_mod q' p).symm
+    have hq_sub : q - 1 = p * (q / p) := by omega
+    have hq'_sub : q' - 1 = p * (q' / p) := by omega
+    have hq_div_eq : (q - 1) / p = q / p := by
+      rw [hq_sub, Nat.mul_div_cancel_left _ (by omega : 0 < p)]
+    have hq'_div_eq : (q' - 1) / p = q' / p := by
+      rw [hq'_sub, Nat.mul_div_cancel_left _ (by omega : 0 < p)]
+    have hqq' : q / p = q' / p := by rw [← hq_div_eq, ← hq'_div_eq]; exact heq'
+    -- From q = p · (q/p) + 1 and q/p = q'/p, plus q' = p · (q'/p) + 1
+    have : q = q' := by
+      rw [hq_dm, hq'_dm, hqq', hq_mod, hq'_mod]
+    exact this
+  -- The image lies in Finset.Icc 2 M.
+  have hmaps : ∀ q ∈ s, (q - 1) / p ∈ Finset.Icc 2 M := by
+    intro q hq
+    simp only [s, Finset.mem_filter, Finset.mem_Iic] at hq
+    have hq_mod : q % p = 1 := hq.2.2.1
+    have hreal : (((2 * p : ℕ) : ℝ)) < (q : ℝ) := hq.2.2.2.1
+    have hq_gt : 2 * p < q := by exact_mod_cast hreal
+    have hq_ge1 : 1 ≤ q := by omega
+    have hreal_le : (q : ℝ) ≤ L := hq.2.2.2.2
+    -- Compute (q-1)/p ≥ 2
+    have hkge : 2 ≤ (q - 1) / p := by
+      -- q > 2p ⟹ q - 1 ≥ 2p ⟹ (q-1)/p ≥ 2
+      have hq_minus_1_ge : 2 * p ≤ q - 1 := by omega
+      have : (2 * p) / p ≤ (q - 1) / p := Nat.div_le_div_right hq_minus_1_ge
+      have h2pdivp : (2 * p) / p = 2 := by
+        rw [Nat.mul_div_cancel _ (by omega : 0 < p)]
+      omega
+    -- Compute (q-1)/p ≤ M
+    have hk_le_M : (q - 1) / p ≤ M := by
+      apply Nat.le_floor
+      have hk_real : (((q - 1) / p : ℕ) : ℝ) ≤ ((q - 1 : ℕ) : ℝ) / (p : ℝ) := by
+        rw [le_div_iff₀ hp_pos]
+        have hself := Nat.div_mul_le_self (q - 1) p
+        calc (((q - 1) / p : ℕ) : ℝ) * (p : ℝ)
+            = ((((q - 1) / p) * p : ℕ) : ℝ) := by push_cast; ring
+          _ ≤ ((q - 1 : ℕ) : ℝ) := by exact_mod_cast hself
+      have hq_minus_1_le : ((q - 1 : ℕ) : ℝ) ≤ (q : ℝ) := by
+        have : (q - 1 : ℕ) ≤ q := Nat.sub_le _ _
+        exact_mod_cast this
+      have hLp_eq : L / (p : ℝ) = (256 : ℝ) * (p : ℝ) ^ 8 := by
+        dsimp [L]
+        rw [show (9 : ℕ) = 8 + 1 by rfl, pow_succ]
+        field_simp
+      calc (((q - 1) / p : ℕ) : ℝ)
+          ≤ ((q - 1 : ℕ) : ℝ) / (p : ℝ) := hk_real
+        _ ≤ (q : ℝ) / (p : ℝ) :=
+            div_le_div_of_nonneg_right hq_minus_1_le hp_pos.le
+        _ ≤ L / (p : ℝ) :=
+            div_le_div_of_nonneg_right hreal_le hp_pos.le
+        _ = (256 : ℝ) * (p : ℝ) ^ 8 := hLp_eq
+    exact Finset.mem_Icc.mpr ⟨hkge, hk_le_M⟩
+  -- 1/q ≤ 1 / ((q-1)/p * p) for q ∈ s
+  have hpoint : ∀ q ∈ s, (1 : ℝ) / (q : ℝ) ≤
+      1 / ((((q - 1) / p : ℕ) : ℝ) * (p : ℝ)) := by
+    intro q hq
+    simp only [s, Finset.mem_filter, Finset.mem_Iic] at hq
+    have hq_mod : q % p = 1 := hq.2.2.1
+    have hreal : (((2 * p : ℕ) : ℝ)) < (q : ℝ) := hq.2.2.2.1
+    have hq_gt : 2 * p < q := by exact_mod_cast hreal
+    -- q = p * (q/p) + 1; q - 1 = p * (q/p); (q-1)/p = q/p
+    have hq_dm : q = p * (q / p) + q % p := (Nat.div_add_mod q p).symm
+    have hq_sub : q - 1 = p * (q / p) := by omega
+    have hq_div_eq : (q - 1) / p = q / p := by
+      rw [hq_sub, Nat.mul_div_cancel_left _ (by omega : 0 < p)]
+    have hq_eq : q = ((q - 1) / p) * p + 1 := by
+      rw [hq_div_eq, Nat.mul_comm]
+      omega
+    have hkp_pos : 0 < (((q - 1) / p : ℕ) : ℝ) * (p : ℝ) := by
+      have hkge2 : 2 ≤ (q - 1) / p := by
+        have hq_minus_1_ge : 2 * p ≤ q - 1 := by omega
+        have : (2 * p) / p ≤ (q - 1) / p := Nat.div_le_div_right hq_minus_1_ge
+        have h2pdivp : (2 * p) / p = 2 :=
+          Nat.mul_div_cancel _ (by omega : 0 < p)
+        omega
+      have hk_pos_real : (0 : ℝ) < (((q - 1) / p : ℕ) : ℝ) := by exact_mod_cast (by omega : 0 < (q - 1) / p)
+      positivity
+    have hprod_le_q : (((q - 1) / p : ℕ) : ℝ) * (p : ℝ) ≤ (q : ℝ) := by
+      have h : ((q - 1) / p) * p ≤ q := by
+        conv_rhs => rw [hq_eq]
+        exact Nat.le_succ _
+      exact_mod_cast h
+    exact one_div_le_one_div_of_le hkp_pos hprod_le_q
+  -- Now do the sum
+  calc
+    (∑ q ∈ s, (1 : ℝ) / (q : ℝ))
+        ≤ ∑ q ∈ s, 1 / ((((q - 1) / p : ℕ) : ℝ) * (p : ℝ)) := Finset.sum_le_sum hpoint
+    _ = ∑ k ∈ Finset.image (fun q : ℕ => (q - 1) / p) s, 1 / ((k : ℝ) * (p : ℝ)) := by
+        rw [Finset.sum_image hinj]
+    _ ≤ ∑ k ∈ Finset.Icc 2 M, 1 / ((k : ℝ) * (p : ℝ)) := by
+        apply Finset.sum_le_sum_of_subset_of_nonneg
+        · intro k hk
+          rw [Finset.mem_image] at hk
+          rcases hk with ⟨q, hqs, rfl⟩
+          exact hmaps q hqs
+        · intro k _ _
+          positivity
+    _ ≤ ∑ k ∈ Finset.Icc 1 M, 1 / ((k : ℝ) * (p : ℝ)) := by
+        apply Finset.sum_le_sum_of_subset_of_nonneg
+        · intro k hk
+          rw [Finset.mem_Icc] at hk ⊢
+          exact ⟨by omega, hk.2⟩
+        · intro k _ _
+          positivity
+    _ = (1 / (p : ℝ)) * (∑ k ∈ Finset.Icc 1 M, (1 : ℝ) / (k : ℝ)) := by
+        rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro k hk
+        have hkpos : (0 : ℝ) < k := by
+          have : 1 ≤ k := (Finset.mem_Icc.mp hk).1
+          exact_mod_cast (by omega : 0 < k)
+        field_simp [hkpos.ne', hp_pos.ne']
+    _ = (1 / (p : ℝ)) * (harmonic M : ℝ) := by
+        rw [harmonic_eq_sum_Icc]
+        simp [one_div]
+    _ ≤ (1 / (p : ℝ)) * (1 + Real.log (M : ℝ)) := by
+        have h1p_nonneg : 0 ≤ 1 / (p : ℝ) := by positivity
+        exact mul_le_mul_of_nonneg_left (harmonic_le_one_add_log M) h1p_nonneg
+    _ ≤ (1 / (p : ℝ)) * (1 + Real.log ((256 : ℝ) * (p : ℝ) ^ 8)) := by
+        have hM_le : (M : ℝ) ≤ (256 : ℝ) * (p : ℝ) ^ 8 := by
+          dsimp [M]
+          exact Nat.floor_le (by positivity)
+        have hM_pos_nat : 0 < M := by
+          dsimp [M]
+          have h256 : (256 : ℕ) ≤ ⌊(256 : ℝ) * (p : ℝ) ^ 8⌋₊ := by
+            apply Nat.le_floor
+            have hp8_ge : (1 : ℝ) ≤ (p : ℝ) ^ 8 := by
+              have : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.one_le
+              exact one_le_pow₀ this
+            have : (256 : ℝ) ≤ (256 : ℝ) * (p : ℝ) ^ 8 := by
+              have := mul_le_mul_of_nonneg_left hp8_ge (by norm_num : (0 : ℝ) ≤ 256)
+              linarith
+            exact_mod_cast this
+          omega
+        have hM_pos : (0 : ℝ) < (M : ℝ) := by exact_mod_cast hM_pos_nat
+        have hlog_le : Real.log (M : ℝ) ≤ Real.log ((256 : ℝ) * (p : ℝ) ^ 8) :=
+          Real.log_le_log hM_pos hM_le
+        have h1p_nonneg : 0 ≤ 1 / (p : ℝ) := by positivity
+        apply mul_le_mul_of_nonneg_left _ h1p_nonneg
+        linarith
+    _ = (1 + Real.log 256 + 8 * Real.log p) / (p : ℝ) := by
+        have hlog_eq : Real.log ((256 : ℝ) * (p : ℝ) ^ 8) = Real.log 256 + 8 * Real.log p := by
+          rw [Real.log_mul (by norm_num) (by positivity)]
+          congr 1
+          rw [Real.log_pow]
+          ring
+        rw [hlog_eq, add_div]
+        ring
+
 /-- **Paper §4 eq:Sp-bound — exact paper statement.**
 
 For every prime `p ≥ 2`, the bad-prime-pair reciprocal sum
@@ -4886,78 +5174,255 @@ theorem bt_reciprocal_AP_tail :
             C * (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2) := by
   classical
   rcases brun_titchmarsh with ⟨CBT, hCBT, hBTall⟩
-  let D : ℝ := |Real.log (Real.log 2)|
-  let K : ℝ := 1 + (2 * CBT / Real.log 2 + 2 * CBT * D) + 2 * CBT
-  refine ⟨K / Real.log 2 + K, ?_, ?_⟩
-  · have hlog2_pos : 0 < Real.log 2 := Real.log_pos (by norm_num)
-    have hK_pos : 0 < K := by
-      dsimp [K, D]
-      positivity
+  -- Total constant: absorbs low ≤ 1/p, chunk ≤ (1 + log 256 + 8 log p)/p,
+  -- and tail ≤ (2 CBT/log 2)(1/p) + 2 CBT (1/(log p)²).
+  let hlog2_pos_top : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  let C : ℝ := (1 / Real.log 2)
+      + ((1 + Real.log 256) / Real.log 2 + 8)
+      + (2 * CBT / (Real.log 2) ^ 2 + 2 * CBT)
+  refine ⟨C, ?_, ?_⟩
+  · dsimp [C]
+    have hlog256_nonneg : 0 ≤ Real.log 256 := Real.log_nonneg (by norm_num)
     positivity
   · intro p hp _hp2
     let A : ℝ := (p : ℝ) / (Real.log p) ^ 2
     let Q : ℝ := Real.exp (Real.exp A)
+    let L : ℝ := (256 : ℝ) * (p : ℝ) ^ 9
     change
       (∑ q ∈ Finset.filter
           (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
           (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
-        (K / Real.log 2 + K) * (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2)
+        C * (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2)
     have hp_pos : (0 : ℝ) < p := by exact_mod_cast hp.pos
+    have hp_ge_two : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
+    have hlog2_pos : 0 < Real.log 2 := Real.log_pos (by norm_num)
+    have hlog256_nonneg : 0 ≤ Real.log 256 := Real.log_nonneg (by norm_num)
     have hlogp_pos : 0 < Real.log (p : ℝ) :=
       Real.log_pos (by exact_mod_cast hp.one_lt)
+    have hlogp_ge_log2 : Real.log 2 ≤ Real.log (p : ℝ) :=
+      Real.log_le_log (by norm_num) hp_ge_two
+    have hlogp_sq_pos : 0 < (Real.log (p : ℝ)) ^ 2 := by positivity
     have hlogterm_nonneg : 0 ≤ 1 / (Real.log (p : ℝ)) ^ 2 := by positivity
     have hinvp_nonneg : 0 ≤ 1 / (p : ℝ) := by positivity
-    have hK_nonneg : 0 ≤ K := by
-      dsimp [K, D]
-      positivity
-    have hBTp : ∀ t : ℝ, (((2 * p : ℕ) : ℝ)) ≤ t →
+    have hL_pos : 0 < L := by dsimp [L]; positivity
+    have h2p_pos : (0 : ℝ) < (((2 * p : ℕ) : ℝ)) := by
+      exact_mod_cast (Nat.mul_pos (by decide : 0 < 2) hp.pos)
+    -- Key fact: log p / p ≥ 1/p * log 2 (since log p ≥ log 2)
+    have h_logpp_ge_invp : (1 / (p : ℝ)) ≤ (1 / Real.log 2) * (Real.log p / (p : ℝ)) := by
+      have hrhs : (1 / Real.log 2) * (Real.log p / (p : ℝ)) =
+          Real.log p / (Real.log 2 * (p : ℝ)) := by
+        rw [div_mul_div_comm, one_mul]
+      rw [hrhs]
+      have hlog2p_pos : 0 < Real.log 2 * (p : ℝ) := by positivity
+      rw [div_le_div_iff₀ hp_pos hlog2p_pos]
+      have h := hlogp_ge_log2
+      nlinarith [hp_pos, hlog2_pos, hlogp_ge_log2]
+    -- The standard BT instance for prime p, AP class 1, with the strengthened hypothesis.
+    have hBTp : ∀ t : ℝ, (256 : ℝ) * (p : ℝ) ^ 9 ≤ t →
         (piMod t p 1 : ℝ) ≤ CBT * t / (((p - 1 : ℕ) : ℝ) * Real.log (t / p)) := by
       intro t ht
-      have ht' : (2 * (p : ℝ)) ≤ t := by
-        norm_num at ht ⊢
-        exact ht
-      simpa [Nat.totient_prime hp] using hBTall p hp.one_le 1 (by simp) t ht'
+      simpa [Nat.totient_prime hp] using hBTall p hp.one_le 1 (by simp) t ht
     have htotal := total_AP_sum_le_low_add_high (p := p) (Q := Q)
     have hlow := low_AP_sum_le_inv hp
-    have hscaled : K * (1 / (p : ℝ) + 1 / (Real.log p) ^ 2) ≤
-        (K / Real.log 2 + K) * (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2) :=
-      scale_one_div_log hK_nonneg hp
-    by_cases hQ : (((2 * p : ℕ) : ℝ)) ≤ Q
-    · have hhigh_exp := high_AP_sum_le_explicit hCBT hp hQ hBTp
-      have htail := explicit_tail_bound hCBT hp hQ
-      have hhigh_bound :
-          (∑ q ∈ Finset.filter
-            (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
-            (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
-            (2 * CBT / Real.log 2 + 2 * CBT * D) * (1 / (p : ℝ)) +
-              2 * CBT * (1 / (Real.log p) ^ 2) :=
-        hhigh_exp.trans htail
-      have hsumK :
-          (∑ q ∈ Finset.filter
-            (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
-            (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
-            K * (1 / (p : ℝ) + 1 / (Real.log p) ^ 2) := by
-        let B : ℝ := 2 * CBT / Real.log 2 + 2 * CBT * D
-        have hpre :
+    -- Chunk bound: applies regardless.
+    have hchunk_bound : (∑ q ∈ Finset.filter
+        (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ L)
+        (Finset.Iic ⌊L⌋₊), (1 : ℝ) / (q : ℝ))
+      ≤ (1 + Real.log 256 + 8 * Real.log p) / (p : ℝ) := chunk_AP_sum_le hp
+    let Sp : ℝ := Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2
+    have hSp_pos : 0 < Sp := by
+      dsimp [Sp]
+      positivity
+    -- Bound the chunk by ((1 + log 256)/log 2 + 8) · Sp
+    have hchunk_le_Sp : (1 + Real.log 256 + 8 * Real.log p) / (p : ℝ) ≤
+        ((1 + Real.log 256) / Real.log 2 + 8) * Sp := by
+      have h1 : (1 + Real.log 256) / (p : ℝ) ≤
+          ((1 + Real.log 256) / Real.log 2) * (Real.log p / (p : ℝ)) := by
+        have h_pos : 0 ≤ 1 + Real.log 256 := by linarith
+        calc (1 + Real.log 256) / (p : ℝ)
+            = (1 + Real.log 256) * (1 / (p : ℝ)) := by ring
+          _ ≤ (1 + Real.log 256) * ((1 / Real.log 2) * (Real.log p / (p : ℝ))) :=
+              mul_le_mul_of_nonneg_left h_logpp_ge_invp h_pos
+          _ = ((1 + Real.log 256) / Real.log 2) * (Real.log p / (p : ℝ)) := by ring
+      have h2 : 8 * Real.log p / (p : ℝ) ≤ 8 * (Real.log p / (p : ℝ)) := by
+        rw [mul_div_assoc]
+      have h3 : (1 + Real.log 256 + 8 * Real.log p) / (p : ℝ) =
+          (1 + Real.log 256) / (p : ℝ) + 8 * Real.log p / (p : ℝ) := by
+        rw [add_div]
+      rw [h3]
+      have hcalc1 : (1 + Real.log 256) / (p : ℝ) + 8 * Real.log p / (p : ℝ) ≤
+          ((1 + Real.log 256) / Real.log 2) * (Real.log p / (p : ℝ)) +
+            8 * (Real.log p / (p : ℝ)) := by
+        linarith [h1, h2]
+      have hcalc2 : ((1 + Real.log 256) / Real.log 2) * (Real.log p / (p : ℝ)) +
+            8 * (Real.log p / (p : ℝ)) =
+          ((1 + Real.log 256) / Real.log 2 + 8) * (Real.log p / (p : ℝ)) := by ring
+      have hSp_ge_logpp : (Real.log p / (p : ℝ)) ≤ Sp := by
+        dsimp [Sp]; linarith [hlogterm_nonneg]
+      have hcoef_nonneg : 0 ≤ (1 + Real.log 256) / Real.log 2 + 8 := by
+        have := div_nonneg (show (0 : ℝ) ≤ 1 + Real.log 256 from by linarith)
+          hlog2_pos.le
+        linarith
+      calc (1 + Real.log 256) / (p : ℝ) + 8 * Real.log p / (p : ℝ)
+          ≤ ((1 + Real.log 256) / Real.log 2) * (Real.log p / (p : ℝ)) +
+              8 * (Real.log p / (p : ℝ)) := hcalc1
+        _ = ((1 + Real.log 256) / Real.log 2 + 8) * (Real.log p / (p : ℝ)) := hcalc2
+        _ ≤ ((1 + Real.log 256) / Real.log 2 + 8) * Sp :=
+            mul_le_mul_of_nonneg_left hSp_ge_logpp hcoef_nonneg
+    -- Bound the low (1/p) by (1/log 2) · Sp
+    have hlow_le_Sp : (1 : ℝ) / (p : ℝ) ≤ (1 / Real.log 2) * Sp := by
+      have hSp_ge_logpp : (Real.log p / (p : ℝ)) ≤ Sp := by
+        dsimp [Sp]; linarith [hlogterm_nonneg]
+      have h1log2_nonneg : 0 ≤ 1 / Real.log 2 := by positivity
+      calc (1 : ℝ) / (p : ℝ)
+          ≤ (1 / Real.log 2) * (Real.log p / (p : ℝ)) := h_logpp_ge_invp
+        _ ≤ (1 / Real.log 2) * Sp := mul_le_mul_of_nonneg_left hSp_ge_logpp h1log2_nonneg
+    -- Bound the tail-form (2 CBT/log 2)(1/p) + 2 CBT (1/(log p)²) by `(2CBT/log²2 + 2CBT)·Sp`
+    have htail_form_le_Sp : ∀ x : ℝ, x = (2 * CBT / Real.log 2) * (1 / (p : ℝ)) +
+        2 * CBT * (1 / (Real.log p) ^ 2) →
+        x ≤ (2 * CBT / (Real.log 2) ^ 2 + 2 * CBT) * Sp := by
+      intro x hx
+      have hCBT_nonneg : 0 ≤ CBT := hCBT.le
+      have h1 : (2 * CBT / Real.log 2) * (1 / (p : ℝ)) ≤
+          (2 * CBT / (Real.log 2) ^ 2) * (Real.log p / (p : ℝ)) := by
+        have hcoef : 0 ≤ 2 * CBT / Real.log 2 := by positivity
+        calc (2 * CBT / Real.log 2) * (1 / (p : ℝ))
+            ≤ (2 * CBT / Real.log 2) * ((1 / Real.log 2) * (Real.log p / (p : ℝ))) :=
+              mul_le_mul_of_nonneg_left h_logpp_ge_invp hcoef
+          _ = (2 * CBT / (Real.log 2) ^ 2) * (Real.log p / (p : ℝ)) := by
+              ring
+      have h2 : (2 * CBT / (Real.log 2) ^ 2) * (Real.log p / (p : ℝ)) +
+          2 * CBT * (1 / (Real.log p) ^ 2) ≤
+          (2 * CBT / (Real.log 2) ^ 2 + 2 * CBT) * Sp := by
+        have hcoefA_nonneg : 0 ≤ 2 * CBT / (Real.log 2) ^ 2 := by positivity
+        have hcoefB_nonneg : 0 ≤ 2 * CBT := by positivity
+        have hlogpp_nonneg : 0 ≤ Real.log p / (p : ℝ) := by
+          have := hlogp_pos.le; positivity
+        show (2 * CBT / (Real.log 2) ^ 2) * (Real.log p / (p : ℝ)) +
+            2 * CBT * (1 / (Real.log p) ^ 2) ≤
+          (2 * CBT / (Real.log 2) ^ 2 + 2 * CBT) *
+            (Real.log p / (p : ℝ) + 1 / (Real.log p) ^ 2)
+        have hcross1 : 0 ≤ (2 * CBT / (Real.log 2) ^ 2) * (1 / (Real.log p) ^ 2) :=
+          mul_nonneg hcoefA_nonneg hlogterm_nonneg
+        have hcross2 : 0 ≤ (2 * CBT) * (Real.log p / (p : ℝ)) :=
+          mul_nonneg hcoefB_nonneg hlogpp_nonneg
+        nlinarith [hcross1, hcross2]
+      linarith [hx, h1, h2]
+    -- The high range (2p < q ≤ Q) splits at L: chunk (2p < q ≤ L) + tail (L < q ≤ Q).
+    by_cases h2pQ : (((2 * p : ℕ) : ℝ)) ≤ Q
+    · -- High range nonempty (potentially).
+      by_cases hQL : Q ≤ L
+      · -- Case A: high ⊆ chunk (as a filter).
+        have hLnonneg : 0 ≤ L := hL_pos.le
+        have hQnonneg : 0 ≤ Q := by dsimp [Q]; positivity
+        have hhigh_le_chunk :
             (∑ q ∈ Finset.filter
-              (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
-              (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
-              (1 + B) * (1 / (p : ℝ)) + 2 * CBT * (1 / (Real.log p) ^ 2) := by
-          dsimp [B] at *
-          nlinarith [htotal, hlow, hhigh_bound]
-        have hB_nonneg : 0 ≤ B := by
-          dsimp [B, D]
-          positivity
-        have htarget :
-            (1 + B) * (1 / (p : ℝ)) + 2 * CBT * (1 / (Real.log p) ^ 2) ≤
-              K * (1 / (p : ℝ) + 1 / (Real.log p) ^ 2) := by
-          have h_extra1 : 0 ≤ (2 * CBT) * (1 / (p : ℝ)) := by positivity
-          have h_extra2 : 0 ≤ (1 + B) * (1 / (Real.log p) ^ 2) := by positivity
-          dsimp [K, B]
-          nlinarith [h_extra1, h_extra2]
-        exact hpre.trans htarget
-      exact hsumK.trans hscaled
-    · have hQlt : Q < (((2 * p : ℕ) : ℝ)) := lt_of_not_ge hQ
+                (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
+              (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ L)
+                (Finset.Iic ⌊L⌋₊), (1 : ℝ) / (q : ℝ)) := by
+          apply Finset.sum_le_sum_of_subset_of_nonneg
+          · intro q hq
+            simp only [Finset.mem_filter, Finset.mem_Iic] at hq ⊢
+            refine ⟨?_, hq.2.1, hq.2.2.1, hq.2.2.2.1, hq.2.2.2.2.trans hQL⟩
+            exact Nat.le_floor (hq.2.2.2.2.trans hQL)
+          · intro q _ _
+            positivity
+        have hhigh_bound :
+            (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
+              (1 + Real.log 256 + 8 * Real.log p) / (p : ℝ) :=
+          hhigh_le_chunk.trans hchunk_bound
+        -- Combine: total ≤ low + high ≤ 1/p + chunk_bound.
+        -- 1/p ≤ (1/log 2)·Sp; chunk ≤ ((1 + log 256)/log 2 + 8)·Sp.
+        calc (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ))
+            ≤ _ := htotal
+          _ ≤ (1 / (p : ℝ)) + (1 + Real.log 256 + 8 * Real.log p) / (p : ℝ) :=
+              add_le_add hlow hhigh_bound
+          _ ≤ ((1 / Real.log 2) * Sp) + (((1 + Real.log 256) / Real.log 2 + 8) * Sp) :=
+              add_le_add hlow_le_Sp hchunk_le_Sp
+          _ = ((1 / Real.log 2) + ((1 + Real.log 256) / Real.log 2 + 8)) * Sp := by ring
+          _ ≤ C * Sp := by
+              dsimp [C]
+              have hSp_nonneg : 0 ≤ Sp := hSp_pos.le
+              have htail_coef_nonneg : 0 ≤ 2 * CBT / (Real.log 2) ^ 2 + 2 * CBT := by
+                positivity
+              nlinarith [hSp_nonneg, htail_coef_nonneg]
+      · -- Case B: L < Q. high = chunk + tail.
+        have hL_le_Q : L ≤ Q := le_of_not_ge hQL
+        have hhigh_exp := high_AP_sum_le_explicit hCBT hp hL_le_Q hBTp
+        have htail := explicit_tail_bound hCBT hp hL_le_Q
+        have htail_bound :
+            (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (256 : ℝ) * (p : ℝ) ^ 9 < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
+              (2 * CBT / Real.log 2) * (1 / (p : ℝ)) +
+                2 * CBT * (1 / (Real.log p) ^ 2) :=
+          hhigh_exp.trans htail
+        -- Split high range (2p, Q] into chunk (2p, L] and tail (L, Q].
+        have hhigh_split :
+            (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
+              (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ L)
+                (Finset.Iic ⌊L⌋₊), (1 : ℝ) / (q : ℝ)) +
+              (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (256 : ℝ) * (p : ℝ) ^ 9 < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) := by
+          have hQnonneg : 0 ≤ Q := by dsimp [Q]; positivity
+          let s := Finset.filter
+              (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+              (Finset.Iic ⌊Q⌋₊)
+          have hsplit := Finset.sum_filter_add_sum_filter_not (s := s)
+            (p := fun q => (q : ℝ) ≤ L) (f := fun q => (1 : ℝ) / (q : ℝ))
+          rw [← hsplit]
+          apply add_le_add
+          · apply Finset.sum_le_sum_of_subset_of_nonneg
+            · intro q hq
+              simp only [s, Finset.mem_filter, Finset.mem_Iic] at hq ⊢
+              refine ⟨?_, hq.1.2.1, hq.1.2.2.1, hq.1.2.2.2.1, hq.2⟩
+              exact Nat.le_floor hq.2
+            · intro q _ _
+              positivity
+          · apply Finset.sum_le_sum_of_subset_of_nonneg
+            · intro q hq
+              simp only [s, Finset.mem_filter, Finset.mem_Iic] at hq ⊢
+              have hlt : L < (q : ℝ) := lt_of_not_ge hq.2
+              refine ⟨hq.1.1, hq.1.2.1, hq.1.2.2.1, ?_, hq.1.2.2.2.2⟩
+              dsimp [L] at hlt
+              exact hlt
+            · intro q _ _
+              positivity
+        -- Combine: total ≤ low + chunk + tail.
+        calc (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ))
+            ≤ _ := htotal
+          _ ≤ (1 / (p : ℝ)) +
+              ((∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (((2 * p : ℕ) : ℝ)) < (q : ℝ) ∧ (q : ℝ) ≤ L)
+                (Finset.Iic ⌊L⌋₊), (1 : ℝ) / (q : ℝ)) +
+              (∑ q ∈ Finset.filter
+                (fun q => q.Prime ∧ q % p = 1 ∧ (256 : ℝ) * (p : ℝ) ^ 9 < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+                (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ))) :=
+              add_le_add hlow hhigh_split
+          _ ≤ ((1 / Real.log 2) * Sp) +
+              ((((1 + Real.log 256) / Real.log 2 + 8) * Sp) +
+                ((2 * CBT / (Real.log 2) ^ 2 + 2 * CBT) * Sp)) := by
+              apply add_le_add hlow_le_Sp
+              apply add_le_add
+              · exact hchunk_bound.trans hchunk_le_Sp
+              · exact htail_bound.trans (htail_form_le_Sp _ rfl)
+          _ = ((1 / Real.log 2) + ((1 + Real.log 256) / Real.log 2 + 8) +
+                (2 * CBT / (Real.log 2) ^ 2 + 2 * CBT)) * Sp := by ring
+          _ = C * Sp := by dsimp [C]
+    · -- High range empty.
+      have hQlt : Q < (((2 * p : ℕ) : ℝ)) := lt_of_not_ge h2pQ
       have hQ_pos : 0 < Q := by dsimp [Q]; positivity
       have hhigh_zero :
           (∑ q ∈ Finset.filter
@@ -4969,20 +5434,25 @@ theorem bt_reciprocal_AP_tail :
         have hq_le_Q : (q : ℝ) ≤ Q := (Nat.cast_le.mpr hq.1).trans (Nat.floor_le hQ_pos.le)
         have hlt : (((2 * p : ℕ) : ℝ)) < (q : ℝ) := hq.2.2.2.1
         exact False.elim (by nlinarith)
-      have hsumK :
-          (∑ q ∈ Finset.filter
-            (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
-            (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ)) ≤
-            K * (1 / (p : ℝ) + 1 / (Real.log p) ^ 2) := by
-        have hK_ge_one : 1 ≤ K := by
-          have hnonneg : 0 ≤ (2 * CBT / Real.log 2 + 2 * CBT * D) + 2 * CBT := by
-            dsimp [D]
-            positivity
-          dsimp [K, D]
-          nlinarith
-        rw [hhigh_zero] at htotal
-        nlinarith
-      exact hsumK.trans hscaled
+      calc (∑ q ∈ Finset.filter
+              (fun q => q.Prime ∧ q % p = 1 ∧ (p : ℝ) < (q : ℝ) ∧ (q : ℝ) ≤ Q)
+              (Finset.Iic ⌊Q⌋₊), (1 : ℝ) / (q : ℝ))
+          ≤ _ := htotal
+        _ ≤ (1 / (p : ℝ)) + 0 := by linarith [hlow, hhigh_zero.le]
+        _ = 1 / (p : ℝ) := by ring
+        _ ≤ (1 / Real.log 2) * Sp := hlow_le_Sp
+        _ ≤ C * Sp := by
+            dsimp [C]
+            have hSp_nonneg : 0 ≤ Sp := hSp_pos.le
+            have hrest_nonneg : 0 ≤ ((1 + Real.log 256) / Real.log 2 + 8) +
+                (2 * CBT / (Real.log 2) ^ 2 + 2 * CBT) := by
+              have h1 : 0 ≤ (1 + Real.log 256) / Real.log 2 + 8 := by
+                have := div_nonneg (show (0 : ℝ) ≤ 1 + Real.log 256 from by linarith)
+                  hlog2_pos.le
+                linarith
+              have h2 : 0 ≤ 2 * CBT / (Real.log 2) ^ 2 + 2 * CBT := by positivity
+              linarith
+            nlinarith [hSp_nonneg, hrest_nonneg]
 
 end Erdos696
 
@@ -7062,11 +7532,12 @@ private lemma IsHBadPrimePair.finset_card_multiples_le {p q N : ℕ}
     simp only [Finset.mem_filter, Finset.mem_Ioc] at hn ⊢
     exact ⟨hn.1, hpq.mul_dvd_of_dvd hn.2.1 hn.2.2⟩)
 
-/-- Brun--Titchmarsh specialized to the residue class `1 mod p` for prime moduli. -/
+/-- Brun--Titchmarsh specialized to the residue class `1 mod p` for prime moduli.
+Uses the strengthened hypothesis `256 p^9 ≤ t`. -/
 private lemma brun_titchmarsh_for_prime :
     ∃ CBT : ℝ, 0 < CBT ∧
       ∀ p : ℕ, p.Prime →
-        ∀ t : ℝ, (2 * p : ℝ) ≤ t →
+        ∀ t : ℝ, (256 * (p : ℝ)^9 : ℝ) ≤ t →
           ((piMod t p 1 : ℝ)) ≤ CBT * t / (((p - 1 : ℕ) : ℝ) * Real.log (t / p)) := by
   rcases brun_titchmarsh with ⟨CBT, hCBT, hBT⟩
   refine ⟨CBT, hCBT, ?_⟩
@@ -26021,6 +26492,6 @@ theorem erdos_696 :
   exact ⟨hhAbs, hHAbs, hratio⟩
 
 #print axioms erdos_696
--- 'Erdos696.erdos_696' depends on axioms: [propext, Classical.choice, Erdos696.brun_titchmarsh, Erdos696.siegel_walfisz, Quot.sound]
+-- 'Erdos696.erdos_696' depends on axioms: [propext, Classical.choice, Erdos696.siegel_walfisz, Quot.sound]
 
 end Erdos696

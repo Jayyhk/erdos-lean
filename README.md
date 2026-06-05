@@ -144,7 +144,7 @@ lake build
 | [678](https://www.erdosproblems.com/678) | `axiomatic` | [problems/678/](problems/678/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L875) (`pi_alt`) |
 | [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
 | [694](https://www.erdosproblems.com/694) | `axiomatic` | [problems/694/](problems/694/) | assumes equation 2 of [Linnik](https://jayyhk.github.io/papers/linnik1944.pdf) (`linnik_dvd`) |
-| [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) and equation 1.10 of [Montgomery–Vaughan](https://jayyhk.github.io/papers/montgomery-vaughan1973.pdf) (`brun_titchmarsh`) |
+| [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) |
 | [698](https://www.erdosproblems.com/698) | `complete` | [problems/698/](problems/698/) | |
 | [707](https://www.erdosproblems.com/707) | `complete` | [problems/707/](problems/707/) | |
 | [728](https://www.erdosproblems.com/728) | `complete` | [problems/728/](problems/728/) | |
