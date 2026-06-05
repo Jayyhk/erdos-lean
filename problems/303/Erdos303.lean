@@ -1,5 +1,4 @@
 import Mathlib
-import Aesop
 set_option maxHeartbeats 0
 set_option maxRecDepth 10000
 
