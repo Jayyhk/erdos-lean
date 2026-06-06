@@ -22,10 +22,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-147 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
+148 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
 - 131 `complete`
 - 3 `trust_extended`
-- 13 `axiomatic`
+- 14 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -176,5 +176,6 @@ lake build
 | [923](https://www.erdosproblems.com/923) | `complete` | [problems/923/](problems/923/) | |
 | [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) | |
 | [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) | |
+| [964](https://www.erdosproblems.com/964) | `axiomatic` | [problems/964/](problems/964/) | assumes the Goldston–Graham–Pintz–Yildirim theorem (`goldston_graham_pintz_yildirim`) |
 
 <!-- TABLE:END -->

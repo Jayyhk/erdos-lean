@@ -1615,3 +1615,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/958#post-2470"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos958.lean"
+- number: "964"
+  proof:
+    path: "problems/964/"
+    theorem: "Erdos964.erdos_964"
+    state: "axiomatic"
+    extra_axioms: ["Erdos964.goldston_graham_pintz_yildirim"]
+    last_update: "2026-06-06"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/964#post-4280"
+      - "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos964.lean"
