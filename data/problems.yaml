@@ -1637,3 +1637,14 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/966#post-4472"
+- number: "967"
+  proof:
+    path: "problems/967/"
+    theorem: "Erdos967.erdos_967"
+    state: "complete"
+    last_update: "2026-06-06"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/967#post-2303"
+      - "https://gist.github.com/llllvvuu/d25f037d1f1000bdabd6ca928c74c9bb#file-967-lean"
