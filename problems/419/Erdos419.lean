@@ -35,17 +35,18 @@ We use `limit_points_subset_S` (provided in the context) to show there are no ot
 
 import Mathlib
 
+set_option linter.style.longLine false
+set_option linter.style.multiGoal false
+set_option linter.style.openClassical false
+set_option linter.style.refine false
+set_option linter.style.setOption false
+
 namespace Erdos419
 
 open scoped Classical
 
 set_option maxHeartbeats 0
 set_option maxRecDepth 4000
-set_option linter.style.longLine false
-set_option linter.style.multiGoal false
-set_option linter.style.openClassical false
-set_option linter.style.refine false
-set_option linter.style.setOption false
 
 noncomputable def tau (n : ℕ) : ℕ := (Nat.divisors n).card
 

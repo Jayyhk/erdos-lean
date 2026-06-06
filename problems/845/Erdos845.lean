@@ -17,10 +17,11 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
 
 import Mathlib
 
+set_option linter.unusedVariables false
+
 namespace Erdos845
 
 open scoped Classical
-set_option linter.unusedVariables false
 noncomputable section
 
 /-

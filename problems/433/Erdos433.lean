@@ -2,6 +2,8 @@ import Mathlib
 
 attribute [-instance] Localization.instSMulCommClassOfIsScalarTower
 
+set_option linter.mathlibStandardSet false
+
 namespace Erdos433
 
 /- ================= Vendored: Dillies' Kneser (MulStab) ================= -/
@@ -949,7 +951,6 @@ end Finset
 end
 
 /- ================= Erdős Problem 433 ================= -/
-set_option linter.mathlibStandardSet false
 
 open scoped BigOperators
 open scoped Real

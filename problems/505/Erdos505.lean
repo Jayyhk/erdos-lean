@@ -29,12 +29,6 @@ This file formalizes a counterexample to Borsuk's conjecture in dimension 946, f
 
 import Mathlib
 
-namespace Erdos505
-
-open scoped Classical
-open scoped Pointwise
-
-set_option maxHeartbeats 0
 set_option linter.style.cases false
 set_option linter.style.induction false
 set_option linter.style.longLine false
@@ -42,6 +36,13 @@ set_option linter.style.multiGoal false
 set_option linter.style.openClassical false
 set_option linter.style.refine false
 set_option linter.style.setOption false
+
+namespace Erdos505
+
+open scoped Classical
+open scoped Pointwise
+
+set_option maxHeartbeats 0
 
 /-
 Let $E\subset \RR^d$ be bounded. Its \emph{diameter} is $\diam(E)\coloneqq \sup\{\norm{x-y}: x,y\in E\}$.

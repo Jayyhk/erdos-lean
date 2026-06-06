@@ -13,10 +13,10 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
 
 import Mathlib
 
-namespace Erdos429
-
 set_option linter.mathlibStandardSet false
 set_option linter.unusedVariables false
+
+namespace Erdos429
 
 open scoped BigOperators
 open scoped Real

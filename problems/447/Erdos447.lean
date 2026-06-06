@@ -27,9 +27,9 @@ Formalized the definitions and theorems from the paper "Union-free families and 
 
 import Mathlib
 
-namespace Erdos447
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos447
 
 open scoped Nat
 open scoped Classical

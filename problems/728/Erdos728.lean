@@ -4,14 +4,6 @@ We formalize the positive answer to Erdos problem #728. We prove the main theore
 
 import Mathlib
 
-namespace Erdos728
-
-
-open Real
-
-open scoped Classical Nat Topology
-
-set_option maxHeartbeats 0
 set_option linter.style.commandStart false
 set_option linter.style.induction false
 set_option linter.style.longLine false
@@ -19,6 +11,14 @@ set_option linter.style.multiGoal false
 set_option linter.style.openClassical false
 set_option linter.style.refine false
 set_option linter.style.setOption false
+
+namespace Erdos728
+
+open Real
+
+open scoped Classical Nat Topology
+
+set_option maxHeartbeats 0
 
 /-
 Definitions of W and kappa. W_p(m) is the p-adic valuation of the product of m+1 to m+k. kappa_p(m) is the p-adic valuation of binom(2m, m).

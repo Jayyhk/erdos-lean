@@ -6,9 +6,9 @@ The proof follows the strategy outlined in the paper, using a primewise reductio
 
 import Mathlib
 
-namespace Erdos401
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos401
 
 open scoped Classical
 

@@ -36,8 +36,15 @@ The proofs follow the arguments in the paper, using elementary number theory and
 
 import Mathlib
 
-namespace Erdos443
+set_option linter.style.cases false
+set_option linter.style.commandStart false
+set_option linter.style.longLine false
+set_option linter.style.multiGoal false
+set_option linter.style.openClassical false
+set_option linter.style.refine false
+set_option linter.style.setOption false
 
+namespace Erdos443
 
 open scoped Classical
 
@@ -46,13 +53,6 @@ open scoped Pointwise
 --set_option linter.mathlibStandardSet false
 
 set_option maxHeartbeats 0
-set_option linter.style.cases false
-set_option linter.style.commandStart false
-set_option linter.style.longLine false
-set_option linter.style.multiGoal false
-set_option linter.style.openClassical false
-set_option linter.style.refine false
-set_option linter.style.setOption false
 
 /-
 For any integer $k \ge 1$, $\log(k+1) \le k \log 2$.

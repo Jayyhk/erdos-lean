@@ -44,12 +44,12 @@ The proof of `lemma_rainbow_clique_free` relies on the structure of $H$ (two $C_
 
 import Mathlib
 
-namespace Erdos762
-
 set_option linter.mathlibStandardSet false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedTactic false
 set_option linter.unusedVariables false
+
+namespace Erdos762
 
 set_option maxHeartbeats 0
 

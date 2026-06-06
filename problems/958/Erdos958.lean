@@ -13,11 +13,10 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7 (v4.24.0)
 
 import Mathlib
 
-namespace Erdos958
-
 set_option linter.style.longLine false
 set_option linter.style.refine false
 
+namespace Erdos958
 
 /-- The Euclidean plane `ℝ²`. -/
 abbrev Point : Type := EuclideanSpace ℝ (Fin 2)

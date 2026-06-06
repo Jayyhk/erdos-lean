@@ -22,9 +22,9 @@ Key definitions and theorems:
 
 import Mathlib
 
-namespace Erdos502
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos502
 
 open scoped BigOperators
 open scoped Real

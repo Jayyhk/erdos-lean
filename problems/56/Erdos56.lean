@@ -27,13 +27,24 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7 (v4.24.0)
 
 import Mathlib
 
+set_option linter.style.setOption false
+set_option linter.style.longLine false
+set_option linter.style.cases false
+set_option linter.style.cdot false
+set_option linter.style.longLine false
+set_option linter.style.multiGoal false
+set_option linter.style.openClassical false
+set_option linter.style.refine false
+set_option linter.style.setOption false
+set_option linter.unnecessarySimpa false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedVariables false
+
 namespace Erdos56
 
 /- ===== vendored from Erdos56/PrimeCount.lean (chunked kernel-`decide` prime counts) ===== -/
 set_option maxHeartbeats 0
 set_option maxRecDepth 8000
-set_option linter.style.setOption false
-set_option linter.style.longLine false
 
 /-! ### Prime counting in chunks of 50
 
@@ -230,16 +241,6 @@ set_option maxHeartbeats 0
 set_option maxRecDepth 4000
 set_option synthInstance.maxHeartbeats 20000
 set_option synthInstance.maxSize 128
-set_option linter.style.cases false
-set_option linter.style.cdot false
-set_option linter.style.longLine false
-set_option linter.style.multiGoal false
-set_option linter.style.openClassical false
-set_option linter.style.refine false
-set_option linter.style.setOption false
-set_option linter.unnecessarySimpa false
-set_option linter.unusedSimpArgs false
-set_option linter.unusedVariables false
 
 set_option relaxedAutoImplicit false
 set_option autoImplicit false

@@ -12,9 +12,9 @@ We prove that for any $C>0$, there exists a constant $K$ such that there are inf
 
 import Mathlib
 
-namespace Erdos729
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos729
 
 open scoped BigOperators
 open scoped Real

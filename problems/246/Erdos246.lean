@@ -28,11 +28,11 @@ We prove that for coprime a, b >= 2, the set Gamma(a,b) = {a^k b^l} is complete,
 
 import Mathlib
 
-namespace Erdos246
-
 set_option linter.mathlibStandardSet false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedVariables false
+
+namespace Erdos246
 
 open scoped Classical
 

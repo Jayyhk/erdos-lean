@@ -32,9 +32,6 @@ Finally, we combined these results to prove the main theorem `erdos_582`.
 
 import Mathlib
 
-namespace Erdos582
-
---set_option linter.mathlibStandardSet false
 set_option linter.unusedSectionVars false
 set_option linter.unusedVariables false
 set_option linter.style.cases false
@@ -44,6 +41,8 @@ set_option linter.style.multiGoal false
 set_option linter.style.openClassical false
 set_option linter.style.refine false
 set_option linter.style.setOption false
+
+namespace Erdos582
 
 open scoped Classical
 open SimpleGraph

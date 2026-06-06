@@ -1,15 +1,16 @@
 import Mathlib
 
+set_option linter.style.setOption false
+set_option linter.style.openClassical false
+set_option linter.style.longLine false
+
 namespace Erdos16
 
 open scoped Nat
 open scoped Pointwise
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 0
 set_option maxRecDepth 4000
-set_option linter.style.openClassical false
-set_option linter.style.longLine false
 
 open Classical
 

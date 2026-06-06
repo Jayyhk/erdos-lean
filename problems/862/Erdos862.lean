@@ -45,16 +45,16 @@ In `eventually_lower_bound`, we avoid issues with `liminf` in `Real` for potenti
 
 import Mathlib
 
-namespace Erdos862
-
-
-set_option maxHeartbeats 0
 set_option linter.style.commandStart false
 set_option linter.style.longLine false
 set_option linter.style.multiGoal false
 set_option linter.style.openClassical false
 set_option linter.style.refine false
 set_option linter.style.setOption false
+
+namespace Erdos862
+
+set_option maxHeartbeats 0
 
 open scoped BigOperators
 

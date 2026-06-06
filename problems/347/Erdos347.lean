@@ -21,12 +21,12 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
 
 import Mathlib
 
-namespace Erdos347
-
 set_option linter.deprecated false
 set_option linter.mathlibStandardSet false
 set_option linter.unusedVariables false
 set_option linter.unusedSimpArgs false
+
+namespace Erdos347
 
 open scoped BigOperators
 open scoped Real

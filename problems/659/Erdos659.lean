@@ -43,9 +43,6 @@ I have proved Perucca's classification theorem (`PeruccaClassificationStatement_
 
 import Mathlib
 
-namespace Erdos659
-
-
 set_option linter.unusedSimpArgs false
 set_option linter.unusedVariables false
 set_option linter.style.cases false
@@ -54,6 +51,8 @@ set_option linter.style.longLine false
 set_option linter.style.multiGoal false
 set_option linter.style.refine false
 set_option linter.style.setOption false
+
+namespace Erdos659
 
 set_option maxHeartbeats 0
 

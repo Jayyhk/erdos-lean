@@ -41,12 +41,12 @@ The proof follows the inductive construction described in the provided LaTeX tex
 
 import Mathlib
 
-namespace Erdos229
-
 set_option linter.mathlibStandardSet false
 set_option linter.unnecessarySimpa false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedVariables false
+
+namespace Erdos229
 
 open scoped Classical
 

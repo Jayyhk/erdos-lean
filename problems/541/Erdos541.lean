@@ -42,12 +42,12 @@ We have formalized and proved the main theorem `thm_main` stating that if a sequ
 
 import Mathlib
 
-namespace Erdos541
-
 set_option linter.mathlibStandardSet false
 set_option linter.unnecessarySimpa false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedVariables false
+
+namespace Erdos541
 
 open scoped Classical
 open scoped Pointwise

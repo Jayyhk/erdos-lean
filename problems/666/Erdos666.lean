@@ -31,18 +31,19 @@ We define the hypercube graph Q_n and a partition of its edges into four subgrap
 
 import Mathlib
 
-namespace Erdos666
-
-open scoped Classical
-open SimpleGraph
-
-set_option maxHeartbeats 0
 set_option linter.style.induction false
 set_option linter.style.longLine false
 set_option linter.style.multiGoal false
 set_option linter.style.openClassical false
 set_option linter.style.refine false
 set_option linter.style.setOption false
+
+namespace Erdos666
+
+open scoped Classical
+open SimpleGraph
+
+set_option maxHeartbeats 0
 
 /-
 Definition of the hypercube graph Q_n and the property of containing a cycle of length k.

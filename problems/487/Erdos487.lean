@@ -1,12 +1,20 @@
 import Mathlib
 
+set_option linter.mathlibStandardSet false
+set_option linter.style.commandStart false
+set_option linter.style.induction false
+set_option linter.style.lambdaSyntax false
+set_option linter.style.longLine false
+set_option linter.style.multiGoal false
+set_option linter.style.openClassical false
+set_option linter.style.refine false
+
 namespace Erdos487
 
 /- ===== Vendored: Erdős 447 (Kleitman union-free bound), needed by 487 ===== -/
 
 namespace KleitmanUnionFree
 
-set_option linter.mathlibStandardSet false
 
 open scoped Nat
 open scoped Classical
@@ -2935,13 +2943,6 @@ Key intermediate lemmas proved include:
 
 
 
-set_option linter.style.commandStart false
-set_option linter.style.induction false
-set_option linter.style.lambdaSyntax false
-set_option linter.style.longLine false
-set_option linter.style.multiGoal false
-set_option linter.style.openClassical false
-set_option linter.style.refine false
 
 open scoped Nat
 open scoped Classical

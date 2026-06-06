@@ -43,9 +43,9 @@ Key lemmas include `two_variable_combinatorial_nullstellensatz`, `large_set_full
 
 import Mathlib
 
-namespace Erdos476
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos476
 
 open scoped Classical
 open Polynomial Finset

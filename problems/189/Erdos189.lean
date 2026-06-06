@@ -31,11 +31,11 @@ We prove that it is possible to partition the complex plane (identified with $\m
 
 import Mathlib
 
-namespace Erdos189
-
 set_option linter.unusedSimpArgs false
 set_option linter.unusedVariables false
 set_option linter.mathlibStandardSet false
+
+namespace Erdos189
 
 open scoped BigOperators
 

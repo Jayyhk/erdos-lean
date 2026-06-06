@@ -40,18 +40,18 @@ The formalization follows the structure of the paper, defining `M`, `m`, `good_x
 
 import Mathlib
 
-namespace Erdos678
-
 set_option linter.mathlibStandardSet false
 set_option linter.unusedTactic false
+set_option linter.unusedSimpArgs false
+set_option linter.unusedVariables false
+
+namespace Erdos678
 
 open scoped BigOperators
 open scoped Nat
 open scoped Classical
 open scoped Pointwise
 
-set_option linter.unusedSimpArgs false
-set_option linter.unusedVariables false
 
 set_option maxHeartbeats 0
 

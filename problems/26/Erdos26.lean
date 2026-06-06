@@ -26,11 +26,6 @@ We define the Ruzsa sequence $n_\ell$ using the Chinese Remainder Theorem to sat
 
 import Mathlib
 
-namespace Erdos26
-
-open scoped Classical
-
-set_option maxHeartbeats 0
 set_option linter.style.docString false
 set_option linter.style.induction false
 set_option linter.style.longLine false
@@ -39,6 +34,12 @@ set_option linter.style.openClassical false
 set_option linter.style.refine false
 set_option linter.style.setOption false
 set_option linter.unusedVariables false
+
+namespace Erdos26
+
+open scoped Classical
+
+set_option maxHeartbeats 0
 
 variable {β : Type*} [Preorder β]
 

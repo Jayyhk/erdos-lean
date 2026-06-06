@@ -12,9 +12,9 @@ We define the central binomial coefficient and the problem statement. We then fo
 
 import Mathlib
 
-namespace Erdos397
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos397
 
 open scoped BigOperators
 open scoped Real

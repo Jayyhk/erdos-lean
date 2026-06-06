@@ -23,9 +23,9 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
 
 import Mathlib
 
-namespace Erdos785
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos785
 
 open scoped BigOperators
 open scoped Real

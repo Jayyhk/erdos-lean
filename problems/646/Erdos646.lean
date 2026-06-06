@@ -11,9 +11,9 @@ Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
 
 import Mathlib
 
-namespace Erdos646
-
 set_option linter.mathlibStandardSet false
+
+namespace Erdos646
 
 open scoped BigOperators
 open scoped Real
