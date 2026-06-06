@@ -56,7 +56,12 @@ def divisor_ratios : Set ℚ :=
   { q | ∃ n : ℕ, n > 0 ∧ q = (tau (n + 1) : ℚ) / (tau n : ℚ) }
 
 /-
-The statement of the Goldston-Graham-Pintz-Yildirim theorem (Corollary 2.1 in the paper).
+The Goldston-Graham-Pintz-Yildirim theorem — Theorem 1 of
+S. Eberhard, "Ratios of consecutive values of the divisor function",
+arXiv:2505.00727 (2025), attributed there to Goldston, Graham, Pintz, Yıldırım,
+"Small gaps between almost primes, the parity problem, and some conjectures
+of Erdős on consecutive integers", Int. Math. Res. Not. IMRN 7 (2011), 1439–1450
+(Corollary 2.1, special case b₁ = b₂ = b₃ = 1).
 -/
 def GoldstonGrahamPintzYildirimStatement : Prop :=
   ∀ (a r : Fin 3 → ℕ),
@@ -1568,9 +1573,9 @@ theorem ErdosProblem964 (hGPY : GoldstonGrahamPintzYildirimStatement) :
       Set.image_mono ( divisor_ratios_contains_all_pos_rats hGPY );
     exact Set.Subset.trans ( pos_rats_dense_in_pos_reals ) ( closure_mono h_image_subset )
 
-/-- The Goldston–Graham–Pintz–Yildirim theorem (Corollary 2.1 of [GGPY09]),
-assumed as an axiom — the result is proved in the literature but is not yet
-formalized in Mathlib. -/
+/-- The Goldston–Graham–Pintz–Yıldırım theorem, as stated in Theorem 1 of
+Eberhard 2025 (arXiv:2505.00727), assumed as an axiom — the result is proved
+in the literature but is not yet formalized in Mathlib. -/
 axiom goldston_graham_pintz_yildirim : GoldstonGrahamPintzYildirimStatement
 
 /-- **Erdős Problem 964** (Eberhard 2025, conditionally on GPY).

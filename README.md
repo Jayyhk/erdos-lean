@@ -176,6 +176,6 @@ lake build
 | [923](https://www.erdosproblems.com/923) | `complete` | [problems/923/](problems/923/) | |
 | [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) | |
 | [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) | |
-| [964](https://www.erdosproblems.com/964) | `axiomatic` | [problems/964/](problems/964/) | assumes the Goldston–Graham–Pintz–Yildirim theorem (`goldston_graham_pintz_yildirim`) |
+| [964](https://www.erdosproblems.com/964) | `axiomatic` | [problems/964/](problems/964/) | assumes Theorem 1 of [Eberhard](https://jayyhk.github.io/papers/eberhard2025.pdf) (`goldston_graham_pintz_yildirim`) |
 
 <!-- TABLE:END -->
