@@ -1560,3 +1560,14 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/905#post-5276"
+- number: "907"
+  proof:
+    path: "problems/907/"
+    theorem: "Erdos907.erdos_907"
+    state: "complete"
+    last_update: "2026-06-06"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/907#post-5277"
+      - "https://gist.github.com/pitmonticone/f419ac0a78259498f93fd60d49c0b3ea#file-erdos907-lean"
