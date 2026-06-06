@@ -1550,3 +1550,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/904#post-5573"
       - "https://gist.github.com/Parcly-Taxel/876d4eadd49a0d29db91ed2e790db733#file-e904-lean"
+- number: "905"
+  proof:
+    path: "problems/905/"
+    theorem: "Erdos905.erdos_905"
+    state: "complete"
+    last_update: "2026-06-06"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/905#post-5276"
