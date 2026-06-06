@@ -1627,3 +1627,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/964#post-4280"
       - "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos964.lean"
+- number: "966"
+  proof:
+    path: "problems/966/"
+    theorem: "Erdos966.erdos_966"
+    state: "complete"
+    last_update: "2026-06-06"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/966#post-4472"
