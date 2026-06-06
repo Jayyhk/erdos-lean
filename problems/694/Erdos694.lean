@@ -4579,6 +4579,6 @@ theorem erdos_694 :
   totient_fibre_extremes
 
 #print axioms erdos_694
--- 'Erdos694.erdos_694' depends on axioms: [propext, Classical.choice, Erdos694.mertens_product, Erdos694.linnik_dvd, Quot.sound]
+-- 'Erdos694.erdos_694' depends on axioms: [propext, Classical.choice, Erdos694.linnik_dvd, Quot.sound]
 
 end Erdos694
