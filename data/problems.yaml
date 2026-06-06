@@ -1582,3 +1582,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/914#post-5403"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem914.lean"
+- number: "923"
+  proof:
+    path: "problems/923/"
+    theorem: "Erdos923.erdos_923"
+    state: "complete"
+    last_update: "2026-06-06"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/923#post-5628"
+      - "https://gist.github.com/Parcly-Taxel/28b95db1e5d3e77077d30c07afc55992#file-e923-aristotle-lean"
