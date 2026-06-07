@@ -1726,3 +1726,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1014#post-5751"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.29.0/ErdosProblems/Erdos1014.lean"
+- number: "1022"
+  proof:
+    path: "problems/1022/"
+    theorem: "Erdos1022.erdos_1022"
+    state: "complete"
+    last_update: "2026-06-07"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1022#post-3654"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1022.lean"
