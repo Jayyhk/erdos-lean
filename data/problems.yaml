@@ -1737,3 +1737,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1022#post-3654"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1022.lean"
+- number: "1023"
+  proof:
+    path: "problems/1023/"
+    theorem: "Erdos1023.erdos_1023"
+    state: "complete"
+    last_update: "2026-06-07"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1023#post-4251"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1023.lean"
