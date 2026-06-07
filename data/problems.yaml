@@ -1670,3 +1670,15 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/990#post-5312"
       - "https://github.com/yuta0x89/ErdosProblems/blob/main/Erdos990.lean"
+- number: "997"
+  proof:
+    path: "problems/997/"
+    theorem: "Erdos997.erdos_997"
+    state: "axiomatic"
+    extra_axioms: ["Erdos997.maynardTaoBFT"]
+    last_update: "2026-06-07"
+    lean_toolchain: "leanprover/lean4:v4.28.1"
+    mathlib_revision: "1f9fffd5ff0b854b8a1f1f69adc11c61f05f2515"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/997#post-5189"
+      - "https://gist.github.com/pitmonticone/016f2ed66b4cd1c4c4b9998095170e60#file-erdos997-lean"
