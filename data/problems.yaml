@@ -1682,3 +1682,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/997#post-5189"
       - "https://gist.github.com/pitmonticone/016f2ed66b4cd1c4c4b9998095170e60#file-erdos997-lean"
+- number: "1000"
+  proof:
+    path: "problems/1000/"
+    theorem: "Erdos1000.erdos_1000"
+    state: "complete"
+    last_update: "2026-06-07"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1000#post-2509"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1000.lean"
