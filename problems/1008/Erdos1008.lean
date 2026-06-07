@@ -309,15 +309,17 @@ theorem exists_C4_free_subgraph_with_many_edges {V : Type} [Fintype V] [Decidabl
       · exact ⟨ h.choose, Finset.mem_filter.mpr ⟨ Finset.mem_univ _, h.choose_spec ⟩ ⟩
 
 /-- **Erdős Problem 1008** (proved by Conlon–Fox–Sudakov; this formalization follows
-the simpler argument by Z. Hunter): every finite graph `G` with `m` edges contains a
-`C₄`-free subgraph with at least `(1/2) · m^(2/3)` edges. -/
-theorem erdos_1008 {V : Type} [Fintype V] [DecidableEq V]
-    (G : SimpleGraph V) [DecidableRel G.Adj] :
-    ∃ S' : Finset (Sym2 V),
-      S' ⊆ G.edgeFinset ∧
-      (∀ s, s ⊆ S' → ¬ is_C4 s) ∧
-      (S'.card : ℝ) ≥ ((1 : ℝ) / 2) * (G.edgeFinset.card : ℝ) ^ ((2 : ℝ) / 3) :=
-  exists_C4_free_subgraph_with_many_edges G
+the simpler argument by Z. Hunter): there is a positive constant `c` such that every
+finite graph `G` with `m` edges contains a `C₄`-free subgraph with at least
+`c · m^(2/3)` edges. -/
+theorem erdos_1008 :
+    ∃ c : ℝ, 0 < c ∧
+      ∀ {V : Type} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj],
+        ∃ S' : Finset (Sym2 V),
+          S' ⊆ G.edgeFinset ∧
+          (∀ s, s ⊆ S' → ¬ is_C4 s) ∧
+          (S'.card : ℝ) ≥ c * (G.edgeFinset.card : ℝ) ^ ((2 : ℝ) / 3) :=
+  ⟨1 / 2, by norm_num, fun G => exists_C4_free_subgraph_with_many_edges G⟩
 
 #print axioms erdos_1008
 -- 'Erdos1008.erdos_1008' depends on axioms: [propext, Classical.choice, Quot.sound]
