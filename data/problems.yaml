@@ -1659,3 +1659,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/974#post-5944"
       - "https://gist.github.com/Parcly-Taxel/a44cbf9a214a5358bf584d05265aec4c#file-erdos974-lean"
+- number: "990"
+  proof:
+    path: "problems/990/"
+    theorem: "Erdos990.erdos_990"
+    state: "complete"
+    last_update: "2026-06-06"
+    lean_toolchain: "leanprover/lean4:v4.28.1"
+    mathlib_revision: "1f9fffd5ff0b854b8a1f1f69adc11c61f05f2515"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/990#post-5312"
+      - "https://github.com/yuta0x89/ErdosProblems/blob/main/Erdos990.lean"
