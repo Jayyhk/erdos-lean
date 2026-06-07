@@ -1693,3 +1693,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1000#post-2509"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1000.lean"
+- number: "1007"
+  proof:
+    path: "problems/1007/"
+    theorem: "Erdos1007.erdos_1007"
+    state: "complete"
+    last_update: "2026-06-07"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1007#post-3461"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1007.lean"

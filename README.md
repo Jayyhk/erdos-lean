@@ -22,8 +22,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-154 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
-- 136 `complete`
+155 proofs in the catalog (out of 186 Erdős problems with formalized solutions):
+- 137 `complete`
 - 3 `trust_extended`
 - 15 `axiomatic`
 
@@ -183,5 +183,6 @@ lake build
 | [990](https://www.erdosproblems.com/990) | `complete` | [problems/990/](problems/990/) | |
 | [997](https://www.erdosproblems.com/997) | `axiomatic` | [problems/997/](problems/997/) | assumes Corollary 3 of [Banks–Freiberg–Turnage-Butterbaugh](https://jayyhk.github.io/papers/banks-freiberg-turnage-butterbaugh2015.pdf) (`maynardTaoBFT`) |
 | [1000](https://www.erdosproblems.com/1000) | `complete` | [problems/1000/](problems/1000/) | |
+| [1007](https://www.erdosproblems.com/1007) | `complete` | [problems/1007/](problems/1007/) | |
 
 <!-- TABLE:END -->
