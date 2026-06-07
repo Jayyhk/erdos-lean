@@ -1704,3 +1704,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1007#post-3461"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1007.lean"
+- number: "1008"
+  proof:
+    path: "problems/1008/"
+    theorem: "Erdos1008.erdos_1008"
+    state: "complete"
+    last_update: "2026-06-07"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1008#post-3299"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1008c.lean"
