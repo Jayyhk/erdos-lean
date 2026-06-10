@@ -1814,3 +1814,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1043#post-2507"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1043.lean"
+- number: "1044"
+  proof:
+    path: "problems/1044/"
+    theorem: "Erdos1044.erdos_1044"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1044#post-6012"
+      - "https://gist.github.com/LorenzoLuccioli/c3ace69881872112109a6c31b7a87cfc#file-erdos1044-lean"
