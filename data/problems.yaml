@@ -1803,3 +1803,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1037#post-3422"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1037.lean"
+- number: "1043"
+  proof:
+    path: "problems/1043/"
+    theorem: "Erdos1043.erdos_1043"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1043#post-2507"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1043.lean"
