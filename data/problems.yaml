@@ -1881,3 +1881,14 @@
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1071.lean"
       - "https://www.erdosproblems.com/forum/thread/1071#post-4272"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1071b.lean"
+- number: "1080"
+  proof:
+    path: "problems/1080/"
+    theorem: "Erdos1080.erdos_1080"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1080#post-2529"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1080.lean"
