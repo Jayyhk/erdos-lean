@@ -1902,3 +1902,14 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/1090#post-4523"
+- number: "1098"
+  proof:
+    path: "problems/1098/"
+    theorem: "Erdos1098.erdos_1098"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1098#post-5863"
+      - "https://gist.github.com/JohnEdwardJennings/783dce98df9fa6c333c24617ef07403b#file-erdos1098-lean"
