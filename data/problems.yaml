@@ -1892,3 +1892,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1080#post-2529"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1080.lean"
+- number: "1090"
+  proof:
+    path: "problems/1090/"
+    theorem: "Erdos1090.erdos_1090"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1090#post-4523"
