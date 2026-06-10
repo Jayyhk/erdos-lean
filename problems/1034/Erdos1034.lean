@@ -976,29 +976,23 @@ theorem MaTang_main (ε : ℝ) (hε : 0 < ε) :
   obtain ⟨ N1, hN1 ⟩ := MaTang_edge_density_lower_bound;
   obtain ⟨ N2, hN2 ⟩ := MaTang_Y_upper_bound ε hε ; exact ⟨ Max.max N1 N2, fun n hn => ⟨ hN1 n ( le_trans ( le_max_left _ _ ) hn ), fun T hT => hN2 n ( le_trans ( le_max_right _ _ ) hn ) T hT ⟩ ⟩ ;
 
-/--
-The Erdős–Faudree conjecture (Erdős [Er93,p.344]; site statement of
-erdosproblems.com/1034): for every `ε > 0`, for all sufficiently large `n`, every
-graph on `n` vertices with more than `n²/4` edges contains a triangle `T` and
-more than `(1/2 - ε) · n` **other** vertices (i.e. vertices in `V(G) \ V(T)`)
-each joined to at least two vertices of `T`. The "other vertices" wording is
-explicit in the original Erdős prose ("`h(n)` other vertices joined to at least
-two of the `x`'s") quoted on the site.
--/
-def Erdos1034Conjecture : Prop :=
-  ∀ ε : ℝ, 0 < ε →
-    ∃ n0 : ℕ,
-      ∀ n ≥ n0,
-        ∀ (G : SimpleGraph (Fin n)) [DecidableRel G.Adj],
-          (G.edgeFinset.card : ℝ) > ((n : ℝ)^2 / 4) →
-          ∃ T ∈ G.cliqueFinset 3,
-            (((Y_set G T) \ T).card : ℝ) > (((1 : ℝ) / 2) - ε) * (n : ℝ)
-
-/-- **Erdős Problem 1034** (refuted by Ma–Tang): the Erdős–Faudree conjecture is false.
-Ma and Tang construct, for large `n`, a graph with `> n²/4` edges in which every
-triangle `T` has at most `(2 − √(5/2) + o(1)) · n ≈ 0.4189 · n` vertices joined to
-at least two vertices of `T`, contradicting the conjecture's `(1/2 − o(1)) · n` bound. -/
-theorem erdos_1034 : ¬ Erdos1034Conjecture := by
+/-- **Erdős Problem 1034** (Erdős–Faudree conjecture [Er93,p.344], refuted by Ma–Tang):
+for every `ε > 0`, for all sufficiently large `n`, every graph on `n` vertices with
+more than `n²/4` edges contains a triangle `T` and more than `(1/2 - ε) · n` other
+vertices (`V(G) \ V(T)`) each joined to at least two vertices of `T`. The "other
+vertices" wording is explicit in Erdős's prose ("`h(n)` other vertices joined to at
+least two of the `x`'s") quoted on the site. Refuted by Ma–Tang: they construct a
+graph with `> n²/4` edges in which every triangle `T` has at most
+`(2 − √(5/2) + o(1)) · n ≈ 0.4189 · n` vertices joined to at least two of `T`,
+contradicting the conjecture's `(1/2 − o(1)) · n` bound. -/
+theorem erdos_1034 :
+    ¬ (∀ ε : ℝ, 0 < ε →
+        ∃ n0 : ℕ,
+          ∀ n ≥ n0,
+            ∀ (G : SimpleGraph (Fin n)) [DecidableRel G.Adj],
+              (G.edgeFinset.card : ℝ) > ((n : ℝ)^2 / 4) →
+              ∃ T ∈ G.cliqueFinset 3,
+                (((Y_set G T) \ T).card : ℝ) > (((1 : ℝ) / 2) - ε) * (n : ℝ)) := by
   intro h;
   -- Apply the MaTang graph's properties to derive a contradiction with h.
   have := h (1 / 100) (by norm_num);

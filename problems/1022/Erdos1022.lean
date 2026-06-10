@@ -508,22 +508,18 @@ theorem c_t_le_two (t : ℕ) (ht : t ≥ 2) (c_t : ℝ)
     · exact counterexample_not_two_colorable t ht
 
 
-/--
-Formal statement of Erdős Problem 1022: there is a constant `c_t → ∞` as `t → ∞`
-such that any hypergraph `F` whose edges have size `≥ t`, and which satisfies
-`|{A ∈ F : A ⊆ X}| < c_t · |X|` for every set `X`, is 2-colorable (has property B).
--/
-def Erdos1022Conjecture : Prop :=
-  ∃ c : ℕ → ℝ, Filter.Tendsto c Filter.atTop Filter.atTop ∧
-  ∀ t, ∀ {α : Type*} [DecidableEq α] (F : Hypergraph α),
-    (∀ A ∈ F, A.card ≥ t) →
-    (∀ X : Finset α, X.Nonempty → (F.filter (λ A => A ⊆ X)).card < c t * (X.card : ℝ)) →
-    TwoColorable F
-
-/-- **Erdős Problem 1022** (refuted by KoishiChan): `Erdos1022Conjecture` is false.
-KoishiChan constructed a counterexample showing `c_t ≤ 2` for all `t`, contradicting
-the required `c_t → ∞`. -/
-theorem erdos_1022 : ¬ Erdos1022Conjecture := by
+/-- **Erdős Problem 1022** (refuted by KoishiChan): there is no constant `c_t → ∞`
+as `t → ∞` such that every hypergraph `F` whose edges have size `≥ t`, and which
+satisfies `|{A ∈ F : A ⊆ X}| < c_t · |X|` for every nonempty set `X`, is 2-colorable
+(has property B). KoishiChan constructed a counterexample showing `c_t ≤ 2` for all
+`t`, contradicting the required `c_t → ∞`. -/
+theorem erdos_1022 :
+    ¬ (∃ c : ℕ → ℝ, Filter.Tendsto c Filter.atTop Filter.atTop ∧
+        ∀ t, ∀ {α : Type*} [DecidableEq α] (F : Hypergraph α),
+          (∀ A ∈ F, A.card ≥ t) →
+          (∀ X : Finset α, X.Nonempty →
+            (F.filter (λ A => A ⊆ X)).card < c t * (X.card : ℝ)) →
+          TwoColorable F) := by
   -- Assume erdos_1022 is true.
   by_contra h_contra
   obtain ⟨c, hc_tendsto, hc_property⟩ := h_contra;

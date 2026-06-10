@@ -191,28 +191,20 @@ lemma neg_last_condition_sets :
   aesop;
   exact Finset.mem_image_of_mem _ he
 
-/--
-**Erdős–Purdy (Erdős Problem 105).**
-
-Given finite point sets `A, B ⊆ R2` and a natural number `n`, if:
-* `A` and `B` are disjoint,
-* `|A| = n` and `|B| = n - 3`,
-* `A` is not contained in any affine line,
-
-then there exist two distinct points `p, q ∈ A` such that the line through them
-avoids all points of `B`.
--/
-def Erdos105Conjecture : Prop :=
-  ∀ (A B : Finset R2) (n : ℕ),
-  Disjoint A B →
-  A.card = n →
-  B.card = n - 3 →
-  (¬ ∃ ℓ : AffineSubspace ℝ R2, IsLine ℓ ∧ (A : Set R2) ⊆ (ℓ : Set R2)) →
-  ∃ (p q : R2),
-    p ∈ A ∧ q ∈ A ∧ p ≠ q ∧
-    (∀ b ∈ B, b ∉ (lineThrough p q : Set R2))
-
-theorem erdos_105 : ¬Erdos105Conjecture := by
+/-- **Erdős–Purdy (Erdős Problem 105).** Given finite disjoint point sets
+`A, B ⊆ ℝ²` with `|A| = n`, `|B| = n − 3`, and `A` not contained in any affine line:
+the conjecture asserted that there always exist two distinct points `p, q ∈ A` such
+that the line through them avoids all points of `B`. This is false (witnessed by an
+explicit `n = 12` configuration). -/
+theorem erdos_105 :
+    ¬ (∀ (A B : Finset R2) (n : ℕ),
+        Disjoint A B →
+        A.card = n →
+        B.card = n - 3 →
+        (¬ ∃ ℓ : AffineSubspace ℝ R2, IsLine ℓ ∧ (A : Set R2) ⊆ (ℓ : Set R2)) →
+        ∃ (p q : R2),
+          p ∈ A ∧ q ∈ A ∧ p ≠ q ∧
+          (∀ b ∈ B, b ∉ (lineThrough p q : Set R2))) := by
   -- By definition of `erdos_105`, if `erdos_105` holds, then for any sets `A` and `B` satisfying the conditions, there exist two distinct points `p` and `q` in `A` such that the line through them avoids all points of `B`.
   by_contra h_contra;
   -- Apply the Erdős problem 105 to the sets A0 and B0 with n=12.

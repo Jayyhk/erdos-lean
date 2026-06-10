@@ -1294,13 +1294,14 @@ theorem steiner_graph (sizes : X_collection → ℕ) (h_sizes : ∀ X, sizes X >
   · exact le_antisymm ( G_cochromatic_le_4 sizes ) ( G_cochromatic_ge_4 sizes h_sizes );
   · exact le_antisymm ( G_chromatic_le_7 sizes ) ( G_chromatic_ge_7 sizes h_sizes )
 
-def Erdos762Conjecture : Prop :=
-  ∀ (V : Type) [Fintype V] (G : SimpleGraph V),
-  G.CliqueFree 5 →
-  4 ≤ cochromaticNumber G →
-  G.chromaticNumber ≤ cochromaticNumber G + 2
-
-theorem erdos_762 : ¬ Erdos762Conjecture := by
+/-- **Erdős Problem 762** (DISPROVED). The conjecture asserted: for every finite
+`K₅`-free graph `G` with cochromatic number at least `4`, the chromatic number is
+at most cochromatic number `+ 2`. An explicit construction refutes this. -/
+theorem erdos_762 :
+    ¬ (∀ (V : Type) [Fintype V] (G : SimpleGraph V),
+        G.CliqueFree 5 →
+        4 ≤ cochromaticNumber G →
+        G.chromaticNumber ≤ cochromaticNumber G + 2) := by
   classical
   intro hE
   let sizes : X_collection → ℕ := fun _ => 1
