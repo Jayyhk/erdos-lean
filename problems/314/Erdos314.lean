@@ -12,9 +12,9 @@ Mathlib version: 8f9d9cff6bd728b17a24e163c9402775d9e6a365
 
 import Mathlib
 
-noncomputable section
-
 namespace Erdos314
+
+noncomputable section
 
 open Finset Real MeasureTheory intervalIntegral
 
@@ -1376,6 +1376,8 @@ theorem erdos_314 :
   · refine le_liminf_of_le cobounded_eps ?_
     filter_upwards [eventually_ge_atTop 1] with n hn
     exact mul_nonneg (by positivity) (eps_nonneg hn)
+
+end
 
 #print axioms erdos_314
 -- 'Erdos314.erdos_314' depends on axioms: [propext, Classical.choice, Quot.sound]
