@@ -1481,29 +1481,29 @@ theorem keranen_abelianSquareFree_four :
   convert hperm using 1
   all_goals refine List.ext_get ?_ ?_ <;> simp +arith +decide [infBlock] <;> omega
 
-/-- **Erdős's conjecture for Problem 231**, parametrised by alphabet size `k`: every string
-of length `2 ^ k` over a `k`-letter alphabet must contain an *abelian square* — two
-consecutive equal-length blocks where one is a permutation of the other.
-(The problem page renders the length as `2^k - 1`, but as discussed there the intended
-threshold is `2^k`; with `2^k - 1` the claim is trivially false for every `k`.) -/
-def ErdosConjecture231 (k : ℕ) : Prop :=
-    ∀ w : List (Fin k), w.length = 2 ^ k →
-      ∃ i l, 0 < l ∧ i + 2 * l ≤ w.length ∧
-        (w.drop i |>.take l).Perm (w.drop (i + l) |>.take l)
-
 /-- The conjecture fails for `k = 4`: Keränen's word truncated to length `2 ^ 4 = 16` is an
 abelian-square-free string over four letters (cf. the counterexample `1213121412132124`). -/
-theorem not_erdosConjecture231_four : ¬ ErdosConjecture231 4 := by
+theorem not_erdosConjecture231_four :
+    ¬ (∀ w : List (Fin 4), w.length = 2 ^ 4 →
+        ∃ i l, 0 < l ∧ i + 2 * l ≤ w.length ∧
+          (w.drop i |>.take l).Perm (w.drop (i + l) |>.take l)) := by
   obtain ⟨w, hlen, hasf⟩ := keranen_abelianSquareFree_four (2 ^ 4)
   intro h
   obtain ⟨i, l, hl, hbound, hperm⟩ := h w hlen
   exact hasf i l hl hbound hperm
 
 /-- **Erdős Problem 231** (disproved). Erdős conjectured that for every alphabet size
-`k ≥ 2`, every string of length `2 ^ k` over `k` characters contains an abelian square.
-This is false: de Bruijn–Erdős refuted `k = 4`, and Keränen's infinite abelian-square-free
-word over `{1, 2, 3, 4}` gives a negative answer for all `k ≥ 4`. -/
-theorem erdos_231 : ¬ ∀ k, 2 ≤ k → ErdosConjecture231 k :=
+`k ≥ 2`, every string of length `2 ^ k` over `k` characters contains an *abelian square*
+— two consecutive equal-length blocks where one is a permutation of the other. This is
+false: de Bruijn–Erdős refuted `k = 4`, and Keränen's infinite abelian-square-free word
+over `{1, 2, 3, 4}` gives a negative answer for all `k ≥ 4`.
+(The problem page renders the length as `2^k - 1`, but as discussed there the intended
+threshold is `2^k`; with `2^k - 1` the claim is trivially false for every `k`.) -/
+theorem erdos_231 :
+    ¬ ∀ k, 2 ≤ k →
+        ∀ w : List (Fin k), w.length = 2 ^ k →
+          ∃ i l, 0 < l ∧ i + 2 * l ≤ w.length ∧
+            (w.drop i |>.take l).Perm (w.drop (i + l) |>.take l) :=
   fun h => not_erdosConjecture231_four (h 4 (by norm_num))
 
 #print axioms erdos_231
