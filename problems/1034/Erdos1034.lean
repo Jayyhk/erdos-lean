@@ -977,10 +977,13 @@ theorem MaTang_main (ε : ℝ) (hε : 0 < ε) :
   obtain ⟨ N2, hN2 ⟩ := MaTang_Y_upper_bound ε hε ; exact ⟨ Max.max N1 N2, fun n hn => ⟨ hN1 n ( le_trans ( le_max_left _ _ ) hn ), fun T hT => hN2 n ( le_trans ( le_max_right _ _ ) hn ) T hT ⟩ ⟩ ;
 
 /--
-The Erdős–Faudree conjecture (statement of erdosproblems.com/1034): for every `ε > 0`,
-for all sufficiently large `n`, every graph on `n` vertices with more than `n²/4` edges
-contains a triangle `T` such that more than `(1/2 - ε) · n` other vertices each have at
-least two neighbors in `T`.
+The Erdős–Faudree conjecture (Erdős [Er93,p.344]; site statement of
+erdosproblems.com/1034): for every `ε > 0`, for all sufficiently large `n`, every
+graph on `n` vertices with more than `n²/4` edges contains a triangle `T` and
+more than `(1/2 - ε) · n` **other** vertices (i.e. vertices in `V(G) \ V(T)`)
+each joined to at least two vertices of `T`. The "other vertices" wording is
+explicit in the original Erdős prose ("`h(n)` other vertices joined to at least
+two of the `x`'s") quoted on the site.
 -/
 def Erdos1034Conjecture : Prop :=
   ∀ ε : ℝ, 0 < ε →
@@ -989,7 +992,7 @@ def Erdos1034Conjecture : Prop :=
         ∀ (G : SimpleGraph (Fin n)) [DecidableRel G.Adj],
           (G.edgeFinset.card : ℝ) > ((n : ℝ)^2 / 4) →
           ∃ T ∈ G.cliqueFinset 3,
-            ((Y_set G T).card : ℝ) > (((1 : ℝ) / 2) - ε) * (n : ℝ)
+            (((Y_set G T) \ T).card : ℝ) > (((1 : ℝ) / 2) - ε) * (n : ℝ)
 
 /-- **Erdős Problem 1034** (refuted by Ma–Tang): the Erdős–Faudree conjecture is false.
 Ma and Tang construct, for large `n`, a graph with `> n²/4` edges in which every
@@ -1006,7 +1009,14 @@ theorem erdos_1034 : ¬ Erdos1034Conjecture := by
     have := MaTang_main ( 1 / 100 ) ( by norm_num );
     exact ⟨ _, le_max_left _ _, this.choose_spec _ ( le_max_right _ _ ) ⟩;
   refine' ⟨ n, hn.1, _, _, hn.2.1, fun T hT => _ ⟩;
-  exact le_trans ( hn.2.2 T hT ) ( by nlinarith only [ Real.sqrt_nonneg ( 5 / 2 ), Real.sq_sqrt ( show 0 ≤ 5 / 2 by norm_num ) ] )
+  -- `(Y_set G T \ T).card ≤ (Y_set G T).card`, and Boris's bound on the latter chains
+  -- to the conjecture's `(1/2 − 1/100)·n` threshold.
+  have hsubset : ((Y_set (MaTangGraph n alpha_star (s_func_robust n alpha_star)) T \ T).card : ℝ)
+      ≤ ((Y_set (MaTangGraph n alpha_star (s_func_robust n alpha_star)) T).card : ℝ) := by
+    exact_mod_cast Finset.card_le_card Finset.sdiff_subset
+  exact le_trans hsubset
+    (le_trans ( hn.2.2 T hT )
+      ( by nlinarith only [ Real.sqrt_nonneg ( 5 / 2 ), Real.sq_sqrt ( show 0 ≤ 5 / 2 by norm_num ) ] ))
 
 end
 
