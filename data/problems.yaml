@@ -1825,3 +1825,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1044#post-6012"
       - "https://gist.github.com/LorenzoLuccioli/c3ace69881872112109a6c31b7a87cfc#file-erdos1044-lean"
+- number: "1047"
+  proof:
+    path: "problems/1047/"
+    theorem: "Erdos1047.erdos_1047"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1047#post-3595"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1047.lean"
