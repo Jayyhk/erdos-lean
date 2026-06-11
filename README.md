@@ -23,9 +23,9 @@ lake build
 
 <!-- TABLE:START -->
 177 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
-- 158 `complete`
+- 159 `complete`
 - 3 `trust_extended`
-- 16 `axiomatic`
+- 15 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -136,7 +136,7 @@ lake build
 | [639](https://www.erdosproblems.com/639) | `complete` | [problems/639/](problems/639/) | |
 | [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) | |
 | [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) | |
-| [648](https://www.erdosproblems.com/648) | `axiomatic` | [problems/648/](problems/648/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L875) (`pi_alt`) |
+| [648](https://www.erdosproblems.com/648) | `complete` | [problems/648/](problems/648/) | |
 | [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
 | [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
 | [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes Theorem 2.2 of [Solymosi](https://jayyhk.github.io/papers/solymosi2004.pdf) (`frankl_roedl_theorem`) |
