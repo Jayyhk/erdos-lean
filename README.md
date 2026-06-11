@@ -22,8 +22,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-175 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
-- 157 `complete`
+176 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
+- 158 `complete`
 - 3 `trust_extended`
 - 15 `axiomatic`
 
@@ -175,6 +175,7 @@ lake build
 | [907](https://www.erdosproblems.com/907) | `complete` | [problems/907/](problems/907/) | |
 | [914](https://www.erdosproblems.com/914) | `complete` | [problems/914/](problems/914/) | |
 | [923](https://www.erdosproblems.com/923) | `complete` | [problems/923/](problems/923/) | |
+| [927](https://www.erdosproblems.com/927) | `complete` | [problems/927/](problems/927/) | |
 | [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) | |
 | [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) | |
 | [964](https://www.erdosproblems.com/964) | `axiomatic` | [problems/964/](problems/964/) | assumes Theorem 1 of [Eberhard](https://jayyhk.github.io/papers/eberhard2025.pdf) (`goldston_graham_pintz_yildirim`) |

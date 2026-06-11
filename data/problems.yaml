@@ -1603,6 +1603,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/923#post-5628"
       - "https://gist.github.com/Parcly-Taxel/28b95db1e5d3e77077d30c07afc55992#file-e923-aristotle-lean"
+- number: "927"
+  proof:
+    path: "problems/927/"
+    theorem: "Erdos927.erdos_927"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/927#post-6850"
+      - "https://gist.github.com/JohnEdwardJennings/24c9debc9854cb118fbc1314c70941c3#file-erdos927-lean"
 - number: "947"
   proof:
     path: "problems/947/"
