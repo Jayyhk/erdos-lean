@@ -22,10 +22,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-176 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
+177 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
 - 158 `complete`
 - 3 `trust_extended`
-- 15 `axiomatic`
+- 16 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -129,6 +129,7 @@ lake build
 | [540](https://www.erdosproblems.com/540) | `complete` | [problems/540/](problems/540/) | |
 | [541](https://www.erdosproblems.com/541) | `complete` | [problems/541/](problems/541/) | |
 | [582](https://www.erdosproblems.com/582) | `complete` | [problems/582/](problems/582/) | |
+| [610](https://www.erdosproblems.com/610) | `axiomatic` | [problems/610/](problems/610/) | assumes Corollary 2 of [Joret–Micek–Reed–Smid](https://jayyhk.github.io/papers/jmrs2021.pdf) (`jmrs_theorem`) and Theorem 1.1 of [Kim](https://jayyhk.github.io/papers/kim1995.pdf) (`kim_theorem`) |
 | [613](https://www.erdosproblems.com/613) | `complete` | [problems/613/](problems/613/) | |
 | [618](https://www.erdosproblems.com/618) | `complete` | [problems/618/](problems/618/) | |
 | [621](https://www.erdosproblems.com/621) | `complete` | [problems/621/](problems/621/) | |

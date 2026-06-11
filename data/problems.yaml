@@ -1090,6 +1090,18 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/582#post-4212"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos582.lean"
+- number: "610"
+  proof:
+    path: "problems/610/"
+    theorem: "Erdos610.erdos_610"
+    state: "axiomatic"
+    last_update: "2026-06-11"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    extra_axioms: ["Erdos610.jmrs_theorem", "Erdos610.kim_theorem"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/610#post-5678"
+      - "https://www.ulam.ai/research/erdos610.lean"
 - number: "613"
   proof:
     path: "problems/613/"
