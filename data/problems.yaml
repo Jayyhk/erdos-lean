@@ -116,6 +116,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/56#post-1850"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos56.lean"
+- number: "71"
+  proof:
+    path: "problems/71/"
+    theorem: "Erdos71.erdos_71"
+    state: "complete"
+    last_update: "2026-06-10"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/71#post-6635"
 - number: "93"
   proof:
     path: "problems/93/"
