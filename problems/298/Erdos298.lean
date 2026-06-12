@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos298
+
 set_option maxErrors 2000
 
 /-!
@@ -11,8 +13,6 @@ are concatenated in topological dependency order. Project-internal `import`
 statements have been removed; Mathlib imports are deduplicated and lifted
 above.
 -/
-
-namespace Erdos298
 
 /-! ## From src4/Definitions.lean -/
 

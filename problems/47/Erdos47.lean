@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos47
+
 set_option maxErrors 2000
 
 /-!
@@ -17,8 +19,6 @@ then some `S ⊆ A` has `∑_{n∈S} 1/n = 1`). It is derived from Bloom's
 quantitative result `unit_fractions_upper_log_density`, whose threshold
 `≫ (log log log N / log log N)·log N` is `o(log N)`, hence below `δ·log N`.
 -/
-
-namespace Erdos47
 
 /-! ## From src4/Definitions.lean -/
 

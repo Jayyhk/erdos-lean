@@ -11,9 +11,9 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
 
 import Mathlib
 
-set_option maxHeartbeats 0
-
 namespace Erdos698
+
+set_option maxHeartbeats 0
 
 /-
 Let $Q_h = \binom{n}{i} \binom{i}{h} \binom{n-i}{j-i+h}$. Then $Q_h \cdot h! (i-h)! (j-i+h)! (n-j-h)! = n!$.

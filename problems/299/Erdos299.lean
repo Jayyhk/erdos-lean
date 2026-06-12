@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos299
+
 set_option maxErrors 2000
 
 /-!
@@ -20,8 +22,6 @@ reciprocal sum `1`, contradicting the hypothesis.  `not_erdos299` is taken verba
 The vendored development's internal "Lean 3" comments refer to that port's provenance
 (Bloom–Mehta's original mathlib3 proof).
 -/
-
-namespace Erdos299
 
 /-! ## From src4/Definitions.lean -/
 

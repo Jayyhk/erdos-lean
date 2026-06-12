@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos46
+
 set_option maxErrors 2000
 
 /-!
@@ -17,8 +19,6 @@ integers `≥ 2` whose reciprocals sum to 1. It follows from Erdős 298
 (Bloom-Mehta), kept here as the helper `erdos_298`, applied to the densest
 colour class.
 -/
-
-namespace Erdos46
 
 /-! ## From src4/Definitions.lean -/
 

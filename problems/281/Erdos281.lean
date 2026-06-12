@@ -12,9 +12,9 @@ $a_i\pmod{n_i}$ for $1\leq i\leq k$ is less than $\epsilon$.
 
 import Mathlib
 
-set_option maxHeartbeats 800000
-
 namespace Erdos281
+
+set_option maxHeartbeats 800000
 
 open Filter Topology Classical
 

@@ -8,9 +8,9 @@ Formal Conjectures project. Adapted here: `import Mathlib`, the `formal-conjectu
 -/
 import Mathlib
 
-set_option maxHeartbeats 1000000
-
 namespace Erdos316
+
+set_option maxHeartbeats 1000000
 
 /-- **Erdős Problem 316.** Main statement (proven via the counterexample
 `{2,3,4,5,6,7,10,11,13,14,15}` due to Sándor; minimal version by Tom Stobart). -/

@@ -17,7 +17,6 @@ Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7 (v4.24.0)
 
 import Mathlib
 
-set_option maxHeartbeats 0
 set_option linter.style.commandStart false
 set_option linter.style.induction false
 set_option linter.style.longLine false
@@ -30,6 +29,8 @@ set_option linter.unusedTactic false
 set_option linter.unusedVariables false
 
 namespace Erdos337
+
+set_option maxHeartbeats 0
 
 open scoped Classical
 open scoped Pointwise

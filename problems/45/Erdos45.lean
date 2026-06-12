@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos45
+
 set_option maxErrors 2000
 
 /-!
@@ -17,8 +19,6 @@ of `nₖ` admits a monochromatic subset whose reciprocals sum to 1. It follows
 from Erdős 46 (helper `erdos_46`) via a compactness argument, which in turn
 follows from Erdős 298 (Bloom-Mehta, helper `erdos_298`).
 -/
-
-namespace Erdos45
 
 /-! ## From src4/Definitions.lean -/
 

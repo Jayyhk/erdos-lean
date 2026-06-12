@@ -1,9 +1,9 @@
 import Mathlib
-set_option maxHeartbeats 0
-set_option maxRecDepth 10000
 
 namespace Erdos303
 
+set_option maxHeartbeats 0
+set_option maxRecDepth 10000
 
 theorem get_finite_natural_coloring_from_integer_coloring (𝓒 : ℤ → ℤ)
   (h_finite : (Set.range 𝓒).Finite):

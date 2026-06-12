@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos296
+
 set_option maxErrors 2000
 
 /-!
@@ -30,8 +32,6 @@ Sources:
 * Bloom's Lean 4 development: `plby/unit-fractions` (same as problem 298).
 * Problem-296 greedy argument: Aristotle (Harmonic) / J. Jennings.
 -/
-
-namespace Erdos296
 
 /-! ## From src4/Definitions.lean -/
 
