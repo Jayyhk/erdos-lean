@@ -138,7 +138,6 @@
       - "https://www.erdosproblems.com/forum/thread/90#post-6715"
       - "https://logicalintelligence.com/blog/aleph-prover-erdos-disproof-lean-4-formal-methods"
       - "https://github.com/logical-intelligence/erdos-unit-distance"
-      - "https://cdn.openai.com/pdf/74c24085-19b0-4534-9c90-465b8e29ad73/unit-distance-proof.pdf"
 - number: "93"
   proof:
     path: "problems/93/"
