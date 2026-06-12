@@ -1983,3 +1983,14 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/1121#post-5504"
+- number: "1125"
+  proof:
+    path: "problems/1125/"
+    theorem: "Erdos1125.erdos_1125"
+    state: "complete"
+    last_update: "2026-06-12"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1125#post-5332"
+      - "https://gist.github.com/ster-oc/18384e6202ffe054cbc76ff2d0b1afde#file-erdos1125-lean"
