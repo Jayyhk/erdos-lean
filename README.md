@@ -23,9 +23,9 @@ lake build
 
 <!-- TABLE:START -->
 177 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
-- 162 `complete`
+- 163 `complete`
 - 3 `trust_extended`
-- 12 `axiomatic`
+- 11 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -58,7 +58,7 @@ lake build
 | [199](https://www.erdosproblems.com/199) | `complete` | [problems/199/](problems/199/) | |
 | [202](https://www.erdosproblems.com/202) | `complete` | [problems/202/](problems/202/) | |
 | [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) | |
-| [205](https://www.erdosproblems.com/205) | `axiomatic` | [problems/205/](problems/205/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L952) (`nth_prime_asymp`) |
+| [205](https://www.erdosproblems.com/205) | `complete` | [problems/205/](problems/205/) | |
 | [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |
 | [214](https://www.erdosproblems.com/214) | `complete` | [problems/214/](problems/214/) | |
 | [221](https://www.erdosproblems.com/221) | `complete` | [problems/221/](problems/221/) | |
