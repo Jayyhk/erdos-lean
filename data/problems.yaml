@@ -1507,11 +1507,10 @@
   proof:
     path: "problems/862/"
     theorem: "Erdos862.erdos_862"
-    state: "axiomatic"
-    extra_axioms: ["Erdos862.prime_between"]
-    last_update: "2026-06-03"
-    lean_toolchain: "leanprover/lean4:v4.24.0"
-    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    state: "complete"
+    last_update: "2026-06-11"
+    lean_toolchain: "leanprover/lean4:v4.30.0"
+    mathlib_revision: "c5ea00351c28e24afc9f0f84379aa41082b1188f"
     sources:
       - "https://www.erdosproblems.com/forum/thread/862#post-3596"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos862.lean"
