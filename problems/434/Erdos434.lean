@@ -1,10 +1,10 @@
 import Mathlib
 
-attribute [-instance] Localization.instSMulCommClassOfIsScalarTower
-
 set_option linter.mathlibStandardSet false
 
 namespace Erdos434
+
+attribute [-instance] Localization.instSMulCommClassOfIsScalarTower
 
 /- ================= Vendored: Dillies' Kneser (MulStab) ================= -/
 
