@@ -23,9 +23,9 @@ lake build
 
 <!-- TABLE:START -->
 177 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
-- 160 `complete`
+- 161 `complete`
 - 3 `trust_extended`
-- 14 `axiomatic`
+- 13 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -157,7 +157,7 @@ lake build
 | [756](https://www.erdosproblems.com/756) | `complete` | [problems/756/](problems/756/) | |
 | [760](https://www.erdosproblems.com/760) | `complete` | [problems/760/](problems/760/) | |
 | [762](https://www.erdosproblems.com/762) | `complete` | [problems/762/](problems/762/) | |
-| [765](https://www.erdosproblems.com/765) | `axiomatic` | [problems/765/](problems/765/) | assumes a result from [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Consequences.lean#L1555) (`prime_between`) |
+| [765](https://www.erdosproblems.com/765) | `complete` | [problems/765/](problems/765/) | |
 | [775](https://www.erdosproblems.com/775) | `complete` | [problems/775/](problems/775/) | |
 | [785](https://www.erdosproblems.com/785) | `complete` | [problems/785/](problems/785/) | |
 | [794](https://www.erdosproblems.com/794) | `complete` | [problems/794/](problems/794/) | |

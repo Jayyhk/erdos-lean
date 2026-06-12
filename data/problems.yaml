@@ -1408,11 +1408,10 @@
   proof:
     path: "problems/765/"
     theorem: "Erdos765.erdos_765"
-    state: "axiomatic"
-    extra_axioms: ["Erdos765.prime_between"]
-    last_update: "2026-06-02"
-    lean_toolchain: "leanprover/lean4:v4.28.0"
-    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    state: "complete"
+    last_update: "2026-06-11"
+    lean_toolchain: "leanprover/lean4:v4.30.0"
+    mathlib_revision: "c5ea00351c28e24afc9f0f84379aa41082b1188f"
     sources:
       - "https://www.erdosproblems.com/forum/thread/765#post-6480"
       - "https://gist.github.com/Parcly-Taxel/13d3bd0f1390b0832a42994a09cf91c5#file-erdos765-lean"
