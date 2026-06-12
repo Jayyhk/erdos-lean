@@ -1973,3 +1973,13 @@
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem1102PropertyQDensity.lean"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem1102PropertyOverP.lean"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem1102PropertyQFastGrowing.lean"
+- number: "1121"
+  proof:
+    path: "problems/1121/"
+    theorem: "Erdos1121.erdos_1121"
+    state: "complete"
+    last_update: "2026-06-12"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1121#post-5504"
