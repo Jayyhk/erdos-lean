@@ -1,5 +1,7 @@
 import Mathlib
 
+set_option linter.style.header false
+
 namespace Erdos765
 
 section Setup
@@ -856,7 +858,6 @@ section Wiener
 
 
 set_option lang.lemmaCmd true
-set_option linter.style.header false
 
 -- note: the opening of ArithmeticFunction introduces a notation σ that seems
 -- impossible to hide, and hence parameters that are traditionally called σ will

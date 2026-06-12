@@ -41,6 +41,7 @@ The formalization follows the structure of the paper, defining `M`, `m`, `good_x
 import Mathlib
 
 set_option linter.mathlibStandardSet false
+set_option linter.style.header false
 set_option linter.unusedTactic false
 set_option linter.unusedSimpArgs false
 set_option linter.unusedVariables false
@@ -612,7 +613,6 @@ section Wiener
 
 
 set_option lang.lemmaCmd true
-set_option linter.style.header false
 
 -- note: the opening of ArithmeticFunction introduces a notation σ that seems
 -- impossible to hide, and hence parameters that are traditionally called σ will

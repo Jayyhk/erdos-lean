@@ -28,6 +28,7 @@ The bounds use the PNT.
 
 import Mathlib
 
+set_option linter.style.header false
 set_option linter.style.induction false
 set_option linter.style.longLine false
 set_option linter.style.maxHeartbeats false
@@ -1242,7 +1243,6 @@ section Wiener
 
 
 set_option lang.lemmaCmd true
-set_option linter.style.header false
 
 -- note: the opening of ArithmeticFunction introduces a notation σ that seems
 -- impossible to hide, and hence parameters that are traditionally called σ will
