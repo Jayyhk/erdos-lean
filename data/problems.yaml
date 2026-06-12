@@ -1994,3 +1994,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1125#post-5332"
       - "https://gist.github.com/ster-oc/18384e6202ffe054cbc76ff2d0b1afde#file-erdos1125-lean"
+- number: "1126"
+  proof:
+    path: "problems/1126/"
+    theorem: "Erdos1126.erdos_1126"
+    state: "complete"
+    last_update: "2026-06-12"
+    lean_toolchain: "leanprover/lean4:v4.24.0"
+    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1126#post-4524"
