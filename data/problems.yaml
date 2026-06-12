@@ -138,6 +138,7 @@
       - "https://www.erdosproblems.com/forum/thread/90#post-6715"
       - "https://logicalintelligence.com/blog/aleph-prover-erdos-disproof-lean-4-formal-methods"
       - "https://github.com/logical-intelligence/erdos-unit-distance"
+      - "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd"
 - number: "93"
   proof:
     path: "problems/93/"

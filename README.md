@@ -41,7 +41,7 @@ lake build
 | [47](https://www.erdosproblems.com/47) | `complete` | [problems/47/](problems/47/) | |
 | [56](https://www.erdosproblems.com/56) | `complete` | [problems/56/](problems/56/) | |
 | [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) | |
-| [90](https://www.erdosproblems.com/90) | `axiomatic` | [problems/90/](problems/90/) | assumes Theorem 3.9.7 of [Neukirch–Schmidt–Wingberg](https://jayyhk.github.io/papers/neukirch-schmidt-wingberg2008.pdf) (`golod_shafarevich_inequality`), Theorem 5.1 of [Mayer](https://jayyhk.github.io/papers/mayer2015.pdf) (`shafarevich_relation_rank_bound`), and a result of [PNT+](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/blob/main/PrimeNumberTheoremAnd/Wiener.lean#L3901) (`wiener_ikehara`) |
+| [90](https://www.erdosproblems.com/90) | `axiomatic` | [problems/90/](problems/90/) | assumes Theorem 3.9.7 of [Neukirch–Schmidt–Wingberg](https://jayyhk.github.io/papers/neukirch-schmidt-wingberg2008.pdf) (`golod_shafarevich_inequality`) and Theorem 5.1 of [Mayer](https://jayyhk.github.io/papers/mayer2015.pdf) (`shafarevich_relation_rank_bound`) |
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
 | [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
 | [105](https://www.erdosproblems.com/105) | `complete` | [problems/105/](problems/105/) | |
