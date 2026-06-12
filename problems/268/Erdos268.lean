@@ -5,6 +5,8 @@ Authors: Matteo Del Vecchio, Aristotle (Harmonic)
 
 import Mathlib
 
+namespace Erdos268
+
 /-! # The Erdős–Graham Problem on Harmonic Subseries Points
 
 We prove that the set of points
@@ -15,8 +17,6 @@ has non-empty interior, following Kovač's answer (2024) to a question of Erdős
 ## Reference
 V. Kovač, "On the set of points represented by harmonic subseries"
 -/
-
-namespace Erdos268
 
 open Set Filter Topology Matrix
 open scoped BigOperators

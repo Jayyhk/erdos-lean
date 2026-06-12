@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos258
+
 /-!
 # Erdős Problem 258 (original formalization by Przemek Chojecki)
 
@@ -28,8 +30,6 @@ four chapters:
 * `tao_teravainen`: the deep analytic input.
 * `erdos_258`: the main theorem.
 -/
-
-namespace Erdos258
 
 open Nat Finset Filter
 open scoped BigOperators Topology

@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos259
+
 /-!
 # Erdős Problem 259
 
@@ -26,13 +28,10 @@ is irrational (Erdős Problem 259), using the Chen–Ruzsa irrationality criteri
 irrationality, Möbius function, squarefree, Erdős
 -/
 
-namespace Erdos259
-
 open scoped BigOperators
 open ArithmeticFunction
 
 noncomputable section
-
 
 /-! # Chapter 1: Definitions -/
 

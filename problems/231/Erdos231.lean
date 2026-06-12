@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos231
+
 /-!
 # Standalone proof of Erdős Problem 231
 
@@ -12,7 +14,6 @@ without importing the KE92 folder.
 ## Source: `PaperCoreDefs.lean`
 -/
 
-
 /-!
 # KE92 shared definitions and basic lemmas
 
@@ -21,8 +22,6 @@ Separated from `KE92.lean` so that bounded verification files can
 -/
 
 set_option maxHeartbeats 800000
-
-namespace Erdos231
 
 /-! ### Finite-word abelian-square-free definitions -/
 
@@ -158,7 +157,6 @@ theorem isFinASF_complete (w : List (Fin 4)) (hw : FinAbelianSquareFree w) :
 ## Source: `KeranenBounded.lean`
 -/
 
-
 /-!
 # Bounded computational verification of Keränen's morphism preservation (K = 4)
 
@@ -189,7 +187,6 @@ theorem morphism_check_4 :
 ## Source: `KeranenBounded5a.lean`
 -/
 
-
 /-! # Morphism preservation for length-5 words starting with letter 0 -/
 
 set_option maxHeartbeats 4000000
@@ -203,7 +200,6 @@ theorem morphism_check_5a :
 /-!
 ## Source: `KeranenBounded5b.lean`
 -/
-
 
 /-! # Morphism preservation for length-5 words starting with letter 1 -/
 
@@ -219,7 +215,6 @@ theorem morphism_check_5b :
 ## Source: `KeranenBounded5c.lean`
 -/
 
-
 /-! # Morphism preservation for length-5 words starting with letter 2 -/
 
 set_option maxHeartbeats 4000000
@@ -234,7 +229,6 @@ theorem morphism_check_5c :
 ## Source: `KeranenBounded5d.lean`
 -/
 
-
 /-! # Morphism preservation for length-5 words starting with letter 3 -/
 
 set_option maxHeartbeats 4000000
@@ -248,7 +242,6 @@ theorem morphism_check_5d :
 /-!
 ## Source: `BlockBound.lean`
 -/
-
 
 /-!
 # Block bound: computational helpers (base file)
@@ -303,14 +296,12 @@ def adjMTtimesDelta (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
 ## Source: `BlockBoundParikh.lean`
 -/
 
-
 /-! # Parikh norm bound and 3-letter ASF bound -/
 
 set_option maxHeartbeats 8000000
 /-!
 ## Source: `BlockBoundParikhBridge.lean`
 -/
-
 
 /-!
 # Parikh bridge infrastructure for the spanning abelian square elimination
@@ -357,7 +348,6 @@ def hasParikhSolution (wa wb we : Fin 4) (r s : Nat) : Bool :=
 /-!
 ## Source: `BlockBoundParikhFormal.lean`
 -/
-
 
 /-!
 # Formal Parikh bridge infrastructure
@@ -411,7 +401,6 @@ theorem applyKeranenG_take_blocks (w : List (Fin 4)) (k s : ℕ)
 /-!
 ## Source: `BlockBoundSpanning.lean`
 -/
-
 
 /-!
 # Spanning abelian square elimination for m ≥ 14
@@ -674,7 +663,6 @@ theorem adjRow_ite_parikhM (d we : Fin 4) :
 /-!
 ## Source: `BlockBoundSpanningChain.lean`
 -/
-
 
 /-!
 # Algebraic chain: inner defect → vGivesSomeAS → False
@@ -974,7 +962,6 @@ theorem no_spanning_large (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
 ## Source: `BlockBoundBridge.lean`
 -/
 
-
 /-!
 # Block bound bridge lemmas
 
@@ -1142,7 +1129,6 @@ theorem abelianSquare_block_bound_inductive :
 /-!
 ## Source: `KE92.lean`
 -/
-
 
 /-!
 # KE92 — Keränen 1992 paper formalization
@@ -1449,7 +1435,6 @@ theorem exists_inf_abelianSquareFree_four :
 /-!
 ## Source: `Erdos231.lean`
 -/
-
 
 /-!
 # Erdős Problem 231 — Infinite abelian-square-free words

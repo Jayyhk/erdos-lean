@@ -1,4 +1,7 @@
 import Mathlib
+
+namespace Erdos224
+
 /-
 Danzer–Grünbaum (Lean4 + mathlib)
 
@@ -8,9 +11,6 @@ So if card(A) = 2^d + 1 then ¬NoObtuse(A), i.e. there exists an obtuse triple.
 
 from SpringSense Innovation Institute
 -/
-
-
-namespace Erdos224
 
 open scoped BigOperators
 open scoped Real

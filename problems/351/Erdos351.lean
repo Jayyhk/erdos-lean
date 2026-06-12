@@ -12,6 +12,7 @@ The May 3 2026 proof (GPT-5.5 Pro, cleaned up by Liam Price; Kevin Barreto notic
 -/
 import Mathlib
 
+namespace Erdos351
 
 /-! =============================================================
     Section from: Erdos/P283/RSG/CompleteSequences.lean
@@ -23,10 +24,6 @@ Copyright (c) 2026
 Basic complete-sequence infrastructure for Graham's theorem on complete
 sequences of polynomial values.
 -/
-
-
-
-namespace Erdos351
 
 namespace Erdos.P283.RSG
 
@@ -1644,7 +1641,6 @@ Finite-difference operators used in Graham's proof of complete polynomial
 sequences.
 -/
 
-
 namespace Erdos.P283.RSG
 
 open Polynomial
@@ -2226,7 +2222,6 @@ Denominator-clearing and residue lemmas for Graham's complete polynomial
 sequence theorem.
 -/
 
-
 namespace Erdos.P283.RSG
 
 open Polynomial
@@ -2394,7 +2389,6 @@ Copyright (c) 2026
 Integer-valued polynomial value sequences for Graham's complete polynomial
 sequence theorem.
 -/
-
 
 namespace Erdos.P283.RSG
 
@@ -3288,7 +3282,6 @@ Predicates and helpers used throughout the formalization:
 This file is imported by every other P283 file.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Polynomial Filter
@@ -3445,7 +3438,6 @@ Internal helper lemmas (broken out for clarity):
   * `egyptian_expansion_all_large_cardinalities` — all sufficiently large
                                                     lengths.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -4154,7 +4146,6 @@ The proof goes via denominator clearing: pick `B` with `B p ∈ ℤ[X]`, get the
 All axiom-free.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Polynomial
@@ -4253,7 +4244,6 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, switching polynomials & Lem
 
 Lemma 6 is axiom-free; uses Lemmas 4, 5 and `IntValued p`.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -5050,7 +5040,6 @@ This file declares the construction objects and proves the supporting
 lemmas; the `theorem_1` assembly lives in `Theorem1.lean`.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Polynomial Finset
@@ -5565,7 +5554,6 @@ The pairwise-distinctness theorem `all_denominators_distinct_after_switches`
 is the goal; sub-lemmas formalize the per-pair valuation argument.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Nat
@@ -5863,7 +5851,6 @@ Two main supporting results:
 
 Plus the bookkeeping for `B_*`, `R_c`, `C_0`.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -6609,7 +6596,6 @@ Sub-results:
 The RSG input is supplied by the proved `roth_szekeres_graham` wrapper in
 `Basic.lean`.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -9930,7 +9916,6 @@ Three cases:
                                                    (optional; FC #351 doesn't
                                                    need it).
 -/
-
 
 namespace PolynomialEgyptianSums
 

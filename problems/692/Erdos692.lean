@@ -5,6 +5,8 @@ Authors: Pietro Monticone, Aristotle (Harmonic)
 -/
 import Mathlib
 
+namespace Erdos692
+
 /-!
 # Erdős Problem 692
 
@@ -28,8 +30,6 @@ and `1/3 < 7/20 < 38/105`.
   [arXiv:2501.10333](https://arxiv.org/abs/2501.10333) (2025).
 * [Erdős Problem #692](https://www.erdosproblems.com/692).
 -/
-
-namespace Erdos692
 
 open Finset
 

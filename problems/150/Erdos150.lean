@@ -5,6 +5,8 @@ Authors: Pietro Monticone, Aristotle (Harmonic)
 -/
 import Mathlib
 
+namespace Erdos150
+
 /-! # Erdős Problem 150: Minimal Vertex Cuts
 
 We formalise Bradač's solution to Erdős Problem 150. The key result is that for any simple graph
@@ -14,7 +16,6 @@ vertex sets separating `u` from `v` is at most `2 · ∑_{k=0}^{⌊|V|/3⌋} C(|
 This implies the growth rate `α = lim c(n)^{1/n}` satisfies `α < 2`, answering Erdős and
 Nešetřil's question in the affirmative.
 -/
-namespace Erdos150
 
 open Finset Fintype Real SimpleGraph
 

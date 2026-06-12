@@ -3,9 +3,10 @@ Released under Apache 2.0 license.
 Authors: Matteo Del Vecchio, Aristotle (Harmonic)
 -/
 import Mathlib
--- ↓↓↓ inlined from Erdos24IntCheck.lean (kernel-decide integer verification) ↓↓↓
 
 namespace Erdos24
+
+-- ↓↓↓ inlined from Erdos24IntCheck.lean (kernel-decide integer verification) ↓↓↓
 
 open Finset
 
@@ -812,7 +813,6 @@ lemma allFuncSum_nonneg {V : Type*} [Fintype V] (G : SimpleGraph V) :
   exact h_decomp.symm ▸
     Finset.sum_nonneg fun a _ => Finset.sum_nonneg fun b _ =>
       Finset.sum_nonneg fun c _ => quadForm_nonneg G a b c
-
 
 set_option maxHeartbeats 800000 in
 /-- Number of non-injective functions `Fin 5 → V` is at most `10 * n^4`. -/

@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos71
+
 /-!
 # Erdős Problem 71
 
@@ -30,8 +32,6 @@ Solved affirmatively by Bollobás [Bo77]:
    `d` even, the AP-contains-an-even-number hypothesis forces `a` even,
    reducing to the fan-cycle construction with `s = a/2`.
 -/
-
-namespace Erdos71
 
 set_option maxHeartbeats 1000000
 

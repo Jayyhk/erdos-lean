@@ -7,6 +7,8 @@ Formalized from a solution by Liam Price and GPT 5.5 Pro
 
 import Mathlib
 
+namespace Erdos38
+
 /-!
 # Erdős Problem 38 — Complete Proof
 
@@ -43,7 +45,6 @@ always achieves `|(A ∪ (A+b)) ∩ [N]| ≥ (α + f(α))N`.
 we use `Finset ℕ` (only `supp(Sₘ)` matters).
 -/
 
-
 /-!
 # Definitions for Erdős Problem 38
 
@@ -51,8 +52,6 @@ We use Mathlib's `schnirelmannDensity` and define additive basis and related not
 -/
 
 set_option maxHeartbeats 800000
-
-namespace Erdos38
 
 open scoped BigOperators Pointwise
 open Finset Classical Real Filter

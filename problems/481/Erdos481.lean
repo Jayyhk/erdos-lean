@@ -4,6 +4,8 @@ Proven and formalised (with assistance from Claude Opus 4.5) by Kevin Barreto
 
 import Mathlib
 
+namespace Erdos481
+
 /-!
 # Erdős Problem #481
 
@@ -53,8 +55,6 @@ $\Sigma_k = O(k)$. Thus, for some $k$, the sequence $A_k$ contains repeated elem
 
 * Erdős Problem #481: https://www.erdosproblems.com/481
 -/
-
-namespace Erdos481
 
 open Finset BigOperators
 

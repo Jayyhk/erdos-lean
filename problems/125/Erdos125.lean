@@ -16,13 +16,13 @@ limitations under the License.
 
 import Mathlib
 
+namespace Erdos125
+
 /-!
 # Erdős Problem 125
 
 *Reference:* [erdosproblems.com/125](https://www.erdosproblems.com/125)
 -/
-
-namespace Erdos125
 
 open Nat Pointwise
 

@@ -5,6 +5,8 @@ Released under Apache 2.0 license.
 
 import Mathlib
 
+namespace Erdos206
+
 /-!
 # Erdős Problem #206: Non-greedy Egyptian Underapproximations
 
@@ -40,8 +42,6 @@ underapproximations. The key steps are:
 
 [1] V. Kovač, *On eventually greedy best underapproximations by Egyptian fractions*
 -/
-
-namespace Erdos206
 
 noncomputable section
 

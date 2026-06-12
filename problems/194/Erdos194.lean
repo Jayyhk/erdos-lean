@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos194
+
 /-!
 # Erdős Problem 194
 Authors: Stefano Rocca, Aristotle (Harmonic)
@@ -49,8 +51,6 @@ In particular:
 
 Erdős, arithmetic progression, linear ordering, chaotic order
 -/
-
-namespace Erdos194
 
 noncomputable section
 

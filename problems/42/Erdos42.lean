@@ -8,6 +8,8 @@ Project-local imports are deliberately flattened; only Mathlib imports remain.
 
 import Mathlib
 
+namespace Erdos42
+
 /-! =============================================================
     Section from: Erdos/P42/Common.lean
     ============================================================= -/
@@ -20,9 +22,6 @@ tiny lemmas that both the Fourier-positive and compact-Cayley routes use. We
 work with `Finset` rather than `Set` because Lean's `Set ℕ` subtraction is
 truncated.
 -/
-
-
-namespace Erdos42
 
 open Finset
 
@@ -1435,7 +1434,6 @@ allowed sets `T_n ⊆ ZMod p_n` with density `η`, zero-free symmetry, Fourier
 upper bias tending to zero, and no `K_ℓ` clique.
 -/
 
-
 namespace CompactCayley
 
 open Filter Erdos42
@@ -1569,7 +1567,6 @@ theorem exists_cayleyCounterSeq_of_not_compactCayleyCliqueStatementExplicit
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/CliqueEndpoint.lean
     ============================================================= -/
@@ -1583,7 +1580,6 @@ endpoint of the compactness argument: once counting convergence gives an
 ordered tuple whose pairwise differences lie in the allowed set, `0 ∉ T`
 turns that tuple into an actual finite clique.
 -/
-
 
 namespace CompactCayley
 
@@ -1933,7 +1929,6 @@ lemma cliqueKernelDensity_re_pos_iff_exists_clique
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/SpectralCutNorm.lean
     ============================================================= -/
@@ -1948,7 +1943,6 @@ Fourier expansion of the Cayley kernel. It deliberately introduces no new
 assumptions; the operator-norm/Cauchy-Schwarz estimate builds on these
 definitions.
 -/
-
 
 namespace CompactCayley
 
@@ -2471,7 +2465,6 @@ theorem cayleyCutBound_of_spectralBound
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/CountingConvergence.lean
     ============================================================= -/
@@ -2483,7 +2476,6 @@ This file does not prove the compactness/counting-convergence lemma yet.  It
 sets up the exact finite `K_ℓ` density that Lemma 2.6 should converge to, and
 connects its indicator-specialized form to the existing finite clique endpoint.
 -/
-
 
 namespace CompactCayley
 
@@ -3460,7 +3452,6 @@ theorem exists_clique_of_spectral_density_transfer_sq
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Subseq.lean
     ============================================================= -/
@@ -3471,7 +3462,6 @@ Erdős Problem 42 — compact-Cayley counterexample subsequences.
 Fourier extraction repeatedly passes to strictly monotone subsequences.  This
 file keeps that bookkeeping out of the later compactness files.
 -/
-
 
 namespace CompactCayley
 
@@ -3537,7 +3527,6 @@ lemma CayleyCounterSeq.subseq_tendsto_eps_zero
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/FourierExtraction.lean
     ============================================================= -/
@@ -3550,7 +3539,6 @@ clique-specific definitions: a `FourierSeq` is only a bounded sequence of
 complex-valued functions on prime cyclic groups.  Later compact-Cayley
 extraction specializes it to the indicators of the counterexample sets.
 -/
-
 
 namespace CompactCayley
 
@@ -3795,7 +3783,6 @@ theorem FourierSeq.exists_labelFreq_for_largeSpectrum
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/ExtractionGroup.lean
     ============================================================= -/
@@ -3809,7 +3796,6 @@ the diagonal stability layer: without eventual zero/nonzero stabilization one
 can define the quotient and its basic equality API, but not yet prove the
 finite-lift injectivity-on-finite-sets facts needed later.
 -/
-
 
 namespace CompactCayley
 
@@ -3940,7 +3926,6 @@ lemma FourierSeq.extractionGenerator_eq_iff_eventually_freq_eq
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/StableExtraction.lean
     ============================================================= -/
@@ -3953,7 +3938,6 @@ after passing to a subsequence where every formal finite-lift zero relation is
 eventually stable and every formal Fourier coefficient converges.  This file
 packages that diagonal step for a generic `FourierSeq`.
 -/
-
 
 namespace CompactCayley
 
@@ -4113,7 +4097,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/QuotientLift.lean
     ============================================================= -/
@@ -4126,7 +4109,6 @@ the extraction quotient of that subsequenced `FourierSeq`; finite lifts of
 quotient elements use arbitrary representatives, so all algebraic facts are
 recorded as eventual statements.
 -/
-
 
 namespace CompactCayley
 
@@ -4347,7 +4329,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/TorsionFree.lean
     ============================================================= -/
@@ -4359,7 +4340,6 @@ Finite lifts land in cyclic groups of prime order tending to infinity along the
 stable subsequence.  A fixed nonzero scalar cannot create persistent torsion in
 those cyclic groups, hence the eventual-kernel quotient is torsion-free.
 -/
-
 
 namespace CompactCayley
 
@@ -4458,7 +4438,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/CoeffLimit.lean
     ============================================================= -/
@@ -4470,7 +4449,6 @@ This file pushes the formal-word coefficient limits from stable extraction data
 to chosen representatives of quotient frequencies.  It also records the key
 large-spectrum covering consequence of the non-nested labels.
 -/
-
 
 namespace CompactCayley
 
@@ -4649,7 +4627,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/CayleyExtraction.lean
     ============================================================= -/
@@ -4661,7 +4638,6 @@ This file connects the generic Fourier extraction sequence to the concrete
 counterexample sets `T_n`.  The resulting coefficient facts are the finite
 hypotheses that later define the compact limit kernel.
 -/
-
 
 namespace CompactCayley
 
@@ -4847,7 +4823,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/CompactDual.lean
     ============================================================= -/
@@ -4859,7 +4834,6 @@ The extraction quotient is a countable discrete torsion-free abelian group.
 This file builds its Pontryagin dual, then wraps it additively so the compact
 endpoint can use additive notation and Haar probability measure.
 -/
-
 
 namespace CompactCayley
 
@@ -5001,7 +4975,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Characters.lean
     ============================================================= -/
@@ -5009,7 +4982,6 @@ end CompactCayley
 /-
 Erdős Problem 42 — characters on the compact-Cayley compact dual.
 -/
-
 
 namespace CompactCayley
 
@@ -5330,7 +5302,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/TrigPolynomial.lean
     ============================================================= -/
@@ -5342,7 +5313,6 @@ This is the finite-support Fourier-polynomial interface on the extraction
 quotient, together with finite cyclic lifts and the zero-frequency finite
 average convergence that follows from relation-stable quotient lifts.
 -/
-
 
 namespace CompactCayley
 
@@ -5969,7 +5939,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/PairOverlap.lean
     ============================================================= -/
@@ -5977,7 +5946,6 @@ end CompactCayley
 /-
 Erdős Problem 42 — generic finite pair-overlap predicates.
 -/
-
 
 namespace CompactCayley
 
@@ -6061,7 +6029,6 @@ end PairCoeffRealBound
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Fejer.lean
     ============================================================= -/
@@ -6069,7 +6036,6 @@ end CompactCayley
 /-
 Erdős Problem 42 — Fejér kernels for compact-Cayley extraction.
 -/
-
 
 namespace CompactCayley
 
@@ -6858,7 +6824,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Smoothing.lean
     ============================================================= -/
@@ -6866,7 +6831,6 @@ end CompactCayley
 /-
 Erdős Problem 42 — finite Fejér smoothing for compact-Cayley extraction.
 -/
-
 
 namespace CompactCayley
 
@@ -8109,7 +8073,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Folner.lean
     ============================================================= -/
@@ -8122,7 +8085,6 @@ structure.  The later constructive box estimate can then be proved in a
 standard free abelian model and transported back to finite generated
 subgroups of the extraction group.
 -/
-
 
 namespace CompactCayley
 
@@ -8824,7 +8786,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/ContinuousEndpoint.lean
     ============================================================= -/
@@ -8844,7 +8805,6 @@ as the continuous endpoint of the U²-regularity / counting argument. Route B
 (Lemma 2.7 of the compact Cayley PDF), which is also a candidate destination
 for `closed_proper_subgroup_haar_null` once we open that black box.
 -/
-
 
 set_option maxHeartbeats 400000
 open Filter Set Finset MeasureTheory
@@ -10425,7 +10385,6 @@ This file defines the complement coefficients
 `a` is the extracted Cayley Fourier coefficient limit.  The summability and
 continuous Fourier-series construction are later steps.
 -/
-
 
 namespace CompactCayley
 
@@ -12663,7 +12622,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/SmoothDensityConvergence.lean
     ============================================================= -/
@@ -12674,7 +12632,6 @@ Erdős Problem 42 — finite-to-compact density convergence for smoothed kernels
 This file contains the finite edge-frequency bookkeeping needed to turn the
 fixed-`Q` finite Fejér-smoothed clique density into a compact Haar integral.
 -/
-
 
 namespace CompactCayley
 
@@ -14088,7 +14045,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/Contradiction.lean
     ============================================================= -/
@@ -14096,7 +14052,6 @@ end CompactCayley
 /-
 Erdős Problem 42 — contradiction from a compact-Cayley counterexample sequence.
 -/
-
 
 namespace CompactCayley
 
@@ -14228,7 +14183,6 @@ end
 
 end CompactCayley
 
-
 /-! =============================================================
     Section from: Erdos/P42/CompactCayley/CliqueAxiom.lean
     ============================================================= -/
@@ -14293,7 +14247,6 @@ This is the compact-Cayley downstream file that imports the proved
 estimates and greedy Sidon extraction stay in `FiniteReduction.lean`, outside
 the compact-Cayley namespace, so Route A can reuse them independently.
 -/
-
 
 namespace CompactCayley
 
@@ -14412,7 +14365,6 @@ theorem theorem_1_1_from_compact_cayley
       exact hcast.2.2 a₁ ha₁ a₂ ha₂ rfl
 
 end CompactCayley
-
 
 /-! =============================================================
     FC bridge: public `Set ℕ` wrapper + FC iff form (Route B)

@@ -4,6 +4,8 @@ Proven by GPT-5.2 Pro and formalised by Claude Opus 4.5
 
 import Mathlib
 
+namespace Erdos333
+
 /-!
 # Erdős Problem #333
 
@@ -39,8 +41,6 @@ we have $|B \cap [0,N]| \geq c\sqrt{N}$ for infinitely many $N$.
 
 * Erdős Problem #333: https://www.erdosproblems.com/333
 -/
-
-namespace Erdos333
 
 open scoped Pointwise
 open Finset Filter Real
@@ -297,7 +297,6 @@ theorem exists_hitting_set_log_bound
           _ = -1 + Real.log 𝓕.card / Real.log (1 / r) + 2 := by rw [h_log_ratio]
           _ = Real.log 𝓕.card / Real.log (1 / r) + 1 := by ring
           _ = Real.log ((k + 1 : ℕ) : ℝ) / Real.log (1 / (1 - δ)) + 1 := by rw [hn]
-
 
 /-! ## Finite Dyadic Obstruction -/
 

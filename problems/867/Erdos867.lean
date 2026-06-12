@@ -5,6 +5,8 @@ Authors: Pietro Monticone, Aristotle (Harmonic)
 -/
 import Mathlib
 
+namespace Erdos867
+
 /-!
 # Erdős Problem 867
 
@@ -33,8 +35,6 @@ Coppersmith–Phillips (1996): `13N/24 - O(1) ≤ |A| ≤ (2/3 - 1/512)N + log N
   James Cook Mathematical Notes (1993), 6199–6202.
 * [Erdős Problem #867](https://www.erdosproblems.com/867).
 -/
-
-namespace Erdos867
 
 open Finset
 
@@ -357,7 +357,6 @@ lemma freudSet_mem_48_4 (y : ℕ) (hy : 1 ≤ y) : 48*y-4 ∈ freudSet y := by
 lemma freudSet_nmem_48_3 (y : ℕ) (hy : 1 ≤ y) : 48*y-3 ∉ freudSet y := by
   unfold freudSet; simp +decide; omega
 
-
 /-- A contiguous subsum of `≥ 3` elements all from D exceeds the maximum of `freudSet y`. -/
 lemma freudSet_all_ge48_card3_sum_gt (y : ℕ) (hy : 1 ≤ y) (a b : ℕ)
     (hcard : ((freudSet y).filter (fun x => a ≤ x ∧ x ≤ b)).card ≥ 3)
@@ -440,7 +439,6 @@ lemma freudSet_adj_pair_ge48_sum (y : ℕ) (hy : 1 ≤ y) (x₁ x₂ : ℕ)
         simp_all +decide [Nat.dvd_iff_mod_eq_zero]; omega
     · have hx1_D : x₁ ∈ Icc (72*y-6) (144*y-12) := by grind +locals
       exact Or.inr (by norm_num at *; omega)
-
 
 /-- A pair of elements from D sums to a value not in `freudSet y`. -/
 lemma freudSet_all_ge48_card2_sum (y : ℕ) (hy : 1 ≤ y) (a b : ℕ)

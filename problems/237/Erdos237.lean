@@ -5,6 +5,8 @@ Authors: Pietro Monticone, Aristotle (Harmonic)
 -/
 import Mathlib
 
+namespace Erdos237
+
 /-!
 # Erdős Problem 237
 
@@ -41,8 +43,6 @@ The unconditional formalization of Mertens' third theorem below is due to T. Woe
 ([Lean-files/MertensThird.lean](https://github.com/Woett/Lean-files/blob/main/MertensThird.lean)),
 obtained with Aristotle (Harmonic).
 -/
-
-namespace Erdos237
 
 open Finset Real
 
