@@ -21,8 +21,7 @@ Formalization of the main results from "On cliques in hypergraphs" by Jun Gao.
 
 ## Status
 
-All theorems are fully proved (0 sorries). Only standard axioms are used:
-`propext`, `Classical.choice`, `Quot.sound`.
+All theorems are fully proved, relying only on Mathlib/Lean core.
 -/
 
 open Finset Classical

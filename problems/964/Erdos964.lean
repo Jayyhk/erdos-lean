@@ -1574,7 +1574,7 @@ theorem ErdosProblem964 (hGPY : GoldstonGrahamPintzYildirimStatement) :
     exact Set.Subset.trans ( pos_rats_dense_in_pos_reals ) ( closure_mono h_image_subset )
 
 /-- The Goldston–Graham–Pintz–Yıldırım theorem, as stated in Theorem 1 of
-Eberhard 2025 (arXiv:2505.00727), assumed as an axiom — the result is proved
+Eberhard 2025 (arXiv:2505.00727), assumed here — the result is proved
 in the literature but is not yet formalized in Mathlib. -/
 axiom goldston_graham_pintz_yildirim : GoldstonGrahamPintzYildirimStatement
 

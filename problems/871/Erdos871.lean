@@ -1447,7 +1447,7 @@ Since the full construction involves:
 1. Choosing an enumeration of B
 2. Choosing horizons H_m appropriately
 3. Defining the enumeration of m-subsets within each stage
-We axiomatize the key properties needed for the proof.
+We isolate the key properties needed for the proof.
 -/
 /-- A valid construction consists of:
 - An enumeration a : ℕ → ℕ of B
@@ -2625,7 +2625,7 @@ using a concrete GrowingConstruction (see `erdos_871`).
 end MainConstruction
 /-
 Construction of a concrete GrowingConstruction instance.
-This file provides building blocks toward removing the axiom GrowingConstruction_exists.
+This file provides building blocks toward removing GrowingConstruction_exists.
 -/
 open NathansonSeq GrowingConstruction
 set_option maxHeartbeats 2000000
@@ -4920,11 +4920,11 @@ noncomputable def concreteGC : GrowingConstruction where
   stage_le_k := stage_le_k_prop
   stage_zero := stageAssign_zero
   H_linear := simpleH_linear
-/-- The existence theorem for GrowingConstruction, proved without axioms.
-    This replaces the axiom `GrowingConstruction_exists` in Basic.lean. -/
+/-- The existence theorem for GrowingConstruction.
+    This replaces `GrowingConstruction_exists` in Basic.lean. -/
 theorem GrowingConstruction_exists' : Nonempty GrowingConstruction := ⟨concreteGC⟩
 /-- Main theorem: Erdős Problem 871 has a negative answer.
-    This is the axiom-free version using the concrete construction. -/
+    Uses the concrete construction. -/
 theorem erdos_871 :
     ∃ (A : Set ℕ),
       (∀ᶠ n in Filter.atTop, ∃ a ∈ A, ∃ b ∈ A, a + b = n) ∧

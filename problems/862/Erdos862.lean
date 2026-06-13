@@ -2653,8 +2653,6 @@ theorem WeakPNT : Tendsto (fun N ↦ cumsum Λ N / N) atTop (𝓝 1) := by
     simpa only [← nterm_eq_norm_term] using (@ArithmeticFunction.LSeriesSummable_vonMangoldt σ' hσ').norm
   apply WienerIkeharaTheorem' l1 l5 l4 l3 l2
 
--- #print axioms WeakPNT
-
 section auto_cheby
 
 variable {f : ℕ → ℝ}

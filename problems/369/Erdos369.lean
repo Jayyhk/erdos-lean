@@ -741,7 +741,7 @@ lemma smooth_consecutive_exists (θ : ℝ) (hθ : 0 < θ) (k : ℕ) (hk : 2 ≤ 
       refine le_trans ?_ ( le_mul_of_one_le_right ?_ ?_ ) <;> norm_num [ hj_zero ];
       · grind;
       · exact Real.one_le_rpow ( mod_cast by nlinarith ) ( by positivity );
-    · -- Let $i = \langle j - 1, by sorry \rangle$.
+    · -- Let $i = \langle j - 1, by omega \rangle$.
       obtain ⟨i, hi⟩ : ∃ i : Fin (k - 1), i.val + 1 = j := by
         exact ⟨ ⟨ j - 1, by omega ⟩, Nat.succ_pred_eq_of_pos ( Nat.pos_of_ne_zero hj_zero ) ⟩;
       -- Apply quotient_is_perfect_power_of_crt to get $b$ such that $C * (2 ^ (L * u) * 3 ^ (L * v)) = (i.val + 1) * b ^ (r i)$.

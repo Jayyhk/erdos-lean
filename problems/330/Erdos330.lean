@@ -44,11 +44,10 @@ theorem Nat.ncard_Iio (b : ℕ) : (Set.Iio b).ncard = b := by
 # Erdős Problem 330
 
 This file records the proof-faithful upper-density formulation that matches
-the Turturean-style roadmap, rather than the older `answer(sorry)` statement
+the Turturean-style roadmap, rather than the older placeholder statement
 from Formal Conjectures.
 
-The main theorem is currently packaged as a `Prop` target so this development
-can remain `sorry`-free while the construction is formalized.
+The main theorem is currently packaged as a `Prop` target.
 -/
 
 noncomputable section

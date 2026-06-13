@@ -11,7 +11,7 @@ Is there an infinite sequence `a₁ < a₂ < ⋯` with `a_{i+1} - a_i = O(1)` an
 sum of `1/aᵢ` equal to `1`?  **No such sequence exists** (`erdos_299`), which follows
 from Bloom's positive solution to problem 298 [Bl21, arXiv:2112.03726].
 
-This file is self-contained and **axiom-free**.  It vendors the full Lean 4 Bloom
+This file is self-contained.  It vendors the full Lean 4 Bloom
 development from our problem-298 file (the `plby/unit-fractions` port of Bloom–Mehta),
 then derives the disproof: a strictly-increasing sequence with bounded gaps has positive
 upper density, so Bloom's `unit_fractions_upper_density` gives a finite subset with

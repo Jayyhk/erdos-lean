@@ -5,7 +5,7 @@ Aristotle from Harmonic (https://aristotle.harmonic.fun) already formalized the 
 
 https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/457.lean
 
-I gave the already existing formalization to Aristotle and asked it to fill in the sorry from the above statement. It managed it mere minutes!
+I gave the already existing formalization to Aristotle and asked it to fill in the proof from the above statement. It managed it in mere minutes!
 
 Lean version: leanprover/lean4:v4.24.0
 Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7

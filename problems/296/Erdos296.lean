@@ -16,8 +16,8 @@ The lower bound follows (Hunter–Sawhney's observation) from Bloom's
 quantitative density theorem — Theorem 3 of arXiv:2112.03726, the result
 `unit_fractions_upper_log_density` below — via a greedy argument.
 
-This file is self-contained and **axiom-free**.  To discharge
-`unit_fractions_upper_log_density` without any axiom, it vendors the full
+This file is self-contained.  To discharge
+`unit_fractions_upper_log_density`, it vendors the full
 Lean 4 formalization of Bloom's theorem from our problem-298 file (the
 `plby/unit-fractions` port of Bloom–Mehta), and then runs the problem-296
 greedy argument on top of it (`bloom_quantitative`, `erdos296_answer`,

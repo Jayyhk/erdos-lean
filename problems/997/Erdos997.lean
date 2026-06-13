@@ -20,7 +20,7 @@ in arithmetic progressions (specifically the Banks–Freiberg–Turnage-Butterba
 For every `α ∈ ℝ`, the sequence `{α pₙ}` of fractional parts is not well-distributed in the sense of
 Hlawka–Petersen.
 
-The Maynard–Tao–BFT theorem (a deep result not in Mathlib) is taken as an axiom.
+The Maynard–Tao–BFT theorem (a deep result not in Mathlib) is taken as a hypothesis.
 Everything else is proved formally.
 
 ## References
@@ -350,7 +350,7 @@ theorem fracSeq_hasClustering (α : ℝ) : HasClustering (fracSeq α) := by
 /-! ## Main theorem -/
 
 /-- **Erdős Problem 997**: for every `α ∈ ℝ`, the sequence `{α pₙ}` is not well-distributed.
-Uses the Maynard–Tao–BFT axiom. -/
+Uses Maynard–Tao–BFT. -/
 theorem erdos_997 (α : ℝ) : ¬IsWellDistributed (fracSeq α) :=
   not_wellDistributed_of_clustering (fracSeq_hasClustering α)
 

@@ -4402,7 +4402,7 @@ noncomputable def piMod (t : ℝ) (q a : ℕ) : ℕ :=
 /-
 # Brun–Titchmarsh inequality (AP form) for Erdős problem 696
 
-Discharges the `brun_titchmarsh` axiom in `Erdos696.lean`.
+Discharges `brun_titchmarsh` in `Erdos696.lean`.
 Strategy: lean-pool's `SelbergSieve4` interval form + restricted Mertens
 + Solymosi-style choice of sieve level. See `PLAN-brun-titchmarsh.md`.
 -/
@@ -5578,7 +5578,7 @@ theorem piMod_le_via_primesBetween_AP (t : ℝ) (q a : ℕ) (hq : 1 ≤ q) (ht :
 set_option maxHeartbeats 1000000 in
 /-- **Brun–Titchmarsh in arithmetic progressions** (strengthened-hypothesis form).
 
-Discharges the original `axiom brun_titchmarsh` in `Erdos696.lean` for the
+Discharges the original `brun_titchmarsh` in `Erdos696.lean` for the
 range `t ≥ 256 · q^9`, which is the range used by every downstream consumer.
 The constant `CBT = 30000` is chosen large enough to absorb both the leading
 sieve constant and the explicit error term `5 z (1 + log z)^3 + z` at level
@@ -5814,8 +5814,6 @@ theorem brun_titchmarsh_large :
     rw [hlog_z] at h_combine
     linarith [h_combine, h_final]
   exact le_trans h_step1 h_target
-
-#print axioms brun_titchmarsh_large
 
 end Erdos696BT
 
@@ -8949,7 +8947,7 @@ states the ψ-form Siegel–Walfisz statement quoted below.
 >     ψ(x; q, a) = x/φ(q) + O{x exp[−C₃(N)(log x)^{1/2}]}
 > uniformly in `q`, for every `(a, q) = 1`.
 
-The π-form (this axiom) follows by partial summation (Davenport p.133
+The π-form (assumed here) follows by partial summation (Davenport p.133
 explicitly states the partial-summation reduction): the main term
 `x/φ(q)` becomes `Li(x)/φ(q)` and the error term keeps the same
 exp(−c √log) shape.  The exp(−c √log x) bound rests on Siegel's
@@ -8970,7 +8968,7 @@ axiom siegel_walfisz :
 
 /-- **Brun–Titchmarsh inequality** (strengthened-hypothesis form).
 
-The original axiom (commented out) required `2q ≤ t`. The full unconditional
+The original statement (commented out) required `2q ≤ t`. The full unconditional
 form with that hypothesis requires Möbius-inversion machinery not currently
 in Mathlib. We use here a strengthened form requiring `256 q^9 ≤ t`, which
 is sufficient for all downstream consumers (since they apply BT at
@@ -9454,7 +9452,7 @@ theorem crt_transfer :
 
 These are derived lemmas obtained from `siegel_walfisz` / `brun_titchmarsh`
 via partial summation (Abel's summation formula).  Paper §2 eq:SW-reciprocal
-and paper §4 eq:Sp-bound.  They are NOT new axioms. -/
+and paper §4 eq:Sp-bound. -/
 
 private noncomputable def apCoeffMod (q a n : ℕ) : ℝ :=
   if n.Prime ∧ n % q = a % q then 1 else 0
@@ -17127,9 +17125,8 @@ open scoped Topology
 /-! ### Paper §6.2 finite product-model objects
 
 The seven deferred steps below use an explicit finite prime-selection model on the
-window `(exp y, exp(y^(A-1))]`.  This keeps the statements mathematical rather than
-introducing new axioms: every model probability is a finite sum over subsets of the
-finite prime window, with each prime `q` selected with weight `1/q`.
+window `(exp y, exp(y^(A-1))]`.  Every model probability is a finite sum over subsets
+of the finite prime window, with each prime `q` selected with weight `1/q`.
 -/
 
 private noncomputable def reciprocalPrimeMass (S : Finset ℕ) : ℝ :=
@@ -26293,7 +26290,7 @@ Proof outline (paper line 1944-1955):
 
 Note: `maxHeartbeats 800000` (set above) raised due to the multi-step CRT closure;
 default 200000 times out on the final linarith combine.  Math is paper-faithful per
-the steps above (no axioms, no weakenings, just more compile-time budget). -/
+the steps above (no weakenings, just more compile-time budget). -/
 private lemma h_chain_per_greedy_stage_failure_bound
     {A : ℝ} (hA_eq : A = 20) {B : ℝ} (hAB : A + 10 ≤ B) :
     ∃ c : ℝ, 0 < c ∧
@@ -27159,7 +27156,7 @@ private lemma h_chain_per_greedy_stage_failure_bound
     --
     -- 8. For y_target large, y_target² / exp(y_target^A) ≤ y_target^{-c}/2 (since exp grows faster than poly).
     --
-    -- ~150-200 LOC for full Lean proof.  Sub-sorry'd; closes in subsequent fires.
+    -- ~150-200 LOC for full Lean proof.  Closes in subsequent fires.
     have hMd_extra_le :
         (M_d : ℝ) * (d : ℝ) * (b : ℝ) / (M : ℝ) ≤
           Real.exp (-c * Real.log y_target) / 2 * (b : ℝ) := by

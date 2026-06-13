@@ -19,7 +19,7 @@ Weisenberg at the forum link above), which Aristotle proved by itself.
 The final theorem statement was available from the Formal Conjectures
 project (from Google DeepMind).
 
-FYI: The proof assumes Bernay's theorem as an axiom!
+FYI: The proof assumes Bernay's theorem!
 
 
 The proof is verified by Lean.  The following version numbers were

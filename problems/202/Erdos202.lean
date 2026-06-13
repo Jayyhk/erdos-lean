@@ -4,8 +4,7 @@
 Generated from the modular files under `Erdos/P202` and intended as
 a one-file proof snapshot: one `import Mathlib`, no project-local imports.
 
-Trust boundary, verified at the bottom with `#print axioms`:
-  Mathlib/Lean core only (`propext`, `Classical.choice`, `Quot.sound`).
+Trust boundary: Mathlib/Lean core only.
 -/
 
 import Mathlib
@@ -10399,7 +10398,7 @@ omega-tail proof in `Erdos/P202/BFV/OmegaTail.lean`.
 
 # Relation to P694's `Erdos694.mertens_product`
 
-The repo's `Erdos/P694/Proof.lean:417` axiomatizes **Mertens' third theorem**
+The repo's `Erdos/P694/Proof.lean:417` assumes **Mertens' third theorem**
 (the product form `∏_{p ≤ y} p/(p-1) ~ e^γ · log y`). P202 only needs a weak
 Mertens-style upper bound `∑_{p ≤ y} 1/p = O(log log y)`, proved below from
 Mathlib's Chebyshev upper bound for `Nat.primeCounting`. The sharp Mertens
@@ -21539,11 +21538,7 @@ Combines:
   * lower bound from `bfv_lower_bound_theorem`.
 
 The historical omega-count and lower-bound input names now point to theorem
-aliases.  The current non-core trust boundary is visible through
-`#print axioms Erdos202.erdos_202`: the only project-level dependency is
-the Park--Pham threshold package.
-
-Audit by uncommenting the `#print axioms` block below.
+aliases. The only project-level dependency is the Park--Pham threshold package.
 -/
 
 open Filter

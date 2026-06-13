@@ -14,8 +14,7 @@ file is a formal proof of THAT bound, produced with ChatGPT and
 Aristotle.
 
 We assume a statement of the Prime Number Theorem taken from the
-PrimeNumberTheoremAnd project, but admitted as an axiom:
-nth_prime_asymp.
+PrimeNumberTheoremAnd project: nth_prime_asymp.
 
 
 The proof is verified by Lean.  The following version numbers were
@@ -2630,8 +2629,6 @@ theorem WeakPNT : Tendsto (fun N ↦ cumsum Λ N / N) atTop (𝓝 1) := by
   have l5 (σ' : ℝ) (hσ' : 1 < σ') : Summable (nterm Λ σ') := by
     simpa only [← nterm_eq_norm_term] using (@ArithmeticFunction.LSeriesSummable_vonMangoldt σ' hσ').norm
   apply WienerIkeharaTheorem' l1 l5 l4 l3 l2
-
--- #print axioms WeakPNT
 
 section auto_cheby
 

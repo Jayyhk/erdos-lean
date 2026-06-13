@@ -3,7 +3,7 @@ For an odd integer $p > 1$, let $A_p$ be the sequence of integers of the form $2
 
 Wouter van Doorn and Anneroos R. F. Everts, Smooth sums with small spacings. arXiv:2511.04585 (2025).
 
-In January 2026 Borix Alexeev successfully fed the above paper into Aristotle from Harmonic (aristotle-harmonic@harmonic.fun) to get it formalized in Lean, and the result can be found here: 
+In January 2026 Borix Alexeev successfully fed the above paper into Aristotle from Harmonic (aristotle-harmonic@harmonic.fun) to get it formalized in Lean, and the result can be found here:
 
 https://github.com/plby/lean-proofs/blob/main/ErdosProblems/Erdos845.md
 
@@ -138,10 +138,6 @@ theorem v_spec (n : ℕ) :
                               exact ⟨ _, this ⟩ ) with ( _ | x ) <;> simp_all +decide [ Nat.find_eq_iff ];
       grind
 
-
-/-
-Here are two lemmas suggested by Claude, in order to get rid of the use of native_decide in the proof of mul_closure. Success!
--/
 lemma two_mem_smooth3 : 2 ∈ smooth3 := by
   rw [show smooth3 = Nat.smoothNumbers 4 from rfl]
   refine ⟨by norm_num, fun p hp => ?_⟩

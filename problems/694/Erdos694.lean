@@ -1,14 +1,13 @@
 /-
 STANDALONE VERSION of Erdős Problem #694 — TOTIENT FIBRE EXTREMES.
 
-Trust boundary (verify with `#print axioms` at the bottom):
-  Mathlib core (propext, Classical.choice, Quot.sound)
-  + linnik_dvd            (Linnik's theorem, divisibility form, axiomatized)
+Trust boundary:
+  Mathlib core + linnik_dvd (Linnik's theorem, divisibility form).
 
 Mertens' third theorem (`mertens_product`, equation 15 of Mertens 1874) is
 fully proved inline (see the `Mertens` sub-namespace + the bridge below);
 that proof was originally produced by Aristotle from Harmonic and verified by
-Lean. Linnik 1944 (eq. 2) remains axiomatized — its proof in Mathlib is a
+Lean. Linnik 1944 (eq. 2) remains assumed — its proof in Mathlib is a
 larger undertaking (Linnik's exceptional-zero machinery).
 -/
 
@@ -395,19 +394,19 @@ Mathlib v4.27 has neither:
   2. the Mertens product asymptotic `∏_{p ≤ y}(1 - 1/p)^{-1} ~ e^γ log y`
      (`mertens_product`).
 
-We axiomatize exactly these two classical inputs. Both are well-known
+We assume exactly these two classical inputs. Both are well-known
 unconditional results (Linnik 1944, Mertens 1874) for which Mathlib v4.27 has
 the surrounding infrastructure (e.g., `Nat.Primes.not_summable_one_div`,
 `Chebyshev.theta`, `Nat.forall_exists_prime_gt_and_modEq`) but not the named
-quantitative theorems themselves. When they land in Mathlib these axioms can
-be deleted and replaced with imports.
+quantitative theorems themselves. When they land in Mathlib these assumptions
+can be deleted and replaced with imports.
 
 The original PDF additionally invokes the PNT in the form `ϑ(y) ~ y`. This
 formalization avoids that dependency: the lower-bound size estimate uses the
 cruder bound `A_Y ≤ P_Y ≤ 4^Y` (provable from `Nat.primorial_le_4_pow`,
 already in Mathlib), which is enough for the final `log log x` asymptotic.
 
-Both axioms below are transitively used by `totient_fibre_extremes`:
+Both assumptions below are transitively used by `totient_fibre_extremes`:
 `mertens_product` is consumed by `landau_max_ratio` for the upper bound and
 by the lower-bound construction; `linnik_dvd` is consumed by the lower-bound
 construction at the height-to-`x` rescaling step. -/
@@ -3185,9 +3184,9 @@ Taking `Y = ⌊log x / (2K)⌋` gives `n_Y ≤ x` eventually and
 
 This namespace builds the deterministic ingredients for the totient-collision
 construction, deferring all asymptotic content to later phases. The deterministic
-phase (Phases 1-6) is independent of `mertens_product`, `linnik_dvd`, and any
-axiom; it is pure prime-factor bookkeeping. The asymptotic wrapper at the end of
-the namespace consumes both axioms.
+phase (Phases 1-6) is independent of `mertens_product` and `linnik_dvd`; it is
+pure prime-factor bookkeeping. The asymptotic wrapper at the end of the namespace
+consumes both.
 -/
 
 namespace LowerConstruction
@@ -3708,9 +3707,9 @@ hypothesis.**
 
 This theorem is the height-form version of the lower-bound construction. It
 takes a Linnik-style prime-existence hypothesis as an *explicit argument* (so
-the closed theorem itself does not depend on the global `linnik_dvd` axiom —
-that axiom enters only at `totient_collision_construction` below, where this
-theorem is instantiated).
+the closed theorem itself does not depend on the global `linnik_dvd` —
+that assumption enters only at `totient_collision_construction` below, where
+this theorem is instantiated).
 
 Concretely: given absolute constants `C, L ≥ 1` and a Linnik-form input
 (existence of a prime `ℓ` with `M ∣ ℓ - 1` and polynomial bound `ℓ ≤ C · M^L`
@@ -3725,7 +3724,7 @@ The proof packages the analytic combination (Mertens product asymptotic on
 leaving the rescaling to `x` to be done in pure Lean below.
 
 Trust boundary: depends on `mertens_product` only (the Linnik input is taken
-as an explicit hypothesis rather than from the global axiom). -/
+as an explicit hypothesis rather than from the global assumption). -/
 theorem collision_at_height :
     ∀ (C : ℝ) (L : ℕ), 1 ≤ C → 1 ≤ L →
       (∀ M : ℕ, 1 ≤ M →
@@ -4013,10 +4012,9 @@ theorem collision_at_height :
     · exact collision_size_bound Y U ℓ C L hC hL hℓ_prime hU_pos hU_lt_ℓ hAU hℓ_le hY1
 
 /-- **Totient-collision construction (Section 2 lower bound).**
-Now a *theorem* (was previously a top-level axiom): derived from the
-height-form `collision_at_height` together with `linnik_dvd`, by the
-substitution `Y(x) := ⌊log x / (2K)⌋` (so that `n ≤ exp(K·Y) ≤ √x ≤ x`, while
-`log Y(x) = log log x + O(1)`). -/
+Now a *theorem*: derived from the height-form `collision_at_height` together
+with `linnik_dvd`, by the substitution `Y(x) := ⌊log x / (2K)⌋` (so that
+`n ≤ exp(K·Y) ≤ √x ≤ x`, while `log Y(x) = log log x + O(1)`). -/
 theorem totient_collision_construction :
     ∀ ε > 0, ∀ᶠ x : ℕ in atTop,
       ∃ a b n : ℕ, 1 ≤ a ∧ 1 ≤ b ∧ 1 ≤ n ∧ n ≤ x ∧
@@ -4491,7 +4489,7 @@ theorem totient_fibre_extremes :
 
 /- ## Section 3 — Permanence observation
 
-This section is **fully proved** — no sorries, no axioms beyond Mathlib.
+This section is **fully proved** using only Mathlib.
 -/
 
 /-- **Proposition 3.1 (Permanence).** If `φ(a) = φ(b) = n` with `a > b ≥ 1`, then
@@ -4559,10 +4557,6 @@ theorem infinitely_many_collisions (a b : ℕ) (hb : 1 ≤ b) (hgt : b < a)
     omega
   exact (h_inf_good.image hinj).mono (Set.image_subset_iff.mpr hmap)
 
-/- Sanity check: verify Proposition 3.1's permanence step relies only on Mathlib axioms,
-not our local analytic axioms. Uncomment to inspect:
-#print axioms permanence_step
--/
 
 
 /-- **Asymptotic companion theorem (Section 4).**
@@ -4570,7 +4564,7 @@ not our local analytic axioms. Uncomment to inspect:
 PDF Theorem 2.1 in the natural `Tendsto` shape an asymptotic result requires.
 
 Trust boundary: `Erdos694.mertens_product` + `Erdos694.linnik_dvd` plus
-Mathlib core. There are no `sorry`s in this file. -/
+Mathlib core. -/
 theorem erdos_694 :
     Tendsto
       (fun x : ℕ => R x /

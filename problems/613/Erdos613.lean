@@ -37,8 +37,7 @@ There exists a simple graph on {lean}`16` vertices with exactly {lean}`44` edges
 for *every* 2‑coloring of unordered pairs, either color {lean (type := "Fin 2")}`0` contains a $`K_{1,5}`
 (a 5‑edge star) or color {lean (type := "Fin 2")}`1` contains a $`K₃` (a triangle).
 
-This only *states* the claim (as a {lean}`Prop`).  You can later prove it from the
-explicit construction, or assume it as an axiom while you develop the rest. -/
+This only *states* the claim (as a {lean}`Prop`). -/
 def Pikhurko_n5_statement : Prop :=
   ∃ (V:Type) (G : SimpleGraph V),
     G.edgeSet.ncard = 44 ∧

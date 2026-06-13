@@ -2790,7 +2790,7 @@ lemma lemma_2_2_same_sum (p q : ℕ) (a : ℕ) (ha : a = p * q) (hp : p > 1) (hq
       -- This makes F \ {x} a set closed under addition (a subgroup if 0 ∈ F).
       -- Since x + e ∈ F and x + e ≠ x (as e ≠ 0), x + e is in the "stable" part.
       -- Then (x + e) + (x + e) - 2e = 2x is forced into F by the almost-subgroup
-      -- axioms or the gap between u_x and the remaining hole budget.
+      -- properties or the gap between u_x and the remaining hole budget.
       have h_final_residue_in_F : ∃ z ∈ E, z ≡ 2 * x [MOD p] := by
         -- Residency logic: residues of E' form an almost-subgroup F_fin.
         -- Since x ≠ e, and total holes ≤ q-2, 2x mod p must be in F_fin.

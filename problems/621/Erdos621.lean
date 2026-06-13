@@ -10,8 +10,7 @@ Consolidated formalization of the main result from:
 **Erdős–Gallai–Tuza Conjecture:**
   α₁(G) + τ₁(G) ≤ |V(G)|² / 4.
 
-All proofs depend only on standard Lean axioms
-(`propext`, `Classical.choice`, `Quot.sound`).
+All proofs depend only on Mathlib/Lean core.
 -/
 import Mathlib
 

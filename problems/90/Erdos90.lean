@@ -5,7 +5,7 @@ Flattened, single-file Lean formalization of the disproof of Erdős's
 planar unit-distance conjecture, vendored from
 <https://github.com/logical-intelligence/erdos-unit-distance> (OpenAI, 2026).
 
-Two axiomatizations replace external assumptions:
+Two external assumptions are stated as hypotheses:
 * `Erdos90.golod_shafarevich_inequality` — NSW 3.9.7 / Serre I.App.2.Thm 1
 * `Erdos90.shafarevich_relation_rank_bound` — Mayer 5.1 / Koch 11.5+11.8
 
@@ -4938,8 +4938,7 @@ proof is structured modularly: intermediate lemmas are stated
 conditionally on these statements, and the conditions are discharged at
 the leaves.  The genuinely **external** assumptions of `main_theorem`
 (only two — Golod–Shafarevich and the Shafarevich relation-rank bound)
-live in `Assumptions.lean`; see also `#print axioms main_theorem`, which
-shows the headline theorem depends on no extra axioms.
+live in `Assumptions.lean`.
 
 **Note on `h1NormalInvariantRank`.**  `Hyp_FiveTermRelationBound` and
 `Hyp_NormallyGenH1InvariantBound` both involve the symbol

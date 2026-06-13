@@ -282,7 +282,7 @@ lemma spAux_pos : ∀ m, 1 ≤ spAux m := by
 lemma spA_pos (n : ℕ) : 1 ≤ spA n := spAux_pos n
 
 /-- Explicit evaluation of `spA 16 = 25`, used to discharge a small case in
-`spencer_log` without relying on `native_decide`. -/
+`spencer_log`. -/
 lemma spA_16_eq : spA 16 = 25 := by
   show spAux 16 = 25
   have h15 : Nat.log 2 15 = 3 := by

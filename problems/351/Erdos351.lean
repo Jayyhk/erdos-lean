@@ -2460,7 +2460,7 @@ lemma polyValueSeq_fs_eval {p : ℚ[X]}
         (fun i _hi => polyValueSeq_eval p h_int_pos i)
 
 /-- Completeness of the chosen integer value sequence unwraps to the rational
-subset-sum conclusion used by the P283 axiom. -/
+subset-sum conclusion used by P283. -/
 lemma complete_polyValueSeq_to_eval_subsets {p : ℚ[X]}
     {h_int_pos :
       ∀ n : ℕ, 1 ≤ n →
@@ -3429,7 +3429,7 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, Lemmas 3 & 4.
     `ρ ∈ ZMod M`, an Egyptian pattern `E` exists with `T ∣ e` for every `e ∈ E`
     and `|E| ≡ ρ (mod M)`.
 
-Both are axiom-free. Lemma 4 is a direct corollary of Lemma 3.
+Lemma 4 is a direct corollary of Lemma 3.
 
 Internal helper lemmas (broken out for clarity):
   * `egyptian_split_*`        — properties of the `1/y → 1/(y+1) + 1/(y(y+1))`
@@ -4142,8 +4142,6 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, Lemma 5 (polynomial periodi
 
 The proof goes via denominator clearing: pick `B` with `B p ∈ ℤ[X]`, get the
 ℤ-version periodicity, and divide back by `B` using integer-valuedness.
-
-All axiom-free.
 -/
 
 namespace PolynomialEgyptianSums
@@ -4242,7 +4240,7 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, switching polynomials & Lem
   * `finite_switch_values_generate_zmod` — finite version usable for the
                                             correction-slot construction.
 
-Lemma 6 is axiom-free; uses Lemmas 4, 5 and `IntValued p`.
+Lemma 6 uses Lemmas 4, 5 and `IntValued p`.
 -/
 
 namespace PolynomialEgyptianSums

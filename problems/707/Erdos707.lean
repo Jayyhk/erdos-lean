@@ -1515,7 +1515,7 @@ noncomputable def pdsProjectivePlane
       mkLine := ?_,
       mkLine_ax := ?_,
       ----------------------------------------------------------------
-      -- ProjectivePlane extra axiom: 3 points/3 lines in general position
+      -- ProjectivePlane extra condition: 3 points/3 lines in general position
       ----------------------------------------------------------------
       exists_config := ?_ }
 
@@ -1651,7 +1651,7 @@ noncomputable def pdsNegPolarity
   · intro x ℓ
     -- i.e. `x ∈ pdsLine B v ℓ ↔ (-ℓ) ∈ pdsLine B v (-x)`
     -- proved earlier as `mem_pdsLine_neg_swap`.
-    -- (Provide the proof here; keeping it `sorry` per your request.)
+    -- (Provide the proof here.)
     simpa using (mem_pdsLine_neg_swap (B := B) (v := v) x ℓ)
 
 /-- A point `x` lies on the line `-x` iff its “double” is the residue of some `b ∈ B`. -/
@@ -2196,7 +2196,7 @@ lemma c2_mul_smul_nontrivial_nontrivial
   -- then use `hff x : f (f x) = x`.
   simp [c2Action_smul, hmul, hg, hh, hff x]
 
-/-- `mul_smul` axiom for the `C2`-action defined by `c2Action_smul`. -/
+/-- `mul_smul` law for the `C2`-action defined by `c2Action_smul`. -/
 lemma c2_mul_smul
   {S : Type*} (f : S → S) (hff : ∀ x : S, f (f x) = x)
   (g h : C2) (x : S) :
@@ -5348,7 +5348,7 @@ lemma exists_line_all_absPoints_of_order_even
     Configuration.HasLines.mkLine (P := P) (L := L) (p₁ := p₁) (p₂ := p₂)
       hp₁_ne_hp₂.symm
 
-  -- Both points lie on that line (from the axiom)
+  -- Both points lie on that line (from `mkLine_ax`)
   have hp₁ℓ : p₁ ∈ ℓ :=
     (Configuration.HasLines.mkLine_ax (p₁ := p₁) (p₂ := p₂)
       (h := hp₁_ne_hp₂.symm)).1

@@ -2,7 +2,7 @@
 **STANDALONE FLAT BUNDLE** of Erdős Problem #42 — compact-Cayley route.
 
 This file is generated from the modular Route B files under `Erdos/P42` and
-contains the axiom-free proof of `Erdos42.CompactCayley.compact_cayley_clique`.
+contains the proof of `Erdos42.CompactCayley.compact_cayley_clique`.
 Project-local imports are deliberately flattened; only Mathlib imports remain.
 -/
 
@@ -218,7 +218,7 @@ lemma zero_mem_diffFinset_self {A : Finset ℤ} (hA : A.Nonempty) :
     ============================================================= -/
 
 /-
-Erdős Problem 42 — finite-Fourier predicates used by the route-axioms.
+Erdős Problem 42 — finite-Fourier predicates used in the routes.
 
 These predicates use Mathlib's discrete Fourier transform on `ZMod p`. The
 transform `ZMod.dft` is unnormalized, so `normalizedDftCoeff` multiplies by
@@ -237,8 +237,8 @@ noncomputable def indicatorC {p : ℕ} (T : Finset (ZMod p)) : ZMod p → ℂ :=
   fun x => if x ∈ T then 1 else 0
 
 /-- Normalized DFT coefficient of an arbitrary complex-valued function on
-`ZMod p`. This is the common finite-Fourier primitive needed for both axiom
-removal projects; `normalizedDftCoeff` is the indicator-specialized version. -/
+`ZMod p`. This is the common finite-Fourier primitive needed for both routes;
+`normalizedDftCoeff` is the indicator-specialized version. -/
 noncomputable def normalizedDftFunction {p : ℕ} [NeZero p]
     (f : ZMod p → ℂ) (r : ZMod p) : ℂ :=
   ((p : ℂ)⁻¹) * (ZMod.dft f r)
@@ -449,8 +449,7 @@ This file contains the route-neutral finite pieces used by both the Fourier-posi
   4. Lift the clique-in-interval to an integer set `X ⊆ [1, N]` avoiding
      `A − A`; greedily extract a Sidon subset `B ⊆ X` of size `M`.
 
-The Route-specific theorem files import this module; this file imports no analytic
-trust-boundary axiom.
+The Route-specific theorem files import this module.
 -/
 
 open Finset Erdos42
@@ -1441,7 +1440,7 @@ open scoped Topology
 
 /-- Explicit-prime version of the compact Cayley theorem statement.  This
 avoids typeclass binders in the counterexample extraction; it is equivalent in
-content to the Route B trust-boundary axiom's statement. -/
+content to the Route B trust-boundary statement. -/
 def CompactCayleyCliqueStatementExplicit (ℓ : ℕ) (η : ℝ) : Prop :=
   ∃ ε : ℝ, 0 < ε ∧
   ∃ p₀ : ℕ, ∀ (p : ℕ) (hp : p.Prime), p₀ < p →
@@ -1453,7 +1452,7 @@ def CompactCayleyCliqueStatementExplicit (ℓ : ℕ) (η : ℝ) : Prop :=
       ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C
 
 /-- The explicit-prime compact-Cayley statement implies the original
-typeclass-shaped statement used by the Route B trust-boundary axiom. -/
+typeclass-shaped statement used by the Route B trust-boundary. -/
 theorem compactCayleyCliqueStatement_from_explicit
     {ℓ : ℕ} {η : ℝ}
     (h : CompactCayleyCliqueStatementExplicit ℓ η) :
@@ -3534,7 +3533,7 @@ end CompactCayley
 /-
 Erdős Problem 42 — generic finite Fourier extraction primitives.
 
-This is the first compact-Cayley axiom-removal layer.  It deliberately avoids
+This is the first compact-Cayley layer.  It deliberately avoids
 clique-specific definitions: a `FourierSeq` is only a bounded sequence of
 complex-valued functions on prime cyclic groups.  Later compact-Cayley
 extraction specializes it to the indicators of the counterexample sets.
@@ -8795,7 +8794,7 @@ Erdős Problem 42 — Layer 1 continuous-analogue lemma.
 
 Following Tao's May 2026 forum comment + natso26's clean exposition
 (`fourier_positive_ulam_note.pdf`). The geometric core
-`closed_proper_subgroup_haar_null` is proved here axiom-free; the main
+`closed_proper_subgroup_haar_null` is proved here directly; the main
 `tao_continuous_avoidance` lemma is also proved once the standard measurable
 group assumptions needed by Mathlib's Haar shear lemmas are available.
 
@@ -10017,9 +10016,8 @@ show that the level set `{x | g x = 1}` is a proper closed subgroup.  This file
 formalizes the downstream subgroup construction and density conclusion from the
 exact closure property that the positive-definite argument must supply.
 
-No new axiom is introduced here: the remaining Route B work is to derive
-`LevelOneSubgroupKernel g` from the compact limit's positive Fourier
-coefficients.
+The remaining Route B work is to derive `LevelOneSubgroupKernel g` from the
+compact limit's positive Fourier coefficients.
 -/
 
 open MeasureTheory
@@ -14201,7 +14199,7 @@ limit properties (2.4), spectral cut-norm control (2.5), counting convergence
 (2.6), and clique forcing on connected compact groups (2.7).
 
 This file now closes the former Route B trust boundary by deriving the compact
-Cayley clique theorem from the axiom-free countersequence contradiction.
+Cayley clique theorem from the countersequence contradiction.
 -/
 
 namespace CompactCayley

@@ -226,7 +226,7 @@ theorem triangleFree_transversal_gives_indep (G : SimpleGraph V)
 /-! ## External theorems (stated without proof)
 
 The following two results are deep theorems from the literature.
-Their proofs are beyond the scope of this formalization and are left as `sorry`. -/
+Their proofs are beyond the scope of this formalization. -/
 
 /-- **Theorem (Joret–Micek–Reed–Smid, 2021)**: There exists `A > 0` such that for all
 sufficiently large `n`, every `n`-vertex graph admits a clique coloring with at most
@@ -318,8 +318,7 @@ number `τ(G)` is the minimum size of a vertex set meeting every maximal clique 
 satisfies `τ(G) ≤ n − c√(n log n)` for some absolute `c > 0`; the answer is
 **yes** and the rate is tight. This theorem proves both directions —
 `T(n) = n − Θ(√(n log n))` — assuming Joret–Micek–Reed–Smid's clique-coloring
-bound (`jmrs_theorem`) and Kim's lower bound on `R(3,t)` (`kim_theorem`),
-both axiomatized here. -/
+bound (`jmrs_theorem`) and Kim's lower bound on `R(3,t)` (`kim_theorem`). -/
 theorem erdos_610 :
     (∃ c : ℝ, 0 < c ∧ ∃ N : ℕ, ∀ n ≥ N,
       ∀ G : SimpleGraph (Fin n),

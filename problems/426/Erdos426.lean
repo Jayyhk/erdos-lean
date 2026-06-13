@@ -1825,7 +1825,7 @@ section AzumaHoeffdingSection
 
 This file proves the Azuma–Hoeffding inequality for functions of independent
 fair coin flips with bounded differences. The statement is copied exactly from
-`RequestProject/Main.lean` (where it appears as a black-box `sorry`).
+`RequestProject/Main.lean`.
 
 ## Main result
 
@@ -2033,7 +2033,7 @@ The main theorem follows from the composition of Lemmas 2.2 and 2.3.
 
 ## Black-box theorems (now fully proved)
 
-Three standard results were previously taken as black-box sorry'd axioms and are now
+Three standard results were previously taken as black boxes and are now
 proved in separate files:
 1. **Pólya–Wright theorem** — proved in `PolyaWright.lean`
 2. **Chernoff bound** — proved in `ChernoffBound.lean`

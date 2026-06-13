@@ -4,8 +4,7 @@
 This file concatenates the P283-local RSG proof plus the supporting development.
 It is intended as a one-file snapshot: one `import Mathlib`, no project-local imports.
 
-Trust boundary (verify with `#print axioms erdos_283` at the bottom):
-  Mathlib core (propext, Classical.choice, Quot.sound)
+Trust boundary: Mathlib core only.
 
 The May 3 2026 proof (GPT-5.5 Pro, cleaned up by Liam Price) —
 see compact_cayley_proof.pdf.
@@ -3439,7 +3438,7 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, Lemmas 3 & 4.
     `ρ ∈ ZMod M`, an Egyptian pattern `E` exists with `T ∣ e` for every `e ∈ E`
     and `|E| ≡ ρ (mod M)`.
 
-Both are axiom-free. Lemma 4 is a direct corollary of Lemma 3.
+Lemma 4 is a direct corollary of Lemma 3.
 
 Internal helper lemmas (broken out for clarity):
   * `egyptian_split_*`        — properties of the `1/y → 1/(y+1) + 1/(y(y+1))`
@@ -4153,8 +4152,6 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, Lemma 5 (polynomial periodi
 
 The proof goes via denominator clearing: pick `B` with `B p ∈ ℤ[X]`, get the
 ℤ-version periodicity, and divide back by `B` using integer-valuedness.
-
-All axiom-free.
 -/
 
 
@@ -4254,7 +4251,7 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, switching polynomials & Lem
   * `finite_switch_values_generate_zmod` — finite version usable for the
                                             correction-slot construction.
 
-Lemma 6 is axiom-free; uses Lemmas 4, 5 and `IntValued p`.
+Lemma 6 uses Lemmas 4, 5 and `IntValued p`.
 -/
 
 

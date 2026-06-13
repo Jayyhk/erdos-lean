@@ -23,7 +23,7 @@ The assumption that `A` is infinite suffices.
 ## Proof structure
 
 The proof chain is:
-1. `maynard_prime_tuples` (axiom): admissible tuples yield many primes.
+1. `maynard_prime_tuples`: admissible tuples yield many primes.
 2. `mertens_third_theorem` (proved): `∏_{p ≤ n} (1 - 1/p) ≥ 1/(3 log n)`, an effective form
     of Mertens' third theorem, formalized unconditionally below (see references).
 3. `sieving_lemma` (proved): large sets contain admissible subsets meeting the Maynard–Tao
@@ -79,7 +79,7 @@ end Defs
 /-! ## Mertens' third theorem (effective form)
 
 An unconditional formalization of `1 / (3 log n) ≤ ∏_{p ≤ n} (1 - 1/p)` for `n ≥ 3`.
-This replaces what was previously an axiom, so `maynard_prime_tuples` is the sole remaining axiom.
+This replaces what was previously assumed, so `maynard_prime_tuples` is the sole remaining assumption.
 Formalization due to T. Woett, obtained with Aristotle (Harmonic);
 see https://github.com/Woett/Lean-files/blob/main/MertensThird.lean -/
 

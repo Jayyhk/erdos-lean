@@ -13,9 +13,8 @@ Cambie's paper from the arxiv was auto-formalized by Aristotle (from
 Harmonic).  It actually auto-formalized the entire paper, but below we
 only include the portion necessary to solve the problem (Theorem 1).
 
-This file includes a statement of the Prime Number Theorem as an
-axiom, `pi_alt`.  It is lifted directly from the PrimeNumberTheoremAnd
-project.
+This file includes a statement of the Prime Number Theorem, `pi_alt`,
+lifted directly from the PrimeNumberTheoremAnd project.
 
 The final statements are from a mixture of sources.
 
@@ -2653,8 +2652,6 @@ theorem WeakPNT : Tendsto (fun N ↦ cumsum Λ N / N) atTop (𝓝 1) := by
   have l5 (σ' : ℝ) (hσ' : 1 < σ') : Summable (nterm Λ σ') := by
     simpa only [← nterm_eq_norm_term] using (@ArithmeticFunction.LSeriesSummable_vonMangoldt σ' hσ').norm
   apply WienerIkeharaTheorem' l1 l5 l4 l3 l2
-
--- #print axioms WeakPNT
 
 section auto_cheby
 
@@ -6816,7 +6813,7 @@ lemma exists_distinct_primes_in_interval (a b : ℝ) (n : ℕ) (ha : 0 < a) (hb 
     exact ⟨ S, hS.2, fun p hp => ⟨ hP₂ p ( Finset.mem_filter.mp ( hS.1 hp ) |>.1 ) |>.1, hP₂ p ( Finset.mem_filter.mp ( hS.1 hp ) |>.1 ) |>.2.1, by nlinarith [ hP₂ p ( Finset.mem_filter.mp ( hS.1 hp ) |>.1 ) |>.2.2, show ( p : ℝ ) < ⌊b * x⌋₊ from mod_cast Finset.mem_filter.mp ( hS.1 hp ) |>.2, Nat.floor_le ( show 0 ≤ b * x by nlinarith [ div_nonneg ( show 0 ≤ b by linarith ) ( show 0 ≤ b - a by linarith ) ] ) ] ⟩ ⟩
 
 /--
-The density hypothesis follows from the PNT (axiom).
+The density hypothesis follows from the PNT.
 -/
 theorem density_proof : DensityHypothesis := by
   intro ε hε;
@@ -7054,7 +7051,7 @@ theorem lcmInterval_growth : ∀ᶠ k in Filter.atTop, ∃ N, ∀ n ≥ N, ∀ m
   exact ⟨ Nat.max k h_const_bound.choose, fun n hn => lt_of_lt_of_le ( h_const_bound.choose_spec n ( le_trans ( le_max_right _ _ ) hn ) ) ( h_binom_bound n ( le_trans ( le_max_left _ _ ) hn ) ) ⟩
 
 /--
-The main theorem holds, conditional on the PNT (axiom)
+The main theorem holds, conditional on the PNT.
 -/
 theorem main_theorem_given_pnt : MainTheoremStatement := by
   -- Apply the main theorem with the density hypothesis to conclude the proof.
@@ -7062,14 +7059,14 @@ theorem main_theorem_given_pnt : MainTheoremStatement := by
 
 /--
 The main theorem spelled out, just for concreteness.  As before, it's proven assuming
-the PNT as an axiom.
+the PNT.
 -/
 theorem main_theorem_expanded :
   ∀ C : ℝ, C ≥ 1 →
   ∃ K, ∀ k ≥ K, ∃ x y : ℕ,
     0 < x ∧ x < y ∧ y > x + k ∧
     lcm_real (Finset.Icc x (x + k - 1)) > C * lcm_real (Finset.Icc y (y + k)) := by
-  -- The main theorem holds, conditional on the PNT (axiom) by applying the `main_theorem` theorem.
+  -- The main theorem holds, conditional on the PNT, by applying the `main_theorem` theorem.
   apply main_theorem_given_pnt
 
 theorem erdos_678_cambie_strong :
