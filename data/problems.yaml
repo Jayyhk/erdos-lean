@@ -2004,3 +2004,14 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/1126#post-4524"
+- number: "1136"
+  proof:
+    path: "problems/1136/"
+    theorem: "Erdos1136.erdos_1136"
+    state: "complete"
+    last_update: "2026-06-20"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1136#post-5688"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem1136.lean"
