@@ -1,0 +1,10 @@
+name = "erdos1196"
+defaultTargets = ["Erdos1196"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "f369f66ea08e49c46a2fffaceb6699e6bef11555"
+
+[[lean_lib]]
+name = "Erdos1196"

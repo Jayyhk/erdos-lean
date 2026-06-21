@@ -22,8 +22,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-188 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
-- 171 `complete`
+189 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
+- 172 `complete`
 - 3 `trust_extended`
 - 14 `axiomatic`
 
@@ -217,5 +217,6 @@ lake build
 | [1148](https://www.erdosproblems.com/1148) | `axiomatic` | [problems/1148/](problems/1148/) | assumes an immediate consequence of Theorem 2.3 of [Einsiedler–Lindenstrauss–Michel–Venkatesh](https://jayyhk.github.io/papers/einsiedler-lindenstrauss-michel-venkatesh2012.pdf) (`theorem_2_3`) |
 | [1190](https://www.erdosproblems.com/1190) | `complete` | [problems/1190/](problems/1190/) | |
 | [1193](https://www.erdosproblems.com/1193) | `complete` | [problems/1193/](problems/1193/) | |
+| [1196](https://www.erdosproblems.com/1196) | `complete` | [problems/1196/](problems/1196/) | |
 
 <!-- TABLE:END -->

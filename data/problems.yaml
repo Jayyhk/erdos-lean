@@ -2072,3 +2072,14 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1193#post-5360"
       - "https://gist.github.com/pitmonticone/c2658d464f8f5ca0e7fa40ed6fb78a5d"
+- number: "1196"
+  proof:
+    path: "problems/1196/"
+    theorem: "Erdos1196.erdos_1196"
+    state: "complete"
+    last_update: "2026-06-21"
+    lean_toolchain: "leanprover/lean4:v4.30.0-rc1"
+    mathlib_revision: "f369f66ea08e49c46a2fffaceb6699e6bef11555"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1196#post-5469"
+      - "https://github.com/math-inc/Erdos1196"
