@@ -22,8 +22,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-190 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
-- 173 `complete`
+191 proofs in the catalog (out of 191 Erdős problems with formalized solutions):
+- 174 `complete`
 - 3 `trust_extended`
 - 14 `axiomatic`
 
@@ -150,6 +150,7 @@ lake build
 | [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) |
 | [698](https://www.erdosproblems.com/698) | `complete` | [problems/698/](problems/698/) | |
 | [707](https://www.erdosproblems.com/707) | `complete` | [problems/707/](problems/707/) | |
+| [716](https://www.erdosproblems.com/716) | `complete` | [problems/716/](problems/716/) | |
 | [728](https://www.erdosproblems.com/728) | `complete` | [problems/728/](problems/728/) | |
 | [729](https://www.erdosproblems.com/729) | `complete` | [problems/729/](problems/729/) | |
 | [741](https://www.erdosproblems.com/741) | `complete` | [problems/741/](problems/741/) | |
