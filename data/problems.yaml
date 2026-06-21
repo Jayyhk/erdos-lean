@@ -2047,6 +2047,6 @@
     last_update: "2026-06-20"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    extra_axioms: ["Erdos1148.theorem_1_2"]
+    extra_axioms: ["Erdos1148.theorem_2_3"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/1148#post-4849"

@@ -628,7 +628,7 @@ lemma exists_bump_with_pos_integral {p : ℝ × ℝ × ℝ} (hp : p ∈ V_disc_p
 
 /-! #### Step 1: existence of a representation in any open patch of V_disc,+1
 
-The next step is to derive an `existence-in-open` consequence of `theorem_1_2`.
+The next step is to derive an `existence-in-open` consequence of `theorem_2_3`.
 The argument:
 
 1. **Geometric lemma**: for `p ∈ V_disc,+1`, the cone `cone(B(p,ε) ∩ V_disc,+1)`
@@ -649,9 +649,9 @@ The argument:
 
 5. **Integral positivity**: `∫ φ dμ_disc_plus_1 ≥ φ(p) · μ(small_ball(p)) > 0`.
 
-6. **Tendsto extraction**: `theorem_1_2 φ φ ... ...` gives the ratio of sums
-   converging to `1`. Eventually the denominator is positive, hence at least
-   one `t ∈ R_disc(4n)` has `φ(t/(2√n)) > 0`, i.e., `t/(2√n) ∈ supp(φ) ⊂ U`.
+6. **Tendsto extraction**: `theorem_2_3` gives `λ_d(φ) / vol_G(d) → ∫φ dμ > 0`.
+   Eventually the sum `λ_d(φ)` is positive, hence at least one `t ∈ R_disc(4n)`
+   has `φ(t/(2√n)) > 0`, i.e., `t/(2√n) ∈ supp(φ) ⊂ U`.
 
 This chain provides `existence-in-open`. Combined with the Pell-matrix parity
 correction (proved as `g/hAction_parity_matches` above), it derives
@@ -676,49 +676,56 @@ noncomputable def project_to_hyperboloid (n : ℤ) (t : ℤ × ℤ × ℤ) : ℝ
   ((t.1 : ℝ) / s, (t.2.1 : ℝ) / s, (t.2.2 : ℝ) / s)
 
 /-
-Statement of Duke's Theorem adapted for Problem 1148.
+Statement of Duke's Theorem adapted for Problem 1148, restricted to non-square
+`n` (matching the non-square restriction in ELMV Theorem 2.3 from which it is
+derived). The case `n = m²` is handled separately in `erdos_1148`.
 -/
 def DukeTheoremStatement : Prop :=
-  ∃ N : ℤ, ∀ n : ℤ, n ≥ N →
+  ∃ N : ℤ, ∀ n : ℤ, n ≥ N → ¬ IsSquare n →
   ∃ t ∈ R_star_disc (4 * n),
     project_to_hyperboloid n t ∈ Omega_strict ∧
     t.1 % 2 = t.2.2 % 2
 
-/-! ### ELMV Theorem 1.2
+/-! ### ELMV Theorem 2.3
 
-The Skubenko-type equidistribution result for positive discriminants,
-in the unconditional form due to Einsiedler-Lindenstrauss-Michel-Venkatesh
-[ELMV12, Theorem 1.2]. -/
+The unconditional equidistribution result for non-square positive
+discriminants due to Einsiedler-Lindenstrauss-Michel-Venkatesh
+[ELMV12, Theorem 2.3], in the point-form consequence displayed
+immediately after the theorem on page 15. -/
 
-/-- **ELMV Theorem 1.2** (the unconditional form).
+/-- **ELMV Theorem 2.3 in point form** — the displayed equation in ELMV [ELMV12]
+immediately following the named Theorem 2.3 statement (page 15):
 
-For any two continuous compactly supported test functions `φ₁, φ₂ : ℝ³ → ℝ`
-with `∫ φ₂ dμ_disc,+1 ≠ 0`, the ratio of point sums over `R_disc(d)/√d`
-converges to the ratio of integrals against `μ_disc,+1`:
+> `λ_d(ϕ_A) = ν_d(ϕ_Γ) = vol(G_d) µ_d(ϕ_Γ) = vol(G_d)(µ_{Γ\G}(ϕ_Γ) + o(1))`
+> `= vol(G_d)(µ_{G/A}(ϕ_A) + o(1))`
 
-`(∑_{x ∈ R_disc(d)} φ₁(|d|^{-½}·x)) / (∑_{x ∈ R_disc(d)} φ₂(|d|^{-½}·x))`
-` → (∫ φ₁ dμ_disc,+1) / (∫ φ₂ dμ_disc,+1)` as `d → +∞` among positive
-discriminants. (We restrict to `d = 4n` for `n → +∞`, which is the case
-needed for Erdős Problem 1148.) -/
-axiom theorem_1_2 :
-    ∀ φ₁ φ₂ : (ℝ × ℝ × ℝ) → ℝ,
-      Continuous φ₁ → HasCompactSupport φ₁ →
-      Continuous φ₂ → HasCompactSupport φ₂ →
-      ∫ x, φ₂ x ∂μ_disc_plus_1 ≠ 0 →
-      Filter.Tendsto
-        (fun n : ℤ =>
-          (∑' t : R_star_disc (4 * n), φ₁ (project_to_hyperboloid n t.val))
-          / (∑' t : R_star_disc (4 * n), φ₂ (project_to_hyperboloid n t.val)))
-        Filter.atTop
-        (nhds
-          ((∫ x, φ₁ x ∂μ_disc_plus_1) / (∫ x, φ₂ x ∂μ_disc_plus_1)))
+Here:
+* `λ_d(ϕ)` is the discrete measure `∑_{x ∈ R_disc(d)} ϕ(|d|^{-1/2}·x)` on
+  `G/A ≃ V_disc,+1(ℝ)` (via §2.4 of the paper);
+* `vol(G_d)` is the volume of the union of A-orbits, equal to
+  `|Pic(O_d)|·Reg(O_d) = |d|^{1/2+o(1)}` (paper eq. 2.9);
+* `µ_{G/A}` is the cone-volume measure `µ_disc,+1` under the identification.
 
-/-! ### Deriving Duke's theorem (with parity) from Theorem 1.2
+Rewritten as `λ_d(ϕ) / vol(G_d) → µ_disc,+1(ϕ)` as `d = 4n → ∞`,
+amongst **non-square** positive discriminants. -/
+axiom theorem_2_3 :
+    ∃ vol_G : ℤ → ℝ,
+      (∀ n : ℤ, 0 < n → ¬ IsSquare n → 0 < vol_G (4 * n)) ∧
+      (∀ f : (ℝ × ℝ × ℝ) → ℝ,
+        Continuous f → HasCompactSupport f →
+        Filter.Tendsto
+          (fun n : ℤ =>
+            (∑' t : R_star_disc (4 * n), f (project_to_hyperboloid n t.val))
+              / vol_G (4 * n))
+          (Filter.atTop ⊓ Filter.principal {n : ℤ | ¬ IsSquare n})
+          (nhds (∫ x, f x ∂μ_disc_plus_1)))
+
+/-! ### Deriving Duke's theorem (with parity) from Theorem 2.3
 
 Chojecki's proof (see [erdosproblems.com/forum/thread/1148#post-4849] and
 the linked note) splits as follows:
 
-* From Theorem 1.2's equidistribution, taking `φ₂` to be a nonnegative bump
+* From Theorem 2.3's equidistribution, taking `f` to be a nonnegative bump
   function on an open `Ω ⊂ V_disc,+1`, the existence of a representation
   `t ∈ R_disc(4n)` with `t/(2√n) ∈ Ω` follows for `n` sufficiently large.
 * The parity condition `a ≡ c (mod 2)` is then enforced using Pell numbers
@@ -786,40 +793,50 @@ lemma hAction_parity_matches (t : ℤ × ℤ × ℤ)
   omega
 
 /-- **Existence in any open ball at a point of V_disc,+1** (consequence of
-`theorem_1_2`): for any `p ∈ V_disc,+1` and `ε > 0`, eventually for `n` large,
-some `t ∈ R_star_disc(4n)` has projection in `B(p, ε)`. -/
+`theorem_2_3`): for any `p ∈ V_disc,+1` and `ε > 0`, eventually for `n` large
+*and non-square*, some `t ∈ R_star_disc(4n)` has projection in `B(p, ε)`. -/
 lemma exists_projection_in_ball {p : ℝ × ℝ × ℝ} (hp : p ∈ V_disc_plus_1)
     {ε : ℝ} (hε : 0 < ε) :
-    ∃ N : ℤ, ∀ n : ℤ, n ≥ N →
+    ∃ N : ℤ, ∀ n : ℤ, n ≥ N → ¬ IsSquare n →
       ∃ t : R_star_disc (4 * n), project_to_hyperboloid n t.val ∈ Metric.ball p ε := by
   -- Build bump function with positive integral.
   obtain ⟨f, hf_cont, hf_supp, hf_nn, hf_subset, hf_int_pos⟩ :=
     exists_bump_with_pos_integral hp hε
-  have hf_int_ne : ∫ x, f x ∂μ_disc_plus_1 ≠ 0 := hf_int_pos.ne'
-  -- Apply theorem_1_2 with φ₁ = φ₂ = f.
-  have h_lim := theorem_1_2 f f hf_cont hf_supp hf_cont hf_supp hf_int_ne
-  have h_lim_eq : (∫ x, f x ∂μ_disc_plus_1) / (∫ x, f x ∂μ_disc_plus_1) = 1 :=
-    div_self hf_int_ne
-  rw [h_lim_eq] at h_lim
-  -- Eventually ratio > 1/2.
-  have h_evt := h_lim.eventually (eventually_gt_nhds (by norm_num : (1:ℝ)/2 < 1))
+  -- Apply theorem_2_3: sum / vol_G → ∫f, where ∫f > 0.
+  obtain ⟨vol_G, h_vol_pos, h_lim⟩ := theorem_2_3
+  have h_lim_f := h_lim f hf_cont hf_supp
+  -- Eventually the ratio is > ½ · ∫f > 0.
+  have h_evt := h_lim_f.eventually (eventually_gt_nhds
+    (show (1:ℝ)/2 * (∫ x, f x ∂μ_disc_plus_1) < ∫ x, f x ∂μ_disc_plus_1 by linarith))
+  rw [Filter.eventually_inf_principal] at h_evt
   rw [Filter.eventually_atTop] at h_evt
   obtain ⟨N, hN⟩ := h_evt
-  refine ⟨N, fun n hn => ?_⟩
-  have h_ratio_pos := hN n hn
-  -- If no t has projection in ball, sum is 0, ratio is 0/0 = 0, contradiction with > 1/2.
-  by_contra h_no
-  push_neg at h_no
+  refine ⟨max N 1, fun n hn hn_nsq => ?_⟩
+  have hnN : n ≥ N := le_trans (le_max_left N 1) hn
+  have hn1 : n ≥ 1 := le_trans (le_max_right N 1) hn
+  have h_ratio_pos := hN n hnN hn_nsq
+  have h_vol_pos_n : 0 < vol_G (4 * n) := h_vol_pos n (by linarith) hn_nsq
+  -- Sum/vol > ½∫f > 0 and vol > 0 imply Sum > 0.
+  have h_sum_pos : 0 <
+      (∑' t : R_star_disc (4 * n), f (project_to_hyperboloid n t.val)) := by
+    by_contra h_no
+    push_neg at h_no
+    have h_div_nonpos : (∑' t : R_star_disc (4 * n),
+        f (project_to_hyperboloid n t.val)) / vol_G (4 * n) ≤ 0 :=
+      div_nonpos_of_nonpos_of_nonneg h_no h_vol_pos_n.le
+    linarith
+  -- Sum positive ⟹ at least one term positive ⟹ projection in supp(f) ⊂ ball.
+  by_contra h_no_ball
+  push_neg at h_no_ball
   have h_all_zero : ∀ t : R_star_disc (4 * n), f (project_to_hyperboloid n t.val) = 0 := by
     intro t
     by_contra h_ne
     have h_in_supp : project_to_hyperboloid n t.val ∈ Function.support f := h_ne
-    exact h_no t (hf_subset h_in_supp)
+    exact h_no_ball t (hf_subset h_in_supp)
   have h_sum_zero : (∑' t : R_star_disc (4 * n), f (project_to_hyperboloid n t.val)) = 0 := by
     have : (fun t : R_star_disc (4 * n) => f (project_to_hyperboloid n t.val))
          = fun _ => 0 := funext h_all_zero
     rw [this, tsum_zero]
-  rw [h_sum_zero, zero_div] at h_ratio_pos
   linarith
 
 /-! #### Pell-fixed point and continuity bound -/
@@ -1201,12 +1218,12 @@ lemma hAction_mem_R_star_disc {d : ℤ} {t : ℤ × ℤ × ℤ} (ht : t ∈ R_st
       exact Nat.dvd_one.mp this
     exact h_g_eq_one
 
-/-- **Derived `duke_theorem`** from `theorem_1_2` plus the Pell-matrix
+/-- **Derived `duke_theorem`** from `theorem_2_3` plus the Pell-matrix
 parity correction (Chojecki's forum proof). -/
 theorem duke_theorem : DukeTheoremStatement := by
   obtain ⟨ε, hε_pos, hε_self, hε_g, hε_h⟩ := exists_pell_continuity_radius
   obtain ⟨N, hN⟩ := exists_projection_in_ball P_0_mem_V hε_pos
-  refine ⟨max N 1, fun n hn => ?_⟩
+  refine ⟨max N 1, fun n hn hn_nsq => ?_⟩
   have hnN : n ≥ N := le_trans (le_max_left N 1) hn
   have hn1 : n ≥ 1 := le_trans (le_max_right N 1) hn
   have hn_pos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast lt_of_lt_of_le zero_lt_one hn1
@@ -1214,7 +1231,7 @@ theorem duke_theorem : DukeTheoremStatement := by
   have h_sqrt_pos : 0 < Real.sqrt (4 * (n : ℝ)) := Real.sqrt_pos.mpr h4n_pos
   have h_sqrt_ne : Real.sqrt (4 * (n : ℝ)) ≠ 0 := h_sqrt_pos.ne'
   have h_sqrt_sq : (Real.sqrt (4 * (n : ℝ)))^2 = 4 * n := Real.sq_sqrt h4n_pos.le
-  obtain ⟨t, h_ball⟩ := hN n hnN
+  obtain ⟨t, h_ball⟩ := hN n hnN hn_nsq
   have ht_in_open : project_to_hyperboloid n t.val ∈ Omega_strict_open :=
     hε_self h_ball
   have ht_in_V : project_to_hyperboloid n t.val ∈ V_disc_plus_1 := by
@@ -1318,7 +1335,20 @@ theorem erdos_1148 :
   have hn_pos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast lt_of_lt_of_le zero_lt_one hn1
   have hn_nonneg : 0 ≤ (n : ℝ) := le_of_lt hn_pos
 
-  rcases hN n hnN with ⟨⟨a, b, c⟩, ht_disc, ht_omega, ht_parity⟩
+  -- Case-split: square vs non-square n. ELMV Theorem 2.3 (hence DukeTheoremStatement)
+  -- only applies to non-square n; the square case n = m² is trivial with (m, 0, 0).
+  by_cases hn_sq : IsSquare n
+  · -- Square case: n = m² for some m. Use (x, y, z) = (m, 0, 0).
+    obtain ⟨m, hm⟩ := hn_sq
+    refine ⟨m, 0, 0, ?_, ?_⟩
+    · -- m² + 0² - 0² = m² = m * m = n
+      rw [hm]; ring
+    · -- max (m², 0, 0) = m² = n ≤ n
+      have h_max : max (m^2) (max ((0:ℤ)^2) ((0:ℤ)^2)) = m^2 := by
+        simp [sq_nonneg]
+      rw [h_max, hm]; nlinarith [sq_nonneg m]
+
+  rcases hN n hnN hn_sq with ⟨⟨a, b, c⟩, ht_disc, ht_omega, ht_parity⟩
   -- Reduce (a, b, c).1 → a, (a, b, c).2.2 → c, etc. so omega doesn't see extra division terms
   dsimp at ht_disc ht_parity
 
@@ -1445,6 +1475,6 @@ theorem erdos_1148 :
 end
 
 #print axioms erdos_1148
--- 'Erdos1148.erdos_1148' depends on axioms: [propext, Classical.choice, Erdos1148.theorem_1_2, Quot.sound]
+-- 'Erdos1148.erdos_1148' depends on axioms: [propext, Classical.choice, Erdos1148.theorem_2_3, Quot.sound]
 
 end Erdos1148
