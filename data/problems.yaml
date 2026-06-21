@@ -2050,3 +2050,14 @@
     extra_axioms: ["Erdos1148.theorem_2_3"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/1148#post-4849"
+- number: "1190"
+  proof:
+    path: "problems/1190/"
+    theorem: "Erdos1190.erdos_1190"
+    state: "complete"
+    last_update: "2026-06-21"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/202#post-6456"
+      - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P1190/Proof_flat.lean"
