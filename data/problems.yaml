@@ -2039,3 +2039,14 @@
       - "https://www.erdosproblems.com/forum/thread/1141#post-5335"
       - "https://github.com/yuta0x89/ErdosProblems/blob/main/Erdos1141.lean"
       - "https://github.com/Woett/Lean-files/blob/main/MertensThird.lean"
+- number: "1148"
+  proof:
+    path: "problems/1148/"
+    theorem: "Erdos1148.erdos_1148"
+    state: "axiomatic"
+    last_update: "2026-06-20"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    extra_axioms: ["Erdos1148.theorem_1_2"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1148#post-4849"

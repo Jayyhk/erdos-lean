@@ -22,10 +22,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-185 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
+186 proofs in the catalog (out of 190 Erdős problems with formalized solutions):
 - 169 `complete`
 - 3 `trust_extended`
-- 13 `axiomatic`
+- 14 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -214,5 +214,6 @@ lake build
 | [1136](https://www.erdosproblems.com/1136) | `complete` | [problems/1136/](problems/1136/) | |
 | [1138](https://www.erdosproblems.com/1138) | `complete` | [problems/1138/](problems/1138/) | |
 | [1141](https://www.erdosproblems.com/1141) | `axiomatic` | [problems/1141/](problems/1141/) | assumes Theorem 1.3 of [Pollack](https://jayyhk.github.io/papers/pollack2017.pdf) (`pollack_theorem_1_3`) |
+| [1148](https://www.erdosproblems.com/1148) | `axiomatic` | [problems/1148/](problems/1148/) | assumes Theorem 1.2 of [Einsiedler–Lindenstrauss–Michel–Venkatesh](https://jayyhk.github.io/papers/elmv2012.pdf) (`theorem_1_2`) |
 
 <!-- TABLE:END -->
