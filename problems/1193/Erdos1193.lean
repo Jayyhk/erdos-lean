@@ -3,7 +3,10 @@ Copyright (c) 2026 Pietro Monticone. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Pietro Monticone, Aristotle (Harmonic)
 -/
+
 import Mathlib
+
+namespace Erdos1193
 
 /-!
 # Erdős Problem 1193
@@ -25,8 +28,6 @@ restrictions on `g` or `A` in mind, but these are not recorded in [Er80].
 Ann. Discrete Math. (1980), 89–115.
 * [Erdős Problem #1193](https://www.erdosproblems.com/1193).
 -/
-
-namespace Erdos1193
 
 open Finset Filter
 

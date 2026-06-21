@@ -2,7 +2,6 @@ import Mathlib
 
 namespace Erdos1136
 
-
 open Finset Nat
 
 /-!

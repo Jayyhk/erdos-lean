@@ -1,5 +1,7 @@
 import Mathlib
 
+namespace Erdos1141
+
 /-!
 # Erdős Problem 1141
 
@@ -48,11 +50,7 @@ Mertens' third theorem (effective form) is proved unconditionally below
 (formalization by T. Woett, see https://github.com/Woett/Lean-files/blob/main/MertensThird.lean).
 -/
 
-namespace Erdos1141
-
 noncomputable section
-
-
 
 /-- The analytic cutoff `m^(1/4 + ε)` appearing in Theorem 1.3. -/
 def residuePrimeUpperBound (m : ℕ) (ε : ℝ) : ℝ :=
