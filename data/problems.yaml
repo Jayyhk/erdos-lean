@@ -698,6 +698,21 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/283#post-6290"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P283/Proof_flat.lean"
+- number: "353"
+  proof:
+    path: "problems/353/"
+    theorem: "Erdos353.erdos_353"
+    state: "complete"
+    last_update: "2026-06-21"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/353#post-7085"
+      - "https://aristotle.harmonic.fun/dashboard/requests/75cddfef-5f21-4eef-8490-7ed7d1163368"
+      - "https://www.erdosproblems.com/forum/thread/353#post-7095"
+      - "https://aristotle.harmonic.fun/dashboard/requests/c4fea4e2-cb48-4377-beea-4d91133951ca"
+      - "https://www.erdosproblems.com/forum/thread/353#post-7098"
+      - "https://aristotle.harmonic.fun/dashboard/requests/f90b7996-0e71-4e59-87d2-03504f3d6c45"
 - number: "355"
   proof:
     path: "problems/355/"
