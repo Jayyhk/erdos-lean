@@ -1208,6 +1208,17 @@
       - "https://www.erdosproblems.com/forum/thread/618#post-4235"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos618.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos134.lean"
+- number: "619"
+  proof:
+    path: "problems/619/"
+    theorem: "Erdos619.erdos_619"
+    state: "complete"
+    last_update: "2026-06-22"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/619#post-6986"
+      - "https://github.com/nick-kuhn/erdos-619"
 - number: "621"
   proof:
     path: "problems/621/"
