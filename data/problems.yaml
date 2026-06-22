@@ -347,6 +347,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/206#post-5989"
       - "https://gist.github.com/madeve-unipi/0920783513a1a00af4a14660852df60e#file-erdos206-lean"
+- number: "209"
+  proof:
+    path: "problems/209/"
+    theorem: "Erdos209.erdos_209"
+    state: "complete"
+    last_update: "2026-06-21"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/209#post-7065"
+      - "https://github.com/AxiomMath/erdos-public/blob/main/Erdos/Erdos209/solution.lean"
 - number: "214"
   proof:
     path: "problems/214/"
