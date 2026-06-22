@@ -22,8 +22,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-195 proofs in the catalog (out of 195 Erdős problems with formalized solutions):
-- 178 `complete`
+196 proofs in the catalog (out of 196 Erdős problems with formalized solutions):
+- 179 `complete`
 - 3 `trust_extended`
 - 14 `axiomatic`
 
@@ -117,6 +117,7 @@ lake build
 | [453](https://www.erdosproblems.com/453) | `complete` | [problems/453/](problems/453/) | |
 | [457](https://www.erdosproblems.com/457) | `complete` | [problems/457/](problems/457/) | |
 | [459](https://www.erdosproblems.com/459) | `complete` | [problems/459/](problems/459/) | |
+| [464](https://www.erdosproblems.com/464) | `complete` | [problems/464/](problems/464/) | |
 | [476](https://www.erdosproblems.com/476) | `complete` | [problems/476/](problems/476/) | |
 | [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) | |
 | [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) | |
