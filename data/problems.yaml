@@ -1096,6 +1096,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/505#post-4108"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos505.lean"
+- number: "512"
+  proof:
+    path: "problems/512/"
+    theorem: "Erdos512.erdos_512"
+    state: "complete"
+    last_update: "2026-06-22"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/512#post-7140"
+      - "https://aristotle.harmonic.fun/dashboard/requests/b663fac0-b653-4148-8d0a-9ae5c7dbdaea"
 - number: "519"
   proof:
     path: "problems/519/"
