@@ -91,8 +91,6 @@ Two deliberate deviations from the source, both transparent:
    `Expr.mdata` annotation and otherwise elaborates it unchanged, so `answer(False)`
    elaborates to the proposition `False`. We state the proposition with a literal
    `False` here to avoid vendoring the elaborator; the resulting `Prop` is identical.
-   (The merged upstream statement is still the **open** form `answer(sorry) ↔ ...`; the
-   `answer(False)` solved form is the upstream edit proposed in the follow-up PR.)
 -/
 
 open SimpleGraph
