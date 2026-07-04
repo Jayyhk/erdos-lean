@@ -22,10 +22,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-199 proofs in the catalog (out of 199 Erdős problems with formalized solutions):
+200 proofs in the catalog (out of 200 Erdős problems with formalized solutions):
 - 182 `complete`
 - 3 `trust_extended`
-- 14 `axiomatic`
+- 15 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -176,6 +176,7 @@ lake build
 | [845](https://www.erdosproblems.com/845) | `complete` | [problems/845/](problems/845/) | |
 | [846](https://www.erdosproblems.com/846) | `complete` | [problems/846/](problems/846/) | |
 | [862](https://www.erdosproblems.com/862) | `complete` | [problems/862/](problems/862/) | |
+| [865](https://www.erdosproblems.com/865) | `axiomatic` | [problems/865/](problems/865/) | assumes Theorem 8 of [Choi–Erdős–Szemerédi](https://jayyhk.github.io/papers/choi-erdos-szemeredi1975.pdf) (`coarse_bound_ces75`) |
 | [867](https://www.erdosproblems.com/867) | `complete` | [problems/867/](problems/867/) | |
 | [871](https://www.erdosproblems.com/871) | `complete` | [problems/871/](problems/871/) | |
 | [897](https://www.erdosproblems.com/897) | `complete` | [problems/897/](problems/897/) | |
