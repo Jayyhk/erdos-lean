@@ -1627,13 +1627,12 @@
   proof:
     path: "problems/865/"
     theorem: "Erdos865.erdos_865"
-    state: "axiomatic"
-    last_update: "2026-07-03"
+    state: "complete"
+    last_update: "2026-07-06"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    extra_axioms: ["Erdos865.coarse_bound_ces75"]
     sources:
-      - "https://www.erdosproblems.com/forum/thread/865#post-7134"
+      - "https://www.erdosproblems.com/forum/thread/865#post-7378"
       - "https://github.com/mrricky22/erdos-865-lean"
 - number: "867"
   proof:
