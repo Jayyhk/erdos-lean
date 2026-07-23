@@ -1932,14 +1932,12 @@ theorem almost_half_indep_of_infinite_chromatic :
     have h_NN : (0 : ℝ) ≤ (f m : ℝ) := (f m).coe_nonneg
     linarith
 
-/--
-**Upstream-shape wrapper** matching `formal-conjectures`'s
-[`FormalConjectures/ErdosProblems/750.lean`](https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/750.lean)
-exact syntax: `m / 2 - f m ≤ I.ncard`. With Lean's default elaboration, `f m : ℝ≥0`
-forces the subtraction into NNReal, which makes `m / 2` *real division* in NNReal
-(`(↑m : ℝ≥0) / 2`), and the subtraction is NNReal-truncated. Implied by the
-real-valued form `erdos_750` proved above. -/
-theorem erdos_750_FC_form :
+/-- **Erdős Problem 750.** For every unbounded `f : ℕ → NNReal`, there exists a
+graph `G` of infinite chromatic number such that every finite subgraph on `m`
+vertices contains an independent set of size at least `m / 2 − f(m)`
+(NNReal-truncated subtraction, matching the google-deepmind/formal-conjectures
+statement `Erdos750.erdos_750`). -/
+theorem erdos_750 :
     ∀ (f : ℕ → NNReal) (_ : Tendsto f atTop atTop),
       ∃ (V : Type) (G : SimpleGraph V),
         G.chromaticNumber = ⊤ ∧
@@ -1957,27 +1955,6 @@ theorem erdos_750_FC_form :
   refine max_le ?_ ?_
   · linarith
   · exact_mod_cast Nat.zero_le _
-
-/--
-**`formal-conjectures` upstream form (`True ↔ ...`).** Fills out FC's
-`erdos_750` under `answer := True`. -/
-theorem erdos_750_FC :
-    True ↔ ∀ (f : ℕ → NNReal) (_hf : Tendsto f atTop atTop),
-      ∃ (V : Type) (G : SimpleGraph V), G.chromaticNumber = ⊤ ∧
-        ∀ (m : ℕ) (S : Set V), 0 < m → S.ncard = m →
-          ∃ I ⊆ S, G.IsIndepSet I ∧ (m : NNReal) / 2 - f m ≤ I.ncard :=
-  ⟨fun _ => erdos_750_FC_form, fun _ => trivial⟩
-
-/-- **Erdős Problem 750.** For every unbounded `f : ℕ → NNReal`, there exists a
-graph `G` of infinite chromatic number such that every finite subgraph on `m`
-vertices contains an independent set of size at least `m / 2 − f(m)`. -/
-theorem erdos_750 :
-    ∀ (f : ℕ → NNReal) (_ : Tendsto f atTop atTop),
-      ∃ (V : Type) (G : SimpleGraph V),
-        G.chromaticNumber = ⊤ ∧
-        ∀ (m : ℕ) (S : Set V), 0 < m → S.ncard = m →
-          ∃ I ⊆ S, G.IsIndepSet I ∧ (m / 2 : ℝ) - f m ≤ I.ncard :=
-  almost_half_indep_of_infinite_chromatic
 
 #print axioms erdos_750
 -- 'Erdos750.erdos_750' depends on axioms: [propext, Classical.choice, Erdos750.stiebitz_lower_bound, Quot.sound]
