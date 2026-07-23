@@ -1689,6 +1689,17 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/871#post-2733"
+- number: "884"
+  proof:
+    path: "problems/884/"
+    theorem: "Erdos884.erdos_884"
+    state: "complete"
+    last_update: "2026-07-23"
+    lean_toolchain: "leanprover/lean4:v4.31.0"
+    mathlib_revision: "fabf563a7c95a166b8d7b6efca11c8b4dc9d911f"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/884#post-7362"
+      - "https://github.com/honicky/erdos884"
 - number: "897"
   proof:
     path: "problems/897/"
