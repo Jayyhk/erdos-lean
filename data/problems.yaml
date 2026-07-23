@@ -988,6 +988,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/464#post-7120"
       - "https://aristotle.harmonic.fun/dashboard/requests/f9894d2d-4bb1-42da-9301-e508aa881b17"
+- number: "469"
+  proof:
+    path: "problems/469/"
+    theorem: "Erdos469.erdos_469"
+    state: "complete"
+    last_update: "2026-07-23"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/proof-claim:c41518b56dd744eda333dc3c1f694516#post-7583"
+      - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem469.lean"
 - number: "476"
   proof:
     path: "problems/476/"
