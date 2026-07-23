@@ -8432,5 +8432,6 @@ theorem erdos_884 :
   exact absurd hchain (not_le.mpr hlt)
 
 #print axioms erdos_884
+-- 'Erdos884.erdos_884' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos884
