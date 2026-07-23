@@ -22,10 +22,10 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-202 proofs in the catalog (out of 202 Erdős problems with formalized solutions):
+203 proofs in the catalog (out of 203 Erdős problems with formalized solutions):
 - 185 `complete`
 - 3 `trust_extended`
-- 14 `axiomatic`
+- 15 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -162,6 +162,7 @@ lake build
 | [728](https://www.erdosproblems.com/728) | `complete` | [problems/728/](problems/728/) | |
 | [729](https://www.erdosproblems.com/729) | `complete` | [problems/729/](problems/729/) | |
 | [741](https://www.erdosproblems.com/741) | `complete` | [problems/741/](problems/741/) | |
+| [750](https://www.erdosproblems.com/750) | `axiomatic` | [problems/750/](problems/750/) | assumes Theorem 1.1 of [Müller–Stehlík](https://jayyhk.github.io/papers/muller-stehlik2019.pdf) (`stiebitz_lower_bound`) |
 | [751](https://www.erdosproblems.com/751) | `complete` | [problems/751/](problems/751/) | |
 | [753](https://www.erdosproblems.com/753) | `complete` | [problems/753/](problems/753/) | |
 | [756](https://www.erdosproblems.com/756) | `complete` | [problems/756/](problems/756/) | |

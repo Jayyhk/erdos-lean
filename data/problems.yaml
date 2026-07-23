@@ -1466,6 +1466,18 @@
       - "https://www.erdosproblems.com/forum/thread/741#post-5135"
       - "https://github.com/google-deepmind/formal-conjectures/blob/9d492049e42167b0d2fd58a9e91da3bf160172b5/FormalConjectures/ErdosProblems/741.lean#L228"
       - "https://github.com/mo271/formal-conjectures/blob/486bc8afae062b6711cd16d3466d651ee2880a52/FormalConjectures/ErdosProblems/741.lean#L1630"
+- number: "750"
+  proof:
+    path: "problems/750/"
+    theorem: "Erdos750.erdos_750"
+    state: "axiomatic"
+    last_update: "2026-07-23"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    extra_axioms: ["Erdos750.stiebitz_lower_bound"]
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/750#post-6255"
+      - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P750/Proof_v4.28.lean"
 - number: "751"
   proof:
     path: "problems/751/"
