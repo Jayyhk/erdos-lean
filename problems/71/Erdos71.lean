@@ -4562,7 +4562,7 @@ theorem erdos_71_of_edge_density (P : InfiniteAP) (heven : P.ContainsEven) :
     have : n = a + m * d := by omega
     exact ⟨n, ⟨m, this⟩, h_cycle⟩
 
-/-- **Erdős Problem 71** (Bollobás, *Cycles modulo k*, 1977).
+/-- **Erdős Problem 71 (bundled AP form)** (Bollobás, *Cycles modulo k*, 1977).
 
 For every infinite arithmetic progression `P` containing an even number,
 there is a constant `c = c(P)` such that every finite simple graph `G`
@@ -4572,14 +4572,13 @@ The heavy lifting is done by `erdos_71_of_edge_density`, which states the
 same result with the integer-valued hypothesis `c · |V| ≤ |E|`. The wrapper
 scales the constant by `2` (since `avgDegree G = 2 |E| / |V|`) and
 converts the rational inequality. -/
-theorem erdos_71 (P : InfiniteAP) (heven : P.ContainsEven) :
+theorem erdos_71_of_infiniteAP (P : InfiniteAP) (heven : P.ContainsEven) :
     ∃ c : ℕ, ∀ (V : Type*) [Fintype V] [DecidableEq V] [Nonempty V]
       (G : SimpleGraph V) [DecidableRel G.Adj],
       (c : ℚ) ≤ avgDegree G →
       ∃ n ∈ P, HasCycleOfLength G n := by
   obtain ⟨c, hc⟩ := erdos_71_of_edge_density P heven
   refine ⟨2 * c, fun V _ _ _ G _ hdeg => hc V G ?_⟩
-  -- `hdeg : (2 * c : ℚ) ≤ 2 |E| / |V|` ⟹ `c · |V| ≤ |E|` in ℕ.
   have hV_pos : (0 : ℚ) < Fintype.card V := by exact_mod_cast Fintype.card_pos
   unfold avgDegree at hdeg
   have h_ℚ : (c * Fintype.card V : ℚ) ≤ G.edgeFinset.card := by
@@ -4587,6 +4586,130 @@ theorem erdos_71 (P : InfiniteAP) (heven : P.ContainsEven) :
     push_cast at this
     linarith
   exact_mod_cast h_ℚ
+
+/-- `Set.IsAPOfLengthWith s l a d` says `s` is the AP of length `l` (possibly `⊤`)
+with first term `a` and common difference `d`. Matches the definition in the
+Formal Conjectures repository. -/
+def _root_.Set.IsAPOfLengthWith (s : Set ℕ) (l : ℕ∞) (a d : ℕ) : Prop :=
+  ENat.card s = l ∧ s = {a + n • d | (n : ℕ) (_ : n < l)}
+
+/-- `Set.IsAPOfLength s l` says `s` is some AP of length `l`. Matches the
+definition in the Formal Conjectures repository. -/
+def _root_.Set.IsAPOfLength (s : Set ℕ) (l : ℕ∞) : Prop :=
+  ∃ a d, s.IsAPOfLengthWith l a d
+
+/-- The average degree `(∑ deg) / |V|`. Matches
+`SimpleGraph.averageDegree` in the Formal Conjectures repository. -/
+noncomputable def _root_.SimpleGraph.averageDegree {V : Type*} [Fintype V]
+    (G : SimpleGraph V) [DecidableRel G.Adj] : ℚ :=
+  (∑ v, (G.degree v : ℚ)) / (Fintype.card V : ℚ)
+
+/-- Handshake lemma: `avgDegree G = averageDegree G`. -/
+private lemma avgDegree_eq_averageDegree {V : Type*} [Fintype V]
+    (G : SimpleGraph V) [DecidableRel G.Adj] :
+    avgDegree G = G.averageDegree := by
+  unfold avgDegree SimpleGraph.averageDegree
+  congr 1
+  have h : (∑ v, G.degree v : ℕ) = 2 * G.edgeFinset.card :=
+    G.sum_degrees_eq_twice_card_edges
+  have : ((∑ v, G.degree v : ℕ) : ℚ) = ((2 * G.edgeFinset.card : ℕ) : ℚ) := by
+    exact_mod_cast h
+  push_cast at this
+  linarith
+
+/-- **Erdős Problem 71** (Bollobás, *Cycles modulo k*, 1977).
+
+For every infinite arithmetic progression `P ⊆ ℕ` containing an even number,
+there is a rational constant `c = c(P)` such that every finite simple graph `G`
+with `averageDegree G ≥ c` contains a cycle whose length lies in `P`.
+
+This formulation matches the Formal Conjectures repository: it takes a
+`Set ℕ` with `IsAPOfLength ⊤` rather than a bundled `InfiniteAP`, uses
+`G.averageDegree` (the `∑ deg / |V|` form) rather than `2|E|/|V|`, does not
+assume `[Nonempty V]`, and allows the AP to start at `0`. All three
+adjustments are made by wrapping `erdos_71_of_infiniteAP`. -/
+theorem erdos_71 :
+    ∀ P : Set ℕ, P.IsAPOfLength ⊤ → (∃ n ∈ P, Even n) →
+      ∃ c : ℚ, ∀ (V : Type) [Fintype V] [DecidableEq V] (G : SimpleGraph V)
+        [DecidableRel G.Adj], c ≤ G.averageDegree →
+          ∃ (v : V) (w : G.Walk v v), w.IsCycle ∧ w.length ∈ P := by
+  intro P hAP hEven
+  obtain ⟨a, d, hcard, hP⟩ := hAP
+  -- With l = ⊤ (infinite card), we must have d ≠ 0 (else P = {a}, finite).
+  have hd_ne : d ≠ 0 := by
+    intro hd
+    subst hd
+    have : P = {a} := by
+      rw [hP]; ext n; simp
+    rw [this] at hcard
+    simp at hcard
+  have hd_pos : 1 ≤ d := Nat.one_le_iff_ne_zero.mpr hd_ne
+  -- Shift so first term ≥ 1: if a ≥ 1, use as-is; else use d as first term.
+  let a' : ℕ := if a = 0 then d else a
+  have ha'_pos : 1 ≤ a' := by
+    simp only [a']
+    split_ifs with h
+    · exact hd_pos
+    · exact Nat.one_le_iff_ne_zero.mpr h
+  -- Build the bundled InfiniteAP.
+  let Q : InfiniteAP := ⟨a', d, ha'_pos, hd_pos⟩
+  -- Every element of Q lies in P (via the appropriate index shift).
+  have hQ_sub : ∀ n, n ∈ Q → n ∈ P := by
+    intro n hn
+    obtain ⟨m, hm⟩ := hn
+    rw [hP]
+    refine ⟨if a = 0 then m + 1 else m, ?_, ?_⟩
+    · exact ENat.coe_lt_top _
+    · simp only [Q, a'] at hm
+      by_cases hh : a = 0
+      · -- a = 0 case: hm becomes n = d + m * d = (m+1) * d
+        subst hh
+        simp only [↓reduceIte, zero_add, smul_eq_mul] at *
+        rw [hm]; ring
+      · -- a ≠ 0 case: hm becomes n = a + m * d
+        simp only [hh, ↓reduceIte, smul_eq_mul] at *
+        linarith
+  -- Q contains an even element. Uses hEven plus hd_pos, hd_ne, ha'_pos.
+  have hQeven : Q.ContainsEven := by
+    obtain ⟨n, hn_mem, hn_even⟩ := hEven
+    -- Case: a = 0 (shifted). We need to find even in {d, 2d, 3d, ...}.
+    by_cases ha_zero : a = 0
+    · -- P = {0, d, 2d, 3d, ...}. Original hEven gives some m with a + m•d = 2k.
+      -- Since a = 0, m * d = 2k. Q = {d, 2d, ...}. 2*d ∈ Q is even.
+      refine ⟨2 * d, ⟨1, ?_⟩, ?_⟩
+      · show 2 * d = a' + 1 * d
+        simp only [a', ha_zero, if_true]; ring
+      · exact ⟨d, by ring⟩
+    · -- a ≠ 0 (so a' = a). Q = P (same AP). Reuse original hEven.
+      rw [hP] at hn_mem
+      obtain ⟨m, hm_lt, hm_eq⟩ := hn_mem
+      refine ⟨n, ⟨m, ?_⟩, hn_even⟩
+      show n = a' + m * d
+      simp only [a', ha_zero, if_false]
+      simpa [smul_eq_mul] using hm_eq.symm
+  -- Apply the bundled version.
+  obtain ⟨c₀, hc₀⟩ := erdos_71_of_infiniteAP Q hQeven
+  -- Use c := c₀ + 1 (rational) so the empty-V case is vacuously true.
+  refine ⟨((c₀ : ℚ) + 1), ?_⟩
+  intro V _ _ G _ hdeg
+  -- Split on whether V is empty.
+  by_cases hV : Nonempty V
+  · -- Nonempty: apply hc₀ after handshake-lemma conversion.
+    have hdeg₀ : (c₀ : ℚ) ≤ avgDegree G := by
+      rw [avgDegree_eq_averageDegree]
+      linarith
+    obtain ⟨n, hn_Q, v, w, hcyc, hwlen⟩ := hc₀ V G hdeg₀
+    exact ⟨v, w, hcyc, hwlen ▸ hQ_sub n hn_Q⟩
+  · -- Empty: averageDegree G = 0, but c₀ + 1 ≥ 1 > 0, contradiction.
+    exfalso
+    have hcard : Fintype.card V = 0 :=
+      Fintype.card_eq_zero_iff.mpr (not_nonempty_iff.mp hV)
+    have hzero : G.averageDegree = 0 := by
+      unfold SimpleGraph.averageDegree
+      simp [hcard]
+    rw [hzero] at hdeg
+    have : (0 : ℚ) ≤ (c₀ : ℚ) := by exact_mod_cast Nat.zero_le c₀
+    linarith
 
 #print axioms erdos_71
 -- 'Erdos71.erdos_71' depends on axioms: [propext, Classical.choice, Quot.sound]
