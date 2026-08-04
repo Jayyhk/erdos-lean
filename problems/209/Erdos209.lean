@@ -321,7 +321,7 @@ theorem escuderoArrangementLines_ncard (d : ℕ) (k : ℤ) (hd : 1 ≤ d) :
 
 -- Lemma: Every line in the Escudero arrangement is a line (1-dim affine subspace).
 -- This follows because the direction of each line is exp(iπu_ν) ≠ 0.
-theorem escuderoArrangementLines_all_lines (d : ℕ) (k : ℤ) (hd : 1 ≤ d) :
+theorem escuderoArrangementLines_all_lines (d : ℕ) (k : ℤ) (_hd : 1 ≤ d) :
     ∀ L ∈ escuderoArrangementLines d k, IsLine L := by
   intro L hL
   obtain ⟨ν, _, rfl⟩ := hL
@@ -567,14 +567,14 @@ private lemma escuderoLines_concurrent_iff_sin_eq_zero (d : ℕ) (k : ℤ) (hd :
         Real.cos (Real.pi * u₁ + 2 * (Real.pi * u₃)) := by linarith
     -- Apply cos_eq_iff_sin_sum_eq_zero
     have key := (cos_eq_iff_sin_sum_eq_zero (Real.pi * u₁) (Real.pi * u₂) (Real.pi * u₃) hsin23).mp hcos_eq
-    convert key using 1 <;> ring
+    convert key using 1
   · -- Backward: sin(sum) = 0 → construct p on all 3 lines
     intro hsin
     -- sin(πu₁+πu₂+πu₃) = 0 → cos(πu₁+2πu₂) = cos(πu₁+2πu₃)
     have hcos_eq : Real.cos (Real.pi * u₁ + 2 * (Real.pi * u₂)) =
         Real.cos (Real.pi * u₁ + 2 * (Real.pi * u₃)) := by
       apply (cos_eq_iff_sin_sum_eq_zero (Real.pi * u₁) (Real.pi * u₂) (Real.pi * u₃) hsin23).mpr
-      convert hsin using 1 <;> ring
+      convert hsin using 1
     -- Construct p as a point on line 1 with parameter t₁ = 2cos(πu₁+2πu₂)
     set t₁ := 2 * Real.cos (Real.pi * u₁ + 2 * (Real.pi * u₂))
     set p := Complex.exp (-Complex.I * ↑(2 * Real.pi * u₁)) +
@@ -908,7 +908,7 @@ theorem gallai_forces_9nu_equiv (d : ℕ) (k : ℤ) (hd : 4 ≤ d)
     (ν₁ ν₂ ν₃ : ℤ) (h₁ : ν₁ ∈ escuderoIndexSet d) (h₂ : ν₂ ∈ escuderoIndexSet d)
     (h₃ : ν₃ ∈ escuderoIndexSet d)
     (hne12 : ν₁ ≠ ν₂) (hne13 : ν₁ ≠ ν₃) (hne23 : ν₂ ≠ ν₃)
-    (h_not_concurrent : ¬((d : ℤ) ∣ (ν₁ + ν₂ + ν₃ - (k + 1))))
+    (_h_not_concurrent : ¬((d : ℤ) ∣ (ν₁ + ν₂ + ν₃ - (k + 1))))
     -- For each pair, no third line from S passes through the vertex
     (h12 : ∀ ν ∈ escuderoIndexSet d, ν ≠ ν₁ → ν ≠ ν₂ →
       ¬((d : ℤ) ∣ (ν₁ + ν₂ + ν - (k + 1))))
@@ -1204,10 +1204,9 @@ theorem erdos_problem_209_disproof :
     escuderoArrangementForD_mult_le_3 d hd,
     escuderoArrangementForD_no_gallai d hd⟩
 
-/-- **Erdős Problem 209.** The conjecture is **false**: there exist line arrangements of
-`d ≥ 4` pairwise non-parallel lines in `ℝ²` with no point of multiplicity `≥ 4` that contain
-**no** Gallai triangle, hence not every such arrangement must contain one. -/
-theorem erdos_209 :
+/-- **Erdős Problem 209 (bundled ℂ form).** Uses the local `LineArrangement` structure
+which identifies `ℝ² = ℂ`. Deduced from `erdos_problem_209_disproof`. -/
+theorem erdos_209_of_lineArrangement :
     ¬ ∀ d : ℕ, 4 ≤ d → ∀ A : LineArrangement,
       A.card = d → A.pairwiseNonParallel →
       (∀ p : PlanePoint, A.pointMultiplicity p ≤ 3) →
@@ -1215,6 +1214,221 @@ theorem erdos_209 :
   intro h
   obtain ⟨A, hcard, hpar, hmult, hno⟩ := erdos_problem_209_disproof 4 (le_refl _)
   exact hno (h 4 (le_refl _) A hcard hpar hmult)
+
+/-! ### FC-shape statement: `ℝ² = EuclideanSpace ℝ (Fin 2)` and `Finset` arrangements. -/
+
+open scoped Affine
+
+/-- FC's `ℝ²`. -/
+abbrev PlaneR : Type := EuclideanSpace ℝ (Fin 2)
+
+/-- FC's `IsLine`: a 1-dimensional real affine subspace of `ℝ²`. -/
+def IsLineR (L : AffineSubspace ℝ PlaneR) : Prop :=
+  Module.finrank ℝ L.direction = 1
+
+/-- FC's `pointMultiplicity`: number of lines from `A` through `p`. -/
+noncomputable def pointMultiplicityR
+    (A : Finset (AffineSubspace ℝ PlaneR)) (p : PlaneR) : ℕ :=
+  {L ∈ (A : Set (AffineSubspace ℝ PlaneR)) | p ∈ L}.ncard
+
+/-- FC's `HasGallaiTriangle`. -/
+def HasGallaiTriangleR (A : Finset (AffineSubspace ℝ PlaneR)) : Prop :=
+  ∃ L₁ ∈ A, ∃ L₂ ∈ A, ∃ L₃ ∈ A, L₁ ≠ L₂ ∧ L₂ ≠ L₃ ∧ L₁ ≠ L₃ ∧
+    ∃ p₁ p₂ p₃ : PlaneR, p₁ ≠ p₂ ∧ p₂ ≠ p₃ ∧ p₁ ≠ p₃ ∧
+      p₁ ∈ L₁ ∧ p₁ ∈ L₂ ∧ p₂ ∈ L₂ ∧ p₂ ∈ L₃ ∧ p₃ ∈ L₃ ∧ p₃ ∈ L₁ ∧
+      pointMultiplicityR A p₁ = 2 ∧ pointMultiplicityR A p₂ = 2 ∧
+      pointMultiplicityR A p₃ = 2
+
+/-- ℝ-linear equivalence `EuclideanSpace ℝ (Fin 2) ≃ₗ[ℝ] ℂ`. -/
+noncomputable def planeREquivComplex : PlaneR ≃ₗ[ℝ] ℂ :=
+  ((EuclideanSpace.equiv (Fin 2) ℝ).toLinearEquiv.trans
+    (LinearEquiv.finTwoArrow ℝ ℝ)).trans Complex.equivRealProdLm.symm
+
+/-- The corresponding affine equivalence. -/
+noncomputable def planeREquivComplexAffine : PlaneR ≃ᵃ[ℝ] ℂ :=
+  planeREquivComplex.toAffineEquiv
+
+/-- Pull a ℂ-line back to a `PlaneR`-line via `ψ := planeREquivComplexAffine.symm`. -/
+noncomputable def pullBackLine (L : AffineSubspace ℝ ℂ) : AffineSubspace ℝ PlaneR :=
+  L.map planeREquivComplexAffine.symm.toAffineMap
+
+private lemma pullBackLine_coe (L : AffineSubspace ℝ ℂ) :
+    (pullBackLine L : Set PlaneR) = planeREquivComplexAffine.symm '' L :=
+  AffineSubspace.coe_map _ _
+
+private lemma mem_pullBackLine {L : AffineSubspace ℝ ℂ} {x : PlaneR} :
+    x ∈ pullBackLine L ↔ planeREquivComplexAffine x ∈ L := by
+  rw [← SetLike.mem_coe, pullBackLine_coe]
+  constructor
+  · rintro ⟨y, hy, heq⟩
+    have hxy : planeREquivComplexAffine x = y := by
+      have h := congrArg planeREquivComplexAffine heq
+      simpa [AffineEquiv.apply_symm_apply] using h.symm
+    exact hxy ▸ hy
+  · intro h
+    exact ⟨planeREquivComplexAffine x, h, by simp [AffineEquiv.symm_apply_apply]⟩
+
+private lemma pullBackLine_injective : Function.Injective pullBackLine := by
+  intro L₁ L₂ hL
+  apply SetLike.coe_injective
+  have h1 : (pullBackLine L₁ : Set PlaneR) = pullBackLine L₂ :=
+    congrArg SetLike.coe hL
+  rw [pullBackLine_coe, pullBackLine_coe] at h1
+  exact planeREquivComplexAffine.symm.injective.image_injective h1
+
+private lemma pullBackLine_direction (L : AffineSubspace ℝ ℂ) :
+    (pullBackLine L).direction =
+      L.direction.map (planeREquivComplex.symm : ℂ →ₗ[ℝ] PlaneR) := by
+  unfold pullBackLine
+  rw [AffineSubspace.map_direction]
+  rfl
+
+private lemma pullBackLine_isLineR {L : AffineSubspace ℝ ℂ} (hL : IsLine L) :
+    IsLineR (pullBackLine L) := by
+  unfold IsLineR
+  rw [pullBackLine_direction]
+  rw [LinearEquiv.finrank_map_eq planeREquivComplex.symm L.direction]
+  exact hL
+
+/-- Multiplicity preservation: the pullback of a `LineArrangement`'s multiplicity
+at a point `p ∈ PlaneR` equals the original multiplicity at `φ(p) ∈ ℂ`. -/
+private lemma pointMultiplicityR_pullBack (A₀ : LineArrangement) (p : PlaneR) :
+    haveI := Classical.dec
+    pointMultiplicityR (A₀.finite.image pullBackLine).toFinset p =
+      A₀.pointMultiplicity (planeREquivComplexAffine p) := by
+  classical
+  unfold pointMultiplicityR LineArrangement.pointMultiplicity
+  have hcoe : ((A₀.finite.image pullBackLine).toFinset :
+      Set (AffineSubspace ℝ PlaneR)) = pullBackLine '' A₀.lines := by
+    simp
+  rw [hcoe]
+  have hset : {L ∈ pullBackLine '' A₀.lines | p ∈ L} =
+      pullBackLine '' {L₀ ∈ A₀.lines | planeREquivComplexAffine p ∈ L₀} := by
+    ext L
+    simp only [Set.mem_setOf_eq, Set.mem_image]
+    constructor
+    · rintro ⟨⟨L₀, hL₀, rfl⟩, hp⟩
+      exact ⟨L₀, ⟨hL₀, mem_pullBackLine.mp hp⟩, rfl⟩
+    · rintro ⟨L₀, ⟨hL₀, hp⟩, rfl⟩
+      exact ⟨⟨L₀, hL₀, rfl⟩, mem_pullBackLine.mpr hp⟩
+  rw [hset]
+  exact Set.ncard_image_of_injective _ pullBackLine_injective
+
+/-- Pullback and `⊥` correspond: `pullBackLine L = ⊥ ↔ L = ⊥`. -/
+private lemma pullBackLine_eq_bot_iff (L : AffineSubspace ℝ ℂ) :
+    pullBackLine L = ⊥ ↔ L = ⊥ := by
+  constructor
+  · intro h
+    apply SetLike.coe_injective
+    have h1 : (pullBackLine L : Set PlaneR) = ∅ := by rw [h]; rfl
+    rw [pullBackLine_coe] at h1
+    have h2 : (L : Set ℂ) = ∅ := Set.image_eq_empty.mp h1
+    exact h2
+  · rintro rfl
+    apply SetLike.coe_injective
+    rw [pullBackLine_coe]
+    simp
+
+/-- The direction of `pullBackLine L` equals the image of `L.direction` under
+`planeREquivComplex.symm` (LinearEquiv), hence has the same finrank. -/
+private lemma pullBackLine_direction_eq_iff
+    {L₁ L₂ : AffineSubspace ℝ ℂ} :
+    (pullBackLine L₁).direction = (pullBackLine L₂).direction ↔
+      L₁.direction = L₂.direction := by
+  rw [pullBackLine_direction, pullBackLine_direction]
+  exact ⟨fun h => Submodule.map_injective_of_injective planeREquivComplex.symm.injective h,
+    fun h => by rw [h]⟩
+
+/-- Pullback preserves parallelism iff both directions equal, using the
+`parallel_iff_direction_eq_and_eq_bot_iff_eq_bot` characterization. -/
+private lemma pullBackLine_parallel_iff
+    {L₁ L₂ : AffineSubspace ℝ ℂ} :
+    (pullBackLine L₁).Parallel (pullBackLine L₂) ↔ L₁.Parallel L₂ := by
+  rw [AffineSubspace.parallel_iff_direction_eq_and_eq_bot_iff_eq_bot,
+    AffineSubspace.parallel_iff_direction_eq_and_eq_bot_iff_eq_bot,
+    pullBackLine_direction_eq_iff, pullBackLine_eq_bot_iff, pullBackLine_eq_bot_iff]
+
+/-- **Erdős Problem 209.** Solved negatively by Füredi–Palásti [FuPa84] and Escudero [Es16]:
+for every `d ≥ 4` there is an arrangement of `d` pairwise non-parallel lines in `ℝ²` with
+no point of multiplicity `≥ 4` and no Gallai triangle. Formulation matches the Formal
+Conjectures repository: uses `Finset (AffineSubspace ℝ ℝ²)` and inline `IsLineR`,
+`pointMultiplicityR`, `HasGallaiTriangleR`. -/
+theorem erdos_209 :
+    ¬ ∀ d : ℕ, 4 ≤ d → ∀ A : Finset (AffineSubspace ℝ PlaneR), A.card = d →
+      (∀ L ∈ A, IsLineR L) →
+      ((A : Set (AffineSubspace ℝ PlaneR)).Pairwise fun L₁ L₂ => ¬ L₁ ∥ L₂) →
+      (∀ p : PlaneR, pointMultiplicityR A p ≤ 3) →
+      HasGallaiTriangleR A := by
+  classical
+  intro h
+  obtain ⟨A₀, hcard₀, hpar₀, hmult₀, hno₀⟩ := erdos_problem_209_disproof 4 (le_refl _)
+  -- Build the ℝ² Finset as the image of A₀.lines under pullBackLine.
+  set A : Finset (AffineSubspace ℝ PlaneR) := (A₀.finite.image pullBackLine).toFinset with hA_def
+  have hA_coe : (A : Set (AffineSubspace ℝ PlaneR)) = pullBackLine '' A₀.lines := by
+    simp [hA_def]
+  -- 1) Cardinality: A₀.card = 4, and pullBackLine is injective, so image preserves count.
+  have hAcard : A.card = 4 := by
+    have h1 : A.card = (pullBackLine '' A₀.lines).ncard :=
+      (Set.ncard_eq_toFinset_card _ (A₀.finite.image _)).symm
+    rw [h1, Set.ncard_image_of_injective _ pullBackLine_injective]
+    exact hcard₀
+  -- 2) All lines in A are lines (finrank 1).
+  have hAlines : ∀ L ∈ A, IsLineR L := by
+    intro L hL
+    rw [hA_def, Set.Finite.mem_toFinset] at hL
+    obtain ⟨L₀, hL₀, rfl⟩ := hL
+    exact pullBackLine_isLineR (A₀.all_lines L₀ hL₀)
+  -- 3) Pairwise non-parallel.
+  have hApar : (A : Set (AffineSubspace ℝ PlaneR)).Pairwise
+      fun L₁ L₂ => ¬ L₁ ∥ L₂ := by
+    rw [hA_coe]
+    rintro _ ⟨L₁, hL₁, rfl⟩ _ ⟨L₂, hL₂, rfl⟩ hne hpar
+    apply hne
+    congr
+    have hL₁_ne_L₂ : L₁ ≠ L₂ := by
+      intro h; apply hne; rw [h]
+    have h_not_par : ¬ LinesParallel L₁ L₂ := hpar₀ L₁ hL₁ L₂ hL₂ hL₁_ne_L₂
+    apply absurd _ h_not_par
+    unfold LinesParallel
+    exact (pullBackLine_parallel_iff.mp hpar).direction_eq
+  -- 4) Point multiplicity ≤ 3.
+  have hAmult : ∀ p : PlaneR, pointMultiplicityR A p ≤ 3 := by
+    intro p
+    rw [pointMultiplicityR_pullBack A₀ p]
+    exact hmult₀ (planeREquivComplexAffine p)
+  -- Apply h to get a Gallai triangle in ℝ², then transport back to ℂ to contradict hno₀.
+  have hgallai : HasGallaiTriangleR A :=
+    h 4 (le_refl _) A hAcard hAlines hApar hAmult
+  apply hno₀
+  obtain ⟨L₁, hL₁_mem, L₂, hL₂_mem, L₃, hL₃_mem, h12, h23, h13,
+    p₁, p₂, p₃, hp12, hp23, hp13,
+    hp₁L₁, hp₁L₂, hp₂L₂, hp₂L₃, hp₃L₃, hp₃L₁,
+    hmult₁, hmult₂, hmult₃⟩ := hgallai
+  -- Each Lᵢ = pullBackLine L₀ᵢ for some L₀ᵢ ∈ A₀.lines.
+  rw [hA_def, Set.Finite.mem_toFinset] at hL₁_mem hL₂_mem hL₃_mem
+  obtain ⟨M₁, hM₁, rfl⟩ := hL₁_mem
+  obtain ⟨M₂, hM₂, rfl⟩ := hL₂_mem
+  obtain ⟨M₃, hM₃, rfl⟩ := hL₃_mem
+  -- Map FC's (p₁, p₂, p₃) to ℂ's (p₁₂, p₁₃, p₂₃):
+  -- FC: p₁ ∈ L₁∩L₂, p₂ ∈ L₂∩L₃, p₃ ∈ L₃∩L₁
+  -- ours: p₁₂ ∈ L₁∩L₂, p₁₃ ∈ L₁∩L₃, p₂₃ ∈ L₂∩L₃
+  -- Mapping: p₁₂ := φp₁, p₁₃ := φp₃, p₂₃ := φp₂
+  refine ⟨M₁, M₂, M₃, hM₁, hM₂, hM₃, ?_, ?_, ?_,
+    planeREquivComplexAffine p₁, planeREquivComplexAffine p₃,
+    planeREquivComplexAffine p₂,
+    mem_pullBackLine.mp hp₁L₁, mem_pullBackLine.mp hp₁L₂,
+    mem_pullBackLine.mp hp₃L₁, mem_pullBackLine.mp hp₃L₃,
+    mem_pullBackLine.mp hp₂L₂, mem_pullBackLine.mp hp₂L₃,
+    ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact fun h => h12 (by rw [h])
+  · exact fun h => h13 (by rw [h])
+  · exact fun h => h23 (by rw [h])
+  · exact fun h => hp13 (planeREquivComplexAffine.injective h)
+  · exact fun h => hp12 (planeREquivComplexAffine.injective h)
+  · exact fun h => hp23 (planeREquivComplexAffine.injective h.symm)
+  · rw [← pointMultiplicityR_pullBack A₀ p₁]; exact hmult₁
+  · rw [← pointMultiplicityR_pullBack A₀ p₃]; exact hmult₃
+  · rw [← pointMultiplicityR_pullBack A₀ p₂]; exact hmult₂
 
 #print axioms erdos_209
 -- 'Erdos209.erdos_209' depends on axioms: [propext, Classical.choice, Quot.sound]
