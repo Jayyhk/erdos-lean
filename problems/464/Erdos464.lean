@@ -228,7 +228,7 @@ lemma iterate_far (μ₀ : ℝ) (a : ℕ → ℕ) (v : ℝ) (k : ℕ) (i : ℕ)
     (h : ∀ j, j < i → μ₀ * (Real.sqrt μ₀ ^ j * v) < (a k : ℝ)) :
     (refStep μ₀ a)^[i] (v, k) = (Real.sqrt μ₀ ^ i * v, k) := by
   induction i <;> simp_all +decide [ Function.iterate_succ_apply' ];
-  rename_i n hn; rw [ hn fun j hj => h j hj.le ] ; rw [ refStep_far ] ; ring;
+  rename_i n hn; rw [ hn fun j hj => h j hj.le ] ; rw [ refStep_far ] ; ring_nf;
   exact h n le_rfl
 
 /-
@@ -463,7 +463,7 @@ lemma inv_succ_of (s : ℕ) (K K' : ℤ) (h : S.Inv s K)
   by_cases hm₃ : m ≤ s * S.n0;
   · exact h ( show θ ∈ S.Jfull s K from hsub hθ |> fun h => S.Jshr_subset_Jfull s K h ) m hm₁ hm₃;
   · cases eq_or_lt_of_le hm₂ <;> simp_all +decide [ Nat.succ_mul ];
-    convert S.ndist_ge_of_mem_Jshr s K ( hsub hθ ) using 1 ; ring
+    convert S.ndist_ge_of_mem_Jshr s K ( hsub hθ ) using 1 ; ring_nf
 
 /-
 Two children that both contain a point where the index-`m` constraint fails must have integer
@@ -507,7 +507,7 @@ lemma bad_close (s : ℕ) (K : ℤ) (m : ℕ) (hm1 : s * S.n0 < m) (hm2 : m < (s
     have h_bound : S.mu ^ ((s + 2) * S.n0 - m) ≤ S.mu ^ (2 * S.n0 - 1) := by
       exact pow_le_pow_right₀ ( by linarith [ S.hlam, S.hlammu ] ) ( by rw [ tsub_le_iff_left ] ; linarith [ Nat.sub_add_cancel ( by nlinarith : 1 ≤ 2 * S.n0 ) ] );
     convert mul_le_mul_of_nonneg_left ( le_trans ‹_› h_bound ) ( show 0 ≤ 2 * S.eps by exact mul_nonneg zero_le_two ( le_of_lt ( S.eps_pos ) ) ) using 1 ; ring;
-    rw [ S.heps ] ; ring;
+    rw [ S.heps ] ; ring_nf;
     norm_num [ show S.mu ≠ 0 by linarith [ S.lam_pos, S.mu_pos ] ];
   have h_bound : |(K1 : ℝ) - K2| ≤ S.scale (s + 1) * |θ1 - θ2| + 1 := by
     have h_bound : (K1 : ℝ) ≤ S.scale (s + 1) * θ1 ∧ S.scale (s + 1) * θ1 ≤ (K1 : ℝ) + 1 ∧ (K2 : ℝ) ≤ S.scale (s + 1) * θ2 ∧ S.scale (s + 1) * θ2 ≤ (K2 : ℝ) + 1 := by
@@ -532,8 +532,8 @@ lemma scale_ratio_gap (s : ℕ) :
     · exact mul_pos zero_lt_four ( pow_pos ( by linarith [ S.lam_pos, S.mu_pos ] ) _ );
     · exact mul_ne_zero four_ne_zero ( pow_ne_zero _ ( by linarith [ S.hlam, S.hlammu ] ) );
   · rw [ ge_iff_le, le_div_iff₀ ];
-    · convert Q_ratio_ge _ ( show ( s + 1 ) * S.n0 ≤ ( s + 2 ) * S.n0 by linarith ) using 1 ; ring;
-      rw [ show S.n0 * 2 + S.n0 * s - ( S.n0 + S.n0 * s ) = S.n0 by rw [ Nat.sub_eq_of_eq_add ] ; ring ] ; unfold Setup.scale ; ring;
+    · convert Q_ratio_ge _ ( show ( s + 1 ) * S.n0 ≤ ( s + 2 ) * S.n0 by linarith ) using 1 ; ring_nf;
+      rw [ show S.n0 * 2 + S.n0 * s - ( S.n0 + S.n0 * s ) = S.n0 by rw [ Nat.sub_eq_of_eq_add ] ; ring ] ; unfold Setup.scale ; ring_nf;
     · exact S.scale_pos s;
   · linarith [ S.eps_le_half ]
 
@@ -798,18 +798,151 @@ theorem deMathan_not_dense
         exact absurd hm ( by linarith [ show ( a 0 : ℝ ) < a k from mod_cast ha ( Nat.pos_of_ne_zero hk ), show ( Q m : ℝ ) ≥ Q 0 from Nat.recOn m ( by norm_num ) fun n ihn => by nlinarith [ hloQ n, hhiQ n, hQpos n, Real.sqrt_nonneg ( 1 + ε₀ ), Real.mul_self_sqrt ( show 0 ≤ 1 + ε₀ by positivity ) ] ] );
   exact zero_notMem_closure_range ( show 0 < δ from lt_min ( S.eps_pos ) ( ndist_pos_of_irrational <| hθ_irr.mul_natCast <| by linarith ) ) hδ_le
 
+/-- A sequence `n : ℕ → ℕ` is *lacunary* if there is some `c > 1` such that
+`c · n k < n (k+1)` for all sufficiently large `k`. This matches the definition
+`IsLacunary` used in the Formal Conjectures repository. -/
+def IsLacunary (n : ℕ → ℕ) : Prop :=
+  ∃ c > (1 : ℝ), ∀ᶠ k in Filter.atTop, c * (n k : ℝ) < n (k + 1)
+
+/-- The open ball of positive radius `< 1/2` around `↑0` in `AddCircle 1` is infinite. -/
+private lemma addCircle_one_ball_zero_infinite {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 1/2) :
+    (Metric.ball (0 : AddCircle (1 : ℝ)) δ).Infinite := by
+  -- Build an injection ℕ → ball via `m ↦ ↑(δ / (m + 2))`.
+  set f : ℕ → AddCircle (1 : ℝ) := fun m => (↑(δ / ((m : ℝ) + 2)) : AddCircle (1 : ℝ)) with hf_def
+  -- Basic pointwise facts.
+  have hm_pos : ∀ m : ℕ, (0 : ℝ) < (m : ℝ) + 2 := fun m => by
+    have : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
+    linarith
+  have hm_ge_two : ∀ m : ℕ, (2 : ℝ) ≤ (m : ℝ) + 2 := fun m => by
+    have : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
+    linarith
+  have hval_pos : ∀ m : ℕ, 0 < δ / ((m : ℝ) + 2) := fun m =>
+    div_pos hδ (hm_pos m)
+  have hval_lt_δ : ∀ m : ℕ, δ / ((m : ℝ) + 2) < δ := fun m => by
+    have h1 : δ / ((m : ℝ) + 2) ≤ δ / 2 :=
+      div_le_div_of_nonneg_left hδ.le (by norm_num) (hm_ge_two m)
+    linarith
+  have hval_lt_Ico : ∀ m : ℕ, δ / ((m : ℝ) + 2) ∈ Set.Ico (0 : ℝ) (0 + 1) := fun m => by
+    refine ⟨(hval_pos m).le, ?_⟩
+    have := hval_lt_δ m
+    linarith
+  -- range ⊆ ball
+  have hrange_sub : Set.range f ⊆ Metric.ball (0 : AddCircle (1 : ℝ)) δ := by
+    rintro y ⟨m, rfl⟩
+    rw [Metric.mem_ball, dist_zero_right, hf_def]
+    show ‖(↑(δ / ((m : ℝ) + 2)) : AddCircle (1 : ℝ))‖ < δ
+    have hnorm : ‖(↑(δ / ((m : ℝ) + 2)) : AddCircle (1 : ℝ))‖ = δ / ((m : ℝ) + 2) := by
+      rw [AddCircle.norm_eq (p := 1)]
+      have hround : round ((1 : ℝ)⁻¹ * (δ / ((m : ℝ) + 2))) = 0 := by
+        simp only [inv_one, one_mul]
+        apply round_eq_zero_iff.mpr
+        rw [Set.mem_Ico]
+        refine ⟨by linarith [hval_pos m], ?_⟩
+        have : δ / ((m : ℝ) + 2) < δ := hval_lt_δ m
+        linarith
+      rw [hround]
+      simp only [Int.cast_zero, zero_mul, sub_zero]
+      exact abs_of_nonneg (hval_pos m).le
+    rw [hnorm]; exact hval_lt_δ m
+  -- Injectivity via `coe_eq_coe_iff_of_mem_Ico`.
+  have hf_inj : Function.Injective f := by
+    intro a b hab
+    simp only [hf_def] at hab
+    have hab_eq : δ / ((a : ℝ) + 2) = δ / ((b : ℝ) + 2) :=
+      (AddCircle.coe_eq_coe_iff_of_mem_Ico (hval_lt_Ico a) (hval_lt_Ico b)).mp hab
+    -- From δ / (a+2) = δ / (b+2) with δ > 0, get a = b.
+    have hδ_ne : δ ≠ 0 := hδ.ne'
+    have hden : (a : ℝ) + 2 = (b : ℝ) + 2 := by
+      have ha_pos := hm_pos a
+      have hb_pos := hm_pos b
+      have hmul : δ * ((b : ℝ) + 2) = δ * ((a : ℝ) + 2) := by
+        have h1 : δ = δ / ((a : ℝ) + 2) * ((a : ℝ) + 2) := by
+          field_simp
+        have h2 : δ = δ / ((b : ℝ) + 2) * ((b : ℝ) + 2) := by
+          field_simp
+        calc δ * ((b : ℝ) + 2)
+            = δ / ((a : ℝ) + 2) * ((a : ℝ) + 2) * ((b : ℝ) + 2) := by rw [← h1]
+          _ = δ / ((b : ℝ) + 2) * ((b : ℝ) + 2) * ((a : ℝ) + 2) := by rw [hab_eq]; ring
+          _ = δ * ((a : ℝ) + 2) := by rw [← h2]
+      exact (mul_left_cancel₀ hδ_ne hmul).symm
+    have : (a : ℝ) = b := by linarith
+    exact_mod_cast this
+  exact (Set.infinite_range_of_injective hf_inj).mono hrange_sub
+
 /-- **Erdős Problem 464.** Solved in the affirmative by de Mathan [dM80] and Pollington [Po79b]:
-for every lacunary sequence `a : ℕ → ℕ` (strictly increasing, with `(1 + ε₀)·aₖ ≤ aₖ₊₁` for some
-`ε₀ > 0`), there exists an irrational `θ` such that `0` is not in the closure of the set of
-nearest-integer distances `{‖θ·aₖ‖ : k}`, i.e. the values stay bounded away from `0` and hence
-are not dense in `[0, 1]`. -/
-theorem erdos_464
-    (a : ℕ → ℕ) (ha : StrictMono a) (ha0 : 0 < a 0)
-    (ε₀ : ℝ) (hε₀ : 0 < ε₀) (hlac : ∀ k, (1 + ε₀) * (a k : ℝ) ≤ a (k + 1)) :
-    ∃ θ : ℝ, Irrational θ ∧
-      (0 : ℝ) ∉ closure
-        (Set.range (fun k : ℕ => |θ * (a k : ℝ) - (round (θ * (a k : ℝ)) : ℝ)|)) :=
-  deMathan_not_dense a ha ha0 ε₀ hε₀ hlac
+for every lacunary sequence of positive integers, there exists an irrational `θ` such that the
+values `θ·nₖ mod 1` are not dense in the circle `ℝ/ℤ`. -/
+theorem erdos_464 :
+    ∀ n : ℕ → ℕ, StrictMono n → (∀ k, 0 < n k) → IsLacunary n →
+      ∃ θ : ℝ, Irrational θ ∧
+        ¬ Dense (Set.range fun k => (↑(θ * (n k : ℝ)) : AddCircle (1 : ℝ))) := by
+  intro n hmono hpos hlac
+  obtain ⟨c, hc, hev⟩ := hlac
+  obtain ⟨N₀, hN⟩ := Filter.eventually_atTop.mp hev
+  -- Build the tail sequence a k := n (k + N₀).
+  let a : ℕ → ℕ := fun k => n (k + N₀)
+  have ha_mono : StrictMono a := fun i j hij => hmono (Nat.add_lt_add_right hij N₀)
+  have ha0 : 0 < a 0 := hpos (0 + N₀)
+  let ε₀ : ℝ := c - 1
+  have hε₀_pos : 0 < ε₀ := by show 0 < c - 1; linarith
+  have hlac_a : ∀ k, (1 + ε₀) * (a k : ℝ) ≤ a (k + 1) := by
+    intro k
+    have hh : c * (n (k + N₀) : ℝ) < n (k + N₀ + 1) := hN (k + N₀) (by omega)
+    show (1 + (c - 1)) * (n (k + N₀) : ℝ) ≤ n (k + 1 + N₀)
+    have h1 : (1 : ℝ) + (c - 1) = c := by ring
+    have h2 : k + 1 + N₀ = k + N₀ + 1 := by ring
+    rw [h1, h2]
+    linarith
+  obtain ⟨θ, hθirr, hclose⟩ := deMathan_not_dense a ha_mono ha0 ε₀ hε₀_pos hlac_a
+  refine ⟨θ, hθirr, ?_⟩
+  -- Extract δ₀ > 0 with δ₀ ≤ |θ * a k - round(θ * a k)| for all k.
+  rw [Metric.mem_closure_range_iff] at hclose
+  push_neg at hclose
+  obtain ⟨δ₀, hδ₀_pos, hδ₀⟩ := hclose
+  have hδ_tail : ∀ k, δ₀ ≤ |θ * (a k : ℝ) - (round (θ * (a k : ℝ)) : ℝ)| := by
+    intro k
+    have hh := hδ₀ k
+    rw [Real.dist_eq, zero_sub, abs_neg] at hh
+    rwa [abs_of_nonneg (abs_nonneg _)] at hh
+  -- Choose δ := min δ₀ (1/4) so 0 < δ < 1/2.
+  let δ : ℝ := min δ₀ (1/4)
+  have hδ_pos : 0 < δ := lt_min hδ₀_pos (by norm_num)
+  have hδ_le_δ₀ : δ ≤ δ₀ := min_le_left _ _
+  have hδ_lt_half : δ < 1/2 := lt_of_le_of_lt (min_le_right _ _) (by norm_num)
+  -- The finite prefix image in AddCircle 1.
+  let F : Set (AddCircle (1 : ℝ)) :=
+    (fun k : ℕ => (↑(θ * (n k : ℝ)) : AddCircle (1 : ℝ))) '' (Set.Iio N₀)
+  have hF_finite : F.Finite := (Set.finite_Iio N₀).image _
+  -- Show ¬ Dense by exhibiting a nonempty open set disjoint from the range.
+  rw [dense_iff_inter_open]
+  push_neg
+  refine ⟨Metric.ball (0 : AddCircle (1 : ℝ)) δ \ F,
+    Metric.isOpen_ball.sdiff hF_finite.isClosed, ?_, ?_⟩
+  · -- Nonempty: infinite ball minus finite set.
+    have hinf : (Metric.ball (0 : AddCircle (1 : ℝ)) δ).Infinite :=
+      addCircle_one_ball_zero_infinite hδ_pos hδ_lt_half
+    exact (hinf.diff hF_finite).nonempty
+  · -- Empty intersection with the range.
+    rw [Set.eq_empty_iff_forall_notMem]
+    rintro y ⟨⟨hy_ball, hy_notF⟩, k, hyk⟩
+    rw [Metric.mem_ball, dist_zero_right] at hy_ball
+    rcases lt_or_ge k N₀ with hk | hk
+    · -- k < N₀ ⟹ y ∈ F, contradicting hy_notF.
+      exact hy_notF ⟨k, hk, hyk⟩
+    · -- k ≥ N₀ ⟹ n k = a (k - N₀), so ‖y‖ ≥ δ₀ ≥ δ, contradicting hy_ball.
+      obtain ⟨j, hj⟩ : ∃ j, k = j + N₀ := ⟨k - N₀, (Nat.sub_add_cancel hk).symm⟩
+      have hnak : (n k : ℝ) = (a j : ℝ) := by rw [hj]
+      have hyeq : y = (↑(θ * (a j : ℝ)) : AddCircle (1 : ℝ)) := by
+        rw [← hyk]
+        show (↑(θ * (n k : ℝ)) : AddCircle (1 : ℝ)) = ↑(θ * (a j : ℝ))
+        rw [hnak]
+      rw [hyeq] at hy_ball
+      have hnorm_eq : ‖(↑(θ * (a j : ℝ)) : AddCircle (1 : ℝ))‖ =
+          |θ * (a j : ℝ) - (round (θ * (a j : ℝ)) : ℝ)| := by
+        rw [AddCircle.norm_eq (p := 1)]
+        simp only [inv_one, one_mul, mul_one]
+      rw [hnorm_eq] at hy_ball
+      exact absurd hy_ball (not_lt.mpr (hδ_le_δ₀.trans (hδ_tail j)))
 
 #print axioms erdos_464
 -- 'Erdos464.erdos_464' depends on axioms: [propext, Classical.choice, Quot.sound]
