@@ -92,4 +92,5 @@
    "inherited": true,
    "configFile": "lakefile.toml"}],
  "name": "erdos765",
- "lakeDir": ".lake"}
+ "lakeDir": ".lake",
+ "fixedToolchain": false}
