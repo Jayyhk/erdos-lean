@@ -121,7 +121,7 @@
     path: "problems/71/"
     theorem: "Erdos71.erdos_71"
     state: "complete"
-    last_update: "2026-06-10"
+    last_update: "2026-08-04"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
@@ -363,7 +363,7 @@
     path: "problems/209/"
     theorem: "Erdos209.erdos_209"
     state: "complete"
-    last_update: "2026-06-21"
+    last_update: "2026-08-04"
     lean_toolchain: "leanprover/lean4:v4.27.0"
     mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
     sources:
@@ -714,7 +714,7 @@
     path: "problems/353/"
     theorem: "Erdos353.erdos_353"
     state: "complete"
-    last_update: "2026-06-21"
+    last_update: "2026-08-04"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
@@ -982,7 +982,7 @@
     path: "problems/464/"
     theorem: "Erdos464.erdos_464"
     state: "complete"
-    last_update: "2026-06-22"
+    last_update: "2026-08-04"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:

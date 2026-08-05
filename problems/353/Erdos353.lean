@@ -105,7 +105,7 @@ lemma rotTwist_inj (ang : ℝ → ℝ) :
     aesop
   have h_w_eq_w' : w = w' := by
     simp +decide [ rot, ← List.ofFn_inj ] at h_rot_eq ⊢;
-    ext i; fin_cases i <;> simp_all +decide [ Prod.ext_iff ] ;
+    ext i; fin_cases i <;> simp_all +decide;
     · cases le_or_gt 0 ( Real.cos ( ang ‖w'‖ ) ) <;> cases le_or_gt 0 ( Real.sin ( ang ‖w'‖ ) ) <;> nlinarith [ Real.sin_sq_add_cos_sq ( ang ‖w'‖ ) ];
     · cases le_or_gt 0 ( Real.cos ( ang ‖w'‖ ) ) <;> cases le_or_gt 0 ( Real.sin ( ang ‖w'‖ ) ) <;> nlinarith [ Real.sin_sq_add_cos_sq ( ang ‖w'‖ ) ]
   exact h_w_eq_w'
@@ -298,8 +298,8 @@ lemma matching (S : Set (EuclideanSpace ℝ (Fin 2))) (hS : MeasurableSet S)
     convert congr_arg ( fun x : ENNReal => x / 4 ) ( volume_ball_half A hε.le ) using 1;
     rw [ ENNReal.mul_div_cancel_right ] <;> norm_num
   have h_eighth : volume (Metric.ball A ε \ S) ≥ volume (Metric.ball A ε) / 8 := by
-    simp_all +decide [ div_eq_mul_inv, mul_assoc, mul_comm, mul_left_comm ];
-    convert ( mul_le_mul_right' h_half ( 1 / 2 : ENNReal ) ) using 1 <;> ring;
+    simp_all +decide [ div_eq_mul_inv, mul_comm, mul_left_comm ];
+    convert ( mul_le_mul_left h_half ( 1 / 2 : ENNReal ) ) using 1 <;> ring;
     · rw [ show ( 8⁻¹ : ENNReal ) = 4⁻¹ * ( 1 / 2 ) by
             rw [ ← ENNReal.toReal_eq_toReal_iff' ] <;> norm_num;
             norm_num [ ENNReal.mul_eq_top ] ] ; ring;
@@ -327,7 +327,7 @@ lemma densityPoint {S : Set (EuclideanSpace ℝ (Fin 2))} (hS : MeasurableSet S)
       specialize this volume S;
       filter_upwards [ this ] with x hx;
       have h_eq : ∀ r > 0, volume (S ∩ Metric.closedBall x r) = volume (S ∩ Metric.ball x r) := by
-        intro r hr; rw [ MeasureTheory.measure_congr ] ; filter_upwards [ MeasureTheory.measure_eq_zero_iff_ae_notMem.mp ( show volume ( Metric.sphere x r ) = 0 from by simp +decide [ MeasureTheory.Measure.addHaar_sphere ] ) ] with y hy; simp_all +decide [ Metric.mem_ball, Metric.mem_closedBall ] ;
+        intro r hr; rw [ MeasureTheory.measure_congr ] ; filter_upwards [ MeasureTheory.measure_eq_zero_iff_ae_notMem.mp ( show volume ( Metric.sphere x r ) = 0 from by simp +decide [ MeasureTheory.Measure.addHaar_sphere ] ) ] with y hy; simp_all +decide;
         exact ⟨ fun h => ⟨ h.1, lt_of_le_of_ne ( by simpa using h.2 ) hy ⟩, fun h => ⟨ h.1, le_of_lt ( by simpa using h.2 ) ⟩ ⟩;
       refine' hx.congr' _;
       filter_upwards [ self_mem_nhdsWithin ] with r hr using by rw [ h_eq r hr, MeasureTheory.Measure.addHaar_closedBall_eq_addHaar_ball ] ;
@@ -902,7 +902,7 @@ lemma densityOnePoint {S : Set (EuclideanSpace ℝ (Fin 2))} (hS : MeasurableSet
     ∃ O ∈ S, M < dist O A ∧
       Filter.Tendsto (fun δ => volume (Metric.ball O δ \ S) / volume (Metric.ball O δ))
         (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
-  contrapose! hinf; simp_all +decide [ MeasureTheory.Measure.restrict_apply ] ;
+  contrapose! hinf; simp_all +decide;
   -- By Besicovitch's density theorem, for volume.restrict S-a.e. x the ratio volume(S ∩ closedBall x r)/volume(closedBall x r) → 1.
   have h_density : ∀ᵐ x ∂(volume.restrict S), Filter.Tendsto (fun r => volume (S ∩ Metric.closedBall x r) / volume (Metric.closedBall x r)) (nhdsWithin 0 (Set.Ioi 0)) (nhds 1) := by
     convert Besicovitch.ae_tendsto_measure_inter_div volume S using 1;
@@ -922,7 +922,7 @@ lemma densityOnePoint {S : Set (EuclideanSpace ℝ (Fin 2))} (hS : MeasurableSet
     have h_complement : Filter.Tendsto (fun r => volume (S ∩ Metric.ball x r) / volume (Metric.ball x r)) (nhdsWithin 0 (Set.Ioi 0)) (nhds 1) := by
       have h_complement : ∀ r > 0, volume (S ∩ Metric.ball x r) = volume (S ∩ Metric.closedBall x r) := by
         intro r hr; rw [ MeasureTheory.measure_congr ] ; filter_upwards [ MeasureTheory.measure_eq_zero_iff_ae_notMem.mp ( show MeasureTheory.MeasureSpace.volume ( Metric.sphere x r ) = 0 from by
-                                                                                                                            rw [ MeasureTheory.Measure.addHaar_sphere ] ) ] with y hy; simp_all +decide [ Metric.mem_ball, Metric.mem_closedBall ] ;
+                                                                                                                            rw [ MeasureTheory.Measure.addHaar_sphere ] ) ] with y hy; simp_all +decide;
         exact ⟨ fun h => ⟨ h.1, Metric.mem_closedBall.mpr <| le_of_lt h.2 ⟩, fun h => ⟨ h.1, lt_of_le_of_ne ( Metric.mem_closedBall.mp h.2 ) hy ⟩ ⟩;
       have h_complement : ∀ r > 0, volume (Metric.ball x r) = volume (Metric.closedBall x r) := by
         intro r hr; rw [ MeasureTheory.Measure.addHaar_closedBall ] ; norm_num [ hr.le ] ;
@@ -1015,11 +1015,17 @@ lemma exists_SR {S : Set (EuclideanSpace ℝ (Fin 2))} (hS : MeasurableSet S)
   have := h_volume_bad_R_zero.eventually ( gt_mem_nhds <| show 0 < 1 / 10 * volume B - volume ( B \ S ) from tsub_pos_of_lt hdens ) ; have := this.and ( Filter.eventually_ge_atTop 2 ) ; obtain ⟨ R, hR₁, hR₂ ⟩ := this.exists; use R;
   rw [ lt_tsub_iff_left ] at hR₁;
   exact ⟨ hR₂, lt_of_le_of_lt ( h_volume_B_S_R R hR₂ ) hR₁ ⟩
-/-- **Theorem 2.**  Let `S ⊆ ℝ²` be a measurable set of infinite Lebesgue measure.  Then `S`
-contains the four vertices of an isosceles trapezoid of area `1`. -/
-theorem thm_trapezoid (S : Set (EuclideanSpace ℝ (Fin 2)))
+/-- **Theorem 2, in constructed form.**  For a measurable `S ⊆ ℝ²` of infinite Lebesgue
+measure, the trapezoid produced by the proof is exhibited explicitly: a centre `O`, a vertex
+`p` at distance `> 2` from it, and a ratio `R ≥ 2`, with all four of `p`, its twist, and their
+contractions towards `O` lying in `S`.  `thm_trapezoid` below is the statement of Theorem 2
+itself; the extra data is what identifies the quadrilateral's shape, and is needed to prove
+that it is in convex position and that its convex hull has measure `1`. -/
+theorem thm_trapezoid_strong (S : Set (EuclideanSpace ℝ (Fin 2)))
     (hS : MeasurableSet S) (hinf : volume S = ⊤) :
-    ∃ A B C D, A ∈ S ∧ B ∈ S ∧ C ∈ S ∧ D ∈ S ∧ IsoTrapArea1 A B C D := by
+    ∃ (O p : EuclideanSpace ℝ (Fin 2)) (R : ℝ), 2 ≤ R ∧ 2 < ‖p - O‖ ∧
+      p ∈ S ∧ twistAt O (psi R) p ∈ S ∧
+      conAt O R (twistAt O (psi R) p) ∈ S ∧ conAt O R p ∈ S := by
   have hpos : 0 < volume S := by rw [hinf]; exact ENNReal.zero_lt_top
   obtain ⟨A, hAS, ε, hε, hε1, hdens⟩ := densityPoint hS hpos
   obtain ⟨O, hOS, hOfar', hdens1⟩ := densityOnePoint hS hinf A (100 / ε + ε)
@@ -1054,8 +1060,15 @@ theorem thm_trapezoid (S : Set (EuclideanSpace ℝ (Fin 2)))
     have h3 : dist p A < ε / 2 := by simpa [Metric.mem_ball] using hpB
     have : (100:ℝ) / ε ≥ 100 := by rw [ge_iff_le, le_div_iff₀ hε]; nlinarith
     nlinarith
-  exact ⟨p, twistAt O (psi R) p, conAt O R (twistAt O (psi R) p), conAt O R p,
-    hpSR.1, hfpSR.1, hfpSR.2, hpSR.2, trapezoid_geom hR O p hr2⟩
+  exact ⟨O, p, R, hR, hr2, hpSR.1, hfpSR.1, hfpSR.2, hpSR.2⟩
+
+/-- **Theorem 2.**  Let `S ⊆ ℝ²` be a measurable set of infinite Lebesgue measure.  Then `S`
+contains the four vertices of an isosceles trapezoid of area `1`. -/
+theorem thm_trapezoid (S : Set (EuclideanSpace ℝ (Fin 2)))
+    (hS : MeasurableSet S) (hinf : volume S = ⊤) :
+    ∃ A B C D, A ∈ S ∧ B ∈ S ∧ C ∈ S ∧ D ∈ S ∧ IsoTrapArea1 A B C D := by
+  obtain ⟨O, p, R, hR, hr2, h1, h2, h3, h4⟩ := thm_trapezoid_strong S hS hinf
+  exact ⟨_, _, _, _, h1, h2, h3, h4, trapezoid_geom hR O p hr2⟩
 
 end Koizumi
 
@@ -3037,58 +3050,1232 @@ theorem thm_congruent :
   exact area_lt_one n C hn hconv hsconv hcong hS
 end Kovac
 
+/-! ### Bridge: shoelace area equals Lebesgue measure of the convex hull -/
+section ShoelaceBridge
+
+open MeasureTheory
+open scoped Pointwise
+open Koizumi (area2)
+
+/-- The linear map sending `e₀ ↦ B - A`, `e₁ ↦ C - A`, as a map on `EuclideanSpace ℝ (Fin 2)`. -/
+noncomputable def triLinMap (A B C : EuclideanSpace ℝ (Fin 2)) :
+    EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 2) :=
+  (Matrix.toLin (EuclideanSpace.basisFun (Fin 2) ℝ).toBasis
+    (EuclideanSpace.basisFun (Fin 2) ℝ).toBasis)
+    !![B 0 - A 0, C 0 - A 0; B 1 - A 1, C 1 - A 1]
+
+/-- The determinant of `triLinMap A B C` is the signed doubled area. -/
+lemma triLinMap_det (A B C : EuclideanSpace ℝ (Fin 2)) :
+    LinearMap.det (triLinMap A B C) =
+      (B 0 - A 0) * (C 1 - A 1) - (C 0 - A 0) * (B 1 - A 1) := by
+  unfold triLinMap
+  rw [LinearMap.det_toLin]
+  rw [Matrix.det_fin_two_of]
+
+/-- The reference triangle with vertices `0`, `e₀`, `e₁`. -/
+noncomputable def refTri : Set (EuclideanSpace ℝ (Fin 2)) :=
+  convexHull ℝ {0, EuclideanSpace.single 0 1, EuclideanSpace.single 1 1}
+
+/-- `triLinMap A B C` sends the reference triangle's vertices to `0`, `B - A`, `C - A`. -/
+lemma triLinMap_apply_zero (A B C : EuclideanSpace ℝ (Fin 2)) :
+    triLinMap A B C 0 = 0 := by
+  simp
+
+/-- The coordinate description of the reference triangle is convex. -/
+lemma convex_refTriSet :
+    Convex ℝ {p : EuclideanSpace ℝ (Fin 2) | 0 ≤ p 0 ∧ 0 ≤ p 1 ∧ p 0 + p 1 ≤ 1} := by
+  intro x hx y hy a b ha hb hab
+  obtain ⟨hx0, hx1, hxs⟩ := hx
+  obtain ⟨hy0, hy1, hys⟩ := hy
+  refine ⟨?_, ?_, ?_⟩
+  · have : (a • x + b • y) 0 = a * x 0 + b * y 0 := rfl
+    rw [this]; positivity
+  · have : (a • x + b • y) 1 = a * x 1 + b * y 1 := rfl
+    rw [this]; positivity
+  · have h0 : (a • x + b • y) 0 = a * x 0 + b * y 0 := rfl
+    have h1 : (a • x + b • y) 1 = a * x 1 + b * y 1 := rfl
+    rw [h0, h1]
+    nlinarith [ha, hb, hxs, hys, hab]
+
+/-- The reference triangle described in coordinates: `{p | 0 ≤ p 0, 0 ≤ p 1, p 0 + p 1 ≤ 1}`. -/
+lemma refTri_eq :
+    refTri = {p : EuclideanSpace ℝ (Fin 2) | 0 ≤ p 0 ∧ 0 ≤ p 1 ∧ p 0 + p 1 ≤ 1} := by
+  apply Set.Subset.antisymm
+  · -- ⊆ : the RHS is convex and contains the three vertices
+    apply convexHull_min _ convex_refTriSet
+    rintro p (rfl | rfl | rfl) <;> refine ⟨?_, ?_, ?_⟩ <;>
+      simp [EuclideanSpace.single_apply]
+  · -- ⊇ : barycentric coordinates (1 - p₀ - p₁, p₀, p₁)
+    intro p ⟨hp0, hp1, hps⟩
+    have hkey : p = (1 - p 0 - p 1) • (0 : EuclideanSpace ℝ (Fin 2)) +
+        (p 0) • (EuclideanSpace.single 0 (1 : ℝ)) +
+        (p 1) • (EuclideanSpace.single 1 (1 : ℝ)) := by
+      ext i
+      fin_cases i <;> simp [EuclideanSpace.single_apply]
+    rw [hkey]
+    have h1 : (0 : EuclideanSpace ℝ (Fin 2)) ∈
+        ({0, EuclideanSpace.single 0 1, EuclideanSpace.single 1 1} :
+          Set (EuclideanSpace ℝ (Fin 2))) := by simp
+    have h2 : (EuclideanSpace.single 0 (1 : ℝ)) ∈
+        ({0, EuclideanSpace.single 0 1, EuclideanSpace.single 1 1} :
+          Set (EuclideanSpace ℝ (Fin 2))) := by simp
+    have h3 : (EuclideanSpace.single 1 (1 : ℝ)) ∈
+        ({0, EuclideanSpace.single 0 1, EuclideanSpace.single 1 1} :
+          Set (EuclideanSpace ℝ (Fin 2))) := by simp
+    unfold refTri
+    -- combine: (1-p₀-p₁)·0 + p₀·e₀ + p₁·e₁ with nonneg weights summing to 1
+    have hw : ∀ i ∈ (Finset.univ : Finset (Fin 3)),
+        (0 : ℝ) ≤ ![1 - p 0 - p 1, p 0, p 1] i := by
+      intro i _
+      fin_cases i <;> simp <;> linarith
+    have hsum : ∑ i : Fin 3, ![1 - p 0 - p 1, p 0, p 1] i = 1 := by
+      simp [Fin.sum_univ_three]; ring
+    have hz : ∀ i ∈ (Finset.univ : Finset (Fin 3)),
+        ![(0 : EuclideanSpace ℝ (Fin 2)), EuclideanSpace.single 0 1,
+          EuclideanSpace.single 1 1] i ∈
+        ({0, EuclideanSpace.single 0 1, EuclideanSpace.single 1 1} :
+          Set (EuclideanSpace ℝ (Fin 2))) := by
+      intro i _
+      fin_cases i <;> simp
+    have := Finset.centerMass_mem_convexHull (R := ℝ) Finset.univ hw (by rw [hsum]; norm_num) hz
+    convert this using 1
+    rw [Finset.centerMass]
+    rw [hsum]
+    simp [Fin.sum_univ_three]
+
+/-- The triangle in `ℝ × ℝ` coordinates. -/
+private def triProd : Set (ℝ × ℝ) := {q : ℝ × ℝ | 0 ≤ q.1 ∧ 0 ≤ q.2 ∧ q.1 + q.2 ≤ 1}
+
+/-- `triProd` is a measurable subset of `ℝ × ℝ`. -/
+private lemma measurableSet_triProd : MeasurableSet triProd := by
+  unfold triProd
+  have h1 : MeasurableSet {q : ℝ × ℝ | 0 ≤ q.1} :=
+    measurableSet_le measurable_const measurable_fst
+  have h2 : MeasurableSet {q : ℝ × ℝ | 0 ≤ q.2} :=
+    measurableSet_le measurable_const measurable_snd
+  have h3 : MeasurableSet {q : ℝ × ℝ | q.1 + q.2 ≤ 1} :=
+    measurableSet_le (measurable_fst.add measurable_snd) measurable_const
+  convert h1.inter (h2.inter h3) using 1
+
+/-- The `x`-slice of `triProd`. -/
+private lemma triProd_slice (x : ℝ) :
+    (Prod.mk x ⁻¹' triProd) = if 0 ≤ x ∧ x ≤ 1 then Set.Icc 0 (1 - x) else ∅ := by
+  ext y
+  simp only [Set.mem_preimage, triProd, Set.mem_setOf_eq]
+  split_ifs with h
+  · obtain ⟨hx0, hx1⟩ := h
+    simp only [Set.mem_Icc]
+    constructor
+    · rintro ⟨-, hy, hs⟩; exact ⟨hy, by linarith⟩
+    · rintro ⟨hy0, hy1⟩; exact ⟨hx0, hy0, by linarith⟩
+  · simp only [Set.mem_empty_iff_false, iff_false]
+    push_neg at h
+    rintro ⟨hx0, hy0, hs⟩
+    exact absurd (by linarith : x ≤ 1) (not_le.mpr (h hx0))
+
+/-- The triangle in `ℝ × ℝ` has volume `1/2`. -/
+private lemma volume_triProd : volume triProd = ENNReal.ofReal (1 / 2) := by
+  rw [MeasureTheory.Measure.volume_eq_prod,
+    MeasureTheory.Measure.prod_apply measurableSet_triProd]
+  have hslice : ∀ x : ℝ, volume (Prod.mk x ⁻¹' triProd) =
+      Set.indicator (Set.Icc (0:ℝ) 1) (fun x => ENNReal.ofReal (1 - x)) x := by
+    intro x
+    rw [triProd_slice x]
+    by_cases h : 0 ≤ x ∧ x ≤ 1
+    · rw [if_pos h, Set.indicator_of_mem (Set.mem_Icc.mpr h)]
+      rw [Real.volume_Icc]
+      congr 1; ring
+    · rw [if_neg h, Set.indicator_of_notMem (fun hm => h (Set.mem_Icc.mp hm))]
+      simp
+  simp_rw [hslice]
+  rw [MeasureTheory.lintegral_indicator measurableSet_Icc]
+  rw [← MeasureTheory.ofReal_integral_eq_lintegral_ofReal
+    (by
+      apply Continuous.integrableOn_Icc
+      exact continuous_const.sub continuous_id)
+    (MeasureTheory.ae_restrict_of_forall_mem measurableSet_Icc
+      (fun x hx => by simp; linarith [(Set.mem_Icc.mp hx).2]))]
+  congr 1
+  rw [MeasureTheory.integral_Icc_eq_integral_Ioc,
+    ← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  have : ∫ x : ℝ in (0:ℝ)..1, (1 - x) =
+      (∫ x : ℝ in (0:ℝ)..1, (1:ℝ)) - ∫ x : ℝ in (0:ℝ)..1, x :=
+    intervalIntegral.integral_sub intervalIntegrable_const
+      (Continuous.intervalIntegrable continuous_id 0 1)
+  rw [this, intervalIntegral.integral_const, integral_id]
+  norm_num
+
+/-- The reference triangle has volume `1/2`. -/
+lemma volume_refTri : volume refTri = ENNReal.ofReal (1 / 2) := by
+  rw [refTri_eq, ← volume_triProd]
+  -- Transport through `ofLp` then `finTwoArrow`.
+  have hofLp : MeasureTheory.MeasurePreserving
+      (@WithLp.ofLp 2 (Fin 2 → ℝ)) volume volume :=
+    PiLp.volume_preserving_ofLp (Fin 2)
+  have hArrow : MeasureTheory.MeasurePreserving
+      (@MeasurableEquiv.finTwoArrow ℝ _) volume volume :=
+    MeasureTheory.volume_preserving_finTwoArrow ℝ
+  have hcomp := hArrow.comp hofLp
+  rw [← hcomp.measure_preimage measurableSet_triProd.nullMeasurableSet]
+  congr 1
+
+/-- `triLinMap A B C` applied to the first basis vector is `B - A`. -/
+lemma triLinMap_e0 (A B C : EuclideanSpace ℝ (Fin 2)) :
+    triLinMap A B C (EuclideanSpace.single 0 1) = B - A := by
+  have hb : (EuclideanSpace.basisFun (Fin 2) ℝ).toBasis 0 =
+      EuclideanSpace.single 0 (1 : ℝ) := by
+    simp [OrthonormalBasis.coe_toBasis]
+  rw [triLinMap, ← hb, Matrix.toLin_self]
+  ext i
+  fin_cases i <;> simp [Fin.sum_univ_two, EuclideanSpace.single_apply]
+
+/-- `triLinMap A B C` applied to the second basis vector is `C - A`. -/
+lemma triLinMap_e1 (A B C : EuclideanSpace ℝ (Fin 2)) :
+    triLinMap A B C (EuclideanSpace.single 1 1) = C - A := by
+  have hb : (EuclideanSpace.basisFun (Fin 2) ℝ).toBasis 1 =
+      EuclideanSpace.single 1 (1 : ℝ) := by
+    simp [OrthonormalBasis.coe_toBasis]
+  rw [triLinMap, ← hb, Matrix.toLin_self]
+  ext i
+  fin_cases i <;> simp [Fin.sum_univ_two, EuclideanSpace.single_apply]
+
+/-- `triLinMap A B C` sends the reference vertices to `0`, `B - A`, `C - A`. -/
+lemma triLinMap_image_vertices (A B C : EuclideanSpace ℝ (Fin 2)) :
+    (triLinMap A B C) ''
+      ({0, EuclideanSpace.single 0 1, EuclideanSpace.single 1 1} :
+        Set (EuclideanSpace ℝ (Fin 2))) = {0, B - A, C - A} := by
+  rw [Set.image_insert_eq, Set.image_insert_eq, Set.image_singleton,
+    triLinMap_apply_zero, triLinMap_e0, triLinMap_e1]
+
+/-- The image of the reference triangle under `triLinMap A B C` is the triangle
+with vertices `0`, `B - A`, `C - A`. -/
+lemma image_refTri (A B C : EuclideanSpace ℝ (Fin 2)) :
+    (triLinMap A B C) '' refTri = convexHull ℝ {0, B - A, C - A} := by
+  unfold refTri
+  rw [LinearMap.image_convexHull, triLinMap_image_vertices]
+
+/-- Translating the triangle `{0, B - A, C - A}` by `A` gives `{A, B, C}`. -/
+lemma vadd_triple (A B C : EuclideanSpace ℝ (Fin 2)) :
+    A +ᵥ ({0, B - A, C - A} : Set (EuclideanSpace ℝ (Fin 2))) = {A, B, C} := by
+  ext q
+  simp only [Set.mem_vadd_set, Set.mem_insert_iff, Set.mem_singleton_iff, vadd_eq_add]
+  constructor
+  · rintro ⟨p, (rfl | rfl | rfl), rfl⟩
+    · left; simp
+    · right; left; abel
+    · right; right; abel
+  · rintro (hq | hq | hq)
+    · exact ⟨0, by simp, by simp [hq]⟩
+    · exact ⟨B - A, by simp, by rw [hq]; abel⟩
+    · exact ⟨C - A, by simp, by rw [hq]; abel⟩
+
+/-! ### The parametrized reference trapezoid -/
+
+/-- The reference trapezoid with vertices `e₀`, `e₁`, `s·e₁`, `s·e₀`. -/
+noncomputable def refTrap (s : ℝ) : Set (EuclideanSpace ℝ (Fin 2)) :=
+  convexHull ℝ {EuclideanSpace.single 0 1, EuclideanSpace.single 1 1,
+    EuclideanSpace.single 1 s, EuclideanSpace.single 0 s}
+
+/-- The coordinate description of the reference trapezoid. -/
+lemma refTrap_eq {s : ℝ} (hs0 : 0 < s) (hs1 : s ≤ 1) :
+    refTrap s =
+      {p : EuclideanSpace ℝ (Fin 2) | 0 ≤ p 0 ∧ 0 ≤ p 1 ∧ s ≤ p 0 + p 1 ∧ p 0 + p 1 ≤ 1} := by
+  apply Set.Subset.antisymm
+  · -- ⊆ : the RHS is convex and contains the four vertices
+    apply convexHull_min
+    · rintro q (rfl | rfl | rfl | rfl) <;>
+        refine ⟨?_, ?_, ?_, ?_⟩ <;> simp [EuclideanSpace.single_apply] <;> linarith
+    · intro x hx y hy a b ha hb hab
+      obtain ⟨hx0, hx1, hxs, hxt⟩ := hx
+      obtain ⟨hy0, hy1, hys, hyt⟩ := hy
+      have e0 : (a • x + b • y) 0 = a * x 0 + b * y 0 := rfl
+      have e1 : (a • x + b • y) 1 = a * x 1 + b * y 1 := rfl
+      refine ⟨by rw [e0]; positivity, by rw [e1]; positivity, ?_, ?_⟩
+      · rw [e0, e1]; nlinarith
+      · rw [e0, e1]; nlinarith
+  · -- ⊇ : explicit barycentric coordinates
+    rintro p ⟨hp0, hp1, hps, hpt⟩
+    have ht0 : 0 < p 0 + p 1 := lt_of_lt_of_le hs0 hps
+    set t : ℝ := p 0 + p 1 with htdef
+    -- λ measures position between the inner and outer edge; μ position along the edge
+    by_cases hs_eq : s = 1
+    · -- degenerate: the trapezoid is the segment from e₀ to e₁
+      subst hs_eq
+      have htone : t = 1 := le_antisymm hpt hps
+      set μ : ℝ := p 0 with hmu
+      have hμ0 : 0 ≤ μ := hp0
+      have hμ1 : μ ≤ 1 := by rw [hmu]; linarith
+      have hkey : p = μ • EuclideanSpace.single 0 (1:ℝ) +
+          (1 - μ) • EuclideanSpace.single 1 (1:ℝ) := by
+        ext i; fin_cases i <;> (simp [EuclideanSpace.single_apply, hmu]; try linarith)
+      unfold refTrap
+      have hw : ∀ i ∈ (Finset.univ : Finset (Fin 4)),
+          (0:ℝ) ≤ ![μ, 1 - μ, 0, 0] i := by
+        intro i _; fin_cases i <;> simp <;> linarith
+      have hsum : ∑ i : Fin 4, ![μ, 1 - μ, (0:ℝ), 0] i = 1 := by
+        simp [Fin.sum_univ_four]
+      have hz : ∀ i ∈ (Finset.univ : Finset (Fin 4)),
+          ![EuclideanSpace.single 0 (1:ℝ), EuclideanSpace.single 1 (1:ℝ),
+            EuclideanSpace.single 1 (1:ℝ), EuclideanSpace.single 0 (1:ℝ)] i ∈
+          ({EuclideanSpace.single 0 1, EuclideanSpace.single 1 1,
+            EuclideanSpace.single 1 (1:ℝ), EuclideanSpace.single 0 (1:ℝ)} :
+            Set (EuclideanSpace ℝ (Fin 2))) := by
+        intro i _; fin_cases i <;> simp
+      have := Finset.centerMass_mem_convexHull (R := ℝ) Finset.univ hw
+        (by rw [hsum]; norm_num) hz
+      convert this using 1
+      rw [Finset.centerMass, hsum]
+      simp [Fin.sum_univ_four, hkey]
+    · -- generic case
+      have hs_lt : s < 1 := lt_of_le_of_ne hs1 hs_eq
+      set lam : ℝ := (t - s) / (1 - s) with hlam
+      set mu : ℝ := p 0 / t with hmu
+      have hlam0 : 0 ≤ lam := div_nonneg (by linarith) (by linarith)
+      have hlam1 : lam ≤ 1 := by
+        rw [hlam, div_le_one (by linarith)]; linarith
+      have hmu0 : 0 ≤ mu := div_nonneg hp0 ht0.le
+      have hmu1 : mu ≤ 1 := by
+        rw [hmu, div_le_one ht0]; linarith
+      have hs_ne : (1 : ℝ) - s ≠ 0 := by intro h; apply hs_eq; linarith
+      have hts : t = s + lam * (1 - s) := by
+        rw [hlam, div_mul_cancel₀ _ hs_ne]; ring
+      have hp0eq : p 0 = t * mu := by rw [hmu]; field_simp
+      have hp1eq : p 1 = t * (1 - mu) := by
+        rw [hmu]; field_simp; linarith
+      unfold refTrap
+      have hw : ∀ i ∈ (Finset.univ : Finset (Fin 4)),
+          (0:ℝ) ≤ ![lam * mu, lam * (1 - mu), (1 - lam) * (1 - mu), (1 - lam) * mu] i := by
+        intro i _; fin_cases i <;> simp <;> nlinarith
+      have hsum : ∑ i : Fin 4,
+          ![lam * mu, lam * (1 - mu), (1 - lam) * (1 - mu), (1 - lam) * mu] i = 1 := by
+        simp [Fin.sum_univ_four]; ring
+      have hz : ∀ i ∈ (Finset.univ : Finset (Fin 4)),
+          ![EuclideanSpace.single 0 (1:ℝ), EuclideanSpace.single 1 (1:ℝ),
+            EuclideanSpace.single 1 s, EuclideanSpace.single 0 s] i ∈
+          ({EuclideanSpace.single 0 1, EuclideanSpace.single 1 1,
+            EuclideanSpace.single 1 s, EuclideanSpace.single 0 s} :
+            Set (EuclideanSpace ℝ (Fin 2))) := by
+        intro i _; fin_cases i <;> simp
+      have := Finset.centerMass_mem_convexHull (R := ℝ) Finset.univ hw
+        (by rw [hsum]; norm_num) hz
+      convert this using 1
+      rw [Finset.centerMass, hsum]
+      ext i
+      fin_cases i <;>
+        simp [Fin.sum_univ_four, EuclideanSpace.single_apply] <;>
+        nlinarith [hts, hp0eq, hp1eq]
+
+/-- The scaled reference triangle, in coordinates. -/
+lemma smul_refTri_eq {s : ℝ} (hs0 : 0 < s) :
+    s • refTri = {p : EuclideanSpace ℝ (Fin 2) | 0 ≤ p 0 ∧ 0 ≤ p 1 ∧ p 0 + p 1 ≤ s} := by
+  rw [refTri_eq]
+  ext q
+  simp only [Set.mem_smul_set, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨w, ⟨hw0, hw1, hws⟩, rfl⟩
+    refine ⟨by simpa using mul_nonneg hs0.le hw0,
+      by simpa using mul_nonneg hs0.le hw1, ?_⟩
+    have e0 : (s • w) 0 = s * w 0 := rfl
+    have e1 : (s • w) 1 = s * w 1 := rfl
+    rw [e0, e1]; nlinarith
+  · rintro ⟨hq0, hq1, hqs⟩
+    refine ⟨s⁻¹ • q, ⟨?_, ?_, ?_⟩, ?_⟩
+    · have : (s⁻¹ • q) 0 = s⁻¹ * q 0 := rfl
+      rw [this]; positivity
+    · have : (s⁻¹ • q) 1 = s⁻¹ * q 1 := rfl
+      rw [this]; positivity
+    · have e0 : (s⁻¹ • q) 0 = s⁻¹ * q 0 := rfl
+      have e1 : (s⁻¹ • q) 1 = s⁻¹ * q 1 := rfl
+      rw [e0, e1, ← mul_add]
+      have hstep : s⁻¹ * (q 0 + q 1) ≤ s⁻¹ * s :=
+        mul_le_mul_of_nonneg_left hqs (by positivity)
+      rwa [inv_mul_cancel₀ hs0.ne'] at hstep
+    · rw [smul_smul, mul_inv_cancel₀ hs0.ne', one_smul]
+
+/-- The scaled reference triangle sits inside the reference triangle. -/
+lemma smul_refTri_subset {s : ℝ} (hs0 : 0 < s) (hs1 : s ≤ 1) : s • refTri ⊆ refTri := by
+  rw [smul_refTri_eq hs0, refTri_eq]
+  rintro q ⟨hq0, hq1, hqs⟩
+  exact ⟨hq0, hq1, by linarith⟩
+
+/-- The volume of the scaled reference triangle. -/
+lemma volume_smul_refTri (s : ℝ) :
+    volume (s • refTri) = ENNReal.ofReal (s ^ 2) * ENNReal.ofReal (1 / 2) := by
+  rw [MeasureTheory.Measure.addHaar_smul, volume_refTri]
+  congr 2
+  rw [finrank_euclideanSpace_fin]
+  exact abs_of_nonneg (sq_nonneg s)
+
+/-- **The reference trapezoid has volume `(1 - s²)/2`.** -/
+lemma volume_refTrap {s : ℝ} (hs0 : 0 < s) (hs1 : s ≤ 1) :
+    volume (refTrap s) = ENNReal.ofReal ((1 - s ^ 2) / 2) := by
+  -- `refTrap s` and `refTri \ (s • refTri)` differ by the null segment `p 0 + p 1 = s`
+  have hmeas_gen : ∀ t : ℝ, MeasurableSet
+      {p : EuclideanSpace ℝ (Fin 2) | 0 ≤ p 0 ∧ 0 ≤ p 1 ∧ p 0 + p 1 ≤ t} := by
+    intro t
+    have hc0 : Measurable fun p : EuclideanSpace ℝ (Fin 2) => p 0 :=
+      (measurable_pi_apply 0).comp (WithLp.measurable_ofLp 2 _)
+    have hc1 : Measurable fun p : EuclideanSpace ℝ (Fin 2) => p 1 :=
+      (measurable_pi_apply 1).comp (WithLp.measurable_ofLp 2 _)
+    have h1 : MeasurableSet {p : EuclideanSpace ℝ (Fin 2) | 0 ≤ p 0} :=
+      measurableSet_le measurable_const hc0
+    have h2 : MeasurableSet {p : EuclideanSpace ℝ (Fin 2) | 0 ≤ p 1} :=
+      measurableSet_le measurable_const hc1
+    have h3 : MeasurableSet {p : EuclideanSpace ℝ (Fin 2) | p 0 + p 1 ≤ t} :=
+      measurableSet_le (hc0.add hc1) measurable_const
+    convert h1.inter (h2.inter h3) using 1
+  have hmeas_tri : MeasurableSet refTri := by
+    rw [refTri_eq]; exact hmeas_gen 1
+  have hmeas_smul : MeasurableSet (s • refTri) := by
+    rw [smul_refTri_eq hs0]; exact hmeas_gen s
+  have hunion : refTri = refTrap s ∪ (s • refTri) := by
+    rw [refTrap_eq hs0 hs1, smul_refTri_eq hs0, refTri_eq]
+    ext q
+    simp only [Set.mem_union, Set.mem_setOf_eq]
+    constructor
+    · rintro ⟨hq0, hq1, hqt⟩
+      rcases le_or_gt s (q 0 + q 1) with h | h
+      · exact Or.inl ⟨hq0, hq1, h, hqt⟩
+      · exact Or.inr ⟨hq0, hq1, h.le⟩
+    · rintro (⟨hq0, hq1, _, hqt⟩ | ⟨hq0, hq1, hqs⟩)
+      · exact ⟨hq0, hq1, hqt⟩
+      · exact ⟨hq0, hq1, by linarith⟩
+  -- the overlap is contained in the line `p 0 + p 1 = s`, which is null
+  have hnull : volume (refTrap s ∩ (s • refTri)) = 0 := by
+    have hsub : refTrap s ∩ (s • refTri) ⊆
+        {p : EuclideanSpace ℝ (Fin 2) | p 0 + p 1 = s} := by
+      rw [refTrap_eq hs0 hs1, smul_refTri_eq hs0]
+      rintro q ⟨⟨-, -, hq1, -⟩, ⟨-, -, hq2⟩⟩
+      exact le_antisymm hq2 hq1
+    refine measure_mono_null hsub ?_
+    -- the level set is a proper affine subspace, hence null
+    set L : EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] ℝ :=
+      { toFun := fun p => p 0 + p 1
+        map_add' := fun x y => by simp; ring
+        map_smul' := fun c x => by simp; ring } with hL
+    have hset : {p : EuclideanSpace ℝ (Fin 2) | p 0 + p 1 = s} =
+        (AffineSubspace.comap (LinearMap.toAffineMap L)
+          (AffineSubspace.mk' s (⊥ : Submodule ℝ ℝ)) : Set (EuclideanSpace ℝ (Fin 2))) := by
+      ext q
+      simp only [Set.mem_setOf_eq, AffineSubspace.mem_coe, AffineSubspace.mem_comap,
+        AffineSubspace.mem_mk', LinearMap.coe_toAffineMap, hL, LinearMap.coe_mk,
+        AddHom.coe_mk, Submodule.mem_bot, vsub_eq_sub]
+      constructor
+      · intro h; rw [h]; ring
+      · intro h; linarith
+    rw [hset]
+    apply MeasureTheory.Measure.addHaar_affineSubspace
+    -- the subspace is proper: `EuclideanSpace.single 0 1` is not in it
+    intro htop
+    have hmem : EuclideanSpace.single 0 (s + 1) ∈
+        AffineSubspace.comap (LinearMap.toAffineMap L)
+          (AffineSubspace.mk' s (⊥ : Submodule ℝ ℝ)) := by
+      rw [htop]; trivial
+    simp only [AffineSubspace.mem_comap, AffineSubspace.mem_mk',
+      LinearMap.coe_toAffineMap, hL, LinearMap.coe_mk, AddHom.coe_mk,
+      Submodule.mem_bot, vsub_eq_sub, EuclideanSpace.single_apply] at hmem
+    norm_num at hmem
+  -- combine
+  have hdisj : volume (refTrap s) + volume (s • refTri) = volume refTri +
+      volume (refTrap s ∩ (s • refTri)) := by
+    nth_rewrite 2 [hunion]
+    exact (measure_union_add_inter _ hmeas_smul).symm
+  rw [hnull, add_zero] at hdisj
+  have hle : volume (s • refTri) ≤ volume refTri :=
+    measure_mono (smul_refTri_subset hs0 hs1)
+  have hfin : volume (s • refTri) ≠ ⊤ := by
+    rw [volume_smul_refTri]
+    exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top ENNReal.ofReal_ne_top
+  have := ENNReal.eq_sub_of_add_eq hfin hdisj
+  rw [this, volume_refTri, volume_smul_refTri]
+  rw [← ENNReal.ofReal_mul (sq_nonneg s), ← ENNReal.ofReal_sub _ (by positivity)]
+  congr 1
+  ring
+
+/-! ### The Koizumi construction yields a convex ccw quadrilateral -/
+
+/-- `sin (psi R r) > 0` in the range used by the construction. -/
+lemma sin_psi_pos {R r : ℝ} (hR : 2 ≤ R) (hr : 2 < r) :
+    0 < Real.sin (Koizumi.psi R r) := by
+  have hR2 : (0:ℝ) < R ^ 2 - 1 := by nlinarith
+  have hr2 : (0:ℝ) < r ^ 2 := by nlinarith
+  have hden : (0:ℝ) < (R ^ 2 - 1) * r ^ 2 := mul_pos hR2 hr2
+  unfold Koizumi.psi
+  rw [Real.sin_arcsin]
+  · exact mul_pos (div_pos (by nlinarith) hR2) (by positivity)
+  · have h1 : (0:ℝ) ≤ R ^ 2 / (R ^ 2 - 1) := div_nonneg (sq_nonneg _) hR2.le
+    have h2 : (0:ℝ) ≤ 2 / r ^ 2 := by positivity
+    nlinarith [mul_nonneg h1 h2]
+  · rw [div_mul_div_comm, div_le_iff₀ hden]
+    nlinarith [sq_nonneg (r - 2), sq_nonneg (R - 2)]
+
+/-- The cross product of `u` with its rotation by `a` is `sin a * ‖u‖²`. -/
+lemma cross_rot (a : ℝ) (u : EuclideanSpace ℝ (Fin 2)) :
+    u 0 * (Koizumi.rot a u) 1 - u 1 * (Koizumi.rot a u) 0 =
+      Real.sin a * (u 0 ^ 2 + u 1 ^ 2) := by
+  simp only [Koizumi.rot_apply0, Koizumi.rot_apply1]
+  ring
+
+/-- The Koizumi quadruple is a strictly convex counter-clockwise quadrilateral. -/
+lemma trapezoid_convexQuadCCW {R : ℝ} (hR : 2 ≤ R)
+    (O p : EuclideanSpace ℝ (Fin 2)) (hr : 2 < ‖p - O‖) :
+    CyclicQuad.ConvexQuadCCW p (Koizumi.twistAt O (Koizumi.psi R) p)
+      (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p))
+      (Koizumi.conAt O R p) := by
+  have hR0 : (0:ℝ) < R := by linarith
+  set u : EuclideanSpace ℝ (Fin 2) := p - O with hu
+  set a : ℝ := Koizumi.psi R ‖p - O‖ with ha
+  set v : EuclideanSpace ℝ (Fin 2) := Koizumi.rot a u with hv
+  -- the cross product `u × v` is positive
+  have hnorm_sq : u 0 ^ 2 + u 1 ^ 2 = ‖p - O‖ ^ 2 := by
+    rw [hu, EuclideanSpace.norm_eq, Fin.sum_univ_two]
+    rw [Real.sq_sqrt (by positivity)]
+    simp
+  have hcross : u 0 * v 1 - u 1 * v 0 = Real.sin a * ‖p - O‖ ^ 2 := by
+    rw [hv, cross_rot, hnorm_sq]
+  have hcross_pos : 0 < u 0 * v 1 - u 1 * v 0 := by
+    rw [hcross]
+    exact mul_pos (sin_psi_pos hR hr) (by positivity)
+  set s : ℝ := R⁻¹ with hs
+  have hs0 : 0 < s := by positivity
+  have hs1 : s < 1 := by
+    rw [hs, inv_lt_one_iff₀]; right; linarith
+  -- coordinates of the four points, relative to O
+  have hA0 : p 0 - O 0 = u 0 := rfl
+  have hA1 : p 1 - O 1 = u 1 := rfl
+  have hB0 : (Koizumi.twistAt O (Koizumi.psi R) p) 0 - O 0 = v 0 := by
+    simp [Koizumi.twistAt, hv, ha, hu]
+  have hB1 : (Koizumi.twistAt O (Koizumi.psi R) p) 1 - O 1 = v 1 := by
+    simp [Koizumi.twistAt, hv, ha, hu]
+  have hD0 : (Koizumi.conAt O R p) 0 - O 0 = s * u 0 := by
+    simp [Koizumi.conAt, hs, hu]
+  have hD1 : (Koizumi.conAt O R p) 1 - O 1 = s * u 1 := by
+    simp [Koizumi.conAt, hs, hu]
+  have hC0 : (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p)) 0 - O 0 = s * v 0 := by
+    simp [Koizumi.conAt, Koizumi.twistAt, hs, hv, ha, hu]
+  have hC1 : (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p)) 1 - O 1 = s * v 1 := by
+    simp [Koizumi.conAt, Koizumi.twistAt, hs, hv, ha, hu]
+  -- abbreviations for the four points
+  set B : EuclideanSpace ℝ (Fin 2) := Koizumi.twistAt O (Koizumi.psi R) p with hB
+  set C : EuclideanSpace ℝ (Fin 2) := Koizumi.conAt O R B with hC
+  set D : EuclideanSpace ℝ (Fin 2) := Koizumi.conAt O R p with hD
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> unfold CyclicQuad.orient
+  · -- orient p B C = (1 - s) * (u 0 * v 1 - u 1 * v 0)
+    have key : (B 0 - p 0) * (C 1 - p 1) - (C 0 - p 0) * (B 1 - p 1)
+        = (1 - s) * (u 0 * v 1 - u 1 * v 0) := by
+      have e1 : B 0 - p 0 = v 0 - u 0 := by rw [← hB0, ← hA0]; ring
+      have e2 : C 1 - p 1 = s * v 1 - u 1 := by rw [← hC1, ← hA1]; ring
+      have e3 : C 0 - p 0 = s * v 0 - u 0 := by rw [← hC0, ← hA0]; ring
+      have e4 : B 1 - p 1 = v 1 - u 1 := by rw [← hB1, ← hA1]; ring
+      rw [e1, e2, e3, e4]; ring
+    rw [key]
+    exact mul_pos (by linarith) hcross_pos
+  · -- orient B C D = s * (1 - s) * (u 0 * v 1 - u 1 * v 0)
+    have key : (C 0 - B 0) * (D 1 - B 1) - (D 0 - B 0) * (C 1 - B 1)
+        = s * (1 - s) * (u 0 * v 1 - u 1 * v 0) := by
+      have e1 : C 0 - B 0 = s * v 0 - v 0 := by rw [← hC0, ← hB0]; ring
+      have e2 : D 1 - B 1 = s * u 1 - v 1 := by rw [← hD1, ← hB1]; ring
+      have e3 : D 0 - B 0 = s * u 0 - v 0 := by rw [← hD0, ← hB0]; ring
+      have e4 : C 1 - B 1 = s * v 1 - v 1 := by rw [← hC1, ← hB1]; ring
+      rw [e1, e2, e3, e4]; ring
+    rw [key]
+    exact mul_pos (mul_pos hs0 (by linarith)) hcross_pos
+  · -- orient C D p = s * (1 - s) * (u 0 * v 1 - u 1 * v 0)
+    have key : (D 0 - C 0) * (p 1 - C 1) - (p 0 - C 0) * (D 1 - C 1)
+        = s * (1 - s) * (u 0 * v 1 - u 1 * v 0) := by
+      have e1 : D 0 - C 0 = s * u 0 - s * v 0 := by rw [← hD0, ← hC0]; ring
+      have e2 : p 1 - C 1 = u 1 - s * v 1 := by rw [← hA1, ← hC1]; ring
+      have e3 : p 0 - C 0 = u 0 - s * v 0 := by rw [← hA0, ← hC0]; ring
+      have e4 : D 1 - C 1 = s * u 1 - s * v 1 := by rw [← hD1, ← hC1]; ring
+      rw [e1, e2, e3, e4]; ring
+    rw [key]
+    exact mul_pos (mul_pos hs0 (by linarith)) hcross_pos
+  · -- orient D p B = (1 - s) * (u 0 * v 1 - u 1 * v 0)
+    have key : (p 0 - D 0) * (B 1 - D 1) - (B 0 - D 0) * (p 1 - D 1)
+        = (1 - s) * (u 0 * v 1 - u 1 * v 0) := by
+      have e1 : p 0 - D 0 = u 0 - s * u 0 := by linarith [hA0, hD0]
+      have e2 : B 1 - D 1 = v 1 - s * u 1 := by linarith [hB1, hD1]
+      have e3 : B 0 - D 0 = v 0 - s * u 0 := by linarith [hB0, hD0]
+      have e4 : p 1 - D 1 = u 1 - s * u 1 := by linarith [hA1, hD1]
+      rw [e1, e2, e3, e4]; ring
+    rw [key]
+    exact mul_pos (by linarith) hcross_pos
+
+/-- **Shoelace = Lebesgue.** The Lebesgue measure of the convex hull of three points
+equals the shoelace area of the triangle they span. -/
+lemma volume_convexHull_triple (A B C : EuclideanSpace ℝ (Fin 2)) :
+    volume (convexHull ℝ {A, B, C}) = ENNReal.ofReal (area2 A B C) := by
+  -- Write {A, B, C} as A +ᵥ {0, B - A, C - A}
+  rw [← vadd_triple A B C, convexHull_vadd]
+  -- Translation invariance of Lebesgue measure
+  rw [MeasureTheory.measure_vadd]
+  -- The hull of {0, B-A, C-A} is the image of refTri under triLinMap
+  rw [← image_refTri A B C]
+  -- Apply the determinant formula
+  rw [MeasureTheory.Measure.addHaar_image_linearMap, volume_refTri, triLinMap_det]
+  -- Combine: |det| * (1/2) = area2
+  rw [← ENNReal.ofReal_mul (abs_nonneg _)]
+  congr 1
+  unfold area2
+  rw [abs_sub_comm ((B 0 - A 0) * (C 1 - A 1))]
+  rw [show (C 0 - A 0) * (B 1 - A 1) - (B 0 - A 0) * (C 1 - A 1) =
+    -((B 0 - A 0) * (C 1 - A 1) - (B 1 - A 1) * (C 0 - A 0)) by ring]
+  rw [abs_neg]
+  ring
+
+/-! ### Volume of the Koizumi quadrilateral -/
+
+/-- `EuclideanSpace.single i s` is `s` times `EuclideanSpace.single i 1`. -/
+lemma single_eq_smul (i : Fin 2) (s : ℝ) :
+    EuclideanSpace.single i s = s • EuclideanSpace.single i (1:ℝ) := by
+  ext j; by_cases h : j = i <;> simp [EuclideanSpace.single_apply, h]
+
+/-- In the basis `(u, v)`, the Koizumi quadrilateral is the image of `refTrap s`
+under `triLinMap 0 u v` (the linear map with columns `u`, `v`). -/
+lemma image_refTrap (s : ℝ) (u v : EuclideanSpace ℝ (Fin 2)) :
+    (triLinMap 0 u v) '' (refTrap s) = convexHull ℝ {u, v, s • v, s • u} := by
+  unfold refTrap
+  rw [LinearMap.image_convexHull]
+  congr 1
+  rw [Set.image_insert_eq, Set.image_insert_eq, Set.image_insert_eq, Set.image_singleton]
+  have h0 : triLinMap 0 u v (EuclideanSpace.single 0 (1:ℝ)) = u := by
+    rw [triLinMap_e0]; simp
+  have h1 : triLinMap 0 u v (EuclideanSpace.single 1 (1:ℝ)) = v := by
+    rw [triLinMap_e1]; simp
+  rw [h0, h1, single_eq_smul 1 s, single_eq_smul 0 s, map_smul, map_smul, h0, h1]
+
+/-- **The Koizumi quadrilateral's hull has volume `(1-s²)/2 · |u × v|`.** -/
+lemma volume_convexHull_trap {s : ℝ} (hs0 : 0 < s) (hs1 : s ≤ 1)
+    (u v : EuclideanSpace ℝ (Fin 2)) :
+    volume (convexHull ℝ {u, v, s • v, s • u}) =
+      ENNReal.ofReal (|u 0 * v 1 - v 0 * u 1| * ((1 - s ^ 2) / 2)) := by
+  rw [← image_refTrap s u v, MeasureTheory.Measure.addHaar_image_linearMap,
+    volume_refTrap hs0 hs1, triLinMap_det]
+  rw [← ENNReal.ofReal_mul (abs_nonneg _)]
+  congr 2
+  simp
+
+/-- The four Koizumi points, as `O` translated by `{u, v, s•v, s•u}`. -/
+lemma koizumi_quad_eq {R : ℝ} (hR : 2 ≤ R) (O p : EuclideanSpace ℝ (Fin 2)) :
+    ({p, Koizumi.twistAt O (Koizumi.psi R) p,
+      Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p),
+      Koizumi.conAt O R p} : Set (EuclideanSpace ℝ (Fin 2))) =
+    O +ᵥ ({p - O, Koizumi.rot (Koizumi.psi R ‖p - O‖) (p - O),
+      R⁻¹ • Koizumi.rot (Koizumi.psi R ‖p - O‖) (p - O), R⁻¹ • (p - O)} :
+      Set (EuclideanSpace ℝ (Fin 2))) := by
+  have hR0 : (0:ℝ) < R := by linarith
+  have e1 : Koizumi.twistAt O (Koizumi.psi R) p =
+      O + Koizumi.rot (Koizumi.psi R ‖p - O‖) (p - O) := rfl
+  have e2 : Koizumi.conAt O R p = O + R⁻¹ • (p - O) := rfl
+  have e3 : Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p) =
+      O + R⁻¹ • Koizumi.rot (Koizumi.psi R ‖p - O‖) (p - O) := by
+    rw [Koizumi.conAt, e1]
+    congr 1
+    congr 1
+    abel
+  rw [e3, e1, e2]
+  rw [Set.vadd_set_insert, Set.vadd_set_insert, Set.vadd_set_insert,
+    Set.vadd_set_singleton]
+  congr 1
+  · show p = O +ᵥ (p - O)
+    rw [vadd_eq_add]; abel
+
+/-- **The Koizumi quadrilateral's hull volume equals its shoelace area.** -/
+lemma volume_koizumi_quad {R : ℝ} (hR : 2 ≤ R) (O p : EuclideanSpace ℝ (Fin 2))
+    (hr : 2 < ‖p - O‖) :
+    volume (convexHull ℝ {p, Koizumi.twistAt O (Koizumi.psi R) p,
+      Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p),
+      Koizumi.conAt O R p}) =
+    ENNReal.ofReal (Koizumi.quadArea p (Koizumi.twistAt O (Koizumi.psi R) p)
+      (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p))
+      (Koizumi.conAt O R p)) := by
+  have hR0 : (0:ℝ) < R := by linarith
+  set u : EuclideanSpace ℝ (Fin 2) := p - O with hu
+  set a : ℝ := Koizumi.psi R ‖p - O‖ with ha
+  set v : EuclideanSpace ℝ (Fin 2) := Koizumi.rot a u with hv
+  set s : ℝ := R⁻¹ with hs
+  have hs0 : 0 < s := by positivity
+  have hs1 : s ≤ 1 := by
+    rw [hs, inv_le_one_iff₀]; right; linarith
+  have hnorm_sq : u 0 ^ 2 + u 1 ^ 2 = ‖p - O‖ ^ 2 := by
+    rw [hu, EuclideanSpace.norm_eq, Fin.sum_univ_two, Real.sq_sqrt (by positivity)]
+    simp
+  have hcross : u 0 * v 1 - u 1 * v 0 = Real.sin a * ‖p - O‖ ^ 2 := by
+    rw [hv, cross_rot, hnorm_sq]
+  have hcross_pos : 0 < u 0 * v 1 - u 1 * v 0 := by
+    rw [hcross]; exact mul_pos (sin_psi_pos hR hr) (by positivity)
+  rw [koizumi_quad_eq hR O p, convexHull_vadd, MeasureTheory.measure_vadd]
+  rw [show ({u, v, s • v, s • u} : Set (EuclideanSpace ℝ (Fin 2))) =
+    {u, v, s • v, s • u} from rfl]
+  rw [volume_convexHull_trap hs0 hs1 u v]
+  congr 1
+  -- shoelace of the quad equals (1 - s²)/2 * |u × v|
+  have hshoe : Koizumi.quadArea p (Koizumi.twistAt O (Koizumi.psi R) p)
+      (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p))
+      (Koizumi.conAt O R p) = |(1 - s ^ 2) * (u 0 * v 1 - u 1 * v 0)| / 2 := by
+    unfold Koizumi.quadArea
+    congr 1
+    have hB0 : (Koizumi.twistAt O (Koizumi.psi R) p) 0 = O 0 + v 0 := rfl
+    have hB1 : (Koizumi.twistAt O (Koizumi.psi R) p) 1 = O 1 + v 1 := rfl
+    have hD0 : (Koizumi.conAt O R p) 0 = O 0 + s * u 0 := rfl
+    have hD1 : (Koizumi.conAt O R p) 1 = O 1 + s * u 1 := rfl
+    have hC0 : (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p)) 0
+        = O 0 + s * v 0 := by
+      show O 0 + s * ((O + Koizumi.rot a u) 0 - O 0) = O 0 + s * v 0
+      congr 2; show O 0 + v 0 - O 0 = v 0; ring
+    have hC1 : (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p)) 1
+        = O 1 + s * v 1 := by
+      show O 1 + s * ((O + Koizumi.rot a u) 1 - O 1) = O 1 + s * v 1
+      congr 2; show O 1 + v 1 - O 1 = v 1; ring
+    have hp0 : p 0 = O 0 + u 0 := by show p 0 = O 0 + (p 0 - O 0); ring
+    have hp1 : p 1 = O 1 + u 1 := by show p 1 = O 1 + (p 1 - O 1); ring
+    rw [hB0, hB1, hC0, hC1, hD0, hD1, hp0, hp1]
+    ring
+  rw [hshoe, abs_mul, abs_of_nonneg (by nlinarith : (0:ℝ) ≤ 1 - s ^ 2)]
+  have habs1 : |u 0 * v 1 - v 0 * u 1| = u 0 * v 1 - v 0 * u 1 := by
+    apply abs_of_nonneg; nlinarith [hcross_pos]
+  have habs2 : |u 0 * v 1 - u 1 * v 0| = u 0 * v 1 - u 1 * v 0 :=
+    abs_of_nonneg hcross_pos.le
+  rw [habs1, habs2]
+  ring
+
+/-! ### FC-shaped statements -/
+
+open scoped EuclideanGeometry
+
+/-- FC's `IsIsosceles`. -/
+def IsIsoscelesFC (p q r : EuclideanSpace ℝ (Fin 2)) : Prop :=
+  dist p q = dist q r ∨ dist q r = dist r p ∨ dist r p = dist p q
+
+/-- FC's `IsRightAngled`. -/
+def IsRightAngledFC (a b c : EuclideanSpace ℝ (Fin 2)) : Prop :=
+  ∠ b a c = Real.pi / 2 ∨ ∠ a b c = Real.pi / 2 ∨ ∠ b c a = Real.pi / 2
+
+/-- Our isosceles predicate implies FC's. -/
+lemma isoscelesFC_of (A B C : EuclideanSpace ℝ (Fin 2))
+    (h : Koizumi.IsoscelesTriangleArea1 A B C) : IsIsoscelesFC A B C := by
+  rcases h.2 with h1 | h1 | h1
+  · right; right; rw [dist_comm C A, dist_comm A B] at *; exact h1.symm
+  · left; rw [dist_comm B A] at h1; exact h1
+  · right; left; rw [dist_comm C A, dist_comm C B] at h1; rw [dist_comm C A]; exact h1.symm
+
+/-- Our right-angle predicate implies FC's. -/
+lemma rightAngledFC_of (A B C : EuclideanSpace ℝ (Fin 2))
+    (h : Koizumi.RightTriangleArea1 A B C) : IsRightAngledFC A B C := by
+  rcases h.2 with h1 | h1 | h1
+  · left
+    rw [EuclideanGeometry.angle, ← InnerProductGeometry.inner_eq_zero_iff_angle_eq_pi_div_two]
+    simpa using h1
+  · right; left
+    rw [EuclideanGeometry.angle, ← InnerProductGeometry.inner_eq_zero_iff_angle_eq_pi_div_two]
+    simpa using h1
+  · right; right
+    rw [EuclideanGeometry.angle, ← InnerProductGeometry.inner_eq_zero_iff_angle_eq_pi_div_two]
+    have : ⟪B - C, A - C⟫ = 0 := by
+      rw [real_inner_comm]; simpa using h1
+    simpa using this
+
+/-! ### Orientation on `ℝ²`, matching the Formal Conjectures repository -/
+
+/-- The standard orientation on `EuclideanSpace ℝ (Fin 2)`, as in
+`FormalConjecturesForMathlib.Geometry.2d`. -/
+noncomputable instance orientedEuclideanSpaceFinTwo :
+    Module.Oriented ℝ (EuclideanSpace ℝ (Fin 2)) (Fin 2) :=
+  ⟨(PiLp.basisFun 2 ℝ (Fin 2)).orientation⟩
+
+instance factFinrankEuclideanFinTwo :
+    Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin 2)) = 2) :=
+  ⟨finrank_euclideanSpace_fin⟩
+
+/-! ### Bridge: determinant sign to oriented-angle sign -/
+
+/-- The sign of an oriented angle is the sign of the area form. -/
+lemma oangle_sign_eq_sign_areaForm {V : Type*} [NormedAddCommGroup V]
+    [InnerProductSpace ℝ V] [Fact (Module.finrank ℝ V = 2)]
+    (o : Orientation ℝ V (Fin 2)) (x y : V) :
+    (o.oangle x y).sign = SignType.sign (o.areaForm x y) := by
+  rw [Orientation.oangle, Real.Angle.sign, Real.Angle.sin_coe, Complex.sin_arg,
+    Orientation.kahler_apply_apply]
+  by_cases hz : (⟪x, y⟫ : ℝ) + o.areaForm x y • Complex.I = 0
+  · have hA : o.areaForm x y = 0 := by
+      have := congrArg Complex.im hz
+      simpa using this
+    rw [hz, hA]
+    simp
+  · have hnorm : (0:ℝ) < ‖(⟪x, y⟫ : ℝ) + o.areaForm x y • Complex.I‖ := by
+      simpa [norm_pos_iff] using hz
+    have him : ((⟪x, y⟫ : ℝ) + o.areaForm x y • Complex.I).im = o.areaForm x y := by
+      simp
+    rw [him]
+    rcases lt_trichotomy (o.areaForm x y) 0 with h | h | h
+    · rw [sign_neg h, sign_neg (div_neg_of_neg_of_pos h hnorm)]
+    · rw [h, zero_div]
+    · rw [sign_pos h, sign_pos (div_pos h hnorm)]
+
+/-- The area form of the standard orientation on `ℝ²` is the `2 × 2` determinant.
+(Proved through `PiLp.basisFun`, which is an orthonormal basis realizing that
+orientation by definition of `orientedEuclideanSpaceFinTwo`.) -/
+lemma areaForm_eq_det (x y : EuclideanSpace ℝ (Fin 2)) :
+    (Module.Oriented.positiveOrientation (R := ℝ)
+      (M := EuclideanSpace ℝ (Fin 2)) (ι := Fin 2)).areaForm x y
+      = x 0 * y 1 - x 1 * y 0 := by
+  rw [Orientation.areaForm_to_volumeForm,
+    Orientation.volumeForm_robust _ (EuclideanSpace.basisFun (Fin 2) ℝ) (by rfl),
+    ((EuclideanSpace.basisFun (Fin 2) ℝ).toBasis).det_apply, Matrix.det_fin_two]
+  simp [Module.Basis.toMatrix_apply, OrthonormalBasis.coe_toBasis_repr_apply,
+    EuclideanSpace.basisFun_repr]
+  ring
+
+/-- The sign of the oriented angle `∡ X Y Z` is the sign of `- orient X Y Z`.
+(Mathlib's oriented angle at `Y` runs from the ray `Y → X` to the ray `Y → Z`, which is the
+opposite convention to the counter-clockwise triangle determinant `orient X Y Z`.) -/
+lemma oangle_sign_eq_sign_neg_orient (X Y Z : EuclideanSpace ℝ (Fin 2)) :
+    (∡ X Y Z).sign = SignType.sign (-CyclicQuad.orient X Y Z) := by
+  rw [EuclideanGeometry.oangle, oangle_sign_eq_sign_areaForm, areaForm_eq_det]
+  congr 1
+  simp only [vsub_eq_sub, CyclicQuad.orient, PiLp.sub_apply]
+  ring
+
+/-- A strictly negative orientation determinant means the oriented angle has sign `1`. -/
+lemma sign_oangle_eq_one {X Y Z : EuclideanSpace ℝ (Fin 2)}
+    (h : CyclicQuad.orient X Y Z < 0) : (∡ X Y Z).sign = 1 := by
+  rw [oangle_sign_eq_sign_neg_orient]
+  exact sign_pos (by linarith)
+
+/-- FC's `IsCcwConvexPolygon`, specialised to the plane. -/
+def IsCcwConvexPolygonFC {n : ℕ} (p : Fin n → EuclideanSpace ℝ (Fin 2)) : Prop :=
+  ∀ ⦃i j k⦄, i < j → j < k → (∡ (p i) (p j) (p k)).sign = 1
+
+/-- FC's `IsIsoscelesTrapezoid`. -/
+def IsIsoscelesTrapezoidFC (a b c d : EuclideanSpace ℝ (Fin 2)) : Prop :=
+  IsCcwConvexPolygonFC ![a, b, c, d] ∧
+    (affineSpan ℝ ({a, b} : Set (EuclideanSpace ℝ (Fin 2)))).Parallel
+      (affineSpan ℝ ({c, d} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+    dist a c = dist b d
+
+/-- Criterion for four points to satisfy FC's `IsCcwConvexPolygon`. -/
+lemma isCcwConvexPolygonFC_four {A B C D : EuclideanSpace ℝ (Fin 2)}
+    (h1 : CyclicQuad.orient A B C < 0) (h2 : CyclicQuad.orient A B D < 0)
+    (h3 : CyclicQuad.orient A C D < 0) (h4 : CyclicQuad.orient B C D < 0) :
+    IsCcwConvexPolygonFC ![A, B, C, D] := by
+  intro i j k hij hjk
+  fin_cases i <;> fin_cases j <;> fin_cases k <;>
+    simp_all only [Fin.mk_lt_mk, Nat.lt_irrefl, Nat.reduceLT] <;>
+    first
+      | omega
+      | exact sign_oangle_eq_one h1
+      | exact sign_oangle_eq_one h2
+      | exact sign_oangle_eq_one h3
+      | exact sign_oangle_eq_one h4
+
+/-- A planar vector is nonzero exactly when one of its two coordinates is. -/
+lemma euclid_ne_zero_iff (x : EuclideanSpace ℝ (Fin 2)) : x ≠ 0 ↔ (x 0 ≠ 0 ∨ x 1 ≠ 0) := by
+  constructor
+  · intro hx
+    by_contra hc
+    push_neg at hc
+    exact hx (by ext i; fin_cases i <;> simp [hc.1, hc.2])
+  · rintro (h0 | h1) rfl <;> simp at *
+
+/-- Two nonzero planar vectors with vanishing cross product are proportional. -/
+lemma exists_smul_of_cross_zero {w z : EuclideanSpace ℝ (Fin 2)} (hw : w ≠ 0) (hz : z ≠ 0)
+    (h : w 0 * z 1 = w 1 * z 0) : ∃ t : ℝ, t ≠ 0 ∧ t • w = z := by
+  by_cases hw0 : w 0 = 0
+  · have hw1 : w 1 ≠ 0 := ((euclid_ne_zero_iff w).1 hw).resolve_left (not_not.2 hw0)
+    have hz0 : z 0 = 0 := by
+      have hmul : w 1 * z 0 = 0 := by rw [← h, hw0]; ring
+      exact (mul_eq_zero.mp hmul).resolve_left hw1
+    have hz1 : z 1 ≠ 0 := ((euclid_ne_zero_iff z).1 hz).resolve_left (not_not.2 hz0)
+    refine ⟨z 1 / w 1, div_ne_zero hz1 hw1, ?_⟩
+    ext i
+    fin_cases i
+    · simpa [hw0] using hz0.symm
+    · simpa using div_mul_cancel₀ (z 1) hw1
+  · refine ⟨z 0 / w 0, ?_, ?_⟩
+    · intro hc
+      have hz0 : z 0 = 0 := (div_eq_zero_iff.mp hc).resolve_right hw0
+      have hz1 : z 1 = 0 := by
+        have hmul : w 0 * z 1 = 0 := by rw [h, hz0]; ring
+        exact (mul_eq_zero.mp hmul).resolve_left hw0
+      exact hz (by ext i; fin_cases i <;> simp [hz0, hz1])
+    · ext i
+      fin_cases i
+      · simpa using div_mul_cancel₀ (z 0) hw0
+      · show z 0 / w 0 * w 1 = z 1
+        rw [div_mul_eq_mul_div, div_eq_iff hw0]
+        linear_combination -h
+
+/-- Two segments with vanishing cross product span parallel lines. -/
+lemma parallel_of_cross_zero {a b c d : EuclideanSpace ℝ (Fin 2)} (hab : a ≠ b) (hcd : c ≠ d)
+    (h : (b 0 - a 0) * (d 1 - c 1) = (b 1 - a 1) * (d 0 - c 0)) :
+    (affineSpan ℝ ({a, b} : Set (EuclideanSpace ℝ (Fin 2)))).Parallel
+      (affineSpan ℝ ({c, d} : Set (EuclideanSpace ℝ (Fin 2)))) := by
+  have hw : b - a ≠ 0 := sub_ne_zero.mpr (Ne.symm hab)
+  have hz : d - c ≠ 0 := sub_ne_zero.mpr (Ne.symm hcd)
+  have h' : (b - a) 0 * (d - c) 1 = (b - a) 1 * (d - c) 0 := by
+    simpa [PiLp.sub_apply] using h
+  obtain ⟨t, ht, hts⟩ := exists_smul_of_cross_zero hw hz h'
+  rw [AffineSubspace.affineSpan_pair_parallel_iff_exists_unit_smul']
+  exact ⟨Units.mk0 t ht, by simpa [Units.smul_def] using hts⟩
+
+/-- **Erdős Problem 353, part 1 (isosceles trapezoid), in Formal Conjectures form.**
+Every measurable set of infinite measure contains the vertices, in convex position, of an
+isosceles trapezoid whose convex hull has Lebesgue measure `1`. -/
+theorem erdos_353_isosceles_trapezoid_FC :
+    ∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+      ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A, ∃ d ∈ A,
+        IsIsoscelesTrapezoidFC a b c d ∧ volume (convexHull ℝ {a, b, c, d}) = 1 := by
+  intro A hA hinf
+  obtain ⟨O, p, R, hR, hr2, h1, h2, h3, h4⟩ := Koizumi.thm_trapezoid_strong A hA hinf
+  set B : EuclideanSpace ℝ (Fin 2) := Koizumi.twistAt O (Koizumi.psi R) p with hB
+  set C : EuclideanSpace ℝ (Fin 2) := Koizumi.conAt O R B with hC
+  set D : EuclideanSpace ℝ (Fin 2) := Koizumi.conAt O R p with hD
+  obtain ⟨harea, hpar, -, hdiag, hPB, hBC, hCD, hDP, -, -⟩ :=
+    Koizumi.trapezoid_geom hR O p hr2
+  obtain ⟨o1, o2, o3, o4⟩ := trapezoid_convexQuadCCW hR O p hr2
+  refine ⟨D, h4, C, h3, B, h2, p, h1, ⟨?_, ?_, ?_⟩, ?_⟩
+  · refine isCcwConvexPolygonFC_four ?_ ?_ ?_ ?_
+    · have e : CyclicQuad.orient D C B = -CyclicQuad.orient B C D := by
+        unfold CyclicQuad.orient; ring
+      linarith
+    · have e : CyclicQuad.orient D C p = -CyclicQuad.orient C D p := by
+        unfold CyclicQuad.orient; ring
+      linarith
+    · have e : CyclicQuad.orient D B p = -CyclicQuad.orient D p B := by
+        unfold CyclicQuad.orient; ring
+      linarith
+    · have e : CyclicQuad.orient C B p = -CyclicQuad.orient p B C := by
+        unfold CyclicQuad.orient; ring
+      linarith
+  · exact parallel_of_cross_zero (Ne.symm hCD) (Ne.symm hPB) (by linear_combination hpar)
+  · rw [dist_comm D B, dist_comm C p]
+    exact hdiag.symm
+  · have hset : ({D, C, B, p} : Set (EuclideanSpace ℝ (Fin 2))) = {p, B, C, D} := by
+      ext x; simp only [Set.mem_insert_iff, Set.mem_singleton_iff]; tauto
+    rw [hset, volume_koizumi_quad hR O p hr2, ← hB, ← hC, ← hD, harea]
+    simp
+
+/-- Distance in the plane, in coordinates. -/
+lemma dist_coords (x y : EuclideanSpace ℝ (Fin 2)) :
+    dist x y = Real.sqrt ((x 0 - y 0) ^ 2 + (x 1 - y 1) ^ 2) := by
+  rw [dist_eq_norm, EuclideanSpace.norm_eq, Fin.sum_univ_two]
+  congr 1
+  simp [PiLp.sub_apply, Real.norm_eq_abs, sq_abs]
+
+/-- Rotation preserves the sum of squares of the coordinates. -/
+lemma sq_rot (a : ℝ) (u : EuclideanSpace ℝ (Fin 2)) :
+    (Koizumi.rot a u) 0 ^ 2 + (Koizumi.rot a u) 1 ^ 2 = u 0 ^ 2 + u 1 ^ 2 := by
+  simp only [Koizumi.rot_apply0, Koizumi.rot_apply1]
+  nlinarith [Real.sin_sq_add_cos_sq a]
+
+/-- The inner product of a vector with its rotation. -/
+lemma dot_rot (a : ℝ) (u : EuclideanSpace ℝ (Fin 2)) :
+    u 0 * (Koizumi.rot a u) 0 + u 1 * (Koizumi.rot a u) 1
+      = Real.cos a * (u 0 ^ 2 + u 1 ^ 2) := by
+  simp only [Koizumi.rot_apply0, Koizumi.rot_apply1]
+  ring
+
+/-- **The Koizumi trapezoid is cyclic.**  An isosceles trapezoid always has a circumcircle;
+here the centre is found explicitly on the axis of symmetry `O + ℝ · (u + v)`. -/
+lemma cospherical_koizumi_quad {R : ℝ} (hR : 2 ≤ R) (O p : EuclideanSpace ℝ (Fin 2))
+    (hr : 2 < ‖p - O‖) :
+    EuclideanGeometry.Cospherical
+      ({p, Koizumi.twistAt O (Koizumi.psi R) p,
+        Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p),
+        Koizumi.conAt O R p} : Set (EuclideanSpace ℝ (Fin 2))) := by
+  have hR0 : (0:ℝ) < R := by linarith
+  set u : EuclideanSpace ℝ (Fin 2) := p - O with hu
+  set a : ℝ := Koizumi.psi R ‖p - O‖ with ha
+  set v : EuclideanSpace ℝ (Fin 2) := Koizumi.rot a u with hv
+  set s : ℝ := R⁻¹ with hs
+  -- basic quantities
+  have hUnorm : u 0 ^ 2 + u 1 ^ 2 = ‖p - O‖ ^ 2 := by
+    rw [hu, EuclideanSpace.norm_eq, Fin.sum_univ_two, Real.sq_sqrt (by positivity)]
+    simp
+  have hU : 0 < u 0 ^ 2 + u 1 ^ 2 := by rw [hUnorm]; nlinarith
+  have hV : v 0 ^ 2 + v 1 ^ 2 = u 0 ^ 2 + u 1 ^ 2 := by rw [hv]; exact sq_rot a u
+  have hq : u 0 * v 0 + u 1 * v 1 = Real.cos a * (u 0 ^ 2 + u 1 ^ 2) := by
+    rw [hv]; exact dot_rot a u
+  have hsin : 0 < Real.sin a := sin_psi_pos hR hr
+  have hcos : -1 < Real.cos a := by
+    nlinarith [Real.sin_sq_add_cos_sq a, Real.neg_one_le_cos a, mul_pos hsin hsin]
+  have hden : 0 < (u 0 ^ 2 + u 1 ^ 2) + (u 0 * v 0 + u 1 * v 1) := by
+    rw [hq]; nlinarith
+  set t : ℝ := (u 0 ^ 2 + u 1 ^ 2) * (1 + s) / (2 * ((u 0 ^ 2 + u 1 ^ 2) + (u 0 * v 0 + u 1 * v 1)))
+    with htdef
+  have ht : 2 * t * ((u 0 ^ 2 + u 1 ^ 2) + (u 0 * v 0 + u 1 * v 1))
+      = (u 0 ^ 2 + u 1 ^ 2) * (1 + s) := by
+    rw [htdef]; field_simp
+  -- the circumcentre
+  set c : EuclideanSpace ℝ (Fin 2) := O + t • (u + v) with hc
+  have hc0 : c 0 = O 0 + t * (u 0 + v 0) := by
+    show O 0 + t • (u 0 + v 0) = O 0 + t * (u 0 + v 0); rw [smul_eq_mul]
+  have hc1 : c 1 = O 1 + t * (u 1 + v 1) := by
+    show O 1 + t • (u 1 + v 1) = O 1 + t * (u 1 + v 1); rw [smul_eq_mul]
+  have hp0 : p 0 = O 0 + u 0 := by show p 0 = O 0 + (p 0 - O 0); ring
+  have hp1 : p 1 = O 1 + u 1 := by show p 1 = O 1 + (p 1 - O 1); ring
+  have hB0 : (Koizumi.twistAt O (Koizumi.psi R) p) 0 = O 0 + v 0 := rfl
+  have hB1 : (Koizumi.twistAt O (Koizumi.psi R) p) 1 = O 1 + v 1 := rfl
+  have hD0 : (Koizumi.conAt O R p) 0 = O 0 + s * u 0 := rfl
+  have hD1 : (Koizumi.conAt O R p) 1 = O 1 + s * u 1 := rfl
+  have hC0 : (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p)) 0 = O 0 + s * v 0 := by
+    show O 0 + s * ((O + Koizumi.rot a u) 0 - O 0) = O 0 + s * v 0
+    congr 2; show O 0 + v 0 - O 0 = v 0; ring
+  have hC1 : (Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p)) 1 = O 1 + s * v 1 := by
+    show O 1 + s * ((O + Koizumi.rot a u) 1 - O 1) = O 1 + s * v 1
+    congr 2; show O 1 + v 1 - O 1 = v 1; ring
+  refine ⟨c, dist p c, ?_⟩
+  intro x hx
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
+  rcases hx with rfl | rfl | rfl | rfl
+  · rfl
+  · rw [dist_coords, dist_coords, hB0, hB1, hp0, hp1, hc0, hc1]
+    congr 1
+    linear_combination (1 - 2 * t) * hV
+  · rw [dist_coords, dist_coords, hC0, hC1, hp0, hp1, hc0, hc1]
+    congr 1
+    linear_combination (s ^ 2 - 2 * s * t) * hV + (1 - s) * ht
+  · rw [dist_coords, dist_coords, hD0, hD1, hp0, hp1, hc0, hc1]
+    congr 1
+    linear_combination (1 - s) * ht
+
+/-- **Erdős Problem 353, part 4 (cyclic quadrilateral), in Formal Conjectures form.**
+Every measurable set of infinite measure contains four concyclic points whose convex hull
+has Lebesgue measure `1`. -/
+theorem erdos_353_cyclic_quadrilateral_FC :
+    ∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+      ∃ Q : Set (EuclideanSpace ℝ (Fin 2)), Q ⊆ A ∧ Q.ncard = 4 ∧
+        EuclideanGeometry.Cospherical Q ∧ volume (convexHull ℝ Q) = 1 := by
+  intro A hA hinf
+  obtain ⟨O, p, R, hR, hr2, h1, h2, h3, h4⟩ := Koizumi.thm_trapezoid_strong A hA hinf
+  obtain ⟨harea, -, -, -, hPB, hBC, hCD, hDP, hPC, hBD⟩ :=
+    Koizumi.trapezoid_geom hR O p hr2
+  refine ⟨{p, Koizumi.twistAt O (Koizumi.psi R) p,
+    Koizumi.conAt O R (Koizumi.twistAt O (Koizumi.psi R) p), Koizumi.conAt O R p}, ?_, ?_, ?_, ?_⟩
+  · intro x hx
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
+    rcases hx with rfl | rfl | rfl | rfl
+    exacts [h1, h2, h3, h4]
+  · rw [Set.ncard_insert_of_notMem (by simp [hPB, hPC, Ne.symm hDP]),
+      Set.ncard_insert_of_notMem (by simp [hBC, hBD]),
+      Set.ncard_insert_of_notMem (by simp [hCD]), Set.ncard_singleton]
+  · exact cospherical_koizumi_quad hR O p hr2
+  · rw [volume_koizumi_quad hR O p hr2, harea]; simp
+
+/-- `Kovac.cross` of the two edge vectors is the orientation determinant. -/
+lemma cross_eq_orient (X Y Z : EuclideanSpace ℝ (Fin 2)) :
+    Kovac.cross (Y - X) (Z - X) = CyclicQuad.orient X Y Z := by
+  unfold Kovac.cross CyclicQuad.orient
+  simp only [PiLp.sub_apply]
+  ring
+
+/-- The orientation determinant is invariant under cyclic permutation. -/
+lemma orient_cyclic (X Y Z : EuclideanSpace ℝ (Fin 2)) :
+    CyclicQuad.orient X Y Z = CyclicQuad.orient Y Z X := by
+  unfold CyclicQuad.orient; ring
+
+/-- The orientation determinant changes sign under a transposition. -/
+lemma orient_swap (X Y Z : EuclideanSpace ℝ (Fin 2)) :
+    CyclicQuad.orient X Y Z = -CyclicQuad.orient Y X Z := by
+  unfold CyclicQuad.orient; ring
+
+/-- In an FC counter-clockwise convex polygon, increasing index triples have negative
+orientation determinant. -/
+lemma orient_neg_of_lt {m : ℕ} {v : Fin m → EuclideanSpace ℝ (Fin 2)}
+    (hv : IsCcwConvexPolygonFC v) {a b c : Fin m} (h1 : a < b) (h2 : b < c) :
+    CyclicQuad.orient (v a) (v b) (v c) < 0 := by
+  have h := hv h1 h2
+  rw [oangle_sign_eq_sign_neg_orient] at h
+  have := sign_eq_one_iff.mp h
+  linarith
+
+/-- Every vertex other than the two endpoints of the edge `A → A + 1` lies strictly to one
+side of it, cyclically. -/
+lemma orient_edge_neg {n : ℕ} {v : Fin (n + 3) → EuclideanSpace ℝ (Fin 2)}
+    (hv : IsCcwConvexPolygonFC v) (A J : Fin (n + 3)) (hJA : J ≠ A) (hJB : J ≠ A + 1) :
+    CyclicQuad.orient (v A) (v (A + 1)) (v J) < 0 := by
+  have hone : ((1 : Fin (n + 3))).val = 1 := by
+    simp [Nat.mod_eq_of_lt]
+  have hadd : ((A + 1 : Fin (n + 3))).val = (A.val + 1) % (n + 3) := by
+    rw [Fin.val_add, hone]
+  have hJAv : J.val ≠ A.val := fun h => hJA (Fin.val_injective h)
+  have hJBv : J.val ≠ (A + 1 : Fin (n + 3)).val := fun h => hJB (Fin.val_injective h)
+  have hAlt : A.val < n + 3 := A.isLt
+  have hJlt : J.val < n + 3 := J.isLt
+  by_cases hA : A.val + 1 < n + 3
+  · have hAB : (A + 1 : Fin (n + 3)).val = A.val + 1 := by
+      rw [hadd, Nat.mod_eq_of_lt hA]
+    rw [hAB] at hJBv
+    rcases lt_or_gt_of_ne hJAv with hlt | hgt
+    · have key := orient_neg_of_lt hv (a := J) (b := A) (c := A + 1)
+        (Fin.lt_def.mpr hlt) (Fin.lt_def.mpr (by omega))
+      rw [orient_cyclic] at key
+      exact key
+    · exact orient_neg_of_lt hv (a := A) (b := A + 1) (c := J)
+        (Fin.lt_def.mpr (by omega)) (Fin.lt_def.mpr (by omega))
+  · have hAv : A.val = n + 2 := by omega
+    have hAB : (A + 1 : Fin (n + 3)).val = 0 := by
+      rw [hadd, hAv]; simp
+    rw [hAB] at hJBv
+    have key := orient_neg_of_lt hv (a := A + 1) (b := J) (c := A)
+      (Fin.lt_def.mpr (by omega)) (Fin.lt_def.mpr (by omega))
+    rw [orient_cyclic, orient_cyclic] at key
+    exact key
+
+/-- The Kovač–Predojević counterexample set is measurable. -/
+lemma measurableSet_Sset : MeasurableSet Kovac.Sset := by
+  have h0 : Measurable fun p : EuclideanSpace ℝ (Fin 2) => p 0 :=
+    (measurable_pi_apply 0).comp (WithLp.measurable_ofLp 2 _)
+  have h1 : Measurable fun p : EuclideanSpace ℝ (Fin 2) => p 1 :=
+    (measurable_pi_apply 1).comp (WithLp.measurable_ofLp 2 _)
+  have hEq : Kovac.Sset = {p : EuclideanSpace ℝ (Fin 2) | 1 < p 0} ∩
+      ({p : EuclideanSpace ℝ (Fin 2) | 0 < p 1} ∩
+        {p : EuclideanSpace ℝ (Fin 2) | 4 * p 0 * p 1 < 1}) := by
+    ext p
+    simp only [Kovac.Sset, Kovac.inS, Set.mem_setOf_eq, Set.mem_inter_iff]
+  rw [hEq]
+  exact (measurableSet_lt measurable_const h0).inter
+    ((measurableSet_lt measurable_const h1).inter
+      (measurableSet_lt ((measurable_const.mul h0).mul h1) measurable_const))
+
+/-- The cyclically reversed vertex sequence has the same range. -/
+lemma range_neg_comp {n : ℕ} (v : Fin (n + 3) → EuclideanSpace ℝ (Fin 2)) :
+    Set.range (fun i : Fin (n + 3) => v (-i)) = Set.range v := by
+  apply Set.eq_of_subset_of_subset
+  · rintro x ⟨i, rfl⟩; exact ⟨-i, rfl⟩
+  · rintro x ⟨i, rfl⟩; exact ⟨-i, by simp⟩
+
+/-- Kovač–Predojević's strict convexity hypothesis, for the reversed vertex sequence. -/
+lemma kovac_hsconv {n : ℕ} {v : Fin (n + 3) → EuclideanSpace ℝ (Fin 2)}
+    (hv : IsCcwConvexPolygonFC v) (i j : Fin (n + 3)) (hji : j ≠ i) (hji1 : j ≠ i + 1) :
+    0 < Kovac.cross (v (-(i + 1)) - v (-i)) (v (-j) - v (-i)) := by
+  have hA1 : (-(i + 1) : Fin (n + 3)) + 1 = -i := by abel
+  have hJA : (-j : Fin (n + 3)) ≠ -(i + 1) := fun h => hji1 (neg_injective h)
+  have hJB : (-j : Fin (n + 3)) ≠ (-(i + 1)) + 1 := by
+    rw [hA1]; exact fun h => hji (neg_injective h)
+  have key := orient_edge_neg hv (-(i + 1)) (-j) hJA hJB
+  rw [hA1] at key
+  rw [cross_eq_orient, orient_swap]
+  linarith
+
+/-- Kovač–Predojević's congruent-sides hypothesis, for the reversed vertex sequence. -/
+lemma kovac_cong {n : ℕ} {v : Fin (n + 3) → EuclideanSpace ℝ (Fin 2)}
+    (hcong : ∀ i, dist (v i) (v (i + 1)) = dist (v 0) (v 1)) (i : Fin (n + 3)) :
+    dist (v (-i)) (v (-(i + 1))) = dist (v 0) (v 1) := by
+  rw [show (-i : Fin (n + 3)) = (-(i + 1)) + 1 from by abel, dist_comm]
+  exact hcong _
+
+/-- The first two vertices of an FC convex polygon are distinct. -/
+lemma vertex_zero_ne_one {n : ℕ} {v : Fin (n + 3) → EuclideanSpace ℝ (Fin 2)}
+    (hv : IsCcwConvexPolygonFC v) : v 0 ≠ v 1 := by
+  have e0 : (0 : Fin (n + 3)).val = 0 := rfl
+  have e1 : (1 : Fin (n + 3)).val = 1 := by simp
+  have e2 : (2 : Fin (n + 3)).val = 2 := by
+    rw [Fin.coe_ofNat_eq_mod]; exact Nat.mod_eq_of_lt (by omega)
+  have h01 : (0 : Fin (n + 3)) < 1 := by rw [Fin.lt_def, e0, e1]; omega
+  have h12 : (1 : Fin (n + 3)) < 2 := by rw [Fin.lt_def, e1, e2]; omega
+  have h012 := orient_neg_of_lt hv h01 h12
+  intro h
+  rw [← h] at h012
+  have hz : CyclicQuad.orient (v 0) (v 0) (v 2) = 0 := by
+    unfold CyclicQuad.orient; ring
+  linarith
+
+/-- **Erdős Problem 353, part 5 (convex polygon with congruent sides), in Formal Conjectures
+form.**  The answer here is negative: there is a measurable set of infinite measure in which
+every convex polygon with congruent sides has area `< 1`. -/
+theorem erdos_353_congruent_sides_FC :
+    ∃ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A ∧ volume A = ⊤ ∧
+      ∀ (n : ℕ) (v : Fin (n + 3) → EuclideanSpace ℝ (Fin 2)),
+        IsCcwConvexPolygonFC v → (∀ i, v i ∈ A) →
+        (∀ i, dist (v i) (v (i + 1)) = dist (v 0) (v 1)) →
+        volume (convexHull ℝ (Set.range v)) < 1 := by
+  obtain ⟨-, -, hprop⟩ := Kovac.thm_congruent
+  refine ⟨Kovac.Sset, measurableSet_Sset, Kovac.volume_Sset_top, ?_⟩
+  intro n v hccw hmem hcong
+  rw [← range_neg_comp v]
+  refine hprop (n + 3) (fun i : Fin (n + 3) => v (-i)) (by omega) ?_ ?_ ?_
+  · intro i j hji hji1
+    exact kovac_hsconv hccw i j hji hji1
+  · exact ⟨dist (v 0) (v 1), dist_pos.mpr (vertex_zero_ne_one hccw), fun i => kovac_cong hcong i⟩
+  · intro i
+    exact hmem (-i)
+
+/-- **Erdős Problem 353, part 2 (isosceles triangle), in Formal Conjectures form.**
+Every measurable set of infinite measure contains the vertices of an isosceles
+triangle whose convex hull has Lebesgue measure `1`. -/
+theorem erdos_353_isosceles_triangle_FC :
+    ∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+      ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A,
+        IsIsoscelesFC a b c ∧ volume (convexHull ℝ {a, b, c}) = 1 := by
+  intro A hA hAinf
+  have hpos : 0 < volume A := by rw [hAinf]; exact ENNReal.zero_lt_top
+  have hunb : ¬ Bornology.IsBounded A := by
+    intro hb
+    have hlt : volume A < ⊤ := hb.measure_lt_top (μ := volume)
+    rw [hAinf] at hlt
+    exact absurd hlt (lt_irrefl _)
+  obtain ⟨a, b, c, ha, hb, hc, htri⟩ := (Koizumi.thm_iso_right A hA hpos hunb).1
+  refine ⟨a, ha, b, hb, c, hc, isoscelesFC_of a b c htri, ?_⟩
+  rw [volume_convexHull_triple, htri.1]
+  simp
+
+/-- **Erdős Problem 353, part 3 (right-angled triangle), in Formal Conjectures form.** -/
+theorem erdos_353_right_triangle_FC :
+    ∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+      ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A,
+        IsRightAngledFC a b c ∧ volume (convexHull ℝ {a, b, c}) = 1 := by
+  intro A hA hAinf
+  have hpos : 0 < volume A := by rw [hAinf]; exact ENNReal.zero_lt_top
+  have hunb : ¬ Bornology.IsBounded A := by
+    intro hb
+    have hlt : volume A < ⊤ := hb.measure_lt_top (μ := volume)
+    rw [hAinf] at hlt
+    exact absurd hlt (lt_irrefl _)
+  obtain ⟨a, b, c, ha, hb, hc, htri⟩ := (Koizumi.thm_iso_right A hA hpos hunb).2
+  refine ⟨a, ha, b, hb, c, hc, rightAngledFC_of a b c htri, ?_⟩
+  rw [volume_convexHull_triple, htri.1]
+  simp
+
+end ShoelaceBridge
+
 /-- **Erdős Problem 353.** Resolved by Koizumi [Ko25] and Kovač–Predojević [KoPr24].
 The website asks five sub-questions; the answers are **YES, YES, YES, YES, NO**:
 
-1. (YES) Every measurable `S ⊂ ℝ²` of infinite measure contains an isosceles trapezoid
-   of area `1` (Koizumi).
-2. (YES) Every measurable `S` of positive measure that is unbounded contains an
-   isosceles triangle of area `1` (Koizumi).
-3. (YES) Every measurable `S` of positive measure that is unbounded contains a
-   right-angled triangle of area `1` (Koizumi).
-4. (YES) Every measurable `S` of infinite measure contains the vertices of a
-   cyclic quadrilateral of area `1` (Kovač–Predojević).
-5. (NO) There exists a measurable `S` of infinite measure such that every convex
-   polygon with congruent sides and vertices in `S` has area strictly less than `1`
-   (Kovač–Predojević). -/
+1. (YES) Every measurable `A ⊆ ℝ²` of infinite measure contains the vertices of an isosceles
+   trapezoid of area `1` (Koizumi).
+2. (YES) The same for an isosceles triangle (Koizumi).
+3. (YES) The same for a right-angled triangle (Koizumi).
+4. (YES) The same for a cyclic quadrilateral (Kovač–Predojević [KoPr24, Theorem 1] — though
+   the proof below instead derives it from Koizumi's trapezoid, which is itself cyclic).
+5. (NO) There exists a measurable `A` of infinite measure such that every convex polygon with
+   congruent sides and vertices in `A` has area strictly less than `1` (Kovač–Predojević). -/
 theorem erdos_353 :
     -- (1) Isosceles trapezoid: YES
-    (∀ S : Set (EuclideanSpace ℝ (Fin 2)),
-        MeasurableSet S → volume S = ⊤ →
-        ∃ A B C D, A ∈ S ∧ B ∈ S ∧ C ∈ S ∧ D ∈ S ∧ Koizumi.IsoTrapArea1 A B C D) ∧
+    (∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+        ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A, ∃ d ∈ A,
+          IsIsoscelesTrapezoidFC a b c d ∧ volume (convexHull ℝ {a, b, c, d}) = 1) ∧
     -- (2) Isosceles triangle: YES
-    (∀ S : Set (EuclideanSpace ℝ (Fin 2)),
-        MeasurableSet S → 0 < volume S → ¬ Bornology.IsBounded S →
-        ∃ A B C, A ∈ S ∧ B ∈ S ∧ C ∈ S ∧ Koizumi.IsoscelesTriangleArea1 A B C) ∧
+    (∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+        ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A,
+          IsIsoscelesFC a b c ∧ volume (convexHull ℝ {a, b, c}) = 1) ∧
     -- (3) Right-angled triangle: YES
-    (∀ S : Set (EuclideanSpace ℝ (Fin 2)),
-        MeasurableSet S → 0 < volume S → ¬ Bornology.IsBounded S →
-        ∃ A B C, A ∈ S ∧ B ∈ S ∧ C ∈ S ∧ Koizumi.RightTriangleArea1 A B C) ∧
+    (∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+        ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A,
+          IsRightAngledFC a b c ∧ volume (convexHull ℝ {a, b, c}) = 1) ∧
     -- (4) Cyclic quadrilateral: YES
-    (∀ A : Set (EuclideanSpace ℝ (Fin 2)),
-        MeasurableSet A → volume A = ⊤ →
-        ∃ P Q R T : EuclideanSpace ℝ (Fin 2),
-          P ∈ A ∧ Q ∈ A ∧ R ∈ A ∧ T ∈ A ∧ CyclicQuad.UnitCyclicQuad P Q R T) ∧
-    -- (5) Convex polygon with congruent sides: NO (counterexample exists)
-    (∃ S : Set (EuclideanSpace ℝ (Fin 2)), volume S = ⊤ ∧
-        ∀ (n : ℕ) (C : ZMod n → EuclideanSpace ℝ (Fin 2)),
-          3 ≤ n →
-          (∀ i j : ZMod n, j ≠ i → j ≠ i + 1 →
-            0 < Kovac.cross (C (i + 1) - C i) (C j - C i)) →
-          (∃ a : ℝ, 0 < a ∧ ∀ i : ZMod n, dist (C i) (C (i + 1)) = a) →
-          (∀ i : ZMod n, C i ∈ S) →
-          volume (convexHull ℝ (Set.range C)) < 1) := by
-  refine ⟨Koizumi.thm_trapezoid,
-          fun S hS hpos hunb => (Koizumi.thm_iso_right S hS hpos hunb).1,
-          fun S hS hpos hunb => (Koizumi.thm_iso_right S hS hpos hunb).2,
-          CyclicQuad.exists_unitCyclicQuad_of_volume_infinite,
-          ?_⟩
-  -- For sub-claim (5), use `Kovac.Sset` directly so the membership `C i ∈ S`
-  -- unfolds to `Kovac.inS (C i)` definitionally.
-  refine ⟨Kovac.Sset, Kovac.volume_Sset_top, ?_⟩
-  intro n C hn hconv hcong hvert
-  obtain ⟨_, _, hS_prop⟩ := Kovac.thm_congruent
-  exact hS_prop n C hn hconv hcong hvert
+    (∀ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A → volume A = ⊤ →
+        ∃ Q : Set (EuclideanSpace ℝ (Fin 2)), Q ⊆ A ∧ Q.ncard = 4 ∧
+          EuclideanGeometry.Cospherical Q ∧ volume (convexHull ℝ Q) = 1) ∧
+    -- (5) Convex polygon with congruent sides: NO
+    (∃ A : Set (EuclideanSpace ℝ (Fin 2)), MeasurableSet A ∧ volume A = ⊤ ∧
+        ∀ (n : ℕ) (v : Fin (n + 3) → EuclideanSpace ℝ (Fin 2)),
+          IsCcwConvexPolygonFC v → (∀ i, v i ∈ A) →
+          (∀ i, dist (v i) (v (i + 1)) = dist (v 0) (v 1)) →
+          volume (convexHull ℝ (Set.range v)) < 1) :=
+  ⟨erdos_353_isosceles_trapezoid_FC, erdos_353_isosceles_triangle_FC,
+    erdos_353_right_triangle_FC, erdos_353_cyclic_quadrilateral_FC,
+    erdos_353_congruent_sides_FC⟩
 
 #print axioms erdos_353
 -- 'Erdos353.erdos_353' depends on axioms: [propext, Classical.choice, Quot.sound]
