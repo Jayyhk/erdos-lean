@@ -776,35 +776,6 @@ theorem erdos_1051
       exact fun ⟨x, hx⟩ => h_b_sum_irrational
         ⟨x - ∑ n ∈ Finset.range N₀, 1 / ((a n : ℚ) * (a (n + 1))), by push_cast; linarith⟩
 
-/-
-If the sum of the series is rational, then the sum of the shifted series is rational.
--/
-lemma erdos_1051_sum_tail_rational
-  (a : ℕ → ℕ)
-  (h_mono : StrictMono a)
-  (h_pos : ∀ n, 0 < a n)
-  (h_rat : ∃ p q : ℕ, 0 < q ∧ (∑' n, 1 / ((a n : ℝ) * (a (n + 1) : ℝ))) = p / q)
-  (N : ℕ) :
-  ∃ p' q' : ℕ, 0 < q' ∧
-    (∑' n, 1 / ((a (n + N) : ℝ) * (a (n + N + 1) : ℝ))) = p' / q' := by
-    -- Denote the sum of the original series as S and the shifted series as S_shifted.
-    obtain ⟨S, hS⟩ : ∃ S : ℚ, ∑' n, 1 / ((a n) * (a (n + 1)) : ℝ) = S := by
-      exact ⟨h_rat.choose / h_rat.choose_spec.choose,
-        by simpa using h_rat.choose_spec.choose_spec.2⟩
-    obtain ⟨S_shifted, hS_shifted⟩ : ∃ S_shifted : ℚ,
-        ∑' n, 1 / ((a (n + N)) * (a (n + N + 1)) : ℝ) = S_shifted := by
-      have h_sum_eq : ∑' n, 1 / ((a (n + N)) * (a (n + N + 1)) : ℝ) =
-          (∑' n, 1 / ((a n) * (a (n + 1)) : ℝ)) -
-          (∑ n ∈ Finset.range N, 1 / ((a n) * (a (n + 1)) : ℝ)) := by
-        rw [eq_comm, ← Summable.sum_add_tsum_nat_add N]
-        · ring
-        · exact erdos1051_summable a h_mono h_pos
-      exact ⟨S - ∑ n ∈ Finset.range N, (a n * a (n + 1) : ℚ)⁻¹, by push_cast; aesop⟩
-    exact ⟨S_shifted.num.natAbs, S_shifted.den, Nat.cast_pos.mpr S_shifted.pos, by
-      simpa [abs_of_nonneg (Rat.num_nonneg.mpr
-        (show 0 ≤ S_shifted by exact_mod_cast hS_shifted ▸ tsum_nonneg fun _ => by positivity)),
-        Rat.cast_def] using hS_shifted⟩
-
 end
 
 #print axioms erdos_1051
