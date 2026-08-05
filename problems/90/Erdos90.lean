@@ -36550,6 +36550,6 @@ theorem erdos_90 :
   exact absurd hνn (not_le.mpr (hN n hnN.le))
 
 #print axioms erdos_90
--- 'Erdos90.erdos_90' depends on axioms: [propext, Classical.choice, golod_shafarevich_inequality, shafarevich_relation_rank_bound, Quot.sound]
+-- 'Erdos90.erdos_90' depends on axioms: [propext, Classical.choice, Erdos90.golod_shafarevich_inequality, Erdos90.shafarevich_relation_rank_bound, Quot.sound]
 
 end Erdos90

@@ -131,9 +131,10 @@
     path: "problems/90/"
     theorem: "Erdos90.erdos_90"
     state: "axiomatic"
-    last_update: "2026-06-12"
+    last_update: "2026-08-05"
     lean_toolchain: "leanprover/lean4:v4.29.1"
     mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
+    extra_axioms: ["Erdos90.golod_shafarevich_inequality", "Erdos90.shafarevich_relation_rank_bound"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/90#post-6715"
       - "https://logicalintelligence.com/blog/aleph-prover-erdos-disproof-lean-4-formal-methods"
