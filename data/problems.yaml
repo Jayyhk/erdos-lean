@@ -1196,6 +1196,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/582#post-4212"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos582.lean"
+- number: "608"
+  proof:
+    path: "problems/608/"
+    theorem: "Erdos608.erdos_608"
+    state: "complete"
+    last_update: "2026-08-05"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://github.com/primateria/erdos608"
 - number: "610"
   proof:
     path: "problems/610/"
