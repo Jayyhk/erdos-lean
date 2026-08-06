@@ -639,7 +639,7 @@
     path: "problems/330/"
     theorem: "Erdos330.erdos_330"
     state: "complete"
-    last_update: "2026-05-26"
+    last_update: "2026-08-06"
     lean_toolchain: "leanprover/lean4:v4.27.0"
     mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
     sources:

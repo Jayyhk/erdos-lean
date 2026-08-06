@@ -10093,9 +10093,126 @@ theorem exists_fairActivation_chain_seed_certificates :
 
 end ScheduledActiveState
 
-theorem erdos_330 : MainTarget := by
+theorem erdos_330_upperDensity : MainTarget := by
   obtain ⟨_seed, ⟨snode⟩⟩ := ScheduledActiveState.exists_initial
   exact snode.fair_mainTarget
+
+/-! ### Formal Conjectures form -/
+
+/-
+The statement as it appears in `FormalConjectures/ErdosProblems/330.lean` after
+google-deepmind/formal-conjectures#4762, which fixed `Rep` to count exactly `h`
+summands, and #4731/#4762, which moved both densities to `Set.upperDensity`.
+The definitions below mirror theirs; `erdos_330` derives that statement from
+`MainTarget`.
+-/
+
+/-- FC's `Set.IsAsymptoticAddBasisOfOrder`: cofinitely many naturals are sums of
+exactly `h` elements of `A`. -/
+def IsAsymptoticAddBasisOfOrderFC (A : Set ℕ) (h : ℕ) : Prop :=
+  ∀ᶠ a in Filter.cofinite, a ∈ h • A
+
+/-- FC's `MinAsymptoticAddBasisOfOrder`. -/
+def MinAsymptoticAddBasisOfOrderFC (A : Set ℕ) (h : ℕ) : Prop :=
+  IsAsymptoticAddBasisOfOrderFC A h ∧
+    ∀ n ∈ A, ¬ IsAsymptoticAddBasisOfOrderFC (A \ {n}) h
+
+/-- FC's `UnrepWithout`, with `Rep A m h` unfolded to `m ∈ h • A`. -/
+def UnrepWithoutFC (A : Set ℕ) (n h : ℕ) : Set ℕ :=
+  {m | m ∉ h • (A \ {n})}
+
+/-- The exact two-fold sumset is the pointwise `2 • A`. -/
+theorem twoFold_eq_two_nsmul (A : Set ℕ) : twoFold A = 2 • A := by
+  rw [two_nsmul]
+  ext n
+  simp only [twoFold, Set.mem_setOf_eq, Set.mem_add]
+
+theorem partialDensity_nonneg (S A : Set ℕ) (b : ℕ) : 0 ≤ Set.partialDensity S A b := by
+  unfold Set.partialDensity
+  positivity
+
+theorem partialDensity_isCoboundedUnder (S : Set ℕ) :
+    Filter.atTop.IsCoboundedUnder (· ≤ ·) (fun b : ℕ => Set.partialDensity S Set.univ b) :=
+  ⟨0, fun a ha => by
+    obtain ⟨b, hb⟩ := Filter.eventually_atTop.mp (Filter.eventually_map.mp ha)
+    exact (partialDensity_nonneg S Set.univ b).trans (hb b le_rfl)⟩
+
+theorem partialDensity_isBoundedUnder (S : Set ℕ) :
+    Filter.atTop.IsBoundedUnder (· ≤ ·) (fun b : ℕ => Set.partialDensity S Set.univ b) :=
+  isBoundedUnder_of_eventually_le (a := (1 : ℝ))
+    (Filter.Eventually.of_forall fun b => Set.partialDensity_le_one S Set.univ b)
+
+/-- `partialDensity` is monotone in the set. -/
+theorem partialDensity_mono {S T : Set ℕ} (h : S ⊆ T) (b : ℕ) :
+    Set.partialDensity S Set.univ b ≤ Set.partialDensity T Set.univ b := by
+  unfold Set.partialDensity
+  gcongr
+  exact (Set.finite_Iio b).subset Set.inter_subset_right
+
+/-- `upperDensity` is monotone in the set. -/
+theorem upperDensity_mono {S T : Set ℕ} (h : S ⊆ T) :
+    Set.upperDensity S ≤ Set.upperDensity T :=
+  Filter.limsup_le_limsup (Filter.Eventually.of_forall fun b => partialDensity_mono h b)
+    (partialDensity_isCoboundedUnder S) (partialDensity_isBoundedUnder T)
+
+/-- A finite set has upper density `0`. -/
+theorem upperDensity_nonpos_of_finite {S : Set ℕ} (hS : S.Finite) :
+    Set.upperDensity S ≤ 0 := by
+  refine le_of_forall_pos_le_add fun ε hε => ?_
+  rw [zero_add]
+  refine Filter.limsup_le_of_le (partialDensity_isCoboundedUnder S) ?_
+  obtain ⟨B, hB⟩ := exists_nat_gt ((S.ncard : ℝ) / ε)
+  filter_upwards [Filter.eventually_gt_atTop (max B 1)] with b hb
+  have hb1 : 1 < b := lt_of_le_of_lt (le_max_right B 1) hb
+  have hbR : (0 : ℝ) < b := by positivity
+  have hnum : (((S ∩ Set.univ) ∩ Set.Iio b).ncard : ℝ) ≤ (S.ncard : ℝ) := by
+    exact_mod_cast Set.ncard_le_ncard
+      (Set.inter_subset_left.trans Set.inter_subset_left) hS
+  have hden : ((Set.univ ∩ Set.Iio b).ncard : ℝ) = (b : ℝ) := by simp
+  have hBb : (S.ncard : ℝ) / ε < (b : ℝ) := by
+    refine hB.trans_le ?_
+    exact_mod_cast (le_max_left B 1).trans hb.le
+  unfold Set.partialDensity
+  rw [hden, div_le_iff₀ hbR]
+  nlinarith [(div_lt_iff₀ hε).mp hBb]
+
+/-- Our `privateSet` sits inside FC's `UnrepWithout` at `h = 2`. -/
+theorem privateSet_subset_unrepWithoutFC (A : Set ℕ) (a : ℕ) :
+    privateSet A a ⊆ UnrepWithoutFC A a 2 := by
+  intro m hm
+  simp only [privateSet, Set.mem_diff] at hm
+  simpa [UnrepWithoutFC, ← twoFold_eq_two_nsmul] using hm.2
+
+/-- An asymptotic basis of order two, in FC's spelling. -/
+theorem isAsymptoticAddBasisOfOrderFC_of {A : Set ℕ} (h : IsAsymptoticBasisTwo A) :
+    IsAsymptoticAddBasisOfOrderFC A 2 := by
+  obtain ⟨N, hN⟩ := h
+  rw [IsAsymptoticAddBasisOfOrderFC, Nat.cofinite_eq_atTop, Filter.eventually_atTop]
+  exact ⟨N, fun n hn => by simpa [← twoFold_eq_two_nsmul] using hN n hn⟩
+
+/-- Minimality, in FC's spelling, from the private sets having positive upper density. -/
+theorem not_isAsymptoticAddBasisOfOrderFC_of_private_pos {A : Set ℕ} {a : ℕ}
+    (h : 0 < Set.upperDensity (privateSet A a)) :
+    ¬ IsAsymptoticAddBasisOfOrderFC (A \ {a}) 2 := by
+  intro hbasis
+  rw [IsAsymptoticAddBasisOfOrderFC, Nat.cofinite_eq_atTop, Filter.eventually_atTop] at hbasis
+  obtain ⟨N, hN⟩ := hbasis
+  have hfin : (privateSet A a).Finite := by
+    refine (Set.finite_Iio N).subset fun m hm => ?_
+    by_contra hmN
+    simp only [Set.mem_Iio, not_lt] at hmN
+    exact hm.2 (by simpa [← twoFold_eq_two_nsmul] using hN m hmN)
+  exact absurd (upperDensity_nonpos_of_finite hfin) (not_le.mpr h)
+
+/-- **Erdős Problem 330**, in the shape used by the `formal-conjectures` repository. -/
+theorem erdos_330 :
+    ∃ (A : Set ℕ), ∃ h, MinAsymptoticAddBasisOfOrderFC A h ∧
+      0 < Set.upperDensity A ∧
+      ∀ n ∈ A, 0 < Set.upperDensity (UnrepWithoutFC A n h) := by
+  obtain ⟨A, hbasis, hdens, hpriv⟩ := erdos_330_upperDensity
+  refine ⟨A, 2, ⟨isAsymptoticAddBasisOfOrderFC_of hbasis, fun n hn =>
+    not_isAsymptoticAddBasisOfOrderFC_of_private_pos (hpriv n hn)⟩, hdens, fun n hn => ?_⟩
+  exact lt_of_lt_of_le (hpriv n hn) (upperDensity_mono (privateSet_subset_unrepWithoutFC A n))
 
 end
 
