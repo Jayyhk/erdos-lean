@@ -139,7 +139,7 @@ lake build
 | [541](https://www.erdosproblems.com/541) | `complete` | [problems/541/](problems/541/) | |
 | [582](https://www.erdosproblems.com/582) | `complete` | [problems/582/](problems/582/) | |
 | [608](https://www.erdosproblems.com/608) | `complete` | [problems/608/](problems/608/) | |
-| [610](https://www.erdosproblems.com/610) | `axiomatic` | [problems/610/](problems/610/) | assumes Corollary 2 of [Joret–Micek–Reed–Smid](https://jayyhk.github.io/papers/joret-micek-reed-smid2021.pdf) (`jmrs_theorem`) and Theorem 1.1 of [Kim](https://jayyhk.github.io/papers/kim1995.pdf) (`kim_theorem`) |
+| [610](https://www.erdosproblems.com/610) | `axiomatic` | [problems/610/](problems/610/) | assumes Corollary 2 of [Joret–Micek–Reed–Smid](https://jayyhk.github.io/papers/joret-micek-reed-smid2021.pdf) (`jmrs_corollary2`) |
 | [613](https://www.erdosproblems.com/613) | `complete` | [problems/613/](problems/613/) | |
 | [618](https://www.erdosproblems.com/618) | `complete` | [problems/618/](problems/618/) | |
 | [619](https://www.erdosproblems.com/619) | `complete` | [problems/619/](problems/619/) | |

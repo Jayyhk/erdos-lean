@@ -1211,10 +1211,10 @@
     path: "problems/610/"
     theorem: "Erdos610.erdos_610"
     state: "axiomatic"
-    last_update: "2026-06-11"
+    last_update: "2026-08-25"
     lean_toolchain: "leanprover/lean4:v4.28.0"
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    extra_axioms: ["Erdos610.jmrs_theorem", "Erdos610.kim_theorem"]
+    extra_axioms: ["Erdos610.jmrs_corollary2"]
     sources:
       - "https://www.erdosproblems.com/forum/thread/610#post-5678"
       - "https://www.ulam.ai/research/erdos610.lean"
