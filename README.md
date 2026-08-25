@@ -22,8 +22,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-208 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 190 `complete`
+210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 192 `complete`
 - 3 `trust_extended`
 - 15 `axiomatic`
 
@@ -49,10 +49,12 @@ lake build
 | [123](https://www.erdosproblems.com/123) | `complete` | [problems/123/](problems/123/) | |
 | [125](https://www.erdosproblems.com/125) | `complete` | [problems/125/](problems/125/) | |
 | [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
+| [146](https://www.erdosproblems.com/146) | `complete` | [problems/146/](problems/146/) | |
 | [150](https://www.erdosproblems.com/150) | `complete` | [problems/150/](problems/150/) | |
 | [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) | |
 | [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) | |
 | [178](https://www.erdosproblems.com/178) | `complete` | [problems/178/](problems/178/) | |
+| [180](https://www.erdosproblems.com/180) | `complete` | [problems/180/](problems/180/) | |
 | [183](https://www.erdosproblems.com/183) | `complete` | [problems/183/](problems/183/) | |
 | [189](https://www.erdosproblems.com/189) | `complete` | [problems/189/](problems/189/) | |
 | [192](https://www.erdosproblems.com/192) | `trust_extended` | [problems/192/](problems/192/) | uses `native_decide` |

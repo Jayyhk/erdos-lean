@@ -215,6 +215,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/134#post-4233"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos134.lean"
+- number: "146"
+  proof:
+    path: "problems/146/"
+    theorem: "Erdos146.erdos_146"
+    state: "complete"
+    last_update: "2026-08-25"
+    lean_toolchain: "leanprover/lean4:v4.32.0"
+    mathlib_revision: "81a5d257c8e410db227a6665ed08f64fea08e997"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/146#post-8253"
+      - "https://github.com/openai/ten-proofs/blob/main/CompactnessAndDegeneracy.lean"
 - number: "150"
   proof:
     path: "problems/150/"
@@ -259,6 +270,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/178#post-5685"
       - "https://gist.github.com/madeve-unipi/ca9c3d1f94fe124c15726d836e1cd623#file-erdos178-lean"
+- number: "180"
+  proof:
+    path: "problems/180/"
+    theorem: "Erdos180.erdos_180"
+    state: "complete"
+    last_update: "2026-08-25"
+    lean_toolchain: "leanprover/lean4:v4.32.0"
+    mathlib_revision: "81a5d257c8e410db227a6665ed08f64fea08e997"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/180#post-8255"
+      - "https://github.com/openai/ten-proofs/blob/main/CompactnessAndDegeneracy.lean"
 - number: "183"
   proof:
     path: "problems/183/"
@@ -268,7 +290,8 @@
     lean_toolchain: "leanprover/lean4:v4.32.0"
     mathlib_revision: "81a5d257c8e410db227a6665ed08f64fea08e997"
     sources:
-      - "https://github.com/openai/ten-proofs/blob/94bc0feb6a9ff12c7d31d6de640a725c9d43d2b6/MulticolorTriangleRamsey.lean"
+      - "https://www.erdosproblems.com/forum/thread/183#post-8250"
+      - "https://github.com/openai/ten-proofs/blob/main/MulticolorTriangleRamsey.lean"
 - number: "189"
   proof:
     path: "problems/189/"
