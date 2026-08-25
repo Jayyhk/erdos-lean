@@ -24,11 +24,9 @@ module's own `namespace Erdos658` is dropped in favour of the single outer one. 
 mathematical content is changed.
 -/
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Finite/Mean.lean` -/
 
 section
-
 
 /-!
 # Normalized averages on finite types
@@ -81,7 +79,6 @@ theorem mean_const {α : Type*} [Fintype α] [Nonempty α] (c : ℝ) :
     mean (fun _ : α => c) = c := by
   exact Fintype.expect_const c
 
-
 theorem mean_add {α : Type*} [Fintype α] (f g : α → ℝ) :
     mean (fun x => f x + g x) = mean f + mean g := by
   exact Finset.expect_add_distrib Finset.univ f g
@@ -110,7 +107,6 @@ theorem mean_le_of_le_const {α : Type*} [Fintype α] [Nonempty α]
     mean f ≤ c := by
   simpa using mean_mono (f := f) (g := fun _ => c) hf
 
-
 /-- The normalized average over two independent finite variables. -/
 noncomputable def mean₂ {α β : Type*} [Fintype α] [Fintype β]
     (f : α → β → ℝ) : ℝ :=
@@ -125,11 +121,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Finite/ProductMean.lean` -/
 
 section
-
 
 /-!
 # Products of independent finite means
@@ -153,17 +147,13 @@ theorem mean_prod_type
     (Finset.expect_product'
       (Finset.univ : Finset α) (Finset.univ : Finset β) F)
 
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Finite/CauchySchwarz.lean` -/
 
 section
-
 
 /-!
 # Finite Cauchy--Schwarz elimination
@@ -215,20 +205,13 @@ theorem mean_inner_sq_eq_mean₂_pair
   funext x
   exact mean_sq_eq_mean_pair_mul (F x)
 
-
-
-
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleCounting.lean` -/
 
 section
-
 
 /-!
 # Hypergraph bundles and the counting-lemma decomposition
@@ -290,7 +273,6 @@ The empty bundle has order zero. -/
 def order (B : HypergraphBundle J K H) : ℕ :=
   B.edges.sup Finset.card
 
-
 /-- Every edge cardinality is bounded by the order of the bundle. -/
 theorem edge_card_le_order
     (B : HypergraphBundle J K H)
@@ -327,7 +309,6 @@ theorem eraseEdge_order_le
   apply Finset.sup_le
   intro g hg
   exact B.edge_card_le_order (Finset.mem_of_mem_erase hg)
-
 
 /-- Erasing a maximum-cardinality edge from a downward-closed bundle
 preserves downward closure. -/
@@ -489,7 +470,6 @@ theorem bundleProduct_nonneg
   exact Finset.prod_nonneg fun g hg =>
     (hA g hg (edgeTuple g x)).1
 
-
 theorem bundleCount_nonneg
     [Fintype K] [Fintype G]
     (B : HypergraphBundle J K H)
@@ -498,8 +478,6 @@ theorem bundleCount_nonneg
     (hA : B.WeightsInUnitInterval A) :
     0 ≤ B.bundleCount A :=
   mean_nonneg (B.bundleProduct_nonneg hA)
-
-
 
 /-- The product left after removing one selected occurrence edge. -/
 noncomputable def edgeRemainder
@@ -797,8 +775,6 @@ theorem doubledRemainderMoment_nonneg
     0 ≤ B.doubledRemainderMoment g₀ A :=
   mean_nonneg fun _ => sq_nonneg _
 
-
-
 /-- The doubled moment is exactly the average obtained by taking two
 independent copies of every outside variable. -/
 theorem doubledRemainderMoment_eq_mean₂_pair
@@ -835,19 +811,15 @@ theorem edgeContribution_sq_le_localSquare_mul_doubled
   exact mean_mul_sq_le_product q
     (B.edgeRemainderAverage g₀ A)
 
-
-
 end HypergraphBundle
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleDuplication.lean` -/
 
 section
-
 
 /-!
 # Duplicating the variables outside one bundle edge
@@ -946,7 +918,6 @@ def splitDoubledAssignmentEquiv
   right_inv p := by
     rcases p with ⟨y, zfalse, ztrue⟩
     rfl
-
 
 /-- Fubini decomposition for the doubled occurrence variables. -/
 theorem mean_splitDoubledAssignment
@@ -1267,7 +1238,6 @@ def doubledEdges
     Finset (Finset (DoubledOccurrenceVertex g₀)) :=
   Finset.univ.image (B.doubledEdgeOfSource g₀)
 
-
 theorem mem_doubledEdges_iff
     (B : HypergraphBundle J K H) (g₀ : Finset K)
     (d : Finset (DoubledOccurrenceVertex g₀)) :
@@ -1415,13 +1385,6 @@ theorem card_doubledEdges_le
     _ = 2 * (B.edges.erase g₀).card := by
       simp [DoubledEdgeSource]
 
-
-
-
-
-
-
-
 /-- A doubled edge is stable under lifting after forgetting its vertices. -/
 theorem doubledEdge_image_forget_of_subset
     (g₀ : Finset K) (copy : Bool)
@@ -1505,11 +1468,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleIndicatorDuplication.lean` -/
 
 section
-
 
 /-!
 # Indicator weights on a duplicated hypergraph bundle
@@ -1619,7 +1580,6 @@ theorem prod_comp_eq_prod_image_of_idempotent
           _ = ∏ b ∈ s.image f, w b :=
             Finset.mul_prod_erase (s.image f) w hfa
       · rw [Finset.prod_insert hfa]
-
 
 /-- Evaluating a pulled-back base weight on a lifted occurrence edge agrees
 with evaluating the original pulled-back weight on its labelled source. -/
@@ -1859,11 +1819,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleFiltration.lean` -/
 
 section
-
 
 /-!
 # Filtrations of hypergraph bundles
@@ -1924,8 +1882,6 @@ theorem mem_filterEdges_edges
       g ∈ B.edges ∧ P g := by
   simp [filterEdges]
 
-
-
 /-- Edge filtering cannot increase the number of occurrence edges. -/
 theorem card_filterEdges_edges_le
     (B : HypergraphBundle J K H)
@@ -1981,7 +1937,6 @@ theorem lowerOrder_order_lt
   intro g hg
   exact (Finset.mem_filter.mp hg).2
 
-
 theorem card_lowerOrder_edges_le
     (B : HypergraphBundle J K H) (d : ℕ) :
     (B.lowerOrder d).edges.card ≤ B.edges.card :=
@@ -2017,7 +1972,6 @@ theorem mem_strictBoundary_edges
       g ∈ B.edges ∧ g ⊂ g₀ := by
   simp [strictBoundary]
 
-
 /-- A strict boundary has order below the size of its ambient edge. -/
 theorem strictBoundary_order_lt
     (B : HypergraphBundle J K H)
@@ -2050,7 +2004,6 @@ noncomputable def bundleMainProduct
     (p : Finset J → ℝ) : ℝ :=
   ∏ g ∈ B.edges, p (g.image B.projection)
 
-
 @[simp]
 theorem bundleMainProduct_lowerOrder
     (B : HypergraphBundle J K H)
@@ -2068,7 +2021,6 @@ theorem bundleMainProduct_strictBoundary
       ∏ g ∈ B.edges.filter (fun g => g ⊂ g₀),
         p (g.image B.projection) :=
   rfl
-
 
 /-- Erasing one edge removes precisely its main-density factor. -/
 theorem bundleMainProduct_eraseEdge_mul
@@ -2307,11 +2259,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleGeneralizedCounting.lean` -/
 
 section
-
 
 /-!
 # Generalized counting for closed hypergraph bundles
@@ -2569,7 +2519,6 @@ theorem card_image_projection
   have hcard :=
     Fintype.card_congr (B.projectionEquiv hg)
   simpa using hcard.symm
-
 
 /-- Nonnegative base densities give a nonnegative bundle main product. -/
 theorem bundleMainProduct_nonneg
@@ -3092,11 +3041,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleEnvelopeSelection.lean` -/
 
 section
-
 
 /-!
 # Small parameters for the bundle-counting envelope
@@ -3123,76 +3070,21 @@ nonnegativity is automatic for every real `t`, and the square root in the
 recurrence remains a globally continuous function of `t`.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open Filter Topology
 
 /-! ## The equality schedule -/
 
-/-- The contribution added while adjoining the `(n + 1)`st occurrence
-edge at the next order. -/
-noncomputable def bundleCommonStepIncrement
-    (a t : ℝ) (lower : ℕ → ℝ) (n : ℕ) : ℝ :=
-  Real.sqrt
-        (t ^ 2 *
-          (1 + lower (n + 1)) *
-          (1 + lower (2 * (n + 1)))) /
-      a ^ (n + 1) +
-    t ^ 2 / a ^ (n + 1)
-
-/-- Given the complete error row at lower order, form the next row by
-summing the one-edge increments. -/
-noncomputable def bundleCommonNextRow
-    (a t : ℝ) (lower : ℕ → ℝ) : ℕ → ℝ
-  | 0 => 0
-  | n + 1 =>
-      bundleCommonNextRow a t lower n +
-        bundleCommonStepIncrement a t lower n
-
-/-- The common-floor bundle-counting error schedule.
-
-Order zero is exact.  Each positive-order row is obtained from the
-preceding row by `bundleCommonNextRow`. -/
-noncomputable def bundleCommonEnvelopeError
-    (a t : ℝ) : ℕ → ℕ → ℝ
-  | 0 => fun _ => 0
-  | d + 1 =>
-      bundleCommonNextRow a t
-        (bundleCommonEnvelopeError a t d)
-
-
-
-
-
 /-! ## Positivity and monotonicity -/
-
-
-
-
-
-
 
 /-! ## The envelope interface -/
 
-
 /-! ## Vanishing at the origin and finite-horizon selection -/
 
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/RankwiseBundleEnvelopeSelection.lean` -/
 
 section
-
 
 /-!
 # Rankwise numerical envelopes for bundle counting
@@ -3257,7 +3149,6 @@ theorem bundleRankwiseDensityFloor_le
       · subst i
         exact min_le_right _ _
       · exact (min_le_left _ _).trans (ih (Nat.le_of_lt_succ (lt_of_le_of_ne hid hi)))
-
 
 /-! ## The rankwise recurrence -/
 
@@ -3454,20 +3345,7 @@ theorem bundleRankwiseEnvelopeError_isEnvelope
 
 /-! ## Vanishing and continuous rankwise parameter paths -/
 
-
-
-
-
 /-! ## Density-scaled finite-horizon selection -/
-
-
-
-
-
-
-
-
-
 
 /-! ## Explicit finite-horizon sufficient bounds -/
 
@@ -3741,11 +3619,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Finite/Bonferroni.lean` -/
 
 section
-
 
 /-!
 # Elementary finite Bonferroni bounds
@@ -3771,17 +3647,13 @@ theorem mean_finset_sum {α κ : Type*}
       (s := (Finset.univ : Finset α)) s
       (fun x q => f q x))
 
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/ConditionalAverage.lean` -/
 
 section
-
 
 /-!
 # Conditional averages on finite partitions
@@ -3830,7 +3702,6 @@ theorem conditionalMean_nonneg {Ω : Type*}
     0 ≤ conditionalMean P f x := by
   exact Finset.expect_nonneg fun y _ => hf y
 
-
 theorem conditionalMean_sub {Ω : Type*}
     [Fintype Ω] [DecidableEq Ω]
     (P : Finpartition (Finset.univ : Finset Ω))
@@ -3846,9 +3717,6 @@ theorem conditionalMean_smul {Ω : Type*}
     conditionalMean P (fun y => c * f y) x =
       c * conditionalMean P f x := by
   exact (Finset.mul_expect (P.part x) f c).symm
-
-
-
 
 /-- On one atom, summing its conditional average recovers the original
 sum on that atom. -/
@@ -3943,16 +3811,13 @@ theorem partitionEnergy_le_mean_sq {Ω : Type*}
     _ = mean (fun x => f x ^ 2) :=
       mean_conditionalMean P fun x => f x ^ 2
 
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/FacePartition.lean` -/
 
 section
-
 
 /-!
 # Finite face partitions
@@ -3975,7 +3840,6 @@ abbrev FacePartition (Ω : Type*) [Fintype Ω] [DecidableEq Ω] :=
 namespace FacePartition
 
 variable {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-
 
 /-- Refinement shrinks the atom containing every point. -/
 theorem part_subset_of_le {P Q : FacePartition Ω}
@@ -4003,7 +3867,6 @@ theorem le_iff_part_subset {P Q : FacePartition Ω} :
 def indiscrete : FacePartition Ω :=
   ⊤
 
-
 @[simp]
 theorem part_indiscrete (x : Ω) :
     (indiscrete : FacePartition Ω).part x = Finset.univ := by
@@ -4015,7 +3878,6 @@ theorem part_indiscrete (x : Ω) :
   exact Finset.mem_singleton.mp
     (Finpartition.parts_top_subset
       (Finset.univ : Finset Ω) hmem)
-
 
 /-- Partition complexity measured by the number of atoms. -/
 def complexity (P : FacePartition Ω) : ℕ :=
@@ -4031,15 +3893,6 @@ theorem representative_mem
     (P : FacePartition Ω) (a : P.parts) :
     P.representative a ∈ a.1 :=
   Classical.choose_spec (P.nonempty_of_mem_parts a.2)
-
-/-- Looking up the atom of its representative recovers the chosen atom. -/
-theorem part_representative
-    (P : FacePartition Ω) (a : P.parts) :
-    P.part (P.representative a) = a.1 :=
-  P.part_eq_of_mem a.2 (P.representative_mem a)
-
-
-
 
 @[simp]
 theorem complexity_indiscrete [Nonempty Ω] :
@@ -4168,7 +4021,6 @@ theorem mem_part_joinFinset_iff {ι : Type*} [DecidableEq ι]
         Finset.mem_inter, Finset.mem_insert, forall_eq_or_imp,
         ih]
 
-
 /-- The partition generated by a finite family of cuts.  Two points lie in
 the same atom exactly when every cut gives them the same membership bit. -/
 def generatedBy (F : Finset (Finset Ω)) : FacePartition Ω :=
@@ -4229,11 +4081,6 @@ theorem complexity_generatedBy_le (F : Finset (Finset Ω)) :
     complexity (generatedBy F) ≤ 2 ^ F.card := by
   exact Finpartition.card_atomise_le
 
-
-
-
-
-
 /-- The same-atom relation transported along a map. -/
 def pullbackSetoid {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
     (f : Ω → Λ) (Q : FacePartition Λ) : Setoid Ω where
@@ -4290,7 +4137,6 @@ theorem mem_part_pullback_iff_image_mem {Λ : Type*}
         (Finset.mem_univ (f y))
         (Finset.mem_univ (f x))).1 h).symm
 
-
 /-- Pullback preserves refinement. -/
 theorem pullback_mono {Λ : Type*}
     [Fintype Λ] [DecidableEq Λ]
@@ -4302,20 +4148,15 @@ theorem pullback_mono {Λ : Type*}
   rw [mem_part_pullback_iff_image_mem] at hy ⊢
   exact part_subset_of_le h (f x) hy
 
-
-
-
 end FacePartition
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/Energy.lean` -/
 
 section
-
 
 /-!
 # Energy under refinement of finite face partitions
@@ -4547,17 +4388,13 @@ theorem partitionEnergy_mono
   exact le_add_of_nonneg_right
     (mean_nonneg fun x => sq_nonneg _)
 
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/Regularity.lean` -/
 
 section
-
 
 /-!
 # A finite energy-increment regularity step
@@ -4638,8 +4475,6 @@ theorem of_le {P Q : FacePartition Ω} {g : Ω → ℝ}
   intro x y hy
   exact hg x y (FacePartition.part_subset_of_le hPQ x hy)
 
-
-
 end IsPartitionMeasurable
 
 /-- The indicator of a generator is measurable for the partition generated
@@ -4664,12 +4499,6 @@ theorem booleanCut_measurable_generatedBy (A : BooleanCutTest Ω) :
 /-- Minimal regularity state for one finite face space. -/
 structure FaceRegularityState (Ω : Type*) [Fintype Ω] [DecidableEq Ω] where
   partition : FacePartition Ω
-
-/-- A collection of per-edge (or per-face-type) regularity states. -/
-abbrev FaceRegularitySystem
-    (ι : Type*) (face : ι → Type*)
-    [∀ i, Fintype (face i)] [∀ i, DecidableEq (face i)] :=
-  ∀ i, FaceRegularityState (face i)
 
 namespace FaceRegularityState
 
@@ -4723,11 +4552,6 @@ theorem booleanCut_measurable_refineBy (S : FaceRegularityState Ω)
     (FacePartition.join_le_right S.partition
       (FacePartition.generatedBy ({A} : Finset (Finset Ω))))
   exact booleanCut_measurable_generatedBy A
-
-
-
-
-
 
 /-- Projecting the old residual onto a refinement gives exactly the change
 in structured components. -/
@@ -4863,40 +4687,15 @@ theorem energy_increment_of_booleanCut [Nonempty Ω]
     S.booleanCutCorrelation_sq_le_energyIncrement f A
   linarith
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 end FaceRegularityState
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/CutDiscrepancy.lean` -/
 
 section
-
 
 /-!
 # Cut discrepancy on finite additive groups
@@ -4916,9 +4715,6 @@ def eraseCoordinate {G : Type*} {r : ℕ}
   cases r with
   | zero => exact Fin.elim0 i
   | succ n => exact fun j => x (i.succAbove j)
-
-
-
 
 /-- A family of cut tests, one for each deleted coordinate. -/
 abbrev CutTestFamily (G : Type*) (r : ℕ) :=
@@ -4941,84 +4737,13 @@ theorem IsBoundedCutTest.le_one
     ∀ i x, u i x ≤ 1 :=
   hu.2
 
-
-
-
-
-
-/-- The cut correlation of `f-g` with a family of deleted-coordinate
-tests. -/
-noncomputable def cutCorrelation
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f g : G → ℝ) (u : CutTestFamily G r) : ℝ :=
-  mean fun x : Fin r → G =>
-    (f (∑ i, x i) - g (∑ i, x i)) *
-      ∏ i, u i (eraseCoordinate i x)
-
-/-- `f` and `g` differ by at most `ε` against every product of
-`[0,1]`-valued deleted-coordinate tests. -/
-def CutDiscrepancyLe
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f g : G → ℝ) (ε : ℝ) : Prop :=
-  ∀ u : CutTestFamily G r,
-    (∀ i x, 0 ≤ u i x) →
-    (∀ i x, u i x ≤ 1) →
-    |cutCorrelation r f g u| ≤ ε
-
-
-
-theorem cutCorrelation_swap
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f g : G → ℝ) (u : CutTestFamily G r) :
-    cutCorrelation r g f u = -cutCorrelation r f g u := by
-  calc
-    cutCorrelation r g f u =
-        mean (fun x : Fin r → G =>
-          (-1 : ℝ) *
-            ((f (∑ i, x i) - g (∑ i, x i)) *
-              ∏ i, u i (eraseCoordinate i x))) := by
-      apply congrArg mean
-      funext x
-      ring
-    _ = (-1 : ℝ) *
-        mean (fun x : Fin r → G =>
-          (f (∑ i, x i) - g (∑ i, x i)) *
-            ∏ i, u i (eraseCoordinate i x)) :=
-      mean_smul _ _
-    _ = -cutCorrelation r f g u := by
-      simp [cutCorrelation]
-
-
-
-
-
-
-theorem CutDiscrepancyLe.symm
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} {ε : ℝ}
-    (h : CutDiscrepancyLe r f g ε) :
-    CutDiscrepancyLe r g f ε := by
-  intro u hu0 hu1
-  rw [cutCorrelation_swap, abs_neg]
-  exact h u hu0 hu1
-
-
-
-
-
-
-
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/GeneralizedConvolution.lean` -/
 
 section
-
 
 /-!
 # Generalized convolutions on finite additive groups
@@ -5035,61 +4760,18 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-
-
-
-
 /-- The product weight associated to a family of deleted-coordinate tests. -/
 def cutTestProduct {G : Type*} {r : ℕ}
     (u : CutTestFamily G r) (x : Fin r → G) : ℝ :=
   ∏ i, u i (eraseCoordinate i x)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/DenseModel.lean` -/
 
 section
-
 
 /-!
 # Finite dense-model duality primitives
@@ -5102,94 +4784,13 @@ a nonnegative `f ≤ ν` from all `[0,1]`-valued models produces a positive
 correlation of `ν - 1` with the positive part of the separator.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped Pointwise
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/PolynomialApproximation.lean` -/
 
 section
-
 
 /-!
 # Polynomial approximation in the finite dense-model argument
@@ -5205,50 +4806,19 @@ degree and coefficient loss of the approximating polynomial remain visible;
 no asymptotic assertion about a particular pseudorandom majorant is hidden here.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators Polynomial
 
 /-! ## Finite products and polynomial expansions -/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /-! ## Bounded combinations and approximation of positive part -/
-
-
-
-
-
-
 
 /-! ## Quantitative positive-part correlation -/
 
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/BooleanCutReduction.lean` -/
 
 section
-
 
 /-!
 # Reduction of bounded cut tests to Boolean cut tests
@@ -5384,7 +4954,6 @@ def cutTestFamilyOfBooleanAssignment
     CutTestFamily G r :=
   fun i y => booleanValue b ⟨i, y⟩
 
-
 /-- Flatten a cut-test family to its finite vector of scalar coordinates. -/
 def cutTestCoordinateValue
     {G : Type*} {r : ℕ}
@@ -5428,26 +4997,15 @@ theorem cutTestProduct_eq_sum_boolean
       (cutTestCoordinateValue u)
       (usedCutTestCoordinateEmbedding x))
 
-
-
 /-! ## The finite dense-model test family -/
-
-
-
-
-
-
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/WeakRegularity.lean` -/
 
 section
-
 
 /-!
 # Weak regularity against lower-face cut tests
@@ -5517,16 +5075,6 @@ theorem booleanFaceCutSupport_eval
           booleanValue, hb]
     | true =>
         exact (hi hb).elim
-
-/-- The finite family of all Boolean lower-face cut supports. -/
-noncomputable def booleanFaceCutSupports
-    (G : Type*) [Fintype G] [DecidableEq G] (r : ℕ) :
-    Finset (BooleanCutTest (Fin r → G)) := by
-  classical
-  exact Finset.univ.image booleanFaceCutSupport
-
-
-
 
 namespace FaceRegularityState
 
@@ -5616,21 +5164,15 @@ def IsFaceCutRegular
     IsBoundedCutTest u →
       |S.faceCutCorrelation f u| ≤ ε
 
-
-
-
-
 end FaceRegularityState
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/FamilyRegularity.lean` -/
 
 section
-
 
 /-!
 # Simultaneous weak regularity for a finite family
@@ -5654,56 +5196,17 @@ The last theorem specializes the abstract result to lower-face product tests,
 which is the form used by the forthcoming shared-skeleton regularity system.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
 variable {Ω ι : Type*}
   [Fintype Ω] [DecidableEq Ω]
   [Fintype ι] [DecidableEq ι]
 
-namespace FaceRegularityState
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end FaceRegularityState
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/GeneratorCells.lean` -/
 
 section
-
 
 /-!
 # Lower-face cells generated by weak-regularity cuts
@@ -5720,24 +5223,11 @@ predicate is false.  There are at most `r ^ |F|` branches, independently of
 the size of the ambient vertex class.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedPattern.lean` -/
 
 section
-
 
 /-!
 # Complete ordered partite hypergraph patterns
@@ -5817,7 +5307,6 @@ def orderedFaceComplementTuple
     OrderedFaceComplement e → G :=
   fun v => x v.1
 
-
 @[simp]
 theorem orderedFaceTuple_splitOrderedFaceEquiv_symm
     {G : Type*} {k r : ℕ} (e : OrderedFace k r)
@@ -5827,7 +5316,6 @@ theorem orderedFaceTuple_splitOrderedFaceEquiv_symm
         ((splitOrderedFaceEquiv e).symm (y, z)) = y := by
   rw [← splitOrderedFaceEquiv_fst]
   simp
-
 
 /-- Fubini decomposition of a full-tuple mean into an ordered face and its
 complement. -/
@@ -5855,9 +5343,6 @@ theorem mean_splitOrderedFace
             fun z : OrderedFaceComplement e → G =>
               f ((splitOrderedFaceEquiv e).symm (y, z))))
 
-
-
-
 /-- A weighted complete ordered rank-`r` pattern. -/
 structure WeightedOrderedPattern
     (G : Type*) (k r : ℕ) where
@@ -5878,9 +5363,6 @@ noncomputable def patternCount
     {G : Type*} [Fintype G] {k r : ℕ}
     (H : WeightedOrderedPattern G k r) : ℝ :=
   mean H.patternWeight
-
-
-
 
 end WeightedOrderedPattern
 
@@ -5923,9 +5405,6 @@ noncomputable def toWeighted
   exact
     { edgeWeight := fun e y =>
         if H.edge e y then 1 else 0 }
-
-
-
 
 /-- An occurrence has zero-one pattern weight one. -/
 theorem toWeighted_patternWeight_of_occurrence
@@ -5997,8 +5476,6 @@ noncomputable def faceDeletionDensity
     (e : OrderedFace k r) : ℝ :=
   (D e).card / Fintype.card (Fin r → G)
 
-
-
 end OrderedPattern
 
 /-- Uniform per-ordered-face removal for complete ordered rank-`r`
@@ -6014,17 +5491,13 @@ def HasUniformOrderedPatternRemoval (k r : ℕ) : Prop :=
               H.IsCover D ∧
                 ∀ e, OrderedPattern.faceDeletionDensity D e ≤ ε
 
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/ArithmeticProgression/Count.lean` -/
 
 section
-
 
 /-!
 # Weighted arithmetic-progression counts
@@ -6034,30 +5507,13 @@ normalized weighted count of progressions in `ZMod N`.  This file defines
 that count and proves its elementary positivity and monotonicity properties.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/LinearForms/Basic.lean` -/
 
 section
-
 
 /-!
 # Affine forms and the arithmetic-progression linear-forms system
@@ -6074,38 +5530,13 @@ one.  Encoding subproducts by Boolean exponents exactly matches the
 Conlon--Fox--Zhao linear-forms condition.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-/-- A finitely supported affine form, represented by all of its coefficients
-on a finite index type. -/
-structure AffineForm (ι R : Type*) [Zero R] where
-  constant : R
-  coefficient : ι → R
-
-namespace AffineForm
-
-
-
-end AffineForm
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/Simplex.lean` -/
 
 section
-
 
 /-!
 # Partite weighted simplices
@@ -6117,44 +5548,13 @@ prevents accidental use of the omitted coordinate and matches the dependent
 index used by the CFZ blow-up forms.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-/-- A vector with coordinate `j` deleted. -/
-abbrev DeletedVector {k : ℕ} (V : Fin k → Type*) (j : Fin k) :=
-  (i : {i : Fin k // i ≠ j}) → V i.1
-
-
-/-- A weighted `(k-1)`-uniform, `k`-partite hypergraph. -/
-structure WeightedSimplexSystem {k : ℕ} (V : Fin k → Type*) where
-  edgeWeight : (j : Fin k) → DeletedVector V j → ℝ
-
-namespace WeightedSimplexSystem
-
-
-
-
-
-
-
-end WeightedSimplexSystem
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/APCorrespondence.lean` -/
 
 section
-
 
 /-!
 # The arithmetic-progression/simplex correspondence
@@ -6170,17 +5570,6 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-
-
-
 /-- Normalized averages are invariant under an equivalence of finite
 indexing types. -/
 theorem mean_equiv {α β : Type*} [Fintype α] [Fintype β]
@@ -6189,18 +5578,13 @@ theorem mean_equiv {α β : Type*} [Fintype α] [Fintype β]
     mean f = mean g := by
   exact Fintype.expect_equiv e f g h
 
-
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/CutTransport.lean` -/
 
 section
-
 
 /-!
 # Transport of cut discrepancy by coordinate automorphisms
@@ -6211,29 +5595,13 @@ coordinatewise change of variables reduces them to the literal sum used in
 `CutDiscrepancyLe`.  This file proves that reduction once and for all.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/APCut.lean` -/
 
 section
-
 
 /-!
 # Arithmetic-progression face forms as transported cut forms
@@ -6245,31 +5613,13 @@ coordinate sum.  This file proves the coefficient and reindexing facts needed
 to apply transported cut discrepancy.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/SimplexTelescoping.lean` -/
 
 section
-
 
 /-!
 # Edge-by-edge telescoping for weighted simplex counts
@@ -6280,27 +5630,13 @@ required: all analytic work is reduced to bounding one mixed correlation for
 each edge colour.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/APSimplexCut.lean` -/
 
 section
-
 
 /-!
 # Cut control of arithmetic-progression simplex counts
@@ -6312,36 +5648,13 @@ relevant factorial.  This file makes that reduction exact and then applies
 cut discrepancy edge by edge.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Transference/SimplexCounting.lean` -/
 
 section
-
 
 /-!
 # Stable weighted simplex counts
@@ -6352,24 +5665,13 @@ This file records the elementary endpoint: uniformly close edge weights in
 estimate for products, followed by averaging.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/WeakCounting.lean` -/
 
 section
-
 
 /-!
 # Weak-regularity counting for simplex systems
@@ -6385,45 +5687,13 @@ vertex in one telescoping term; the remaining edge factors become precisely a
 bounded cut-test family on the distinguished edge.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedCounting.lean` -/
 
 section
-
 
 /-!
 # Weak counting for complete ordered patterns
@@ -6439,60 +5709,13 @@ outside `e` are fixed, the `f`-edge factor therefore omits one coordinate of
 the `e`-tuple and is a valid cut-test factor.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-/-- A weak-regularity state for every ordered rank-`r` face. -/
-abbrev OrderedRegularitySystem
-    (G : Type*) [Fintype G] [DecidableEq G]
-    (k r : ℕ) :=
-  (e : OrderedFace k r) →
-    FaceRegularityState (Fin r → G)
-
-/-- Replace each ordered edge weight by its conditional mean in the
-corresponding regularity state. -/
-noncomputable def regularizedOrderedPattern
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r) :
-    WeightedOrderedPattern G k r where
-  edgeWeight e :=
-    (S e).structured (H.edgeWeight e)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedRegularizedCells.lean` -/
 
 section
-
 
 /-!
 # Generator-retaining regularization for complete ordered patterns
@@ -6503,74 +5726,11 @@ retains the Boolean face-cut generators.  Consequently every structured
 top atom is an explicit union of products of rank-`r - 1` cells.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
-
-
-/-- Simultaneous regularization data for all ordered faces, including the
-actual lower-face generators. -/
-structure GeneratedOrderedPatternRegularization
-    (G : Type*) [Fintype G] [DecidableEq G]
-    (k r : ℕ)
-    (H : WeightedOrderedPattern G k r)
-    (ε : ℝ) where
-  state : OrderedRegularitySystem G k r
-  generators :
-    (e : OrderedFace k r) →
-      Finset (BooleanCutTest (Fin r → G))
-  budgetLength : OrderedFace k r → ℕ
-  stepIndex : OrderedFace k r → ℕ
-  budget_large :
-    ∀ e, 1 < (budgetLength e : ℝ) * ε ^ 2
-  step_lt_budget :
-    ∀ e, stepIndex e < budgetLength e
-  partition_eq_generated :
-    ∀ e, (state e).partition =
-      FacePartition.generatedBy (generators e)
-  generators_supported :
-    ∀ e, generators e ⊆ booleanFaceCutSupports G r
-  generator_card_le :
-    ∀ e, (generators e).card ≤ stepIndex e
-  regular :
-    ∀ e, (state e).IsFaceCutRegular
-      (H.edgeWeight e) ε
-  count_close :
-    |H.patternCount -
-        (regularizedOrderedPattern H state).patternCount| ≤
-      (Fintype.card (OrderedFace k r) : ℝ) * ε
-  complexity_le :
-    ∀ e, FacePartition.complexity (state e).partition ≤
-      2 ^ stepIndex e
-
-
-
-namespace GeneratedOrderedPatternRegularization
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end GeneratedOrderedPatternRegularization
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/Unweighted.lean` -/
 
 section
-
 
 /-!
 # Unweighted partite simplex hypergraphs
@@ -6581,40 +5741,13 @@ gives the finite predicate-valued interface and connects its labelled
 simplices exactly to the weighted counting API.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-/-- An unweighted `(k - 1)`-uniform, `k`-partite hypergraph. -/
-structure SimplexHypergraph {k : ℕ} (V : Fin k → Type*) where
-  edge : (j : Fin k) → DeletedVector V j → Prop
-
-namespace SimplexHypergraph
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end SimplexHypergraph
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/Removal.lean` -/
 
 section
-
 
 /-!
 # Finite deletion framework for simplex removal
@@ -6629,74 +5762,13 @@ existence of a minimum finite cover.
 No quantitative hypergraph-removal theorem is asserted here.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-namespace SimplexHypergraph
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end SimplexHypergraph
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/StructuredCleaning.lean` -/
 
 section
-
 
 /-!
 # Cleaning low-density structured cells
@@ -6716,43 +5788,13 @@ same principle recursively to lower skeleton cells in order to replace the
 ambient-size-dependent one-tuple bound by a uniform counting bound.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
-
-namespace FaceRegularityState
-
-
-
-
-
-
-
-
-
-end FaceRegularityState
-
-
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedCellLifting.lean` -/
 
 section
-
 
 /-!
 # Lower-rank cells and lifted ordered-pattern deletions
@@ -6764,71 +5806,11 @@ generated by a structured top atom therefore assemble into a complete
 ordered lower-rank pattern.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
-/-- Delete coordinate `i` from an increasing ordered face. -/
-def eraseOrderedFace
-    {k r : ℕ} (e : OrderedFace k r) (i : Fin r) :
-    OrderedFace k (r - 1) := by
-  cases r with
-  | zero => exact Fin.elim0 i
-  | succ n =>
-      exact (Fin.succAboveOrderEmb i).trans e
-
-
-
-namespace OrderedPattern
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end OrderedPattern
-
-namespace GeneratedOrderedPatternRegularization
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end GeneratedOrderedPatternRegularization
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedBoundaryPartition.lean` -/
 
 section
-
 
 /-!
 # Shared ordered-face partitions and boundary pullbacks
@@ -6908,7 +5890,6 @@ theorem trans
 
 end OrderedFacePartitionRefines
 
-
 /-- Pull one actual lower-face partition back to an upper tuple space. -/
 def orderedImmediateBoundaryPartition
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -6979,10 +5960,6 @@ theorem mem_orderedBoundaryPartition_part_iff
     orderedImmediateBoundaryPartition,
     FacePartition.mem_part_pullback_iff_image_mem]
 
-
-
-
-
 /-- Canonical boundary atom containing an upper tuple. -/
 noncomputable def orderedBoundaryAtomAt
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -6995,8 +5972,6 @@ noncomputable def orderedBoundaryAtomAt
     (orderedBoundaryPartition P e).part_mem.2
       (Finset.mem_univ x)⟩
 
-
-
 /-- Conditional mean of an upper-face function relative to its shared
 immediate boundary. -/
 noncomputable def orderedBoundaryStructured
@@ -7007,9 +5982,6 @@ noncomputable def orderedBoundaryStructured
     (f : (Fin (j + 1) → G) → ℝ) :
     (Fin (j + 1) → G) → ℝ :=
   conditionalMean (orderedBoundaryPartition P e) f
-
-
-
 
 /-- A bounded hierarchy of shared partitions, one layer for every rank from
 zero through `r`. -/
@@ -7031,7 +6003,6 @@ def layer
     (j : ℕ) (hj : j ≤ r) :
     OrderedFacePartitionSystem G k j :=
   C.partition ⟨j, Nat.lt_succ_iff.mpr hj⟩
-
 
 /-- Pointwise refinement at every rank of two partition complexes. -/
 def Refines
@@ -7055,18 +6026,15 @@ theorem Refines.trans
     C.Refines E :=
   fun j e => le_trans (hCD j e) (hDE j e)
 
-
 end OrderedPartitionComplex
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedAtomEnergy.lean` -/
 
 section
-
 
 /-!
 # Atom-family energy on shared ordered boundaries
@@ -7155,8 +6123,6 @@ theorem sum_partitionAtomIndicator
     exact hba heq
   · intro hax
     exact (hax (Finset.mem_univ ax)).elim
-
-
 
 /-- Aggregate energy of all genuine atoms of `Q`, observed through `P`. -/
 noncomputable def partitionAtomEnergy
@@ -7314,11 +6280,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/PreliminaryOrderedRegularity.lean` -/
 
 section
-
 
 /-!
 # Distributed preliminary ordered regularity
@@ -8088,7 +7052,6 @@ theorem exists_preliminaryOrderedRegularityRun_index_before
     orderedLayerAtomEnergy_le_card _ _
   linarith
 
-
 /-! ## Ambient-independent complexity bounds -/
 
 theorem card_orderedBoundaryComponentCuts_le
@@ -8254,11 +7217,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/BoundaryBernoulli.lean` -/
 
 section
-
 
 /-!
 # Bernoulli reduction for bounded boundary products
@@ -8392,7 +7353,6 @@ theorem boundaryBernoulliWeight_nonneg
       (fun q => hu.le_one q.1 q.2)
       (booleanAssignmentOfBoundary b)
 
-
 /-- At successor arity the specialized boundary erasure is the ordinary
 cut-test coordinate erasure. -/
 theorem eraseBoundaryCoordinate_eq_eraseCoordinate
@@ -8415,9 +7375,6 @@ theorem boundaryBooleanCutSupport_eq_booleanFaceCutSupport
     mem_booleanFaceCutSupport]
   simp only [booleanAssignmentOfBoundary,
     eraseBoundaryCoordinate_eq_eraseCoordinate]
-
-
-
 
 namespace FaceRegularityState
 
@@ -8532,11 +7489,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/FullOrderedRegularity.lean` -/
 
 section
-
 
 /-!
 # All-rank ordered preliminary regularity
@@ -8609,7 +7564,6 @@ theorem topLayer_appendTop
     (appendTop C top).topLayer = top := by
   simp [topLayer, appendTop]
 
-
 @[simp]
 theorem topLayer_withTopLayer
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -8618,7 +7572,6 @@ theorem topLayer_withTopLayer
     (top : OrderedFacePartitionSystem G k r) :
     (withTopLayer C top).topLayer = top := by
   simp [topLayer, withTopLayer]
-
 
 @[simp]
 theorem appendTop_partition_castSucc
@@ -8641,7 +7594,6 @@ theorem appendTop_partition_last
       top := by
   simp [appendTop]
 
-
 @[simp]
 theorem appendTop_dropTop_topLayer
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -8656,7 +7608,6 @@ theorem appendTop_dropTop_topLayer
       cases j using Fin.lastCases <;>
         simp only [Fin.lastCases_last,
           Fin.lastCases_castSucc]
-
 
 /-- Appending pointwise-refining top and lower layers preserves refinement
 of the whole complex. -/
@@ -8716,78 +7667,20 @@ structure OrderedCoarseFineComplex
   fine : OrderedPartitionComplex G k r
   refines : fine.Refines coarse
 
-namespace OrderedCoarseFineComplex
-
-
-
-
-/-- At rank `j`, compare coarse and fine lower boundaries against the same
-family of atoms: the atoms of the fine rank-`j+1` layer.  Freezing this upper
-family is what makes the gap monotone. -/
-noncomputable def layerAtomEnergyGap
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) : ℝ :=
-  orderedLayerAtomEnergy
-      (P.fine.partition j.castSucc)
-      (P.fine.partition j.succ) -
-    orderedLayerAtomEnergy
-      (P.coarse.partition j.castSucc)
-      (P.fine.partition j.succ)
-
-
-
-
-/-- Total frozen-upper-family gap over every adjacent pair of ranks. -/
-noncomputable def totalAtomEnergyGap
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) : ℝ :=
-  ∑ j : Fin r, P.layerAtomEnergyGap j
-
-
-
-
-
-
-end OrderedCoarseFineComplex
-
 /-! ## Rank schedules and simultaneous preliminary regularity -/
 
 /-- One tolerance for every adjacent rank pair `(j, j + 1)`. -/
 abbrev OrderedRegularityTolerance (r : ℕ) := Fin r → ℝ
 
-
-
-/-- Every adjacent rank pair in a complex is preliminarily regular. -/
-def IsFullyPreliminaryOrderedRegular
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (ε : OrderedRegularityTolerance r) : Prop :=
-  ∀ j : Fin r,
-    IsPreliminaryOrderedRegular
-      (C.partition j.castSucc)
-      (C.partition j.succ)
-      (ε j)
-
-
-
 /-! ## The top-down all-rank construction -/
-
-
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedGoodAtoms.lean` -/
 
 section
-
 
 /-!
 # Good ordered atoms and localized bad-base accounting
@@ -8824,7 +7717,6 @@ def partitionAtomAt
     (P : FacePartition Ω) (x : Ω) :
     P.parts :=
   ⟨P.part x, P.part_mem.2 (Finset.mem_univ x)⟩
-
 
 @[simp]
 theorem partitionAtomAt_eq_iff_mem
@@ -8909,41 +7801,6 @@ theorem mem_partitionAtomUnion_iff_atomAt_mem
       (mem_partitionAtomUnion P s x).2
         ⟨partitionAtomAt P x, hx,
           P.mem_part (Finset.mem_univ x)⟩
-
-
-
-/-- The indicator of an atom union is the sum of the indicators of its
-selected atoms. -/
-theorem finsetIndicator_partitionAtomUnion
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (P : FacePartition Ω) (s : Finset P.parts) (x : Ω) :
-    finsetIndicator (partitionAtomUnion P s) x =
-      ∑ a ∈ s, partitionAtomIndicator P a x := by
-  classical
-  by_cases hx : x ∈ partitionAtomUnion P s
-  · obtain ⟨a, ha, hxa⟩ :=
-      (mem_partitionAtomUnion P s x).1 hx
-    rw [finsetIndicator_of_mem hx,
-      Finset.sum_eq_single a]
-    · exact (partitionAtomIndicator_of_mem P a hxa).symm
-    · intro b hb hba
-      apply partitionAtomIndicator_of_not_mem
-      intro hxb
-      have hab : b = a := by
-        apply Subtype.ext
-        exact P.eq_of_mem_parts b.2 a.2 hxb hxa
-      exact hba hab
-    · intro hnot
-      exact (hnot ha).elim
-  · rw [finsetIndicator_of_not_mem hx]
-    symm
-    apply Finset.sum_eq_zero
-    intro a ha
-    apply partitionAtomIndicator_of_not_mem
-    intro hxa
-    exact hx
-      ((mem_partitionAtomUnion P s x).2 ⟨a, ha, hxa⟩)
-
 
 /-- Every union of atoms is measurable for the underlying partition. -/
 theorem partitionAtomUnion_indicator_measurable
@@ -9155,7 +8012,6 @@ theorem mul_mean_indicator_largeAverageBaseSupport_le
         exact conditionalMean_nonneg P hf x
     _ = mean f := mean_conditionalMean P f
 
-
 /-! ## Coarse--fine defect bases -/
 
 /-- Change in the conditional density of one upper atom between a fine and
@@ -9180,13 +8036,6 @@ theorem atomBoundaryDefectSq_nonneg
     (a : upper.parts) (x : Ω) :
     0 ≤ atomBoundaryDefectSq fine coarse upper a x :=
   sq_nonneg _
-
-
-
-
-
-
-
 
 /-- Elementary normalized union bound, with the second set allowed to be
 larger than its intersection with `A`. -/
@@ -9219,11 +8068,7 @@ theorem mean_indicator_inter_union_le_add
       (by
         by_cases hxc : x ∈ C <;> simp [hxc])
 
-
 /-! ## Ordered boundary specialization -/
-
-
-
 
 /-- Ordered version of the coarse--fine conditional-density defect. -/
 noncomputable def orderedAtomBoundaryDefect
@@ -9237,15 +8082,6 @@ noncomputable def orderedAtomBoundaryDefect
     (orderedBoundaryPartition fine e)
     (orderedBoundaryPartition coarse e)
     upper a x
-
-
-
-
-
-
-
-
-
 
 /-! ## Good local configurations and closed atom configurations -/
 
@@ -9267,8 +8103,6 @@ def OrderedAtomIsGoodAtBoundary
         (fun y => orderedAtomBoundaryDefect
           fine coarse e upper a y ^ 2) x ≤
       β
-
-
 
 /-- A realizable closed atom configuration for all ranks of an ordered
 partition complex.  The witness ensures that all chosen atoms are
@@ -9316,21 +8150,15 @@ theorem atom_eq_partitionAtomAt
     ((C.partition j e).part_eq_of_mem
       (A.atom j e).2 (A.mem_atom j e)).symm
 
-
-
-
-
 end ClosedOrderedAtomConfiguration
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/CoarseAtomBridge.lean` -/
 
 section
-
 
 /-!
 # Passing from fine upper atoms to coarse upper atoms
@@ -9355,300 +8183,9 @@ open scoped BigOperators
 
 /-! ## Coarse fibers of fine atoms -/
 
-/-- The coarse atom containing the canonical representative of a fine
-atom.  Under `fineUpper ≤ coarseUpper`, the whole fine atom lies in this
-coarse atom. -/
-noncomputable def coarseAtomOfFineAtom
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineUpper coarseUpper : FacePartition Ω)
-    (b : fineUpper.parts) :
-    coarseUpper.parts :=
-  partitionAtomAt coarseUpper
-    (fineUpper.representative b)
-
-/-- The fiber of fine atoms assigned to one coarse atom. -/
-noncomputable def fineAtomsInCoarseAtom
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineUpper coarseUpper : FacePartition Ω)
-    (a : coarseUpper.parts) :
-    Finset fineUpper.parts := by
-  classical
-  exact
-    (Finset.univ : Finset fineUpper.parts).filter fun b =>
-      coarseAtomOfFineAtom fineUpper coarseUpper b = a
-
-@[simp]
-theorem mem_fineAtomsInCoarseAtom
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineUpper coarseUpper : FacePartition Ω)
-    (a : coarseUpper.parts) (b : fineUpper.parts) :
-    b ∈ fineAtomsInCoarseAtom fineUpper coarseUpper a ↔
-      coarseAtomOfFineAtom fineUpper coarseUpper b = a := by
-  classical
-  simp [fineAtomsInCoarseAtom]
-
-/-- Refinement puts every point of a fine atom in the coarse atom selected
-by its representative. -/
-theorem fineAtom_subset_coarseAtomOfFineAtom
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (b : fineUpper.parts) :
-    b.1 ⊆
-      (coarseAtomOfFineAtom fineUpper coarseUpper b).1 := by
-  have hsubset :=
-    FacePartition.part_subset_of_le hupper
-      (fineUpper.representative b)
-  rw [fineUpper.part_representative b] at hsubset
-  exact hsubset
-
-/-- Taking the fine atom at a point and then passing to its coarse atom is
-the same as taking the coarse atom at that point. -/
-theorem coarseAtomOfFineAtom_partitionAtomAt
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (x : Ω) :
-    coarseAtomOfFineAtom fineUpper coarseUpper
-        (partitionAtomAt fineUpper x) =
-      partitionAtomAt coarseUpper x := by
-  apply Subtype.ext
-  have hrepresentative :
-      fineUpper.representative
-          (partitionAtomAt fineUpper x) ∈
-        coarseUpper.part x := by
-    apply FacePartition.part_subset_of_le hupper x
-    exact fineUpper.representative_mem
-      (partitionAtomAt fineUpper x)
-  exact coarseUpper.part_eq_of_mem
-    (coarseUpper.part_mem.2 (Finset.mem_univ x))
-    hrepresentative
-
-/-- A coarse atom is exactly the union of its contained fine atoms. -/
-theorem partitionAtomUnion_fineAtomsInCoarseAtom
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts) :
-    partitionAtomUnion fineUpper
-        (fineAtomsInCoarseAtom fineUpper coarseUpper a) =
-      a.1 := by
-  ext x
-  constructor
-  · intro hx
-    obtain ⟨b, hb, hxb⟩ :=
-      (mem_partitionAtomUnion fineUpper
-        (fineAtomsInCoarseAtom fineUpper coarseUpper a) x).1 hx
-    have hba :
-        coarseAtomOfFineAtom fineUpper coarseUpper b = a :=
-      (mem_fineAtomsInCoarseAtom
-        fineUpper coarseUpper a b).1 hb
-    rw [← hba]
-    exact fineAtom_subset_coarseAtomOfFineAtom
-      hupper b hxb
-  · intro hx
-    apply
-      (mem_partitionAtomUnion fineUpper
-        (fineAtomsInCoarseAtom fineUpper coarseUpper a) x).2
-    refine ⟨partitionAtomAt fineUpper x, ?_, ?_⟩
-    · apply
-        (mem_fineAtomsInCoarseAtom
-          fineUpper coarseUpper a
-          (partitionAtomAt fineUpper x)).2
-      rw [coarseAtomOfFineAtom_partitionAtomAt
-        hupper x]
-      exact
-        (partitionAtomAt_eq_iff_mem
-          coarseUpper x a).2 hx
-    · exact fineUpper.mem_part (Finset.mem_univ x)
-
-/-- The indicator of a coarse atom is the sum of the indicators of its
-contained fine atoms. -/
-theorem partitionAtomIndicator_eq_sum_fineAtomsInCoarseAtom
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts) (x : Ω) :
-    partitionAtomIndicator coarseUpper a x =
-      ∑ b ∈ fineAtomsInCoarseAtom
-          fineUpper coarseUpper a,
-        partitionAtomIndicator fineUpper b x := by
-  rw [← finsetIndicator_partitionAtomUnion
-    fineUpper
-    (fineAtomsInCoarseAtom fineUpper coarseUpper a) x]
-  unfold partitionAtomIndicator
-  rw [partitionAtomUnion_fineAtomsInCoarseAtom
-    hupper a]
-
-/-- Function-valued form of the coarse-atom indicator decomposition. -/
-theorem partitionAtomIndicator_eq_sum_fineAtomsInCoarseAtom_fun
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts) :
-    partitionAtomIndicator coarseUpper a =
-      fun x =>
-        ∑ b ∈ fineAtomsInCoarseAtom
-            fineUpper coarseUpper a,
-          partitionAtomIndicator fineUpper b x := by
-  funext x
-  exact partitionAtomIndicator_eq_sum_fineAtomsInCoarseAtom
-    hupper a x
-
-/-- A coarse fiber contains no more atoms than the whole fine
-partition. -/
-theorem card_fineAtomsInCoarseAtom_le_complexity
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineUpper coarseUpper : FacePartition Ω)
-    (a : coarseUpper.parts) :
-    (fineAtomsInCoarseAtom fineUpper coarseUpper a).card ≤
-      FacePartition.complexity fineUpper := by
-  classical
-  calc
-    (fineAtomsInCoarseAtom
-        fineUpper coarseUpper a).card ≤
-        (Finset.univ : Finset fineUpper.parts).card :=
-      Finset.card_le_card (Finset.subset_univ _)
-    _ = FacePartition.complexity fineUpper := by
-      simp [FacePartition.complexity]
-
 /-! ## Linear transfer of cut regularity -/
 
-/-- Conditional averaging commutes with a sum over an arbitrary finite
-index set. -/
-theorem conditionalMean_finset_sum
-    {Ω ι : Type*} [Fintype Ω] [DecidableEq Ω]
-    [Fintype ι] [DecidableEq ι]
-    (P : FacePartition Ω) (s : Finset ι)
-    (f : ι → Ω → ℝ) (x : Ω) :
-    conditionalMean P
-        (fun y => ∑ i ∈ s, f i y) x =
-      ∑ i ∈ s, conditionalMean P (f i) x := by
-  unfold conditionalMean
-  exact Finset.expect_sum_comm (P.part x) s
-    (fun y i => f i y)
-
-
-/-- Boolean-cut correlation is linear over a finite sum of target
-functions. -/
-theorem FaceRegularityState.booleanCutCorrelation_finset_sum
-    {Ω ι : Type*} [Fintype Ω] [DecidableEq Ω]
-    [Fintype ι] [DecidableEq ι]
-    (S : FaceRegularityState Ω)
-    (s : Finset ι) (f : ι → Ω → ℝ)
-    (A : BooleanCutTest Ω) :
-    S.booleanCutCorrelation
-        (fun x => ∑ i ∈ s, f i x) A =
-      ∑ i ∈ s, S.booleanCutCorrelation (f i) A := by
-  unfold FaceRegularityState.booleanCutCorrelation
-  calc
-    mean (fun x =>
-        S.residual (fun y => ∑ i ∈ s, f i y) x *
-          A.eval x) =
-        mean (fun x =>
-          ∑ i ∈ s,
-            S.residual (f i) x * A.eval x) := by
-      apply congrArg mean
-      funext x
-      unfold FaceRegularityState.residual
-        FaceRegularityState.structured
-      rw [conditionalMean_finset_sum]
-      rw [← Finset.sum_sub_distrib, Finset.sum_mul]
-    _ =
-        ∑ i ∈ s,
-          mean (fun x =>
-            S.residual (f i) x * A.eval x) :=
-      mean_finset_sum s
-        (fun i x => S.residual (f i) x * A.eval x)
-    _ =
-        ∑ i ∈ s,
-          S.booleanCutCorrelation (f i) A := by
-      rfl
-
-
-/-- Boolean-cut version of the coarse-atom regularity transfer. -/
-theorem FaceRegularityState.abs_coarseAtom_booleanCutCorrelation_le_card_mul
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω)
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts)
-    (A : BooleanCutTest Ω)
-    {ε : ℝ}
-    (hregular :
-      ∀ b : fineUpper.parts,
-        |S.booleanCutCorrelation
-          (partitionAtomIndicator fineUpper b) A| ≤ ε)
-    :
-    |S.booleanCutCorrelation
-        (partitionAtomIndicator coarseUpper a) A| ≤
-      ((fineAtomsInCoarseAtom
-        fineUpper coarseUpper a).card : ℝ) * ε := by
-  rw [partitionAtomIndicator_eq_sum_fineAtomsInCoarseAtom_fun
-    hupper a,
-    S.booleanCutCorrelation_finset_sum]
-  calc
-    |∑ b ∈ fineAtomsInCoarseAtom fineUpper coarseUpper a,
-        S.booleanCutCorrelation
-          (partitionAtomIndicator fineUpper b) A| ≤
-        ∑ b ∈ fineAtomsInCoarseAtom fineUpper coarseUpper a,
-          |S.booleanCutCorrelation
-            (partitionAtomIndicator fineUpper b) A| :=
-      Finset.abs_sum_le_sum_abs _ _
-    _ ≤
-        ∑ _b ∈ fineAtomsInCoarseAtom
-            fineUpper coarseUpper a, ε := by
-      apply Finset.sum_le_sum
-      intro b _
-      exact hregular b
-    _ =
-        ((fineAtomsInCoarseAtom
-          fineUpper coarseUpper a).card : ℝ) * ε := by
-      simp
-
-
-
-/-- A uniform bound on fine-upper complexity transfers preliminary
-regularity itself from the fine upper system to the coarse upper system. -/
-theorem IsPreliminaryOrderedRegular.coarseUpper
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (lower : OrderedFacePartitionSystem G k j)
-    (fineUpper coarseUpper :
-      OrderedFacePartitionSystem G k (j + 1))
-    (hupper :
-      OrderedFacePartitionRefines fineUpper coarseUpper)
-    {ε : ℝ} (hε : 0 ≤ ε)
-    (hregular :
-      IsPreliminaryOrderedRegular lower fineUpper ε)
-    (M : ℕ)
-    (hcomplexity :
-      ∀ e, FacePartition.complexity (fineUpper e) ≤ M) :
-    IsPreliminaryOrderedRegular
-      lower coarseUpper ((M : ℝ) * ε) := by
-  intro e a b
-  have hcard :=
-    FaceRegularityState.abs_coarseAtom_booleanCutCorrelation_le_card_mul
-      (⟨orderedBoundaryPartition lower e⟩ :
-        FaceRegularityState (Fin (j + 1) → G))
-      (hupper e) a
-      (boundaryBooleanCutSupport b)
-      (fun c => hregular e c b)
-  exact le_trans hcard
-    (mul_le_mul_of_nonneg_right
-      (Nat.cast_le.mpr
-        ((card_fineAtomsInCoarseAtom_le_complexity
-          (fineUpper e) (coarseUpper e) a).trans
-          (hcomplexity e)))
-      hε)
-
 /-! ## Coarse-upper atom-energy gaps -/
-
-
-
-
-
-
 
 namespace OrderedCoarseFineComplex
 
@@ -9678,7 +8215,6 @@ theorem coarseUpperFaceAtomEnergyGap_nonneg
     (fun f => P.refines j.castSucc f)
     e (P.coarse.partition j.succ e)
 
-
 /-- The rank-`j` coarse-upper gap, summed over all ordered upper faces. -/
 noncomputable def coarseUpperLayerAtomEnergyGap
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -9707,20 +8243,15 @@ theorem coarseUpperLayerAtomEnergyGap_eq_sum_face
   rw [Finset.sum_sub_distrib]
   rfl
 
-
-
-
 end OrderedCoarseFineComplex
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedEnergy.lean` -/
 
 section
-
 
 /-!
 # Aggregate energy for ordered hypergraph systems
@@ -9735,22 +8266,6 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-
-namespace FaceRegularityState
-
-
-
-end FaceRegularityState
-
-
-
-
-
-
-
-
-
-
 /-- Averaging a function pulled back along one ordered face gives its face
 average. -/
 theorem mean_comp_orderedFaceTuple
@@ -9764,20 +8279,13 @@ theorem mean_comp_orderedFaceTuple
   unfold mean₂
   simp
 
-
-
-
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedRemoval.lean` -/
 
 section
-
 
 /-!
 # Bad-base cleaning for ordered hypergraph complexes
@@ -9847,14 +8355,7 @@ theorem mean_finsetIndicator_biUnion_le_sum
 
 /-! ## The bad base attached to the tuple's own upper atom -/
 
-
-
-
-
 /-! ## Ordered specialization -/
-
-
-
 
 /-! ## Pullback to top faces -/
 
@@ -9959,24 +8460,15 @@ theorem mean_indicator_orderedFacePullbackFinset
   exact mean_comp_orderedFaceTuple d
     (finsetIndicator S)
 
-
-
-
-
-
-
 /-! ## Surviving tuples induce good closed configurations -/
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/CoarseOrderedRemoval.lean` -/
 
 section
-
 
 /-!
 # Bad-base cleaning for coarse ordered atom configurations
@@ -10006,13 +8498,6 @@ namespace Wikipedia.SzemeredisTheorem
 open scoped BigOperators
 
 /-! ## Coarse-own-atom bad bases -/
-
-namespace OrderedCoarseFineComplex
-
-
-
-
-end OrderedCoarseFineComplex
 
 /-! ## Mixed goodness for a coarse closed configuration -/
 
@@ -10053,38 +8538,19 @@ def IsMixedGood
     A.IsMixedGoodAt P j hj e
       (α (j + 1)) (β (j + 1))
 
-
-
 end ClosedOrderedAtomConfiguration
 
 /-! ## Pullback to top faces -/
 
-namespace OrderedCoarseFineComplex
-
-
-
-
-
-
-
-end OrderedCoarseFineComplex
-
 /-! ## Surviving tuples induce mixed-good coarse configurations -/
-
-namespace ClosedOrderedAtomConfiguration
-
-
-end ClosedOrderedAtomConfiguration
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/BundleCountingRecurrence.lean` -/
 
 section
-
 
 /-!
 # Quantitative recurrence for positive bundle counts
@@ -10101,28 +8567,15 @@ maximal edge may depend on `s`; no global enumeration is required.  This
 file solves that recurrence on arbitrary finite edge families.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
-
-
-
-
 
 /-! ## Edge-dependent recurrence errors -/
 
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedConfigurationCounting.lean` -/
 
 section
-
 
 /-!
 # Positive counts for good closed ordered configurations
@@ -10226,20 +8679,9 @@ theorem boundary_rank_lt
   simp only [rank, boundary_lowerRank]
   omega
 
-
 end PositiveOrderedFace
 
-
-
-
-
-
 /-! ## Missing coordinates for lower-or-equal rank faces -/
-
-
-
-
-
 
 /-! ## Selected atom weights and counts -/
 
@@ -10306,9 +8748,6 @@ noncomputable def fullConfigurationCount
     (A : ClosedOrderedAtomConfiguration G k r C) : ℝ :=
   partialConfigurationCount A Finset.univ
 
-
-
-
 theorem partialConfigurationWeight_le_one
     {G : Type*} [Fintype G] [DecidableEq G]
     {k r : ℕ}
@@ -10326,12 +8765,6 @@ theorem partialConfigurationWeight_le_one
 
 /-! ## Freezing and grouping a maximum-rank remainder -/
 
-
-
-
-
-
-
 /-! ## Coarse densities, defects, and boundary support -/
 
 /-- Rank-normalized lower layer attached to a positive face. -/
@@ -10342,16 +8775,6 @@ def positiveFaceLowerLayer
     (e : PositiveOrderedFace k r) :
     OrderedFacePartitionSystem G k e.lowerRank.1 :=
   C.partition e.lowerRank.castSucc
-
-
-
-
-
-
-
-
-
-
 
 /-- A nonzero selected factor on an immediate positive boundary face puts
 the erased tuple in the corresponding coarse boundary atom. -/
@@ -10419,48 +8842,23 @@ theorem coarse_boundary_mem_of_boundary_weight_ne_zero
       simpa [f, j, positiveFaceLowerLayer,
         OrderedPartitionComplex.layer] using hcoarse'
 
-
 /-! ## Selected-face contributions and exact decomposition -/
-
-
-
-
-
 
 /-! ## Uniform contribution -/
 
-
-
 /-! ## Localized defect contribution -/
-
-
-
-
-
-
-
 
 /-! ## The one-face recurrence -/
 
-
-
-
-
-
-
 /-! ## Quantitative full-count lower bound and positivity -/
-
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/CoarseConfigurationCounting.lean` -/
 
 section
-
 
 /-!
 # Positive counts for mixed-good coarse configurations
@@ -10566,10 +8964,6 @@ noncomputable def mixedConfigurationBoundaryIndicator
       (orderedFaceTuple e.face A.witness))
     y
 
-
-
-
-
 /-- Exact three-term decomposition of a selected coarse atom. -/
 theorem mixedConfigurationFaceWeight_decompose
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -10611,8 +9005,6 @@ theorem coarse_boundary_mem_of_coarse_configuration_weight_ne_zero
     coarse_boundary_mem_of_boundary_weight_ne_zero
       P.coarseDiagonal A e hpos i x hweight
 
-
-
 /-! ## Mixed coarse-upper regularity and the uniform contribution -/
 
 /-- At every rank, the fine lower boundary is regular against the coarse
@@ -10627,7 +9019,6 @@ def IsFullyMixedPreliminaryOrderedRegular
       (P.fine.partition j.castSucc)
       (P.coarse.partition j.succ)
       (τ j)
-
 
 /-- Mixed all-rank preliminary regularity specializes to the selected coarse
 upper atom at a positive face. -/
@@ -10653,10 +9044,6 @@ theorem mixedConfigurationFace_isFaceCutRegular
     (hregular e.lowerRank).toBounded
       e.face
       (A.atom e.lowerRank.succ e.face)
-
-
-
-
 
 /-! ## Localized mixed defect contribution -/
 
@@ -10717,38 +9104,21 @@ theorem mixedConfigurationDefect_mul_boundaryIndicator
       partitionAtomIndicator_of_not_mem _ _ hy,
       mul_zero, mul_zero]
 
-
-
-
-
 /-! ## One-face recurrence -/
-
-
 
 /-! ## Rank-dependent totalized recurrence -/
 
-
-
-
-
-
 /-! ## Rankwise full-count lower bounds -/
 
-
-
 /-! ## Fine-regular complexity corollaries -/
-
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/ConfigurationWeightedDefect.lean` -/
 
 section
-
 
 /-!
 # Configuration-weighted defect estimates
@@ -10770,29 +9140,15 @@ a maximal face is charged relative to the already-counted lower
 configuration, rather than against the ambient probability space.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 /-! ## Idempotence of configuration indicators -/
-
-
-
-
 
 /-! ## The mixed defect with its remaining-count factor -/
 
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleConfigurationBridge.lean` -/
 
 section
-
 
 /-!
 # The ordered configuration as an initial hypergraph bundle
@@ -10920,8 +9276,6 @@ theorem positiveOrderedFaceOfEdge_edge
     (positiveOrderedFaceEdge e)
     (positiveOrderedFaceEdge_nonempty e)
     (positiveOrderedFaceEdge_card_le e)
-
-
 
 /-! ## The complete initial bundle -/
 
@@ -11285,7 +9639,6 @@ theorem orderedConfigurationBaseDensity_positiveOrderedFaceEdge
   exact congrArg (mixedConfigurationCoarseDensity P A)
     (positiveOrderedFaceOfEdge_edge e)
 
-
 /-! ## Exact initial count and product identities -/
 
 /-- With the identity projection, transporting an edge tuple to the base
@@ -11507,11 +9860,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleRelativeCounting.lean` -/
 
 section
-
 
 /-!
 # Relative generalized counting for closed hypergraph bundles
@@ -12493,11 +10844,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleConfigurationStep.lean` -/
 
 section
-
 
 /-!
 # The ordered-configuration one-edge bundle step
@@ -12921,11 +11270,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleFrozenUniformity.lean` -/
 
 section
-
 
 /-!
 # Frozen bundle uniformity
@@ -13091,19 +11438,15 @@ theorem hasOrderedConfigurationBundleFrozenUniformity_of_fullyMixed
 
 /-! ## Source-full certificate -/
 
-
-
 end HypergraphBundle
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleFrozenCut.lean` -/
 
 section
-
 
 /-!
 # Frozen bundle remainders are face cuts
@@ -13268,7 +11611,6 @@ noncomputable def frozenBundleMissingCoordinate
     Fin ((B.orderedConfigurationBundleFace hg₀ hne).lowerRank.1 + 1) :=
   (B.frozenOccurrenceOrderEquiv hg₀ hne).symm
     (B.frozenBundleMissingVertex hmax hne g)
-
 
 /-! ## Reconstructing and grouping a frozen remainder -/
 
@@ -13575,11 +11917,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedFullBoundary.lean` -/
 
 section
-
 
 /-!
 # Full lower boundaries of ordered faces
@@ -13636,7 +11976,6 @@ abbrev orderedFullLowerComplexRank
       exact e.lowerRank.2
     omega⟩
 
-
 /-- A local proper subface, transported into the ambient labelled face. -/
 abbrev orderedFullLowerAmbientFace
     {k r : ℕ}
@@ -13685,8 +12024,6 @@ noncomputable def orderedFullLowerPositivePartition
       Finset (ProperPositiveOrderedSubface e.lowerRank.1))
     (orderedFullLowerConstituentPartition C e)
 
-
-
 /-- The source-faithful full lower boundary.  We explicitly join the
 ordinary immediate boundary with the positive strict-subface join.  For
 rank greater than one the immediate constituents already occur in the
@@ -13716,8 +12053,6 @@ theorem orderedFullLowerBoundaryPartition_le_immediate
         (positiveFaceLowerLayer C e) e.face := by
   exact FacePartition.join_le_left _ _
 
-
-
 /-- Exact atom membership for the full lower boundary. -/
 theorem mem_orderedFullLowerBoundaryPartition_part_iff
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -13742,8 +12077,6 @@ theorem mem_orderedFullLowerBoundaryPartition_part_iff
     orderedFullLowerConstituentPartition,
     FacePartition.mem_part_pullback_iff_image_mem]
 
-
-
 /-! ## Selected full-lower atoms and their weights -/
 
 /-- Canonical full-lower atom containing a selected upper tuple. -/
@@ -13755,7 +12088,6 @@ noncomputable def orderedFullLowerBoundaryAtomAt
     (x : Fin (e.lowerRank.1 + 1) → G) :
     (orderedFullLowerBoundaryPartition C e).parts :=
   partitionAtomAt (orderedFullLowerBoundaryPartition C e) x
-
 
 /-- Indicator of the full-lower atom selected by `x`. -/
 noncomputable def orderedFullLowerBoundaryWeight
@@ -13769,9 +12101,6 @@ noncomputable def orderedFullLowerBoundaryWeight
     (orderedFullLowerBoundaryAtomAt C e x)
     y
 
-
-
-
 @[simp]
 theorem orderedFullLowerBoundaryWeight_sq
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -13783,11 +12112,7 @@ theorem orderedFullLowerBoundaryWeight_sq
       orderedFullLowerBoundaryWeight C e x y :=
   partitionAtomIndicator_sq _ _ _
 
-
-
-
 /-! ## Source full-lower goodness -/
-
 
 /-- The source density term is the existing immediate-boundary coarse
 conditional density.  The full lower boundary is used to localize its
@@ -13835,7 +12160,6 @@ theorem sourceFullMixedBoundaryWeight_sq
     sourceFullMixedBoundaryWeight P A e y ^ 2 =
       sourceFullMixedBoundaryWeight P A e y :=
   orderedFullLowerBoundaryWeight_sq _ _ _ _
-
 
 /-- Source mixed goodness at one positive face.  The first clause is the
 coarse density floor.  The second is the conditional square average of the
@@ -13933,11 +12257,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/HypergraphBundleSourceGoodnessBridge.lean` -/
 
 section
-
 
 /-!
 # Source-full goodness supplies the bundle-localized defect bound
@@ -14048,7 +12370,6 @@ def ambientPositiveFaceOfProperSubface
     ⟨d.lowerRank.1,
       lt_trans d.lowerRank.2 e.lowerRank.2⟩
   face := orderedFullLowerAmbientFace e d
-
 
 theorem ambientPositiveFaceOfProperSubface_edge_ssubset
     (e : PositiveOrderedFace k r)
@@ -14797,11 +13118,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/SourceFullBundleCounting.lean` -/
 
 section
-
 
 /-!
 # Source-full generalized bundle counting
@@ -14813,30 +13132,19 @@ explicit schedule `bundleCommonEnvelopeError a t` then controls every
 closed bundle pulled back from the ordered configuration.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
 /-! ## The common density floor on base edges -/
 
-
 /-! ## Relative counting for every closed pullback bundle -/
-
-
 
 /-! ## Initial bundle and positivity -/
 
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/StrongFullOrderedRegularity.lean` -/
 
 section
-
 
 /-!
 # Strong all-rank ordered regularity towers
@@ -14860,66 +13168,23 @@ All schedules in this file are arguments to the construction; none is
 chosen after inspecting an ambient-dependent partition.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 open scoped BigOperators
 
 /-! ## Bounded-test all-rank regularity -/
 
-
-
 /-! ## Canonical precomputed tower -/
-
-
-
-
-
-
-
-
-
-
-
 
 /-! ## Recursive ambient-independent complexity bound -/
 
-
-
-
-
-
 /-! ## Fixed-upper-family all-rank energy -/
-
-
-
-
-
-
-
-
-
 
 /-! ## Moving-upper bridge and the exact loss -/
 
-
-
-
-
-
-
-
-
-
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/StrongOrderedComplexRegularity.lean` -/
 
 section
-
 
 /-!
 # Strong coarse/fine regularity for ordered partition complexes
@@ -15386,101 +13651,17 @@ def selectedOrderedComplexTolerance
     OrderedRegularityTolerance r :=
   fun j => ε j (index j)
 
-/-- Complete top-down strong regularity certificate. -/
-structure StrongOrderedComplexRegularityCertificate
-    (G : Type*) [Fintype G] [DecidableEq G]
-    (k r : ℕ)
-    (initial : OrderedPartitionComplex G k r)
-    (ε : (j : Fin r) → ℕ → ℝ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ) where
-  index : Fin r → ℕ
-  coarse : OrderedPartitionComplex G k r
-  fine : OrderedPartitionComplex G k r
-  refines : fine.Refines coarse
-  coarse_refines_initial : coarse.Refines initial
-  coarse_topLayer_eq :
-    coarse.topLayer = initial.topLayer
-  fine_topLayer_eq :
-    fine.topLayer = initial.topLayer
-  index_lt : ∀ j, index j < length j
-  regular :
-    IsFullyPreliminaryOrderedRegular fine
-      (selectedOrderedComplexTolerance ε index)
-  gap_nonneg :
-    ∀ j : Fin r,
-      0 ≤
-        orderedLayerAtomEnergy
-            (fine.partition j.castSucc)
-            (fine.partition j.succ) -
-          orderedLayerAtomEnergy
-            (coarse.partition j.castSucc)
-            (fine.partition j.succ)
-  gap_le :
-    ∀ j : Fin r,
-      orderedLayerAtomEnergy
-            (fine.partition j.castSucc)
-            (fine.partition j.succ) -
-          orderedLayerAtomEnergy
-            (coarse.partition j.castSucc)
-            (fine.partition j.succ) ≤
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) /
-            (length j : ℝ)
-  coarse_complexity :
-    ∀ (j : Fin r) (e : OrderedFace k j.1),
-      FacePartition.complexity
-          (coarse.partition j.castSucc e) ≤
-        fixedUpperLayerComplexityFactor
-            j.1 (budget j) (index j) *
-          FacePartition.complexity
-            (initial.partition j.castSucc e)
-  fine_complexity :
-    ∀ (j : Fin r) (e : OrderedFace k j.1),
-      FacePartition.complexity
-          (fine.partition j.castSucc e) ≤
-        fixedUpperLayerComplexityFactor
-            j.1 (budget j) (index j + 1) *
-          FacePartition.complexity
-            (initial.partition j.castSucc e)
-
-namespace StrongOrderedComplexRegularityCertificate
-
-
-
-
-end StrongOrderedComplexRegularityCertificate
-
 /-! ## Existence by downward rank induction -/
 
-
 /-! ## Quantitative consequences -/
-
-namespace StrongOrderedComplexRegularityCertificate
-
-
-
-
-
-
-
-
-
-
-end StrongOrderedComplexRegularityCertificate
-
-
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/CoarseTargetRegularity.lean` -/
 
 section
-
 
 /-!
 # Strong ordered regularity with coarse upper targets
@@ -15583,36 +13764,19 @@ def toCoarseFine
   fine := R.fine
   refines := R.refines
 
-
 end CoarseTargetOrderedComplexRegularityCertificate
 
 /-! ## Existence by downward rank induction -/
 
-
 /-! ## Total coarse-target gap -/
-
-namespace OrderedCoarseFineComplex
-
-
-
-end OrderedCoarseFineComplex
-
-namespace CoarseTargetOrderedComplexRegularityCertificate
-
-
-
-end CoarseTargetOrderedComplexRegularityCertificate
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/AdaptiveCoarseTargetRegularity.lean` -/
 
 section
-
 
 /-!
 # Adaptive top-down coarse-target regularity
@@ -15876,64 +14040,6 @@ theorem tolerance_nonneg {k r : ℕ}
           simpa using htolerance n
       | cast j =>
           simpa using ih (hnext chosen) j n
-
-/-- Admissibility supplies the local regularity-budget inequality along
-every landing. -/
-theorem budget_spec {k r : ℕ}
-    {S : AdaptiveCoarseTargetSchedule k r}
-    (P : S.Landing) (hS : S.IsAdmissible) :
-    ∀ j n,
-      (Fintype.card (OrderedFace k (j.1 + 1)) : ℝ) <
-        (P.budget j n : ℝ) * (P.tolerance j n) ^ 2 := by
-  induction P with
-  | nil =>
-      intro j
-      exact Fin.elim0 j
-  | @node r tolerance budget length next chosen lower ih =>
-      rcases hS with ⟨_htolerance, hbudget, _hlength, hnext⟩
-      intro j n
-      cases j using Fin.lastCases with
-      | last =>
-          change
-            (Fintype.card (OrderedFace k (r + 1)) : ℝ) <
-              ((Landing.node
-                (tolerance := tolerance) (budget := budget)
-                chosen lower).budget (Fin.last r) n : ℕ) *
-                (Landing.node
-                  (tolerance := tolerance) (budget := budget)
-                  chosen lower).tolerance (Fin.last r) n ^ 2
-          rw [budget_node_last, tolerance_node_last]
-          exact hbudget n
-      | cast j =>
-          change
-            (Fintype.card (OrderedFace k (j.1 + 1)) : ℝ) <
-              ((Landing.node
-                (tolerance := tolerance) (budget := budget)
-                chosen lower).budget j.castSucc n : ℕ) *
-                (Landing.node
-                  (tolerance := tolerance) (budget := budget)
-                  chosen lower).tolerance j.castSucc n ^ 2
-          rw [budget_node_castSucc, tolerance_node_castSucc]
-          exact ih (hnext chosen) j n
-
-/-- Admissibility supplies positive path-dependent horizons along every
-landing. -/
-theorem length_pos {k r : ℕ}
-    {S : AdaptiveCoarseTargetSchedule k r}
-    (P : S.Landing) (hS : S.IsAdmissible) :
-    ∀ j, 0 < P.length j := by
-  induction P with
-  | nil =>
-      intro j
-      exact Fin.elim0 j
-  | @node r tolerance budget length next chosen lower ih =>
-      rcases hS with ⟨_htolerance, _hbudget, hlength, hnext⟩
-      intro j
-      cases j using Fin.lastCases with
-      | last =>
-          simpa using hlength
-      | cast j =>
-          simpa using ih (hnext chosen) j
 
 end Landing
 
@@ -16394,11 +14500,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedRemovalParameters.lean` -/
 
 section
-
 
 /-!
 # Quantitative parameters for ordered hypergraph removal
@@ -16444,66 +14548,7 @@ open scoped BigOperators
 
 /-! ## Face counts and explicit thresholds -/
 
-/-- Number of positive faces in the complete ordered configuration. -/
-noncomputable def orderedRemovalConfigurationFaceCount (k r : ℕ) : ℕ :=
-  Fintype.card (PositiveOrderedFace k r)
-
-/-- Number of positive subfaces occurring below one top rank-`r` face. -/
-noncomputable def orderedRemovalTopSubfaceCount (r : ℕ) : ℕ :=
-  Fintype.card (OrderedPositiveSubface r)
-
-/-- The product `S * M` which multiplies the low-density threshold in the
-per-top-face cleaning estimate. -/
-noncomputable def orderedRemovalComplexityCoefficient (r M : ℕ) : ℕ :=
-  orderedRemovalTopSubfaceCount r * M
-
-/-- Constant density floor and low-density cleaning threshold. -/
-noncomputable def orderedRemovalDensityFloor
-    (r M : ℕ) (ξ : ℝ) : ℝ :=
-  min (1 / 2)
-    (ξ /
-      (4 *
-        ((orderedRemovalComplexityCoefficient r M : ℝ) + 1)))
-
-/-- Equal regularity and square-root defect error reserved for one
-configuration-count recurrence step. -/
-noncomputable def orderedRemovalCountingError
-    (k r M : ℕ) (ξ : ℝ) : ℝ :=
-  orderedRemovalDensityFloor r M ξ ^
-      orderedRemovalConfigurationFaceCount k r /
-    (4 *
-      ((orderedRemovalConfigurationFaceCount k r : ℝ) + 1))
-
-/-- Defect threshold used by good atoms. -/
-noncomputable def orderedRemovalDefectThreshold
-    (k r M : ℕ) (ξ : ℝ) : ℝ :=
-  orderedRemovalCountingError k r M ξ ^ 2
-
-/-- Frozen-upper total atom-energy target. -/
-noncomputable def orderedRemovalEnergyGapTarget
-    (k r M : ℕ) (ξ : ℝ) : ℝ :=
-  ξ * orderedRemovalDefectThreshold k r M ξ / 4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /-! ## Arithmetic margins -/
-
-
-
-
-
 
 /-! ## Ambient-independent ceiling schedules -/
 
@@ -16515,8 +14560,6 @@ noncomputable def orderedRemovalRegularityBudget
       ((Fintype.card (OrderedFace k (j + 1)) : ℝ) /
         τ ^ 2) +
     1
-
-
 
 /-- The ceiling construction satisfies the strict energy-length
 hypothesis of one fixed-upper preliminary regularity pass. -/
@@ -16552,33 +14595,7 @@ theorem orderedRemovalRegularityBudget_spec
         norm_num
   exact (div_lt_iff₀ hsq).1 hquot
 
-
-
-
-
-
-
 /-! ## A uniform complexity bound for the strong certificate -/
-
-
-/-- A deliberately coarse uniform bound for every rank of the selected
-fine complex.  The sum dominates the factor at each non-top rank, while
-the leading `1` also covers the unchanged top layer. -/
-def orderedRemovalFinePartitionComplexityBound
-    (r initialBound : ℕ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ) : ℕ :=
-  initialBound *
-    (1 +
-      ∑ j : Fin r,
-        fixedUpperLayerComplexityFactor
-          j.1 (budget j) (length j))
-
-
-namespace StrongOrderedComplexRegularityCertificate
-
-
-end StrongOrderedComplexRegularityCertificate
 
 /-! ## Rank-sensitive target interface
 
@@ -16601,54 +14618,15 @@ together with a diagonal strong selector, closes the remaining schedule
 feedback is deliberately left as a separate mathematical obligation.
 -/
 
-/-- Rank-dependent version of the sharp top-face cleaning error. -/
-noncomputable def orderedRemovalRankCleaningError
-    (r : ℕ)
-    (complexity : Fin r → ℕ)
-    (α : ℕ → ℝ)
-    (gap : Fin r → ℝ)
-    (β : ℕ → ℝ) : ℝ :=
-  ∑ j : Fin r,
-    ((Fintype.card
-        (OrderedFace r (j.1 + 1)) : ℝ) *
-        (complexity j : ℝ) * α (j.1 + 1) +
-      gap j / β (j.1 + 1))
-
-/-- Product of rank-dependent density floors over all positive ordered
-faces in the complete configuration. -/
-noncomputable def orderedRemovalRankDensityProduct
-    (k r : ℕ) (α : ℕ → ℝ) : ℝ :=
-  ∏ e : PositiveOrderedFace k r, α e.rank
-
-/-- Sum of rank-dependent regularity and square-root defect errors over
-all positive ordered faces. -/
-noncomputable def orderedRemovalRankCountingError
-    (k r : ℕ)
-    (η : Fin r → ℝ)
-    (δ : ℕ → ℝ) : ℝ :=
-  ∑ e : PositiveOrderedFace k r,
-    (η e.lowerRank + δ e.rank)
-
-
 /-! ## Bridge from a compatible strong certificate -/
-
-
-namespace StrongOrderedComplexRegularityCertificate
-
-
-
-
-end StrongOrderedComplexRegularityCertificate
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/GrowthFunctionRegularity.lean` -/
 
 section
-
 
 /-!
 # One-rank growth-function regularity
@@ -16697,7 +14675,6 @@ theorem positive (F : NatGrowthFunction) (n : ℕ) :
   exact lt_of_lt_of_le (Nat.zero_lt_succ n)
     (F.above_diagonal n)
 
-
 end NatGrowthFunction
 
 /-! ## The triangular numerical schedule -/
@@ -16707,46 +14684,12 @@ noncomputable def growthRegularityStepTolerance
     (F : NatGrowthFunction) (M : ℕ) : ℝ :=
   1 / (F M : ℝ)
 
-/-- Ceiling budget for one preliminary regularity pass at the reciprocal
-growth-function tolerance. -/
-noncomputable def growthRegularityStepBudget
-    (k j : ℕ) (F : NatGrowthFunction) (M : ℕ) : ℕ :=
-  orderedRemovalRegularityBudget
-    k j (growthRegularityStepTolerance F M)
-
-/-- The triangular complexity sequence generated by the fixed-upper tower
-factor and the budget computed from the current complexity. -/
-noncomputable def growthRegularityComplexity
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    ℕ → ℕ
-  | 0 => initialBound
-  | n + 1 =>
-      (2 ^ (j + 1)) ^
-          growthRegularityStepBudget
-            k j F
-              (growthRegularityComplexity
-                k j initialBound F n) *
-        growthRegularityComplexity
-          k j initialBound F n
-
-
-
-
-
-
-
 theorem growthRegularityStepTolerance_pos
     (F : NatGrowthFunction) (M : ℕ) :
     0 < growthRegularityStepTolerance F M := by
   unfold growthRegularityStepTolerance
   exact one_div_pos.mpr
     (by exact_mod_cast F.positive M)
-
-
-
-
-
-
 
 /-! ## A one-rank energy timescale -/
 
@@ -16808,17 +14751,13 @@ theorem orderedFace_card_div_growthRegularityLength_lt
 
 /-! ## Growth-function fixed-upper selection -/
 
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/GrowthFunctionComplexRegularity.lean` -/
 
 section
-
 
 /-!
 # All-rank growth-function ordered regularity
@@ -16843,194 +14782,19 @@ prescribed rankwise target `γ j`.  Complexity bookkeeping is stated for
 every layer, including the unchanged top layer.
 -/
 
-namespace Wikipedia.SzemeredisTheorem
-
 /-! ## Finite descending growth hierarchies -/
-
-/-- A finite hierarchy indexed from the largest scale `0` down to the
-smallest scale `depth`.  Each upper scale is exactly the growth-function
-image of the next lower scale. -/
-structure DescendingGrowthHierarchy
-    (F : NatGrowthFunction) (depth : ℕ) where
-  level : Fin (depth + 1) → ℕ
-  step_eq :
-    ∀ i : Fin depth,
-      level i.castSucc = F (level i.succ)
-
-namespace DescendingGrowthHierarchy
-
-/-- The lower member of each adjacent pair is at most its growth-function
-image. -/
-theorem lower_le_growth
-    {F : NatGrowthFunction} {depth : ℕ}
-    (H : DescendingGrowthHierarchy F depth)
-    (i : Fin depth) :
-    H.level i.succ ≤ F (H.level i.succ) := by
-  exact (Nat.le_succ _).trans
-    (F.above_diagonal (H.level i.succ))
-
-/-- The growth-function image of a lower scale is the preceding upper
-scale. -/
-theorem growth_eq_upper
-    {F : NatGrowthFunction} {depth : ℕ}
-    (H : DescendingGrowthHierarchy F depth)
-    (i : Fin depth) :
-    F (H.level i.succ) = H.level i.castSucc :=
-  (H.step_eq i).symm
-
-
-/-- The hierarchy is antitone in its finite index: later/deeper scales are
-no larger than earlier scales. -/
-theorem antitone
-    {F : NatGrowthFunction} {depth : ℕ}
-    (H : DescendingGrowthHierarchy F depth) :
-    Antitone H.level := by
-  rw [Fin.antitone_iff_succ_le]
-  intro i
-  exact (H.lower_le_growth i).trans_eq
-    (H.growth_eq_upper i)
-
-end DescendingGrowthHierarchy
-
-
-
 
 /-! ## Rankwise triangular schedules -/
 
-
-
-
-/-- Selected coarse complexity bound at one non-top rank. -/
-noncomputable def selectedGrowthCoarseComplexityBound
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (index : Fin r → ℕ)
-    (j : Fin r) : ℕ :=
-  growthRegularityComplexity
-    k j.1 (initialBound j.castSucc) F (index j)
-
-/-- Selected fine complexity bound at one non-top rank. -/
-noncomputable def selectedGrowthFineComplexityBound
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (index : Fin r → ℕ)
-    (j : Fin r) : ℕ :=
-  growthRegularityComplexity
-    k j.1 (initialBound j.castSucc) F (index j + 1)
-
-/-- Bound for every selected coarse layer.  The top layer is unchanged;
-every lower layer uses its own selected triangular stage. -/
-noncomputable def selectedGrowthCoarseLayerComplexityBound
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (index : Fin r → ℕ) :
-    Fin (r + 1) → ℕ :=
-  Fin.lastCases
-    (initialBound (Fin.last r))
-    (fun j =>
-      selectedGrowthCoarseComplexityBound
-        k r initialBound F index j)
-
-/-- Bound for every selected fine layer, with the same unchanged top layer
-and the following triangular stage at every lower rank. -/
-noncomputable def selectedGrowthFineLayerComplexityBound
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (index : Fin r → ℕ) :
-    Fin (r + 1) → ℕ :=
-  Fin.lastCases
-    (initialBound (Fin.last r))
-    (fun j =>
-      selectedGrowthFineComplexityBound
-        k r initialBound F index j)
-
-
-
-
 /-! ## All-rank growth-function certificate -/
-
-/-- Top-down all-rank fixed-upper regularity with growth-function errors and
-rank-exact complexity bounds. -/
-structure GrowthFunctionOrderedComplexRegularityCertificate
-    (G : Type*) [Fintype G] [DecidableEq G]
-    (k r : ℕ)
-    (initial : OrderedPartitionComplex G k r)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (γ : Fin r → ℝ) where
-  index : Fin r → ℕ
-  coarse : OrderedPartitionComplex G k r
-  fine : OrderedPartitionComplex G k r
-  refines : fine.Refines coarse
-  coarse_refines_initial : coarse.Refines initial
-  coarse_topLayer_eq :
-    coarse.topLayer = initial.topLayer
-  fine_topLayer_eq :
-    fine.topLayer = initial.topLayer
-  index_lt :
-    ∀ j : Fin r,
-      index j <
-        growthRegularityLength k j.1 (γ j)
-  regular :
-    IsFullyPreliminaryOrderedRegular fine
-      (fun j =>
-        1 /
-          (F (selectedGrowthCoarseComplexityBound
-            k r initialBound F index j) : ℝ))
-  gap_nonneg :
-    ∀ j : Fin r,
-      0 ≤
-        orderedLayerAtomEnergy
-            (fine.partition j.castSucc)
-            (fine.partition j.succ) -
-          orderedLayerAtomEnergy
-            (coarse.partition j.castSucc)
-            (fine.partition j.succ)
-  gap_le :
-    ∀ j : Fin r,
-      orderedLayerAtomEnergy
-            (fine.partition j.castSucc)
-            (fine.partition j.succ) -
-          orderedLayerAtomEnergy
-            (coarse.partition j.castSucc)
-            (fine.partition j.succ) ≤
-        γ j
-  coarse_complexity :
-    ∀ (q : Fin (r + 1)) (e : OrderedFace k q.1),
-      FacePartition.complexity
-          (coarse.partition q e) ≤
-        selectedGrowthCoarseLayerComplexityBound
-          k r initialBound F index q
-  fine_complexity :
-    ∀ (q : Fin (r + 1)) (e : OrderedFace k q.1),
-      FacePartition.complexity
-          (fine.partition q e) ≤
-        selectedGrowthFineLayerComplexityBound
-          k r initialBound F index q
-
-namespace GrowthFunctionOrderedComplexRegularityCertificate
-
-
-
-
-end GrowthFunctionOrderedComplexRegularityCertificate
 
 /-! ## Existence by the top-down fixed-upper composition -/
 
-
-end Wikipedia.SzemeredisTheorem
-
 end
-
 
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/TowerDominatingGrowth.lean` -/
 
 section
-
 
 /-!
 # Finite-stage tower-dominating growth functions
@@ -17070,30 +14834,9 @@ namespace Wikipedia.SzemeredisTheorem
 
 /-! ## The one-step map and bounded envelopes -/
 
-
-
-
-
-
-
-
-
 /-! ## One majorant stage -/
 
-
-
-
-
-
 /-! ## Iterated finite-stage closure -/
-
-
-
-
-
-
-
-
 
 /-! ## Finite maxima for simultaneous hierarchy bounds -/
 
@@ -17126,33 +14869,15 @@ theorem le_finiteMaximum :
 
 /-! ## Bridge to selected all-rank certificates -/
 
-namespace GrowthFunctionOrderedComplexRegularityCertificate
-
-
-
-
-
-
-
-
 /-! ### One hierarchy containing all independently selected layers -/
-
-
-
-
-
-
-end GrowthFunctionOrderedComplexRegularityCertificate
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/SourceFullCoarseTargetRegularity.lean` -/
 
 section
-
 
 /-!
 # Source-style full coarse-target regularity
@@ -17212,7 +14937,6 @@ theorem sourceFullCommonTolerance_pos
   unfold sourceFullCommonTolerance
   exact one_div_pos.mpr
     (by exact_mod_cast F.positive (scale 0))
-
 
 /-! ## Numerical bounds selected by an adaptive landing -/
 
@@ -17348,7 +15072,6 @@ structure Certificate
           (regularity.coarse.partition q e) ≤
         scale q
 
-
 /-! ## Rank-zero plan -/
 
 /-- Rank zero has no regularity choices.  The only selected scale is the
@@ -17384,7 +15107,6 @@ def zero
       max scaleFloor (initialBound 0)
     exact le_max_right _ _
 
-
 /-! ## A genuine top-down successor constructor -/
 
 /-- Prepend one deepest scale to the scale vector of a selected lower
@@ -17407,7 +15129,6 @@ def nodeScale
   | .node chosen lower =>
       Fin.lastCases topScale
         (lowerScale chosen lower)
-
 
 @[simp]
 theorem nodeScale_node_last
@@ -17795,8 +15516,6 @@ noncomputable def sourceFullStageBudget
     (sourceFullStageTolerance
       initialBound F topScale lowerBuilder n)
 
-
-
 /-- The explicitly accumulated stage factor is exactly the standard
 fixed-upper tower factor for the recursively chosen budget stream. -/
 theorem fixedUpperLayerComplexityFactor_sourceFullStageBudget
@@ -18048,19 +15767,15 @@ theorem bounded_nonempty
               (le_finiteMaximum
                 (fun i => (next i).ceiling) chosen)
 
-
-
 end SourceFullCoarseTargetSchedule
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/SourceFullRankwiseBundleCounting.lean` -/
 
 section
-
 
 /-!
 # Rankwise source-full bundle counting
@@ -18373,11 +16088,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/SourceFullGoodAtoms.lean` -/
 
 section
-
 
 /-!
 # Source-full good atoms and sharp bad-cell cleaning
@@ -18499,7 +16212,6 @@ theorem mul_mean_indicator_sourceFullLargeDefectBaseSupport_le
       (P.sourceFullAtomDefectSq e upper a)
       (P.sourceFullAtomDefectSq_nonneg e upper a)
       hβ
-
 
 /-- Divided form of the source-full Markov estimate. -/
 theorem mean_indicator_sourceFullLargeDefectBaseSupport_le
@@ -18963,11 +16675,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedPatternPartition.lean` -/
 
 section
-
 
 /-!
 # Ordered pattern edge partitions
@@ -19156,11 +16866,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedRemovalTheorem.lean` -/
 
 section
-
 
 /-!
 # The ordered removal cover contradiction
@@ -19189,8 +16897,6 @@ def topPositiveOrderedFace
     PositiveOrderedFace k (n + 1) where
   lowerRank := Fin.last n
   face := e
-
-
 
 /-- If a full tuple is not an occurrence, then the full selected
 configuration weight of an occurring closed configuration vanishes on that
@@ -19274,17 +16980,13 @@ theorem fullConfigurationCount_le_patternCount
 
 /-! ## The cover contradiction -/
 
-
-
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/SourceFullOrderedRemoval.lean` -/
 
 section
-
 
 /-!
 # Source-full bad-base cleaning and the ordered removal contradiction
@@ -19435,8 +17137,6 @@ theorem faceDeletionDensity_sourceFullBadBaseDeletionFamily_le
     P.mean_indicator_sourceFullTopBadBaseDeletion_le
       e α β hα hβ
 
-
-
 end OrderedCoarseFineComplex
 
 /-! ## Surviving tuples are source-full mixed-good -/
@@ -19532,11 +17232,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/SourceFullBundleRemovalParameters.lean` -/
 
 section
-
 
 /-!
 # Ambient-independent source-full bundle-removal parameters
@@ -20176,11 +17874,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/OrderedRemovalAssembly.lean` -/
 
 section
-
 
 /-!
 # Schedule-level assembly of ordered hypergraph removal
@@ -20229,58 +17925,15 @@ theorem complexity_orderedPatternInitialComplex_le_two
 
 /-! ## Ambient-independent compatible schedules -/
 
-/-- A complete schedule whose inequalities are strong enough for the
-fine-configuration ordered-removal pipeline.
-
-The bound in `tolerance_le` and `reciprocal_gap_le` uses only the displayed
-natural schedules and `initialBound`, so the data are independent of the
-ambient finite type and the input pattern. -/
-structure OrderedRemovalSchedule
-    (k r initialBound : ℕ) (ξ : ℝ) where
-  tolerance : (j : Fin r) → ℕ → ℝ
-  budget : (j : Fin r) → ℕ → ℕ
-  length : Fin r → ℕ
-  tolerance_pos : ∀ j n, 0 < tolerance j n
-  budget_spec :
-    ∀ j n,
-      (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-        (budget j n : ℝ) * (tolerance j n) ^ 2
-  length_pos : ∀ j, 0 < length j
-  tolerance_le :
-    ∀ j n,
-      tolerance j n ≤
-        orderedRemovalCountingError k r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ
-  reciprocal_gap_le :
-    (∑ j : Fin r,
-      (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) /
-        (length j : ℝ)) ≤
-      orderedRemovalEnergyGapTarget k r
-        (orderedRemovalFinePartitionComplexityBound
-          r initialBound budget length) ξ
-
-
-namespace OrderedRemovalSchedule
-
-
-
-end OrderedRemovalSchedule
-
 /-! ## Conditional uniform ordered removal -/
-
 
 end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Wikipedia/SzemeredisTheorem/Hypergraph/SourceFullBundleRemovalAssembly.lean` -/
 
 section
-
 
 /-!
 # Source-full bundle-counting removal assembly
@@ -20698,11 +18351,9 @@ end Wikipedia.SzemeredisTheorem
 
 end
 
-
 /-! ### Upstream module `src/latest/Util/FranklRodl.lean` -/
 
 section
-
 
 /-!
 # The Frankl–Rödl unique-clique bound
@@ -21019,7 +18670,6 @@ theorem frankl_roedl_theorem : Theorem_2_2 := by
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos658.lean` -/
 
 section
@@ -21207,8 +18857,6 @@ lemma encVertex_lt {N : ℕ} (hN : N ≥ 1) {f : ℕ} (hf : f < 4)
   unfold encVertex
   interval_cases f <;> linarith [Int.toNat_of_nonneg hi]
 
-
-
 /-! ## §6. Edge Properties -/
 
 /-- The vertices of an edge from a point in `[N]³` are distinct. -/
@@ -21233,7 +18881,6 @@ lemma edge_card_three {N : ℕ} (hN : N ≥ 1) {a b c : ℤ}
   have h_distinct : Function.Injective (vertexOf N a b c) :=
     vertexOf_injective hN ha hb hc
   simp +decide [h_distinct.eq_iff]
-
 
 /-- Every edge in `E` has card 3 and is a subset of `V`. -/
 lemma edgeSet_valid {N : ℕ} (hN : N ≥ 1)
@@ -21428,7 +19075,6 @@ lemma pointClique_sub_vertexSet {N : ℕ} (_hN : N ≥ 1) {a b c : ℤ}
   · exact encVertex_lt _hN (by decide) (by linarith) (by linarith)
   · exact encVertex_lt _hN (by decide) (by linarith) (by linarith)
   · exact encVertex_lt _hN (by decide) (by linarith) (by linarith)
-
 
 /-- Extract the generating point from an edge. -/
 lemma edge_from_point {N : ℕ} {S : Finset (ℤ × ℤ × ℤ)}
