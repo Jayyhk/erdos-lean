@@ -2142,6 +2142,17 @@
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem1102PropertyQDensity.lean"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem1102PropertyOverP.lean"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem1102PropertyQFastGrowing.lean"
+- number: "1112"
+  proof:
+    path: "problems/1112/"
+    theorem: "Erdos1112.erdos_1112"
+    state: "complete"
+    last_update: "2026-08-25"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1112#post-7375"
+      - "https://github.com/beetree/math_erdos_1112/tree/main/lean"
 - number: "1121"
   proof:
     path: "problems/1121/"
