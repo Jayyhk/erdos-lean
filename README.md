@@ -23,9 +23,9 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 194 `complete`
+- 195 `complete`
 - 2 `trust_extended`
-- 14 `axiomatic`
+- 13 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -127,7 +127,7 @@ lake build
 | [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) | |
 | [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) | |
 | [487](https://www.erdosproblems.com/487) | `complete` | [problems/487/](problems/487/) | |
-| [490](https://www.erdosproblems.com/490) | `axiomatic` | [problems/490/](problems/490/) | assumes prime bounds of [Dusart](https://jayyhk.github.io/papers/dusart2018.pdf): Theorem 3.3 (`dusart_chebyshev`), equation 5.4 of Corollary 5.2 (`dusart_pi_lower`, `dusart_pi_upper`), and Theorem 5.9 (`dusart_mertens_product`) |
+| [490](https://www.erdosproblems.com/490) | `complete` | [problems/490/](problems/490/) | |
 | [493](https://www.erdosproblems.com/493) | `complete` | [problems/493/](problems/493/) | |
 | [497](https://www.erdosproblems.com/497) | `complete` | [problems/497/](problems/497/) | |
 | [498](https://www.erdosproblems.com/498) | `complete` | [problems/498/](problems/498/) | |
