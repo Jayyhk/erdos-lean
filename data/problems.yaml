@@ -870,14 +870,13 @@
   proof:
     path: "problems/418/"
     theorem: "Erdos418.erdos_418"
-    state: "trust_extended"
-    last_update: "2026-05-28"
-    lean_toolchain: "leanprover/lean4:v4.24.0"
-    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
-    trust_extensions: ["uses_native_decide"]
+    state: "complete"
+    last_update: "2026-08-25"
+    lean_toolchain: "leanprover/lean4:v4.32.0"
+    mathlib_revision: "81a5d257c8e410db227a6665ed08f64fea08e997"
     sources:
       - "https://www.erdosproblems.com/forum/thread/418#post-1778"
-      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos418.lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/v4.32.0/ErdosProblems/Erdos418.lean"
 - number: "419"
   proof:
     path: "problems/419/"
@@ -1367,14 +1366,14 @@
   proof:
     path: "problems/658/"
     theorem: "Erdos658.erdos_658"
-    state: "axiomatic"
-    extra_axioms: ["Erdos658.frankl_roedl_theorem"]
-    last_update: "2026-05-30"
-    lean_toolchain: "leanprover/lean4:v4.28.0"
-    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    state: "complete"
+    last_update: "2026-08-25"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/658#post-5677"
       - "https://gist.github.com/JohnEdwardJennings/ca7d49761fb51d28613bafc956742fbc#file-erdos658-lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos658.lean"
 - number: "659"
   proof:
     path: "problems/659/"

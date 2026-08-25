@@ -23,9 +23,9 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 192 `complete`
-- 3 `trust_extended`
-- 15 `axiomatic`
+- 194 `complete`
+- 2 `trust_extended`
+- 14 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -108,7 +108,7 @@ lake build
 | [399](https://www.erdosproblems.com/399) | `complete` | [problems/399/](problems/399/) | |
 | [401](https://www.erdosproblems.com/401) | `complete` | [problems/401/](problems/401/) | |
 | [403](https://www.erdosproblems.com/403) | `complete` | [problems/403/](problems/403/) | |
-| [418](https://www.erdosproblems.com/418) | `trust_extended` | [problems/418/](problems/418/) | uses `native_decide` |
+| [418](https://www.erdosproblems.com/418) | `complete` | [problems/418/](problems/418/) | |
 | [419](https://www.erdosproblems.com/419) | `complete` | [problems/419/](problems/419/) | |
 | [426](https://www.erdosproblems.com/426) | `complete` | [problems/426/](problems/426/) | |
 | [427](https://www.erdosproblems.com/427) | `axiomatic` | [problems/427/](problems/427/) | assumes Theorem 1 of [Shiu](https://jayyhk.github.io/papers/shiu2000.pdf) (`shiu_consecutive_primes`) |
@@ -153,7 +153,7 @@ lake build
 | [648](https://www.erdosproblems.com/648) | `complete` | [problems/648/](problems/648/) | |
 | [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
 | [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
-| [658](https://www.erdosproblems.com/658) | `axiomatic` | [problems/658/](problems/658/) | assumes Theorem 2.2 of [Solymosi](https://jayyhk.github.io/papers/solymosi2004.pdf) (`frankl_roedl_theorem`) |
+| [658](https://www.erdosproblems.com/658) | `complete` | [problems/658/](problems/658/) | |
 | [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes Theorems 1 and 2 on page 92 of [Bernays](https://jayyhk.github.io/papers/bernays1912.pdf) (`bernays`) |
 | [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) | |
 | [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
