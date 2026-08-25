@@ -2,7 +2,7 @@ import Mathlib
 
 namespace Erdos613
 
-open Classical
+open scoped Classical
 open scoped BigOperators
 
 
@@ -1195,6 +1195,6 @@ theorem erdos_613 :
     exact hG₁_bip.cliqueFree (by norm_num : (2 : ℕ) < 3) _ htri
 
 #print axioms erdos_613
--- 'Erdos613.erdos_613' depends on axioms: [propext, choice, Quot.sound]
+-- 'Erdos613.erdos_613' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos613
