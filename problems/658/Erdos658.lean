@@ -81,10 +81,6 @@ theorem mean_const {α : Type*} [Fintype α] [Nonempty α] (c : ℝ) :
     mean (fun _ : α => c) = c := by
   exact Fintype.expect_const c
 
-@[simp]
-theorem mean_zero {α : Type*} [Fintype α] :
-    mean (fun _ : α => (0 : ℝ)) = 0 := by
-  simp [mean]
 
 theorem mean_add {α : Type*} [Fintype α] (f g : α → ℝ) :
     mean (fun x => f x + g x) = mean f + mean g := by
@@ -114,10 +110,6 @@ theorem mean_le_of_le_const {α : Type*} [Fintype α] [Nonempty α]
     mean f ≤ c := by
   simpa using mean_mono (f := f) (g := fun _ => c) hf
 
-theorem const_le_mean {α : Type*} [Fintype α] [Nonempty α]
-    {f : α → ℝ} {c : ℝ} (hf : ∀ x, c ≤ f x) :
-    c ≤ mean f := by
-  simpa using mean_mono (f := fun _ => c) (g := f) hf
 
 /-- The normalized average over two independent finite variables. -/
 noncomputable def mean₂ {α β : Type*} [Fintype α] [Fintype β]
@@ -161,40 +153,7 @@ theorem mean_prod_type
     (Finset.expect_product'
       (Finset.univ : Finset α) (Finset.univ : Finset β) F)
 
-/-- Split the normalized mean over an `(n + 1)`-tuple into the head
-coordinate and the remaining `n` coordinates. -/
-theorem mean_fin_cons
-    {G : Type*} [Fintype G] {n : ℕ}
-    (F : (Fin (n + 1) → G) → ℝ) :
-    mean F =
-      mean₂ (fun a : G => fun y : Fin n → G => F (Fin.cons a y)) := by
-  calc
-    mean F =
-        mean (fun p : G × (Fin n → G) =>
-          F (Fin.cons p.1 p.2)) := by
-      unfold mean
-      apply Fintype.expect_equiv
-        (Fin.consEquiv (fun _ : Fin (n + 1) => G)).symm
-      intro x
-      congr 1
-      simp
-    _ = mean₂ (fun a : G => fun y : Fin n → G =>
-          F (Fin.cons a y)) :=
-      mean_prod_type
-        (fun a : G => fun y : Fin n → G => F (Fin.cons a y))
 
-/-- A product of normalized means is the normalized mean over an independent
-choice of one input for every factor. -/
-theorem prod_mean
-    {ι β : Type*} [Fintype ι] [DecidableEq ι]
-    [Fintype β] [Nonempty β]
-    (F : ι → β → ℝ) :
-    (∏ i, mean (F i)) =
-      mean (fun y : ι → β => ∏ i, F i (y i)) := by
-  classical
-  simp_rw [mean, Fintype.expect_eq_sum_div_card]
-  rw [Finset.prod_div_distrib, Fintype.prod_sum]
-  simp
 
 end Wikipedia.SzemeredisTheorem
 
@@ -256,128 +215,10 @@ theorem mean_inner_sq_eq_mean₂_pair
   funext x
   exact mean_sq_eq_mean_pair_mul (F x)
 
-/-- Jensen/Cauchy--Schwarz for the square of a normalized finite mean. -/
-theorem mean_square_le_mean_square
-    {Ω : Type*} [Fintype Ω] [Nonempty Ω]
-    (f : Ω → ℝ) :
-    mean f ^ 2 ≤ mean (fun x => f x ^ 2) := by
-  have h :=
-    Finset.expect_mul_sq_le_sq_mul_sq
-      Finset.univ f (fun _ : Ω => (1 : ℝ))
-  simpa [mean] using h
 
-/-- Jensen for powers whose exponent is a power of two, in the form used
-after iterating Cauchy--Schwarz. -/
-theorem mean_pow_two_le_mean_pow_two
-    {Ω : Type*} [Fintype Ω] [Nonempty Ω]
-    (f : Ω → ℝ) (hf : ∀ x, 0 ≤ f x) (n : ℕ) :
-    mean f ^ (2 ^ n) ≤
-      mean (fun x => f x ^ (2 ^ n)) := by
-  induction n with
-  | zero =>
-      simp
-  | succ n ih =>
-      have hmean0 : 0 ≤ mean f := mean_nonneg hf
-      have hright0 :
-          0 ≤ mean (fun x => f x ^ (2 ^ n)) :=
-        mean_nonneg fun x => pow_nonneg (hf x) _
-      have hsquare :
-          (mean f ^ (2 ^ n)) ^ 2 ≤
-            mean (fun x => f x ^ (2 ^ n)) ^ 2 := by
-        simpa [pow_two] using
-          mul_self_le_mul_self
-            (pow_nonneg hmean0 _) ih
-      calc
-        mean f ^ (2 ^ (n + 1)) =
-            (mean f ^ (2 ^ n)) ^ 2 := by
-          rw [show 2 ^ (n + 1) = 2 ^ n * 2 by
-            rw [pow_succ], pow_mul]
-        _ ≤ mean (fun x => f x ^ (2 ^ n)) ^ 2 :=
-          hsquare
-        _ ≤ mean (fun x =>
-            (f x ^ (2 ^ n)) ^ 2) :=
-          mean_square_le_mean_square _
-        _ = mean (fun x => f x ^ (2 ^ (n + 1))) := by
-          apply congrArg mean
-          funext x
-          rw [show 2 ^ (n + 1) = 2 ^ n * 2 by
-            rw [pow_succ], pow_mul]
 
-/-- Jensen for an arbitrary real-valued function and a positive power-of-two
-exponent.  Positivity of the exponent makes it even, so absolute values can
-be inserted before applying the nonnegative version. -/
-theorem mean_pow_two_le_mean_pow_two_of_pos
-    {Ω : Type*} [Fintype Ω] [Nonempty Ω]
-    (f : Ω → ℝ) {n : ℕ} (hn : 0 < n) :
-    mean f ^ (2 ^ n) ≤
-      mean (fun x => f x ^ (2 ^ n)) := by
-  have heven : Even (2 ^ n) :=
-    even_two.pow_of_ne_zero (Nat.ne_of_gt hn)
-  have habs :
-      |mean f| ≤ mean (fun x => |f x|) := by
-    exact Finset.abs_expect_le Finset.univ f
-  calc
-    mean f ^ (2 ^ n) = |mean f| ^ (2 ^ n) :=
-      (heven.pow_abs (mean f)).symm
-    _ ≤ mean (fun x => |f x|) ^ (2 ^ n) :=
-      pow_le_pow_left₀ (abs_nonneg _) habs _
-    _ ≤ mean (fun x => |f x| ^ (2 ^ n)) :=
-      mean_pow_two_le_mean_pow_two
-        (fun x => |f x|) (fun x => abs_nonneg (f x)) n
-    _ = mean (fun x => f x ^ (2 ^ n)) := by
-      apply congrArg mean
-      funext x
-      exact heven.pow_abs (f x)
 
-/-- Jensen for every power-of-two exponent.  At exponent one it is an
-identity; positive exponents are covered by
-`mean_pow_two_le_mean_pow_two_of_pos`. -/
-theorem mean_pow_two_le_mean_pow_two'
-    {Ω : Type*} [Fintype Ω] [Nonempty Ω]
-    (f : Ω → ℝ) (n : ℕ) :
-    mean f ^ (2 ^ n) ≤
-      mean (fun x => f x ^ (2 ^ n)) := by
-  cases n with
-  | zero => simp
-  | succ n =>
-      exact mean_pow_two_le_mean_pow_two_of_pos f (Nat.succ_pos n)
 
-/-- One normalized Cauchy--Schwarz elimination step.  The factor `u`,
-which is independent of the inner variable, disappears; the inner variable
-is replaced by two independent copies. -/
-theorem cauchySchwarz_eliminate_outer_factor
-    {X Y : Type*} [Fintype X] [Nonempty X] [Fintype Y]
-    (u : X → ℝ) (F : X → Y → ℝ)
-    (hu : ∀ x, |u x| ≤ 1) :
-    mean₂ (fun x y => u x * F x y) ^ 2 ≤
-      mean₂ (fun x => fun p : Y × Y =>
-        F x p.1 * F x p.2) := by
-  have hrewrite :
-      mean₂ (fun x y => u x * F x y) =
-        mean (fun x => u x * mean (F x)) := by
-    unfold mean₂
-    apply congrArg mean
-    funext x
-    exact mean_smul (u x) (F x)
-  rw [hrewrite]
-  calc
-    mean (fun x => u x * mean (F x)) ^ 2 ≤
-        mean (fun x => u x ^ 2) *
-          mean (fun x => mean (F x) ^ 2) :=
-      mean_mul_sq_le_product u (fun x => mean (F x))
-    _ ≤ mean (fun x => mean (F x) ^ 2) := by
-      have huSq : mean (fun x => u x ^ 2) ≤ 1 := by
-        apply mean_le_of_le_const
-        intro x
-        have hx := abs_le.mp (hu x)
-        nlinarith [sq_nonneg (u x - 1), sq_nonneg (u x + 1)]
-      have hmeanSq :
-          0 ≤ mean (fun x => mean (F x) ^ 2) :=
-        mean_nonneg fun x => sq_nonneg _
-      exact mul_le_of_le_one_left hmeanSq huSq
-    _ = mean₂ (fun x => fun p : Y × Y =>
-          F x p.1 * F x p.2) :=
-      mean_inner_sq_eq_mean₂_pair F
 
 end Wikipedia.SzemeredisTheorem
 
@@ -449,10 +290,6 @@ The empty bundle has order zero. -/
 def order (B : HypergraphBundle J K H) : ℕ :=
   B.edges.sup Finset.card
 
-/-- Number of occurrence edges at one specified rank. -/
-def edgeCountAtRank
-    (B : HypergraphBundle J K H) (r : ℕ) : ℕ :=
-  (B.edges.filter fun g => g.card = r).card
 
 /-- Every edge cardinality is bounded by the order of the bundle. -/
 theorem edge_card_le_order
@@ -491,26 +328,6 @@ theorem eraseEdge_order_le
   intro g hg
   exact B.edge_card_le_order (Finset.mem_of_mem_erase hg)
 
-/-- Erasing a rank-`r` edge removes exactly one edge from the rank-`r`
-count. -/
-theorem edgeCountAtRank_eraseEdge
-    (B : HypergraphBundle J K H)
-    {g₀ : Finset K} (hg₀ : g₀ ∈ B.edges)
-    {r : ℕ} (hr : g₀.card = r) :
-    (B.eraseEdge g₀).edgeCountAtRank r =
-      B.edgeCountAtRank r - 1 := by
-  unfold edgeCountAtRank eraseEdge
-  have hmem :
-      g₀ ∈ B.edges.filter fun g => g.card = r :=
-    Finset.mem_filter.mpr ⟨hg₀, hr⟩
-  have hfilter :
-      (B.edges.erase g₀).filter
-          (fun g => g.card = r) =
-        (B.edges.filter fun g => g.card = r).erase g₀ := by
-    ext g
-    simp only [Finset.mem_filter, Finset.mem_erase]
-    aesop
-  rw [hfilter, Finset.card_erase_of_mem hmem]
 
 /-- Erasing a maximum-cardinality edge from a downward-closed bundle
 preserves downward closure. -/
@@ -672,19 +489,6 @@ theorem bundleProduct_nonneg
   exact Finset.prod_nonneg fun g hg =>
     (hA g hg (edgeTuple g x)).1
 
-theorem bundleProduct_le_one
-    (B : HypergraphBundle J K H)
-    {A : (g : Finset K) →
-      ({v : K // v ∈ g} → G) → ℝ}
-    (hA : B.WeightsInUnitInterval A)
-    (x : K → G) :
-    B.bundleProduct A x ≤ 1 := by
-  unfold bundleProduct
-  apply Finset.prod_le_one
-  · intro g hg
-    exact (hA g hg (edgeTuple g x)).1
-  · intro g hg
-    exact (hA g hg (edgeTuple g x)).2
 
 theorem bundleCount_nonneg
     [Fintype K] [Fintype G]
@@ -695,25 +499,7 @@ theorem bundleCount_nonneg
     0 ≤ B.bundleCount A :=
   mean_nonneg (B.bundleProduct_nonneg hA)
 
-theorem bundleCount_le_one
-    [Fintype K] [Fintype G] [Nonempty G]
-    (B : HypergraphBundle J K H)
-    {A : (g : Finset K) →
-      ({v : K // v ∈ g} → G) → ℝ}
-    (hA : B.WeightsInUnitInterval A) :
-    B.bundleCount A ≤ 1 :=
-  mean_le_of_le_const (B.bundleProduct_le_one hA)
 
-/-- Unit-interval bounds survive erasing an occurrence edge. -/
-theorem WeightsInUnitInterval.eraseEdge
-    (B : HypergraphBundle J K H)
-    {A : (g : Finset K) →
-      ({v : K // v ∈ g} → G) → ℝ}
-    (hA : B.WeightsInUnitInterval A)
-    (g₀ : Finset K) :
-    (B.eraseEdge g₀).WeightsInUnitInterval A := by
-  intro g hg y
-  exact hA g (Finset.mem_of_mem_erase hg) y
 
 /-- The product left after removing one selected occurrence edge. -/
 noncomputable def edgeRemainder
@@ -1011,46 +797,7 @@ theorem doubledRemainderMoment_nonneg
     0 ≤ B.doubledRemainderMoment g₀ A :=
   mean_nonneg fun _ => sq_nonneg _
 
-/-- For unit-interval bundle factors, the conditional remainder average is
-itself in the unit interval. -/
-theorem edgeRemainderAverage_unitInterval
-    [Fintype K] [Fintype G] [Nonempty G]
-    (B : HypergraphBundle J K H)
-    {A : (g : Finset K) →
-      ({v : K // v ∈ g} → G) → ℝ}
-    (hA : B.WeightsInUnitInterval A)
-    (g₀ : Finset K)
-    (y : {v : K // v ∈ g₀} → G) :
-    0 ≤ B.edgeRemainderAverage g₀ A y ∧
-      B.edgeRemainderAverage g₀ A y ≤ 1 := by
-  constructor
-  · apply mean_nonneg
-    intro z
-    exact
-      (B.eraseEdge g₀).bundleProduct_nonneg
-        (hA.eraseEdge B g₀) _
-  · apply mean_le_of_le_const
-    intro z
-    exact
-      (B.eraseEdge g₀).bundleProduct_le_one
-        (hA.eraseEdge B g₀) _
 
-/-- For unit-interval factors, the doubled remainder moment is at most one.
-This gives an ambient-size-independent absolute defect estimate. -/
-theorem doubledRemainderMoment_le_one
-    [Fintype K] [Fintype G] [Nonempty G]
-    (B : HypergraphBundle J K H)
-    {A : (g : Finset K) →
-      ({v : K // v ∈ g} → G) → ℝ}
-    (hA : B.WeightsInUnitInterval A)
-    (g₀ : Finset K) :
-    B.doubledRemainderMoment g₀ A ≤ 1 := by
-  unfold doubledRemainderMoment
-  apply mean_le_of_le_const
-  intro y
-  have hy :=
-    B.edgeRemainderAverage_unitInterval hA g₀ y
-  nlinarith
 
 /-- The doubled moment is exactly the average obtained by taking two
 independent copies of every outside variable. -/
@@ -1088,63 +835,7 @@ theorem edgeContribution_sq_le_localSquare_mul_doubled
   exact mean_mul_sq_le_product q
     (B.edgeRemainderAverage g₀ A)
 
-/-- Localized defect estimate.  Once the square mass of the defect on its
-boundary base is at most `β` times the base mass, the only remaining factor
-is the doubled lower-rank bundle moment. -/
-theorem edgeContribution_sq_le_of_localized_defect
-    [Fintype K] [Fintype G]
-    (B : HypergraphBundle J K H)
-    (g₀ : Finset K)
-    (b base : ({v : K // v ∈ g₀} → G) → ℝ)
-    (A : (g : Finset K) →
-      ({v : K // v ∈ g} → G) → ℝ)
-    (β : ℝ)
-    (hlocalized :
-      mean (fun y => b y ^ 2) ≤
-        β * mean base) :
-    B.edgeContribution g₀ b A ^ 2 ≤
-      (β * mean base) *
-        B.doubledRemainderMoment g₀ A := by
-  calc
-    B.edgeContribution g₀ b A ^ 2 ≤
-        mean (fun y => b y ^ 2) *
-          B.doubledRemainderMoment g₀ A :=
-      B.edgeContribution_sq_le_localSquare_mul_doubled
-        g₀ b A
-    _ ≤
-        (β * mean base) *
-          B.doubledRemainderMoment g₀ A :=
-      mul_le_mul_of_nonneg_right hlocalized
-        (B.doubledRemainderMoment_nonneg g₀ A)
 
-/-- Absolute localized defect bound for unit-interval remaining factors.
-The stronger doubled-moment form above is retained for the relative
-double-induction estimate. -/
-theorem edgeContribution_sq_le_of_localized_defect_unitInterval
-    [Fintype K] [Fintype G] [Nonempty G]
-    (B : HypergraphBundle J K H)
-    (g₀ : Finset K)
-    (b base : ({v : K // v ∈ g₀} → G) → ℝ)
-    {A : (g : Finset K) →
-      ({v : K // v ∈ g} → G) → ℝ}
-    (hA : B.WeightsInUnitInterval A)
-    {β : ℝ} (hβ : 0 ≤ β)
-    (hbase : ∀ y, 0 ≤ base y)
-    (hlocalized :
-      mean (fun y => b y ^ 2) ≤
-        β * mean base) :
-    B.edgeContribution g₀ b A ^ 2 ≤
-      β * mean base := by
-  calc
-    B.edgeContribution g₀ b A ^ 2 ≤
-        (β * mean base) *
-          B.doubledRemainderMoment g₀ A :=
-      B.edgeContribution_sq_le_of_localized_defect
-        g₀ b base A β hlocalized
-    _ ≤ β * mean base := by
-      apply mul_le_of_le_one_right
-      · exact mul_nonneg hβ (mean_nonneg hbase)
-      · exact B.doubledRemainderMoment_le_one hA g₀
 
 end HypergraphBundle
 
@@ -1256,16 +947,6 @@ def splitDoubledAssignmentEquiv
     rcases p with ⟨y, zfalse, ztrue⟩
     rfl
 
-omit [DecidableEq K] in
-@[simp]
-theorem splitDoubledAssignmentEquiv_symm_apply
-    (g₀ : Finset K)
-    (y : {v : K // v ∈ g₀} → G)
-    (z : (EdgeComplement g₀ → G) ×
-      (EdgeComplement g₀ → G)) :
-    (splitDoubledAssignmentEquiv g₀).symm (y, z) =
-      doubledAssignment g₀ y z :=
-  rfl
 
 /-- Fubini decomposition for the doubled occurrence variables. -/
 theorem mean_splitDoubledAssignment
@@ -1586,14 +1267,6 @@ def doubledEdges
     Finset (Finset (DoubledOccurrenceVertex g₀)) :=
   Finset.univ.image (B.doubledEdgeOfSource g₀)
 
-theorem doubledEdgeOfSource_mem_doubledEdges
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (s : B.DoubledEdgeSource g₀) :
-    B.doubledEdgeOfSource g₀ s ∈
-      B.doubledEdges g₀ := by
-  classical
-  exact Finset.mem_image.mpr
-    ⟨s, Finset.mem_univ s, rfl⟩
 
 theorem mem_doubledEdges_iff
     (B : HypergraphBundle J K H) (g₀ : Finset K)
@@ -1742,123 +1415,12 @@ theorem card_doubledEdges_le
     _ = 2 * (B.edges.erase g₀).card := by
       simp [DoubledEdgeSource]
 
-/-- The condition under which the two copies of every remaining edge are
-genuinely distinct: every such edge contains at least one vertex outside
-the shared edge. -/
-def RemainingEdgesMeetComplement
-    (B : HypergraphBundle J K H) (g₀ : Finset K) : Prop :=
-  ∀ g ∈ B.edges.erase g₀,
-    ∃ v ∈ g, v ∉ g₀
 
-/-- If every remaining edge meets the complement of `g₀`, then the source
-edge together with its Boolean copy label is recoverable from its doubled
-edge. -/
-theorem doubledEdgeOfSource_injective
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (houtside : B.RemainingEdgesMeetComplement g₀) :
-    Function.Injective (B.doubledEdgeOfSource g₀) := by
-  rintro ⟨copy, ⟨g, hg⟩⟩
-    ⟨copy', ⟨g', hg'⟩⟩ hedges
-  change
-    doubledEdge g₀ copy g =
-      doubledEdge g₀ copy' g' at hedges
-  have hgg' : g = g' := by
-    have himage :=
-      congrArg
-        (Finset.image (doubledVertexForget g₀))
-        hedges
-    simpa using himage
-  subst g'
-  have hcopy : copy = copy' := by
-    obtain ⟨v, hvg, hvoutside⟩ :=
-      houtside g hg
-    have hv :
-        doubledVertexLift g₀ copy v ∈
-          doubledEdge g₀ copy' g := by
-      rw [← hedges]
-      exact mem_doubledEdge g₀ copy g v hvg
-    obtain ⟨w, hwg, hwv⟩ :=
-      Finset.mem_image.mp hv
-    have hwv' : w = v := by
-      have := congrArg
-        (doubledVertexForget g₀) hwv
-      simpa using this
-    subst w
-    simpa [doubledVertexLift, hvoutside] using
-      hwv.symm
-  subst copy'
-  rfl
 
-/-- When every remaining edge meets the complement, labelled source edges
-are equivalent to the actual doubled occurrence edges. -/
-noncomputable def doubledEdgeSourceEquiv
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (houtside : B.RemainingEdgesMeetComplement g₀) :
-    B.DoubledEdgeSource g₀ ≃
-      {d : Finset (DoubledOccurrenceVertex g₀) //
-        d ∈ B.doubledEdges g₀} := by
-  classical
-  apply Equiv.ofBijective
-    (fun s =>
-      ⟨B.doubledEdgeOfSource g₀ s,
-        B.doubledEdgeOfSource_mem_doubledEdges
-          g₀ s⟩)
-  constructor
-  · intro s t hst
-    apply B.doubledEdgeOfSource_injective
-      g₀ houtside
-    exact congrArg Subtype.val hst
-  · rintro ⟨d, hd⟩
-    obtain ⟨s, _hs, hsd⟩ :=
-      Finset.mem_image.mp hd
-    refine ⟨s, ?_⟩
-    apply Subtype.ext
-    exact hsd
 
-/-- The unique labelled source of an actual doubled edge. -/
-noncomputable def sourceOfDoubledEdge
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (houtside : B.RemainingEdgesMeetComplement g₀)
-    {d : Finset (DoubledOccurrenceVertex g₀)}
-    (hd : d ∈ B.doubledEdges g₀) :
-    B.DoubledEdgeSource g₀ :=
-  (B.doubledEdgeSourceEquiv g₀ houtside).symm
-    ⟨d, hd⟩
 
-theorem doubledEdgeOfSource_sourceOfDoubledEdge
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (houtside : B.RemainingEdgesMeetComplement g₀)
-    {d : Finset (DoubledOccurrenceVertex g₀)}
-    (hd : d ∈ B.doubledEdges g₀) :
-    B.doubledEdgeOfSource g₀
-        (B.sourceOfDoubledEdge g₀ houtside hd) = d := by
-  exact congrArg Subtype.val
-    (Equiv.apply_symm_apply
-      (B.doubledEdgeSourceEquiv g₀ houtside)
-      ⟨d, hd⟩)
 
-theorem sourceOfDoubledEdge_doubledEdgeOfSource
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (houtside : B.RemainingEdgesMeetComplement g₀)
-    (s : B.DoubledEdgeSource g₀) :
-    B.sourceOfDoubledEdge g₀ houtside
-        (B.doubledEdgeOfSource_mem_doubledEdges
-          g₀ s) = s := by
-  exact
-    Equiv.symm_apply_apply
-      (B.doubledEdgeSourceEquiv g₀ houtside) s
 
-/-- Under the complement condition, duplication creates exactly two
-occurrence edges for every remaining occurrence edge. -/
-theorem card_doubledEdges_eq
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (houtside : B.RemainingEdgesMeetComplement g₀) :
-    (B.doubledEdges g₀).card =
-      2 * (B.edges.erase g₀).card := by
-  unfold doubledEdges
-  rw [Finset.card_image_of_injective _
-    (B.doubledEdgeOfSource_injective g₀ houtside)]
-  simp [DoubledEdgeSource]
 
 /-- A doubled edge is stable under lifting after forgetting its vertices. -/
 theorem doubledEdge_image_forget_of_subset
@@ -2058,51 +1620,6 @@ theorem prod_comp_eq_prod_image_of_idempotent
             Finset.mul_prod_erase (s.image f) w hfa
       · rw [Finset.prod_insert hfa]
 
-/-- Two labelled sources produce the same doubled edge exactly when they
-come from the same old edge and either have the same copy label or that old
-edge is wholly contained in the shared edge.  Thus the latter two-copy
-collision is the only multiplicity removed by `doubledEdges`. -/
-theorem doubledEdgeOfSource_eq_iff
-    (B : HypergraphBundle J K H) (g₀ : Finset K)
-    (s t : B.DoubledEdgeSource g₀) :
-    B.doubledEdgeOfSource g₀ s =
-        B.doubledEdgeOfSource g₀ t ↔
-      s.2.1 = t.2.1 ∧
-        (s.1 = t.1 ∨ s.2.1 ⊆ g₀) := by
-  classical
-  constructor
-  · intro hst
-    have hgg : s.2.1 = t.2.1 := by
-      have himage :=
-        congrArg
-          (Finset.image (doubledVertexForget g₀))
-          hst
-      simpa [doubledEdgeOfSource] using himage
-    refine ⟨hgg, ?_⟩
-    by_cases hcopy : s.1 = t.1
-    · exact Or.inl hcopy
-    · right
-      have hedges :
-          doubledEdge g₀ s.1 s.2.1 =
-            doubledEdge g₀ t.1 s.2.1 := by
-        simpa [doubledEdgeOfSource, hgg] using hst
-      cases hs : s.1 <;> cases ht : t.1
-      · exact False.elim (hcopy (by simp [hs, ht]))
-      · exact
-          (doubledEdge_false_eq_true_iff_subset
-            g₀ s.2.1).1 (by
-              simpa [hs, ht] using hedges)
-      · exact
-          (doubledEdge_false_eq_true_iff_subset
-            g₀ s.2.1).1 (by
-              simpa [hs, ht] using hedges.symm)
-      · exact False.elim (hcopy (by simp [hs, ht]))
-  · rintro ⟨hgg, hcopy⟩
-    rcases hcopy with hcopy | hsubset
-    · simp [doubledEdgeOfSource, hgg, hcopy]
-    · simpa [doubledEdgeOfSource, hgg] using
-        doubledEdge_copy_independent_of_subset
-          g₀ hsubset s.1 t.1
 
 /-- Evaluating a pulled-back base weight on a lifted occurrence edge agrees
 with evaluating the original pulled-back weight on its labelled source. -/
@@ -2407,23 +1924,7 @@ theorem mem_filterEdges_edges
       g ∈ B.edges ∧ P g := by
   simp [filterEdges]
 
-@[simp]
-theorem filterEdges_projection
-    (B : HypergraphBundle J K H)
-    (P : Finset K → Prop) [DecidablePred P] :
-    (B.filterEdges P).projection = B.projection :=
-  rfl
 
-/-- Edge filtering cannot increase bundle order. -/
-theorem filterEdges_order_le
-    (B : HypergraphBundle J K H)
-    (P : Finset K → Prop) [DecidablePred P] :
-    (B.filterEdges P).order ≤ B.order := by
-  unfold order
-  apply Finset.sup_le
-  intro g hg
-  exact B.edge_card_le_order
-    (Finset.mem_filter.mp hg).1
 
 /-- Edge filtering cannot increase the number of occurrence edges. -/
 theorem card_filterEdges_edges_le
@@ -2480,10 +1981,6 @@ theorem lowerOrder_order_lt
   intro g hg
   exact (Finset.mem_filter.mp hg).2
 
-theorem lowerOrder_order_le
-    (B : HypergraphBundle J K H) (d : ℕ) :
-    (B.lowerOrder d).order ≤ B.order :=
-  B.filterEdges_order_le _
 
 theorem card_lowerOrder_edges_le
     (B : HypergraphBundle J K H) (d : ℕ) :
@@ -2520,10 +2017,6 @@ theorem mem_strictBoundary_edges
       g ∈ B.edges ∧ g ⊂ g₀ := by
   simp [strictBoundary]
 
-theorem strictBoundary_order_le
-    (B : HypergraphBundle J K H) (g₀ : Finset K) :
-    (B.strictBoundary g₀).order ≤ B.order :=
-  B.filterEdges_order_le _
 
 /-- A strict boundary has order below the size of its ambient edge. -/
 theorem strictBoundary_order_lt
@@ -2557,15 +2050,6 @@ noncomputable def bundleMainProduct
     (p : Finset J → ℝ) : ℝ :=
   ∏ g ∈ B.edges, p (g.image B.projection)
 
-@[simp]
-theorem bundleMainProduct_filterEdges
-    (B : HypergraphBundle J K H)
-    (P : Finset K → Prop) [DecidablePred P]
-    (p : Finset J → ℝ) :
-    (B.filterEdges P).bundleMainProduct p =
-      ∏ g ∈ B.edges.filter P,
-        p (g.image B.projection) :=
-  rfl
 
 @[simp]
 theorem bundleMainProduct_lowerOrder
@@ -2585,19 +2069,6 @@ theorem bundleMainProduct_strictBoundary
         p (g.image B.projection) :=
   rfl
 
-/-- Splitting a bundle product according to a decidable edge predicate. -/
-theorem bundleMainProduct_filter_mul_filter_not
-    (B : HypergraphBundle J K H)
-    (P : Finset K → Prop) [DecidablePred P]
-    (p : Finset J → ℝ) :
-    (B.filterEdges P).bundleMainProduct p *
-        (B.filterEdges fun g => ¬ P g).bundleMainProduct p =
-      B.bundleMainProduct p := by
-  classical
-  exact Finset.prod_filter_mul_prod_filter_not
-    (s := B.edges)
-    (p := P)
-    (f := fun g => p (g.image B.projection))
 
 /-- Erasing one edge removes precisely its main-density factor. -/
 theorem bundleMainProduct_eraseEdge_mul
@@ -3099,28 +2570,6 @@ theorem card_image_projection
     Fintype.card_congr (B.projectionEquiv hg)
   simpa using hcard.symm
 
-/-- A uniform lower bound on the base densities gives the corresponding
-power lower bound for every bundle main product. -/
-theorem pow_card_edges_le_bundleMainProduct
-    (B : HypergraphBundle J K H)
-    (p : Finset J → ℝ) {a : ℝ}
-    (ha : 0 ≤ a)
-    (hp : ∀ e ∈ H, a ≤ p e) :
-    a ^ B.edges.card ≤ B.bundleMainProduct p := by
-  classical
-  unfold bundleMainProduct
-  calc
-    a ^ B.edges.card =
-        ∏ _g ∈ B.edges, a := by
-      simp
-    _ ≤
-        ∏ g ∈ B.edges,
-          p (g.image B.projection) := by
-      apply Finset.prod_le_prod
-      · intro g hg
-        exact ha
-      · intro g hg
-        exact hp _ (B.projection_mem_base g hg)
 
 /-- Nonnegative base densities give a nonnegative bundle main product. -/
 theorem bundleMainProduct_nonneg
@@ -3711,382 +3160,29 @@ noncomputable def bundleCommonEnvelopeError
       bundleCommonNextRow a t
         (bundleCommonEnvelopeError a t d)
 
-@[simp]
-theorem bundleCommonNextRow_zero
-    (a t : ℝ) (lower : ℕ → ℝ) :
-    bundleCommonNextRow a t lower 0 = 0 :=
-  rfl
 
-@[simp]
-theorem bundleCommonNextRow_succ
-    (a t : ℝ) (lower : ℕ → ℝ) (n : ℕ) :
-    bundleCommonNextRow a t lower (n + 1) =
-      bundleCommonNextRow a t lower n +
-        bundleCommonStepIncrement a t lower n :=
-  rfl
 
-@[simp]
-theorem bundleCommonEnvelopeError_zero_order
-    (a t : ℝ) (n : ℕ) :
-    bundleCommonEnvelopeError a t 0 n = 0 :=
-  rfl
 
-@[simp]
-theorem bundleCommonEnvelopeError_succ_order
-    (a t : ℝ) (d n : ℕ) :
-    bundleCommonEnvelopeError a t (d + 1) n =
-      bundleCommonNextRow a t
-        (bundleCommonEnvelopeError a t d) n :=
-  rfl
 
 /-! ## Positivity and monotonicity -/
 
-/-- Every row produced by the equality schedule is nonnegative when the
-common density floor is nonnegative. -/
-theorem bundleCommonNextRow_nonneg
-    {a t : ℝ} (ha : 0 ≤ a)
-    (lower : ℕ → ℝ) :
-    ∀ n, 0 ≤ bundleCommonNextRow a t lower n := by
-  intro n
-  induction n with
-  | zero =>
-      simp
-  | succ n ihn =>
-      rw [bundleCommonNextRow_succ]
-      apply add_nonneg ihn
-      unfold bundleCommonStepIncrement
-      exact add_nonneg
-        (div_nonneg (Real.sqrt_nonneg _)
-          (pow_nonneg ha _))
-        (div_nonneg (sq_nonneg t)
-          (pow_nonneg ha _))
 
-/-- Every entry in the two-dimensional schedule is nonnegative. -/
-theorem bundleCommonEnvelopeError_nonneg
-    {a t : ℝ} (ha : 0 ≤ a) :
-    ∀ d n, 0 ≤ bundleCommonEnvelopeError a t d n := by
-  intro d
-  induction d with
-  | zero =>
-      intro n
-      simp
-  | succ d _ih =>
-      intro n
-      rw [bundleCommonEnvelopeError_succ_order]
-      exact bundleCommonNextRow_nonneg ha _ n
 
-/-- Increasing a nonnegative lower row pointwise can only increase the
-one-edge increment. -/
-theorem bundleCommonStepIncrement_mono
-    {a t : ℝ} (ha : 0 ≤ a)
-    {lower₁ lower₂ : ℕ → ℝ}
-    (hlower₁ : ∀ n, 0 ≤ lower₁ n)
-    (hlower : ∀ n, lower₁ n ≤ lower₂ n)
-    (n : ℕ) :
-    bundleCommonStepIncrement a t lower₁ n ≤
-      bundleCommonStepIncrement a t lower₂ n := by
-  have h₁nonneg :
-      0 ≤ 1 + lower₁ (n + 1) := by
-    linarith [hlower₁ (n + 1)]
-  have h₂nonneg :
-      0 ≤ 1 + lower₁ (2 * (n + 1)) := by
-    linarith [hlower₁ (2 * (n + 1))]
-  have hright₁nonneg :
-      0 ≤ 1 + lower₂ (n + 1) := by
-    linarith [hlower₁ (n + 1), hlower (n + 1)]
-  have hproduct :
-      (1 + lower₁ (n + 1)) *
-          (1 + lower₁ (2 * (n + 1))) ≤
-        (1 + lower₂ (n + 1)) *
-          (1 + lower₂ (2 * (n + 1))) := by
-    exact mul_le_mul
-      (by linarith [hlower (n + 1)])
-      (by linarith [hlower (2 * (n + 1))])
-      h₂nonneg hright₁nonneg
-  have hradicand :
-      t ^ 2 *
-          (1 + lower₁ (n + 1)) *
-          (1 + lower₁ (2 * (n + 1))) ≤
-        t ^ 2 *
-          (1 + lower₂ (n + 1)) *
-          (1 + lower₂ (2 * (n + 1))) := by
-    simpa [mul_assoc] using
-      mul_le_mul_of_nonneg_left hproduct (sq_nonneg t)
-  unfold bundleCommonStepIncrement
-  apply add_le_add
-  · exact div_le_div_of_nonneg_right
-      (Real.sqrt_le_sqrt hradicand)
-      (pow_nonneg ha _)
-  · exact le_rfl
 
-/-- The row constructor is monotone in a nonnegative lower row. -/
-theorem bundleCommonNextRow_mono
-    {a t : ℝ} (ha : 0 ≤ a)
-    {lower₁ lower₂ : ℕ → ℝ}
-    (hlower₁ : ∀ n, 0 ≤ lower₁ n)
-    (hlower : ∀ n, lower₁ n ≤ lower₂ n) :
-    ∀ n,
-      bundleCommonNextRow a t lower₁ n ≤
-        bundleCommonNextRow a t lower₂ n := by
-  intro n
-  induction n with
-  | zero =>
-      simp
-  | succ n ihn =>
-      rw [bundleCommonNextRow_succ,
-        bundleCommonNextRow_succ]
-      exact add_le_add ihn
-        (bundleCommonStepIncrement_mono
-          ha hlower₁ hlower n)
 
-/-- At fixed order, the schedule is monotone in the occurrence-edge
-cardinality. -/
-theorem bundleCommonEnvelopeError_monotone_card
-    {a t : ℝ} (ha : 0 ≤ a) (d : ℕ) :
-    Monotone (bundleCommonEnvelopeError a t d) := by
-  apply monotone_nat_of_le_succ
-  intro n
-  cases d with
-  | zero =>
-      simp
-  | succ d =>
-      rw [bundleCommonEnvelopeError_succ_order,
-        bundleCommonEnvelopeError_succ_order,
-        bundleCommonNextRow_succ]
-      exact le_add_of_nonneg_right
-        (by
-          unfold bundleCommonStepIncrement
-          exact add_nonneg
-            (div_nonneg (Real.sqrt_nonneg _)
-              (pow_nonneg ha _))
-            (div_nonneg (sq_nonneg t)
-              (pow_nonneg ha _)))
 
-/-- At fixed cardinality, the schedule is monotone in bundle order. -/
-theorem bundleCommonEnvelopeError_monotone_order
-    {a t : ℝ} (ha : 0 ≤ a) :
-    ∀ n, Monotone (fun d =>
-      bundleCommonEnvelopeError a t d n) := by
-  intro n
-  apply monotone_nat_of_le_succ
-  intro d
-  induction d generalizing n with
-  | zero =>
-      simp only [bundleCommonEnvelopeError_zero_order]
-      exact bundleCommonEnvelopeError_nonneg ha 1 n
-  | succ d ihd =>
-      rw [bundleCommonEnvelopeError_succ_order,
-        bundleCommonEnvelopeError_succ_order]
-      apply bundleCommonNextRow_mono ha
-      · exact bundleCommonEnvelopeError_nonneg ha d
-      · intro m
-        exact ihd m
 
 /-! ## The envelope interface -/
 
-/-- With a common density floor `a` and common squared error `t²`, the
-equality schedule is a valid `IsBundleCountingEnvelope`. -/
-theorem bundleCommonEnvelopeError_isEnvelope
-    {a t : ℝ} (ha : 0 < a) (ha_one : a ≤ 1) :
-    IsBundleCountingEnvelope
-      (fun _ => a) (fun _ => t ^ 2) (fun _ => a) (t ^ 2)
-      (bundleCommonEnvelopeError a t) := by
-  refine
-    { density_pos := fun _ => ha
-      density_le_one := fun _ => ha_one
-      defect_nonneg := fun _ => sq_nonneg t
-      uniform_nonneg := sq_nonneg t
-      floor_pos := fun _ => ha
-      rankFloor := ?_
-      error_nonneg :=
-        bundleCommonEnvelopeError_nonneg ha.le
-      error_mono_order := ?_
-      error_mono_card := ?_
-      step := ?_ }
-  · intro i d hid
-    exact le_rfl
-  · intro d d' n hdd'
-    exact
-      (bundleCommonEnvelopeError_monotone_order
-        ha.le n) hdd'
-  · intro d n n' hnn'
-    exact
-      (bundleCommonEnvelopeError_monotone_card
-        ha.le d) hnn'
-  · intro d n
-    rw [bundleCommonEnvelopeError_succ_order,
-      bundleCommonEnvelopeError_succ_order,
-      bundleCommonNextRow_succ]
-    unfold bundleCommonStepIncrement
-    ring_nf
-    exact le_rfl
 
 /-! ## Vanishing at the origin and finite-horizon selection -/
 
-/-- At zero defect and zero frozen-uniformity error, the schedule is
-identically zero. -/
-@[simp]
-theorem bundleCommonNextRow_zero_parameter
-    (a : ℝ) (lower : ℕ → ℝ)
-    (hlower : ∀ n, lower n = 0) :
-    ∀ n, bundleCommonNextRow a 0 lower n = 0 := by
-  intro n
-  induction n with
-  | zero =>
-      simp
-  | succ n ihn =>
-      rw [bundleCommonNextRow_succ, ihn]
-      simp [bundleCommonStepIncrement, hlower]
 
-/-- Every fixed entry of the schedule is zero at the origin. -/
-@[simp]
-theorem bundleCommonEnvelopeError_zero_parameter
-    (a : ℝ) :
-    ∀ d n, bundleCommonEnvelopeError a 0 d n = 0 := by
-  intro d
-  induction d with
-  | zero =>
-      intro n
-      simp
-  | succ d ihd =>
-      intro n
-      rw [bundleCommonEnvelopeError_succ_order]
-      exact bundleCommonNextRow_zero_parameter a
-        (bundleCommonEnvelopeError a 0 d) ihd n
 
-/-- For a continuously varying lower row, every fixed entry of the next
-row varies continuously. -/
-theorem continuous_bundleCommonNextRow
-    (a : ℝ) (lower : ℝ → ℕ → ℝ)
-    (hlower : ∀ n, Continuous (fun t => lower t n)) :
-    ∀ n,
-      Continuous
-        (fun t =>
-          bundleCommonNextRow a t (lower t) n) := by
-  intro n
-  induction n with
-  | zero =>
-      simp only [bundleCommonNextRow_zero]
-      fun_prop
-  | succ n ihn =>
-      simp only [bundleCommonNextRow_succ,
-        bundleCommonStepIncrement]
-      have h₁ := hlower (n + 1)
-      have h₂ := hlower (2 * (n + 1))
-      fun_prop
 
-/-- Every fixed finite-order, finite-cardinality envelope entry is a
-continuous function of the common small parameter. -/
-theorem continuous_bundleCommonEnvelopeError_real
-    (a : ℝ) :
-    ∀ d n,
-      Continuous
-        (fun t : ℝ =>
-          bundleCommonEnvelopeError a t d n) := by
-  intro d
-  induction d with
-  | zero =>
-      intro n
-      simp only [bundleCommonEnvelopeError_zero_order]
-      fun_prop
-  | succ d ihd =>
-      intro n
-      change
-        Continuous (fun t : ℝ =>
-          bundleCommonNextRow a t
-            (bundleCommonEnvelopeError a t d) n)
-      exact continuous_bundleCommonNextRow
-        a
-        (fun t m =>
-          bundleCommonEnvelopeError a t d m)
-        ihd n
 
-/-- Every fixed finite-horizon envelope entry tends to zero with the
-common small parameter. -/
-theorem tendsto_bundleCommonEnvelopeError_zero
-    (a : ℝ) (d n : ℕ) :
-    Tendsto
-      (fun t : ℝ =>
-        bundleCommonEnvelopeError a t d n)
-      (𝓝 0) (𝓝 0) := by
-  simpa using
-    (continuous_bundleCommonEnvelopeError_real a d n).tendsto 0
 
-/-- For fixed rank and bundle-size bounds, a strictly positive common
-parameter can be chosen below an arbitrary reserve so that the final
-relative counting error is below any prescribed positive reserve. -/
-theorem exists_bundleCommonEnvelopeError_lt
-    (a : ℝ) (rankBound edgeBound : ℕ)
-    {parameterReserve errorReserve : ℝ}
-    (hparameter : 0 < parameterReserve)
-    (herror : 0 < errorReserve) :
-    ∃ t : ℝ,
-      0 < t ∧ t < parameterReserve ∧ t < 1 ∧
-        bundleCommonEnvelopeError
-            a t rankBound edgeBound <
-          errorReserve := by
-  have heventually :
-      ∀ᶠ t : ℝ in 𝓝 0,
-        bundleCommonEnvelopeError
-            a t rankBound edgeBound <
-          errorReserve :=
-    (tendsto_bundleCommonEnvelopeError_zero
-      a rankBound edgeBound).eventually_lt_const herror
-  obtain ⟨δ, hδ, hball⟩ :=
-    Metric.eventually_nhds_iff_ball.mp heventually
-  let t : ℝ := min δ (min parameterReserve 1) / 2
-  have hmin :
-      0 < min δ (min parameterReserve 1) := by
-    exact lt_min hδ (lt_min hparameter zero_lt_one)
-  have ht : 0 < t := by
-    dsimp [t]
-    linarith
-  have htδ : t < δ := by
-    dsimp [t]
-    have hle :
-        min δ (min parameterReserve 1) ≤ δ :=
-      min_le_left _ _
-    linarith
-  have htparameter : t < parameterReserve := by
-    dsimp [t]
-    have hle :
-        min δ (min parameterReserve 1) ≤
-          min parameterReserve 1 :=
-      min_le_right _ _
-    have hle' : min parameterReserve 1 ≤ parameterReserve :=
-      min_le_left _ _
-    linarith
-  have htone : t < 1 := by
-    dsimp [t]
-    have hle :
-        min δ (min parameterReserve 1) ≤
-          min parameterReserve 1 :=
-      min_le_right _ _
-    have hle' : min parameterReserve 1 ≤ 1 :=
-      min_le_right _ _
-    linarith
-  refine ⟨t, ht, htparameter, htone, ?_⟩
-  apply hball
-  simpa [Real.dist_eq, abs_of_pos ht] using htδ
 
-/-- The concrete half-error form used in generalized counting. -/
-theorem exists_bundleCommonEnvelopeError_lt_half
-    {a : ℝ} (ha : 0 < a) (ha_one : a ≤ 1)
-    (rankBound edgeBound : ℕ) :
-    ∃ t : ℝ,
-      0 < t ∧ t < 1 ∧
-      IsBundleCountingEnvelope
-        (fun _ => a) (fun _ => t ^ 2) (fun _ => a) (t ^ 2)
-        (bundleCommonEnvelopeError a t) ∧
-      bundleCommonEnvelopeError
-          a t rankBound edgeBound < 1 / 2 := by
-  obtain ⟨t, ht, htone, _htone', hfinal⟩ :=
-    exists_bundleCommonEnvelopeError_lt
-      a rankBound edgeBound zero_lt_one
-        (by norm_num : (0 : ℝ) < 1 / 2)
-  exact ⟨t, ht, htone,
-    bundleCommonEnvelopeError_isEnvelope ha ha_one,
-    hfinal⟩
 
 end Wikipedia.SzemeredisTheorem
 
@@ -4162,13 +3258,6 @@ theorem bundleRankwiseDensityFloor_le
         exact min_le_right _ _
       · exact (min_le_left _ _).trans (ih (Nat.le_of_lt_succ (lt_of_le_of_ne hid hi)))
 
-/-- Prefix floors decrease as the permitted rank increases. -/
-theorem bundleRankwiseDensityFloor_antitone (α : ℕ → ℝ) :
-    Antitone (bundleRankwiseDensityFloor α) := by
-  apply antitone_nat_of_succ_le
-  intro d
-  rw [bundleRankwiseDensityFloor_succ]
-  exact min_le_left _ _
 
 /-! ## The rankwise recurrence -/
 
@@ -4365,254 +3454,20 @@ theorem bundleRankwiseEnvelopeError_isEnvelope
 
 /-! ## Vanishing and continuous rankwise parameter paths -/
 
-/-- If every rank defect and the frozen-uniformity error vanish, the next
-row is zero over a zero lower row. -/
-@[simp]
-theorem bundleRankwiseNextRow_zero_parameters
-    (α μ : ℕ → ℝ) (d : ℕ) (lower : ℕ → ℝ)
-    (hlower : ∀ n, lower n = 0) :
-    ∀ n,
-      bundleRankwiseNextRow α (fun _ => 0) μ 0 d lower n = 0 := by
-  intro n
-  induction n with
-  | zero => simp
-  | succ n ih =>
-      rw [bundleRankwiseNextRow_succ, ih]
-      simp [bundleRankwiseStepIncrement, hlower]
 
-/-- The complete rankwise schedule vanishes when all analytic errors do. -/
-@[simp]
-theorem bundleRankwiseEnvelopeError_zero_parameters
-    (α μ : ℕ → ℝ) :
-    ∀ d n,
-      bundleRankwiseEnvelopeError α (fun _ => 0) μ 0 d n = 0 := by
-  intro d
-  induction d with
-  | zero =>
-      intro n
-      simp
-  | succ d ih =>
-      intro n
-      rw [bundleRankwiseEnvelopeError_succ_order]
-      exact bundleRankwiseNextRow_zero_parameters α μ d _ ih n
 
-/-- The row constructor varies continuously along any continuous defect,
-uniformity, and lower-row path. -/
-theorem continuous_bundleRankwiseNextRow
-    (α μ : ℕ → ℝ) (β : ℝ → ℕ → ℝ) (τ : ℝ → ℝ)
-    (d : ℕ) (lower : ℝ → ℕ → ℝ)
-    (hβ : ∀ q, Continuous (fun t => β t q))
-    (hτ : Continuous τ)
-    (hlower : ∀ n, Continuous (fun t => lower t n)) :
-    ∀ n,
-      Continuous (fun t =>
-        bundleRankwiseNextRow α (β t) μ (τ t) d (lower t) n) := by
-  intro n
-  induction n with
-  | zero =>
-      simp only [bundleRankwiseNextRow_zero]
-      fun_prop
-  | succ n ih =>
-      simp only [bundleRankwiseNextRow_succ,
-        bundleRankwiseStepIncrement]
-      have hβd := hβ (d + 1)
-      have hlower₁ := hlower (n + 1)
-      have hlower₂ := hlower (2 * (n + 1))
-      fun_prop
 
-/-- Every fixed entry of the rankwise envelope is continuous along a
-continuous parameter path. -/
-theorem continuous_bundleRankwiseEnvelopeError
-    (α μ : ℕ → ℝ) (β : ℝ → ℕ → ℝ) (τ : ℝ → ℝ)
-    (hβ : ∀ q, Continuous (fun t => β t q))
-    (hτ : Continuous τ) :
-    ∀ d n,
-      Continuous (fun t =>
-        bundleRankwiseEnvelopeError α (β t) μ (τ t) d n) := by
-  intro d
-  induction d with
-  | zero =>
-      intro n
-      simp only [bundleRankwiseEnvelopeError_zero_order]
-      fun_prop
-  | succ d ih =>
-      intro n
-      change Continuous (fun t =>
-        bundleRankwiseNextRow α (β t) μ (τ t) d
-          (bundleRankwiseEnvelopeError α (β t) μ (τ t) d) n)
-      exact continuous_bundleRankwiseNextRow α μ β τ d _ hβ hτ ih n
 
 /-! ## Density-scaled finite-horizon selection -/
 
-/-- A defect schedule whose rank-`d` reserve uses only `α d` (besides the
-common scalar and the caller-chosen exponent). -/
-noncomputable def bundleRankwiseScaledDefect
-    (α : ℕ → ℝ) (power : ℕ → ℕ) (t : ℝ) (d : ℕ) : ℝ :=
-  (t * (α d) ^ (power d)) ^ 2
 
-/-- A frozen-uniformity reserve scaled by the prefix density floor at the
-finite rank horizon. -/
-noncomputable def bundleRankwiseScaledUniformity
-    (α : ℕ → ℝ) (rankBound uniformPower : ℕ) (t : ℝ) : ℝ :=
-  (t *
-      (bundleRankwiseDensityFloor α rankBound) ^ uniformPower) ^ 2
 
-theorem continuous_bundleRankwiseScaledDefect
-    (α : ℕ → ℝ) (power : ℕ → ℕ) (d : ℕ) :
-    Continuous (fun t => bundleRankwiseScaledDefect α power t d) := by
-  unfold bundleRankwiseScaledDefect
-  fun_prop
 
-theorem continuous_bundleRankwiseScaledUniformity
-    (α : ℕ → ℝ) (rankBound uniformPower : ℕ) :
-    Continuous (bundleRankwiseScaledUniformity α rankBound uniformPower) := by
-  unfold bundleRankwiseScaledUniformity
-  fun_prop
 
-@[simp]
-theorem bundleRankwiseScaledDefect_zero
-    (α : ℕ → ℝ) (power : ℕ → ℕ) (d : ℕ) :
-    bundleRankwiseScaledDefect α power 0 d = 0 := by
-  simp [bundleRankwiseScaledDefect]
 
-@[simp]
-theorem bundleRankwiseScaledUniformity_zero
-    (α : ℕ → ℝ) (rankBound uniformPower : ℕ) :
-    bundleRankwiseScaledUniformity α rankBound uniformPower 0 = 0 := by
-  simp [bundleRankwiseScaledUniformity]
 
-/-- Along the density-scaled one-parameter family, every fixed finite entry
-of the rankwise envelope tends to zero. -/
-theorem tendsto_bundleRankwiseScaledEnvelopeError_zero
-    (α : ℕ → ℝ) (power : ℕ → ℕ)
-    (rankBound uniformPower d n : ℕ) :
-    Tendsto
-      (fun t =>
-        bundleRankwiseEnvelopeError α
-          (bundleRankwiseScaledDefect α power t)
-          (bundleRankwiseDensityFloor α)
-          (bundleRankwiseScaledUniformity α rankBound uniformPower t)
-          d n)
-      (𝓝 0) (𝓝 0) := by
-  have hcontinuous :=
-    continuous_bundleRankwiseEnvelopeError
-      α (bundleRankwiseDensityFloor α)
-      (fun t => bundleRankwiseScaledDefect α power t)
-      (bundleRankwiseScaledUniformity α rankBound uniformPower)
-      (continuous_bundleRankwiseScaledDefect α power)
-      (continuous_bundleRankwiseScaledUniformity α rankBound uniformPower)
-      d n
-  have hβzero :
-      bundleRankwiseScaledDefect α power 0 = fun _ => 0 := by
-    funext q
-    exact bundleRankwiseScaledDefect_zero α power q
-  simpa [hβzero] using hcontinuous.tendsto 0
 
-/-- Finite-horizon rankwise small-parameter selection.
 
-The selected defect at rank `d` is
-`(t * α d ^ power d)²`, so its density dependence is pointwise rather than
-through a common floor.  The single frozen-uniformity reserve is
-`(t * μ rankBound ^ uniformPower)²`, where `μ` is the prefix floor.  Both
-formulas are strictly positive for positive densities and `t > 0`, and their
-explicit envelope error can be made smaller than any prescribed reserve. -/
-theorem exists_bundleRankwiseScaledEnvelopeError_lt
-    {α : ℕ → ℝ}
-    (hα : ∀ d, 0 < α d) (hα_one : ∀ d, α d ≤ 1)
-    (power : ℕ → ℕ) (rankBound edgeBound uniformPower : ℕ)
-    {parameterReserve errorReserve : ℝ}
-    (hparameter : 0 < parameterReserve)
-    (herror : 0 < errorReserve) :
-    ∃ t : ℝ,
-      0 < t ∧ t < parameterReserve ∧ t < 1 ∧
-      IsBundleCountingEnvelope α
-        (bundleRankwiseScaledDefect α power t)
-        (bundleRankwiseDensityFloor α)
-        (bundleRankwiseScaledUniformity α rankBound uniformPower t)
-        (bundleRankwiseEnvelopeError α
-          (bundleRankwiseScaledDefect α power t)
-          (bundleRankwiseDensityFloor α)
-          (bundleRankwiseScaledUniformity α rankBound uniformPower t)) ∧
-      bundleRankwiseEnvelopeError α
-          (bundleRankwiseScaledDefect α power t)
-          (bundleRankwiseDensityFloor α)
-          (bundleRankwiseScaledUniformity α rankBound uniformPower t)
-          rankBound edgeBound < errorReserve := by
-  have heventually :
-      ∀ᶠ t : ℝ in 𝓝 0,
-        bundleRankwiseEnvelopeError α
-            (bundleRankwiseScaledDefect α power t)
-            (bundleRankwiseDensityFloor α)
-            (bundleRankwiseScaledUniformity α rankBound uniformPower t)
-            rankBound edgeBound < errorReserve :=
-    (tendsto_bundleRankwiseScaledEnvelopeError_zero
-      α power rankBound uniformPower rankBound edgeBound).eventually_lt_const herror
-  obtain ⟨δ, hδ, hball⟩ := Metric.eventually_nhds_iff_ball.mp heventually
-  let t : ℝ := min δ (min parameterReserve 1) / 2
-  have hmin : 0 < min δ (min parameterReserve 1) :=
-    lt_min hδ (lt_min hparameter zero_lt_one)
-  have ht : 0 < t := by
-    dsimp [t]
-    linarith
-  have htδ : t < δ := by
-    dsimp [t]
-    have hle : min δ (min parameterReserve 1) ≤ δ := min_le_left _ _
-    linarith
-  have htparameter : t < parameterReserve := by
-    dsimp [t]
-    have hle₁ : min δ (min parameterReserve 1) ≤ min parameterReserve 1 :=
-      min_le_right _ _
-    have hle₂ : min parameterReserve 1 ≤ parameterReserve := min_le_left _ _
-    linarith
-  have htone : t < 1 := by
-    dsimp [t]
-    have hle₁ : min δ (min parameterReserve 1) ≤ min parameterReserve 1 :=
-      min_le_right _ _
-    have hle₂ : min parameterReserve 1 ≤ 1 := min_le_right _ _
-    linarith
-  have henvelope :
-      IsBundleCountingEnvelope α
-        (bundleRankwiseScaledDefect α power t)
-        (bundleRankwiseDensityFloor α)
-        (bundleRankwiseScaledUniformity α rankBound uniformPower t)
-        (bundleRankwiseEnvelopeError α
-          (bundleRankwiseScaledDefect α power t)
-          (bundleRankwiseDensityFloor α)
-          (bundleRankwiseScaledUniformity α rankBound uniformPower t)) :=
-    bundleRankwiseEnvelopeError_isEnvelope hα hα_one
-      (fun d => sq_nonneg (t * (α d) ^ (power d)))
-      (sq_nonneg
-        (t * (bundleRankwiseDensityFloor α rankBound) ^ uniformPower))
-  refine ⟨t, ht, htparameter, htone, henvelope, ?_⟩
-  apply hball
-  simpa [Real.dist_eq, abs_of_pos ht] using htδ
-
-/-- The concrete half-error selector used to turn the relative counting
-estimate into a positive configuration count. -/
-theorem exists_bundleRankwiseScaledEnvelopeError_lt_half
-    {α : ℕ → ℝ}
-    (hα : ∀ d, 0 < α d) (hα_one : ∀ d, α d ≤ 1)
-    (power : ℕ → ℕ) (rankBound edgeBound uniformPower : ℕ) :
-    ∃ t : ℝ,
-      0 < t ∧ t < 1 ∧
-      IsBundleCountingEnvelope α
-        (bundleRankwiseScaledDefect α power t)
-        (bundleRankwiseDensityFloor α)
-        (bundleRankwiseScaledUniformity α rankBound uniformPower t)
-        (bundleRankwiseEnvelopeError α
-          (bundleRankwiseScaledDefect α power t)
-          (bundleRankwiseDensityFloor α)
-          (bundleRankwiseScaledUniformity α rankBound uniformPower t)) ∧
-      bundleRankwiseEnvelopeError α
-          (bundleRankwiseScaledDefect α power t)
-          (bundleRankwiseDensityFloor α)
-          (bundleRankwiseScaledUniformity α rankBound uniformPower t)
-          rankBound edgeBound < 1 / 2 := by
-  obtain ⟨t, ht, htone, _htone', hE, hfinal⟩ :=
-    exists_bundleRankwiseScaledEnvelopeError_lt hα hα_one power
-      rankBound edgeBound uniformPower zero_lt_one
-      (by norm_num : (0 : ℝ) < 1 / 2)
-  exact ⟨t, ht, htone, hE, hfinal⟩
 
 /-! ## Explicit finite-horizon sufficient bounds -/
 
@@ -4916,81 +3771,7 @@ theorem mean_finset_sum {α κ : Type*}
       (s := (Finset.univ : Finset α)) s
       (fun x q => f q x))
 
-/-- First Bonferroni bound for complements of zero--one functions. -/
-theorem one_sub_sum_le_prod_one_sub
-    {κ : Type*} [Fintype κ] [DecidableEq κ]
-    (I : κ → ℝ)
-    (hI0 : ∀ q, 0 ≤ I q)
-    (hI01 : ∀ q, I q = 0 ∨ I q = 1) :
-    1 - ∑ q, I q ≤ ∏ q, (1 - I q) := by
-  by_cases hone : ∃ q, I q = 1
-  · obtain ⟨q, hq⟩ := hone
-    have hsum : 1 ≤ ∑ r, I r := by
-      simpa [hq] using
-        (Finset.single_le_sum
-          (s := (Finset.univ : Finset κ))
-          (f := I) (fun r _ => hI0 r)
-          (Finset.mem_univ q))
-    have hprod : (∏ r, (1 - I r)) = 0 := by
-      apply Finset.prod_eq_zero (Finset.mem_univ q)
-      rw [hq]
-      norm_num
-    rw [hprod]
-    linarith
-  · have hzero : ∀ q, I q = 0 := by
-      intro q
-      exact (hI01 q).resolve_right fun hq =>
-        hone ⟨q, hq⟩
-    simp [hzero]
 
-/-- Second Bonferroni bound for complements.  Ordered pairs of distinct
-indices are used on the right. -/
-theorem prod_one_sub_le_orderedPair_bonferroni
-    {κ : Type*} [Fintype κ] [DecidableEq κ]
-    (I : κ → ℝ)
-    (hI0 : ∀ q, 0 ≤ I q)
-    (hI01 : ∀ q, I q = 0 ∨ I q = 1) :
-    (∏ q, (1 - I q)) ≤
-      1 - ∑ q, I q +
-        ∑ q, ∑ r ∈ (Finset.univ : Finset κ).erase q,
-          I q * I r := by
-  by_cases hone : ∃ q, I q = 1
-  · obtain ⟨q, hq⟩ := hone
-    have hprod : (∏ r, (1 - I r)) = 0 := by
-      apply Finset.prod_eq_zero (Finset.mem_univ q)
-      rw [hq]
-      norm_num
-    have hsum :
-        (∑ r, I r) =
-          1 + ∑ r ∈ (Finset.univ : Finset κ).erase q, I r := by
-      rw [← Finset.add_sum_erase
-        (Finset.univ : Finset κ) I (Finset.mem_univ q), hq]
-    have hrow :
-        (∑ r ∈ (Finset.univ : Finset κ).erase q, I r) ≤
-          ∑ a, ∑ r ∈ (Finset.univ : Finset κ).erase a,
-            I a * I r := by
-      calc
-        (∑ r ∈ (Finset.univ : Finset κ).erase q, I r) =
-            ∑ r ∈ (Finset.univ : Finset κ).erase q,
-              I q * I r := by simp [hq]
-        _ ≤ ∑ a, ∑ r ∈ (Finset.univ : Finset κ).erase a,
-              I a * I r := by
-          apply Finset.single_le_sum
-            (s := (Finset.univ : Finset κ))
-            (f := fun a =>
-              ∑ r ∈ (Finset.univ : Finset κ).erase a,
-                I a * I r)
-          · intro a _
-            exact Finset.sum_nonneg fun r _ =>
-              mul_nonneg (hI0 a) (hI0 r)
-          · exact Finset.mem_univ q
-    rw [hprod, hsum]
-    linarith
-  · have hzero : ∀ q, I q = 0 := by
-      intro q
-      exact (hI01 q).resolve_right fun hq =>
-        hone ⟨q, hq⟩
-    simp [hzero]
 
 end Wikipedia.SzemeredisTheorem
 
@@ -5049,13 +3830,6 @@ theorem conditionalMean_nonneg {Ω : Type*}
     0 ≤ conditionalMean P f x := by
   exact Finset.expect_nonneg fun y _ => hf y
 
-theorem conditionalMean_add {Ω : Type*}
-    [Fintype Ω] [DecidableEq Ω]
-    (P : Finpartition (Finset.univ : Finset Ω))
-    (f g : Ω → ℝ) (x : Ω) :
-    conditionalMean P (fun y => f y + g y) x =
-      conditionalMean P f x + conditionalMean P g x := by
-  exact Finset.expect_add_distrib (P.part x) f g
 
 theorem conditionalMean_sub {Ω : Type*}
     [Fintype Ω] [DecidableEq Ω]
@@ -5073,42 +3847,8 @@ theorem conditionalMean_smul {Ω : Type*}
       c * conditionalMean P f x := by
   exact (Finset.mul_expect (P.part x) f c).symm
 
-theorem conditionalMean_le_one {Ω : Type*}
-    [Fintype Ω] [DecidableEq Ω]
-    (P : Finpartition (Finset.univ : Finset Ω))
-    {f : Ω → ℝ} (hf : ∀ x, f x ≤ 1) (x : Ω) :
-    conditionalMean P f x ≤ 1 := by
-  apply Finset.expect_le
-  · simp
-  · exact fun y _ => hf y
 
-@[simp]
-theorem conditionalMean_const {Ω : Type*}
-    [Fintype Ω] [DecidableEq Ω]
-    (P : Finpartition (Finset.univ : Finset Ω))
-    (c : ℝ) (x : Ω) :
-    conditionalMean P (fun _ => c) x = c := by
-  rw [conditionalMean]
-  exact Finset.expect_const (by simp) c
 
-/-- Averaging a conditional average over the same partition does nothing. -/
-@[simp]
-theorem conditionalMean_idem {Ω : Type*}
-    [Fintype Ω] [DecidableEq Ω]
-    (P : Finpartition (Finset.univ : Finset Ω))
-    (f : Ω → ℝ) (x : Ω) :
-    conditionalMean P (conditionalMean P f) x =
-      conditionalMean P f x := by
-  rw [conditionalMean]
-  calc
-    Finset.expect (P.part x) (conditionalMean P f) =
-        Finset.expect (P.part x)
-          (fun _ => conditionalMean P f x) := by
-      apply Finset.expect_congr rfl
-      intro y hy
-      exact conditionalMean_eq_of_mem_part P f hy
-    _ = conditionalMean P f x :=
-      Finset.expect_const (by simp) _
 
 /-- On one atom, summing its conditional average recovers the original
 sum on that atom. -/
@@ -5203,18 +3943,6 @@ theorem partitionEnergy_le_mean_sq {Ω : Type*}
     _ = mean (fun x => f x ^ 2) :=
       mean_conditionalMean P fun x => f x ^ 2
 
-theorem partitionEnergy_le_one {Ω : Type*}
-    [Fintype Ω] [DecidableEq Ω] [Nonempty Ω]
-    (P : Finpartition (Finset.univ : Finset Ω))
-    {f : Ω → ℝ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1) :
-    partitionEnergy P f ≤ 1 := by
-  apply mean_le_of_le_const
-  intro x
-  have h0 := conditionalMean_nonneg P hf0 x
-  have h1 := conditionalMean_le_one P hf1 x
-  nlinarith [mul_nonneg h0 (sub_nonneg.mpr h1)]
 
 end Wikipedia.SzemeredisTheorem
 
@@ -5248,24 +3976,6 @@ namespace FacePartition
 
 variable {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
 
-/-- A face partition is determined by its atom lookup function. -/
-theorem ext_of_part_eq {P Q : FacePartition Ω}
-    (h : ∀ x, P.part x = Q.part x) : P = Q := by
-  apply Finpartition.ext
-  ext s
-  constructor
-  · intro hs
-    obtain ⟨x, hx⟩ := P.nonempty_of_mem_parts hs
-    have hxs : Q.part x = s :=
-      (h x).symm.trans (P.part_eq_of_mem hs hx)
-    rw [← hxs]
-    exact Q.part_mem.2 (Finset.mem_univ x)
-  · intro hs
-    obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts hs
-    have hxs : P.part x = s :=
-      (h x).trans (Q.part_eq_of_mem hs hx)
-    rw [← hxs]
-    exact P.part_mem.2 (Finset.mem_univ x)
 
 /-- Refinement shrinks the atom containing every point. -/
 theorem part_subset_of_le {P Q : FacePartition Ω}
@@ -5293,9 +4003,6 @@ theorem le_iff_part_subset {P Q : FacePartition Ω} :
 def indiscrete : FacePartition Ω :=
   ⊤
 
-/-- The discrete face partition. -/
-def discrete : FacePartition Ω :=
-  ⊥
 
 @[simp]
 theorem part_indiscrete (x : Ω) :
@@ -5309,13 +4016,6 @@ theorem part_indiscrete (x : Ω) :
     (Finpartition.parts_top_subset
       (Finset.univ : Finset Ω) hmem)
 
-@[simp]
-theorem part_discrete (x : Ω) :
-    (discrete : FacePartition Ω).part x = {x} := by
-  apply Finpartition.part_eq_of_mem
-  · rw [discrete, Finpartition.mem_bot_iff]
-    exact ⟨x, Finset.mem_univ x, rfl⟩
-  · exact Finset.mem_singleton_self x
 
 /-- Partition complexity measured by the number of atoms. -/
 def complexity (P : FacePartition Ω) : ℕ :=
@@ -5338,19 +4038,8 @@ theorem part_representative
     P.part (P.representative a) = a.1 :=
   P.part_eq_of_mem a.2 (P.representative_mem a)
 
-theorem complexity_antitone {P Q : FacePartition Ω}
-    (h : P ≤ Q) :
-    complexity Q ≤ complexity P :=
-  Finpartition.card_mono h
 
-theorem complexity_le_card (P : FacePartition Ω) :
-    complexity P ≤ Fintype.card Ω := by
-  simpa [complexity] using P.card_parts_le_card
 
-@[simp]
-theorem complexity_discrete :
-    complexity (discrete : FacePartition Ω) = Fintype.card Ω := by
-  simp [complexity, discrete]
 
 @[simp]
 theorem complexity_indiscrete [Nonempty Ω] :
@@ -5479,31 +4168,6 @@ theorem mem_part_joinFinset_iff {ι : Type*} [DecidableEq ι]
         Finset.mem_inter, Finset.mem_insert, forall_eq_or_imp,
         ih]
 
-/-- The atom count of a finite common refinement is at most the product of
-the constituent atom counts. -/
-theorem complexity_joinFinset_le [Nonempty Ω]
-    {ι : Type*} [DecidableEq ι]
-    (s : Finset ι) (P : ι → FacePartition Ω) :
-    complexity (joinFinset s P) ≤
-      ∏ i ∈ s, complexity (P i) := by
-  classical
-  induction s using Finset.induction with
-  | empty =>
-      change complexity (indiscrete : FacePartition Ω) ≤ 1
-      simp
-  | @insert a s ha ih =>
-      calc
-        complexity (joinFinset (insert a s) P) ≤
-            complexity (P a) *
-              complexity (joinFinset s P) := by
-          rw [joinFinset_insert]
-          exact complexity_join_le _ _
-        _ ≤
-            complexity (P a) *
-              (∏ i ∈ s, complexity (P i)) :=
-          Nat.mul_le_mul_left _ ih
-        _ = ∏ i ∈ insert a s, complexity (P i) := by
-          simp [ha]
 
 /-- The partition generated by a finite family of cuts.  Two points lie in
 the same atom exactly when every cut gives them the same membership bit. -/
@@ -5565,57 +4229,10 @@ theorem complexity_generatedBy_le (F : Finset (Finset Ω)) :
     complexity (generatedBy F) ≤ 2 ^ F.card := by
   exact Finpartition.card_atomise_le
 
-/-- No cuts generate the indiscrete partition. -/
-@[simp]
-theorem generatedBy_empty :
-    generatedBy (∅ : Finset (Finset Ω)) =
-      indiscrete := by
-  apply ext_of_part_eq
-  intro x
-  ext y
-  simp [mem_part_generatedBy_iff, part_indiscrete]
 
-/-- Generating by two families at once is their common refinement. -/
-theorem generatedBy_union
-    (F G : Finset (Finset Ω)) :
-    generatedBy (F ∪ G) =
-      join (generatedBy F) (generatedBy G) := by
-  apply ext_of_part_eq
-  intro x
-  ext y
-  simp only [part_join, Finset.mem_inter,
-    mem_part_generatedBy_iff]
-  simp only [Finset.mem_union]
-  constructor
-  · intro h
-    constructor
-    · intro s hs
-      exact h s (Or.inl hs)
-    · intro s hs
-      exact h s (Or.inr hs)
-  · rintro ⟨hF, hG⟩ s (hs | hs)
-    · exact hF s hs
-    · exact hG s hs
 
-/-- Adjoining one generator is one binary partition refinement. -/
-theorem generatedBy_insert
-    (A : Finset Ω) (F : Finset (Finset Ω)) :
-    generatedBy (insert A F) =
-      join (generatedBy F)
-        (generatedBy ({A} : Finset (Finset Ω))) := by
-  rw [show insert A F = F ∪ {A} by
-    ext s
-    simp]
-  exact generatedBy_union F {A}
 
-/-- The equivalence relation of belonging to the same atom. -/
-abbrev atomSetoid (P : FacePartition Ω) : Setoid Ω :=
-  Setoid.ker P.part
 
-@[simp]
-theorem atomSetoid_rel (P : FacePartition Ω) (x y : Ω) :
-    atomSetoid P x y ↔ P.part x = P.part y :=
-  Iff.rfl
 
 /-- The same-atom relation transported along a map. -/
 def pullbackSetoid {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
@@ -5673,17 +4290,6 @@ theorem mem_part_pullback_iff_image_mem {Λ : Type*}
         (Finset.mem_univ (f y))
         (Finset.mem_univ (f x))).1 h).symm
 
-/-- A pullback atom is the finite preimage of the corresponding target
-atom. -/
-theorem part_pullback_eq_filter {Λ : Type*}
-    [Fintype Λ] [DecidableEq Λ]
-    (f : Ω → Λ) (Q : FacePartition Λ) (x : Ω) :
-    (pullback f Q).part x =
-      Finset.univ.filter (fun y => f y ∈ Q.part (f x)) := by
-  ext y
-  rw [Finset.mem_filter]
-  simp only [Finset.mem_univ, true_and]
-  exact mem_part_pullback_iff_image_mem f Q x y
 
 /-- Pullback preserves refinement. -/
 theorem pullback_mono {Λ : Type*}
@@ -5696,68 +4302,8 @@ theorem pullback_mono {Λ : Type*}
   rw [mem_part_pullback_iff_image_mem] at hy ⊢
   exact part_subset_of_le h (f x) hy
 
-/-- Pullback along the identity map does not change a partition. -/
-@[simp]
-theorem pullback_id (P : FacePartition Ω) :
-    pullback id P = P := by
-  apply ext_of_part_eq
-  intro x
-  ext y
-  simp only [mem_part_pullback_iff_image_mem, id_eq]
 
-/-- Pullbacks compose. -/
-theorem pullback_comp {Λ Γ : Type*}
-    [Fintype Λ] [DecidableEq Λ]
-    [Fintype Γ] [DecidableEq Γ]
-    (f : Ω → Λ) (g : Γ → Ω) (Q : FacePartition Λ) :
-    pullback g (pullback f Q) =
-      pullback (f ∘ g) Q := by
-  apply ext_of_part_eq
-  intro x
-  ext y
-  simp only [mem_part_pullback_iff_image_mem,
-    Function.comp_apply]
 
-/-- Pullback cannot have more atoms than the target partition. -/
-theorem complexity_pullback_le {Λ : Type*}
-    [Fintype Λ] [DecidableEq Λ]
-    (f : Ω → Λ) (Q : FacePartition Λ) :
-    complexity (pullback f Q) ≤ complexity Q := by
-  classical
-  let R : FacePartition Ω := pullback f Q
-  let representative : R.parts → Ω := fun s =>
-    Classical.choose (R.nonempty_of_mem_parts s.2)
-  have representative_mem (s : R.parts) :
-      representative s ∈ s.1 :=
-    Classical.choose_spec (R.nonempty_of_mem_parts s.2)
-  let atomMap : R.parts → Q.parts := fun s =>
-    ⟨Q.part (f (representative s)),
-      Q.part_mem.2 (Finset.mem_univ _)⟩
-  have atomMap_injective : Function.Injective atomMap := by
-    intro s t hst
-    apply Subtype.ext
-    have htarget :=
-      congrArg (fun u : Q.parts => u.1) hst
-    change
-      Q.part (f (representative s)) =
-        Q.part (f (representative t)) at htarget
-    have htInPart :
-        representative t ∈ R.part (representative s) := by
-      change
-        representative t ∈
-          (pullback f Q).part (representative s)
-      exact
-        (mem_part_pullback_iff f Q
-          (representative s) (representative t)).2 htarget
-    have htInS : representative t ∈ s.1 := by
-      rw [← R.part_eq_of_mem s.2 (representative_mem s)]
-      exact htInPart
-    exact
-      R.eq_of_mem_parts s.2 t.2 htInS
-        (representative_mem t)
-  have hcard :=
-    Fintype.card_le_of_injective atomMap atomMap_injective
-  simpa only [complexity, R, Fintype.card_coe] using hcard
 
 end FacePartition
 
@@ -6001,28 +4547,7 @@ theorem partitionEnergy_mono
   exact le_add_of_nonneg_right
     (mean_nonneg fun x => sq_nonneg _)
 
-/-- The standard `[0,1]` energy bounds packaged as interval membership. -/
-theorem partitionEnergy_mem_Icc [Nonempty Ω]
-    (P : FacePartition Ω) {f : Ω → ℝ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1) :
-    partitionEnergy P f ∈ Set.Icc (0 : ℝ) 1 :=
-  ⟨partitionEnergy_nonneg P f,
-    partitionEnergy_le_one P hf0 hf1⟩
 
-/-- For a `[0,1]`-valued function, energies along a refinement lie in the
-expected monotone chain. -/
-theorem partitionEnergy_refinement_bounds [Nonempty Ω]
-    (P Q : FacePartition Ω) (hPQ : P ≤ Q)
-    {f : Ω → ℝ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1) :
-    0 ≤ partitionEnergy Q f ∧
-      partitionEnergy Q f ≤ partitionEnergy P f ∧
-      partitionEnergy P f ≤ 1 :=
-  ⟨partitionEnergy_nonneg Q f,
-    partitionEnergy_mono P Q hPQ f,
-    partitionEnergy_le_one P hf0 hf1⟩
 
 end Wikipedia.SzemeredisTheorem
 
@@ -6091,9 +4616,6 @@ theorem eval_sq (A : BooleanCutTest Ω) (x : Ω) :
   by_cases hx : x ∈ A <;> simp [hx]
 
 omit [Fintype Ω] in
-theorem eval_nonneg (A : BooleanCutTest Ω) (x : Ω) :
-    0 ≤ A.eval x := by
-  by_cases hx : x ∈ A <;> simp [hx]
 
 omit [Fintype Ω] in
 theorem eval_le_one (A : BooleanCutTest Ω) (x : Ω) :
@@ -6116,24 +4638,7 @@ theorem of_le {P Q : FacePartition Ω} {g : Ω → ℝ}
   intro x y hy
   exact hg x y (FacePartition.part_subset_of_le hPQ x hy)
 
-/-- Conditional averaging fixes measurable functions pointwise. -/
-theorem conditionalMean_eq {P : FacePartition Ω} {g : Ω → ℝ}
-    (hg : IsPartitionMeasurable P g) (x : Ω) :
-    conditionalMean P g x = g x := by
-  rw [conditionalMean]
-  calc
-    Finset.expect (P.part x) g =
-        Finset.expect (P.part x) (fun _ => g x) := by
-      apply Finset.expect_congr rfl
-      intro y hy
-      exact hg x y hy
-    _ = g x := Finset.expect_const (by simp) _
 
-/-- Every conditional average is measurable for its partition. -/
-theorem conditionalMean (P : FacePartition Ω) (f : Ω → ℝ) :
-    IsPartitionMeasurable P (conditionalMean P f) := by
-  intro x y hy
-  exact conditionalMean_eq_of_mem_part P f hy
 
 end IsPartitionMeasurable
 
@@ -6219,63 +4724,10 @@ theorem booleanCut_measurable_refineBy (S : FaceRegularityState Ω)
       (FacePartition.generatedBy ({A} : Finset (Finset Ω))))
   exact booleanCut_measurable_generatedBy A
 
-/-- One Boolean refinement multiplies partition complexity by at most two. -/
-theorem complexity_refineBy_le (S : FaceRegularityState Ω)
-    (A : BooleanCutTest Ω) :
-    FacePartition.complexity (S.refineBy A).partition ≤
-      2 * FacePartition.complexity S.partition := by
-  have hgenerated :
-      FacePartition.complexity
-          (FacePartition.generatedBy ({A} : Finset (Finset Ω))) ≤ 2 := by
-    simpa using
-      FacePartition.complexity_generatedBy_le
-        ({A} : Finset (Finset Ω))
-  calc
-    FacePartition.complexity (S.refineBy A).partition ≤
-        FacePartition.complexity S.partition *
-          FacePartition.complexity
-            (FacePartition.generatedBy
-              ({A} : Finset (Finset Ω))) :=
-      FacePartition.complexity_join_le _ _
-    _ ≤ FacePartition.complexity S.partition * 2 :=
-      Nat.mul_le_mul_left _ hgenerated
-    _ = 2 * FacePartition.complexity S.partition := by
-      omega
 
-/-- The structured component of a `[0,1]`-valued function remains
-nonnegative. -/
-theorem structured_nonneg (S : FaceRegularityState Ω)
-    {f : Ω → ℝ} (hf : ∀ x, 0 ≤ f x) (x : Ω) :
-    0 ≤ S.structured f x :=
-  conditionalMean_nonneg S.partition hf x
 
-/-- The structured component of a `[0,1]`-valued function is at most one. -/
-theorem structured_le_one (S : FaceRegularityState Ω)
-    {f : Ω → ℝ} (hf : ∀ x, f x ≤ 1) (x : Ω) :
-    S.structured f x ≤ 1 :=
-  conditionalMean_le_one S.partition hf x
 
-/-- The residual has conditional mean zero on every current atom. -/
-@[simp]
-theorem conditionalMean_residual (S : FaceRegularityState Ω)
-    (f : Ω → ℝ) (x : Ω) :
-    conditionalMean S.partition (S.residual f) x = 0 := by
-  change
-    conditionalMean S.partition
-      (fun y => f y - conditionalMean S.partition f y) x = 0
-  rw [conditionalMean_sub]
-  rw [conditionalMean_idem]
-  ring
 
-/-- The residual has global mean zero. -/
-@[simp]
-theorem mean_residual (S : FaceRegularityState Ω) (f : Ω → ℝ) :
-    mean (S.residual f) = 0 := by
-  change
-    mean (fun x => f x - conditionalMean S.partition f x) = 0
-  rw [mean_sub]
-  rw [mean_conditionalMean]
-  ring
 
 /-- Projecting the old residual onto a refinement gives exactly the change
 in structured components. -/
@@ -6411,461 +4863,28 @@ theorem energy_increment_of_booleanCut [Nonempty Ω]
     S.booleanCutCorrelation_sq_le_energyIncrement f A
   linarith
 
-/-- A state is regular against a finite family of Boolean cuts if every
-residual correlation is at most `ε` in absolute value. -/
-def IsRegularAgainst (S : FaceRegularityState Ω)
-    (f : Ω → ℝ) (cuts : Finset (BooleanCutTest Ω))
-    (ε : ℝ) : Prop :=
-  ∀ A ∈ cuts, |S.booleanCutCorrelation f A| ≤ ε
 
-/-- Failure of regularity supplies a cut whose correlation is strictly above
-the threshold. -/
-theorem exists_booleanCut_of_not_regular
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) {ε : ℝ}
-    (h : ¬ S.IsRegularAgainst f cuts ε) :
-    ∃ A ∈ cuts, ε < |S.booleanCutCorrelation f A| := by
-  classical
-  by_contra hnone
-  apply h
-  intro A hA
-  by_contra hle
-  apply hnone
-  exact ⟨A, hA, lt_of_not_ge hle⟩
 
-/-- Telescoping form of the bounded-energy argument.  A `[0,1]`-valued
-target cannot support more than unit total energy gain. -/
-theorem energy_increment_budget [Nonempty Ω]
-    (states : ℕ → FaceRegularityState Ω)
-    (f : Ω → ℝ) {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hgain : ∀ i, i < m →
-      (states i).energy f + ε ^ 2 ≤ (states (i + 1)).energy f) :
-    (m : ℝ) * ε ^ 2 ≤ 1 := by
-  have growth :
-      ∀ n : ℕ,
-        (∀ i, i < n →
-          (states i).energy f + ε ^ 2 ≤
-            (states (i + 1)).energy f) →
-        (states 0).energy f + (n : ℝ) * ε ^ 2 ≤
-          (states n).energy f := by
-    intro n
-    induction n with
-    | zero =>
-        intro _
-        simp
-    | succ n ih =>
-        intro hn
-        have hprevious := ih (fun i hi =>
-          hn i (Nat.lt_trans hi (Nat.lt_succ_self n)))
-        have hstep := hn n (Nat.lt_succ_self n)
-        calc
-          (states 0).energy f + (↑(Nat.succ n) : ℝ) * ε ^ 2 =
-              ((states 0).energy f + (n : ℝ) * ε ^ 2) +
-                ε ^ 2 := by
-            push_cast
-            ring
-          _ ≤ (states n).energy f + ε ^ 2 :=
-            by linarith
-          _ ≤ (states (Nat.succ n)).energy f := by
-            simpa [Nat.succ_eq_add_one] using hstep
-  have hgrowth := growth m hgain
-  have hnonneg :
-      0 ≤ (states 0).energy f :=
-    partitionEnergy_nonneg (states 0).partition f
-  have hupper :
-      (states m).energy f ≤ 1 :=
-    partitionEnergy_le_one (states m).partition hf0 hf1
-  linarith
 
-/-- Explicit finite termination certificate: once
-`1 < m * ε^2`, a run of `m` consecutive `ε^2` energy increments is
-impossible for a `[0,1]`-valued target. -/
-theorem no_long_energy_increment_run [Nonempty Ω]
-    (states : ℕ → FaceRegularityState Ω)
-    (f : Ω → ℝ) {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hlong : 1 < (m : ℝ) * ε ^ 2)
-    (hgain : ∀ i, i < m →
-      (states i).energy f + ε ^ 2 ≤
-        (states (i + 1)).energy f) :
-    False := by
-  have hbudget :=
-    energy_increment_budget states f hf0 hf1 hgain
-  linarith
 
-/-- A regularity loop which refines by a correlated Boolean witness must
-encounter a regular state before its energy budget is exhausted. -/
-theorem exists_regular_state_in_refinement_run [Nonempty Ω]
-    (states : ℕ → FaceRegularityState Ω)
-    (witness : ℕ → BooleanCutTest Ω)
-    (f : Ω → ℝ) (cuts : Finset (BooleanCutTest Ω))
-    {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 ≤ ε)
-    (hlong : 1 < (m : ℝ) * ε ^ 2)
-    (hrefine : ∀ i, i < m →
-      states (i + 1) = (states i).refineBy (witness i))
-    (hchoose : ∀ i, i < m →
-      ¬(states i).IsRegularAgainst f cuts ε →
-      witness i ∈ cuts ∧
-        ε ≤ |(states i).booleanCutCorrelation f (witness i)|) :
-    ∃ i, i < m ∧ (states i).IsRegularAgainst f cuts ε := by
-  by_contra hregular
-  have hnotregular :
-      ∀ i, i < m →
-        ¬(states i).IsRegularAgainst f cuts ε := by
-    intro i hi hisRegular
-    exact hregular ⟨i, hi, hisRegular⟩
-  have hgain :
-      ∀ i, i < m →
-        (states i).energy f + ε ^ 2 ≤
-          (states (i + 1)).energy f := by
-    intro i hi
-    have hcorrelation :=
-      (hchoose i hi (hnotregular i hi)).2
-    have hincrement :=
-      (states i).energy_increment_of_booleanCut
-        f (witness i) hε hcorrelation
-    rw [hrefine i hi]
-    exact hincrement
-  exact no_long_energy_increment_run
-    states f hf0 hf1 hlong hgain
 
-/-- Select a violating Boolean cut when the current state is irregular.
-At a regular state the empty cut is used, so iteration remains total. -/
-noncomputable def chosenIrregularCut
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    BooleanCutTest Ω := by
-  classical
-  exact
-    if h : S.IsRegularAgainst f cuts ε then ∅
-    else
-      Classical.choose
-        (S.exists_booleanCut_of_not_regular f cuts h)
 
-theorem chosenIrregularCut_mem
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (h : ¬S.IsRegularAgainst f cuts ε) :
-    S.chosenIrregularCut f cuts ε ∈ cuts := by
-  simp only [chosenIrregularCut, dif_neg h]
-  exact
-    (Classical.choose_spec
-      (S.exists_booleanCut_of_not_regular f cuts h)).1
 
-theorem chosenIrregularCut_correlation
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (h : ¬S.IsRegularAgainst f cuts ε) :
-    ε <
-      |S.booleanCutCorrelation f
-        (S.chosenIrregularCut f cuts ε)| := by
-  simp only [chosenIrregularCut, dif_neg h]
-  exact
-    (Classical.choose_spec
-      (S.exists_booleanCut_of_not_regular f cuts h)).2
 
-/-- The actual weak-regularity refinement run obtained by repeatedly
-adjoining the selected violating cut. -/
-noncomputable def regularityRun
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    ℕ → FaceRegularityState Ω
-  | 0 => S
-  | n + 1 =>
-      let T := regularityRun S f cuts ε n
-      T.refineBy (T.chosenIrregularCut f cuts ε)
 
-@[simp]
-theorem regularityRun_zero
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    S.regularityRun f cuts ε 0 = S :=
-  rfl
 
-@[simp]
-theorem regularityRun_succ
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (n : ℕ) :
-    S.regularityRun f cuts ε (n + 1) =
-      (S.regularityRun f cuts ε n).refineBy
-        ((S.regularityRun f cuts ε n).chosenIrregularCut
-          f cuts ε) :=
-  rfl
 
-/-- Every state in the canonical run refines the initial partition. -/
-theorem regularityRun_partition_le
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (n : ℕ) :
-    (S.regularityRun f cuts ε n).partition ≤ S.partition := by
-  induction n with
-  | zero =>
-      exact le_rfl
-  | succ n ih =>
-      exact
-        le_trans
-          ((S.regularityRun f cuts ε n).refineBy_le
-            ((S.regularityRun f cuts ε n).chosenIrregularCut
-              f cuts ε))
-          ih
 
-/-- After `n` Boolean refinements, complexity has grown by at most `2^n`. -/
-theorem regularityRun_complexity_le
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (n : ℕ) :
-    FacePartition.complexity
-        (S.regularityRun f cuts ε n).partition ≤
-      2 ^ n * FacePartition.complexity S.partition := by
-  induction n with
-  | zero =>
-      simp
-  | succ n ih =>
-      calc
-        FacePartition.complexity
-            (S.regularityRun f cuts ε (n + 1)).partition ≤
-            2 * FacePartition.complexity
-              (S.regularityRun f cuts ε n).partition := by
-          rw [regularityRun_succ]
-          exact
-            (S.regularityRun f cuts ε n).complexity_refineBy_le
-              ((S.regularityRun f cuts ε n).chosenIrregularCut
-                f cuts ε)
-        _ ≤ 2 * (2 ^ n *
-              FacePartition.complexity S.partition) :=
-          Nat.mul_le_mul_left 2 ih
-        _ = 2 ^ (n + 1) *
-              FacePartition.complexity S.partition := by
-          rw [pow_succ]
-          ring
 
-/-- The finite family of Boolean cuts adjoined during the first `n` steps
-of the canonical run. -/
-noncomputable def regularityRunCuts
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (n : ℕ) :
-    Finset (BooleanCutTest Ω) := by
-  classical
-  exact (Finset.range n).image fun i =>
-    (S.regularityRun f cuts ε i).chosenIrregularCut
-      f cuts ε
 
-@[simp]
-theorem regularityRunCuts_zero
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    S.regularityRunCuts f cuts ε 0 = ∅ := by
-  simp [regularityRunCuts]
 
-@[simp]
-theorem regularityRunCuts_succ
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (n : ℕ) :
-    S.regularityRunCuts f cuts ε (n + 1) =
-      insert
-        ((S.regularityRun f cuts ε n).chosenIrregularCut
-          f cuts ε)
-        (S.regularityRunCuts f cuts ε n) := by
-  classical
-  simp [regularityRunCuts, Finset.range_add_one]
 
-/-- If the allowed family contains the empty cut, the canonical selector
-always remains inside that family, including after regularity is reached. -/
-theorem chosenIrregularCut_mem_of_empty_mem
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (hempty : (∅ : BooleanCutTest Ω) ∈ cuts) :
-    S.chosenIrregularCut f cuts ε ∈ cuts := by
-  by_cases hregular : S.IsRegularAgainst f cuts ε
-  · simpa [chosenIrregularCut, hregular] using hempty
-  · exact S.chosenIrregularCut_mem f cuts ε hregular
 
-/-- Every cut recorded by a run belongs to the allowed cut family when that
-family contains the empty cut. -/
-theorem regularityRunCuts_subset
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (hempty : (∅ : BooleanCutTest Ω) ∈ cuts)
-    (n : ℕ) :
-    S.regularityRunCuts f cuts ε n ⊆ cuts := by
-  classical
-  intro A hA
-  obtain ⟨i, _hi, rfl⟩ := Finset.mem_image.mp hA
-  exact chosenIrregularCut_mem_of_empty_mem
-    (S.regularityRun f cuts ε i) f cuts ε hempty
 
-/-- The current run partition is exactly the input partition refined by the
-finite list of cuts recorded so far.  This retains the lower-face generator
-certificate needed by recursive removal. -/
-theorem regularityRun_partition_eq_join_generatedBy
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (n : ℕ) :
-    (S.regularityRun f cuts ε n).partition =
-      FacePartition.join S.partition
-        (FacePartition.generatedBy
-          (S.regularityRunCuts f cuts ε n)) := by
-  induction n with
-  | zero =>
-      rw [regularityRun_zero, regularityRunCuts_zero,
-        FacePartition.generatedBy_empty]
-      change S.partition = S.partition ⊓ ⊤
-      exact (inf_top_eq S.partition).symm
-  | succ n ih =>
-      let A : BooleanCutTest Ω :=
-        (S.regularityRun f cuts ε n).chosenIrregularCut
-          f cuts ε
-      calc
-        (S.regularityRun f cuts ε (n + 1)).partition =
-            FacePartition.join
-              (S.regularityRun f cuts ε n).partition
-              (FacePartition.generatedBy
-                ({A} : Finset (Finset Ω))) := by
-          rfl
-        _ =
-            FacePartition.join
-              (FacePartition.join S.partition
-                (FacePartition.generatedBy
-                  (S.regularityRunCuts f cuts ε n)))
-              (FacePartition.generatedBy
-                ({A} : Finset (Finset Ω))) := by
-          rw [ih]
-        _ =
-            FacePartition.join S.partition
-              (FacePartition.join
-                (FacePartition.generatedBy
-                  (S.regularityRunCuts f cuts ε n))
-                (FacePartition.generatedBy
-                  ({A} : Finset (Finset Ω)))) := by
-          exact inf_assoc _ _ _
-        _ =
-            FacePartition.join S.partition
-              (FacePartition.generatedBy
-                (insert A
-                  (S.regularityRunCuts f cuts ε n))) := by
-          rw [FacePartition.generatedBy_insert]
-        _ =
-            FacePartition.join S.partition
-              (FacePartition.generatedBy
-                (S.regularityRunCuts f cuts ε (n + 1))) := by
-          rw [regularityRunCuts_succ]
 
-/-- The canonical run itself reaches a regular index before the prescribed
-energy-budget cutoff. -/
-theorem exists_regular_run_index_before [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω))
-    {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 ≤ ε)
-    (hlong : 1 < (m : ℝ) * ε ^ 2) :
-    ∃ i : ℕ, i < m ∧
-      (S.regularityRun f cuts ε i).IsRegularAgainst
-        f cuts ε := by
-  exact
-    exists_regular_state_in_refinement_run
-      (S.regularityRun f cuts ε)
-      (fun n =>
-        (S.regularityRun f cuts ε n).chosenIrregularCut
-          f cuts ε)
-      f cuts hf0 hf1 hε hlong
-      (fun n _ => S.regularityRun_succ f cuts ε n)
-      (fun n _ hn =>
-        ⟨(S.regularityRun f cuts ε n).chosenIrregularCut_mem
-            f cuts ε hn,
-          le_of_lt
-            (chosenIrregularCut_correlation
-              (S.regularityRun f cuts ε n) f cuts ε hn)⟩)
 
-/-- The canonical run encounters a regular refinement before any prescribed
-energy-budget cutoff. -/
-theorem exists_regular_refinement_before [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω))
-    {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 ≤ ε)
-    (hlong : 1 < (m : ℝ) * ε ^ 2) :
-    ∃ i : ℕ, ∃ T : FaceRegularityState Ω,
-      i < m ∧
-      T.partition ≤ S.partition ∧
-      T.IsRegularAgainst f cuts ε ∧
-      FacePartition.complexity T.partition ≤
-        2 ^ i * FacePartition.complexity S.partition := by
-  obtain ⟨i, hi, hregular⟩ :=
-    S.exists_regular_run_index_before f cuts
-      hf0 hf1 hε hlong
-  exact
-    ⟨i, S.regularityRun f cuts ε i, hi,
-      S.regularityRun_partition_le f cuts ε i,
-      hregular,
-      S.regularityRun_complexity_le f cuts ε i⟩
 
-/-- A positive regularity threshold admits a finite, ambient-size-independent
-energy budget and hence a regular refinement. -/
-theorem exists_regular_refinement [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω))
-    {ε : ℝ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 < ε) :
-    ∃ m i : ℕ, ∃ T : FaceRegularityState Ω,
-      1 < (m : ℝ) * ε ^ 2 ∧
-      i < m ∧
-      T.partition ≤ S.partition ∧
-      T.IsRegularAgainst f cuts ε ∧
-      FacePartition.complexity T.partition ≤
-        2 ^ i * FacePartition.complexity S.partition := by
-  have hεsq : 0 < ε ^ 2 := sq_pos_of_pos hε
-  obtain ⟨m, hm⟩ := exists_nat_gt (1 / ε ^ 2)
-  have hlong : 1 < (m : ℝ) * ε ^ 2 := by
-    calc
-      1 = (1 / ε ^ 2) * ε ^ 2 := by
-        field_simp
-      _ < (m : ℝ) * ε ^ 2 :=
-        mul_lt_mul_of_pos_right hm hεsq
-  obtain ⟨i, T, hi, hTS, hregular, hcomplexity⟩ :=
-    S.exists_regular_refinement_before f cuts
-      hf0 hf1 hε.le hlong
-  exact
-    ⟨m, i, T, hlong, hi, hTS, hregular, hcomplexity⟩
 
-/-- In particular, one may regularize simultaneously against every Boolean
-cut on the finite face space. -/
-theorem exists_regular_refinement_allCuts [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ)
-    {ε : ℝ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 < ε) :
-    ∃ m i : ℕ, ∃ T : FaceRegularityState Ω,
-      1 < (m : ℝ) * ε ^ 2 ∧
-      i < m ∧
-      T.partition ≤ S.partition ∧
-      (∀ A : BooleanCutTest Ω,
-        |T.booleanCutCorrelation f A| ≤ ε) ∧
-      FacePartition.complexity T.partition ≤
-        2 ^ i * FacePartition.complexity S.partition := by
-  classical
-  obtain ⟨m, i, T, hlong, hi, hTS, hregular, hcomplexity⟩ :=
-    S.exists_regular_refinement f
-      (Finset.univ : Finset (BooleanCutTest Ω))
-      hf0 hf1 hε
-  refine ⟨m, i, T, hlong, hi, hTS, ?_, hcomplexity⟩
-  intro A
-  exact hregular A (Finset.mem_univ A)
 
 end FaceRegularityState
 
@@ -6898,25 +4917,8 @@ def eraseCoordinate {G : Type*} {r : ℕ}
   | zero => exact Fin.elim0 i
   | succ n => exact fun j => x (i.succAbove j)
 
-@[simp]
-theorem eraseCoordinate_apply {G : Type*} {n : ℕ}
-    (i : Fin (n + 1)) (x : Fin (n + 1) → G) (j : Fin n) :
-    eraseCoordinate i x j = x (i.succAbove j) :=
-  rfl
 
-/-- On a nonempty tuple, `eraseCoordinate` is Mathlib's `Fin.removeNth`. -/
-theorem eraseCoordinate_eq_removeNth
-    {G : Type*} {n : ℕ}
-    (i : Fin (n + 1)) (x : Fin (n + 1) → G) :
-    eraseCoordinate i x = Fin.removeNth i x :=
-  rfl
 
-@[simp]
-theorem eraseCoordinate_insertNth {G : Type*} {n : ℕ}
-    (i : Fin (n + 1)) (a : G) (x : Fin n → G) :
-    eraseCoordinate i (Fin.insertNth i a x) = x := by
-  funext j
-  simp only [eraseCoordinate_apply, Fin.insertNth_apply_succAbove]
 
 /-- A family of cut tests, one for each deleted coordinate. -/
 abbrev CutTestFamily (G : Type*) (r : ℕ) :=
@@ -6939,42 +4941,10 @@ theorem IsBoundedCutTest.le_one
     ∀ i x, u i x ≤ 1 :=
   hu.2
 
-theorem isBoundedCutTest_const
-    {G : Type*} {r : ℕ} {c : ℝ}
-    (hc0 : 0 ≤ c) (hc1 : c ≤ 1) :
-    IsBoundedCutTest (fun _ : Fin r => fun _ : Fin (r - 1) → G => c) :=
-  ⟨fun _ _ => hc0, fun _ _ => hc1⟩
 
-@[simp]
-theorem isBoundedCutTest_zero
-    {G : Type*} {r : ℕ} :
-    IsBoundedCutTest
-      (fun _ : Fin r => fun _ : Fin (r - 1) → G => (0 : ℝ)) :=
-  isBoundedCutTest_const (by positivity) (by norm_num)
 
-@[simp]
-theorem isBoundedCutTest_one
-    {G : Type*} {r : ℕ} :
-    IsBoundedCutTest
-      (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ)) :=
-  isBoundedCutTest_const (by positivity) le_rfl
 
-theorem IsBoundedCutTest.mono
-    {G : Type*} {r : ℕ} {u v : CutTestFamily G r}
-    (hu : IsBoundedCutTest u)
-    (hv0 : ∀ i x, 0 ≤ v i x)
-    (hvu : ∀ i x, v i x ≤ u i x) :
-    IsBoundedCutTest v :=
-  ⟨hv0, fun i x => (hvu i x).trans (hu.le_one i x)⟩
 
-theorem IsBoundedCutTest.mul
-    {G : Type*} {r : ℕ} {u v : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) (hv : IsBoundedCutTest v) :
-    IsBoundedCutTest (fun i x => u i x * v i x) := by
-  constructor
-  · exact fun i x => mul_nonneg (hu.nonneg i x) (hv.nonneg i x)
-  · exact fun i x => mul_le_one₀ (hu.le_one i x)
-      (hv.nonneg i x) (hv.le_one i x)
 
 /-- The cut correlation of `f-g` with a family of deleted-coordinate
 tests. -/
@@ -6995,20 +4965,7 @@ def CutDiscrepancyLe
     (∀ i x, u i x ≤ 1) →
     |cutCorrelation r f g u| ≤ ε
 
-theorem CutDiscrepancyLe.apply_bounded
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} {ε : ℝ}
-    (h : CutDiscrepancyLe r f g ε)
-    (u : CutTestFamily G r) (hu : IsBoundedCutTest u) :
-    |cutCorrelation r f g u| ≤ ε :=
-  h u hu.nonneg hu.le_one
 
-@[simp]
-theorem cutCorrelation_self
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f : G → ℝ) (u : CutTestFamily G r) :
-    cutCorrelation r f f u = 0 := by
-  simp [cutCorrelation]
 
 theorem cutCorrelation_swap
     {G : Type*} [Fintype G] [AddCommGroup G]
@@ -7031,43 +4988,10 @@ theorem cutCorrelation_swap
     _ = -cutCorrelation r f g u := by
       simp [cutCorrelation]
 
-theorem cutCorrelation_add_middle
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f g h : G → ℝ) (u : CutTestFamily G r) :
-    cutCorrelation r f h u =
-      cutCorrelation r f g u + cutCorrelation r g h u := by
-  rw [cutCorrelation, cutCorrelation, cutCorrelation, ← mean_add]
-  apply congrArg mean
-  funext x
-  ring
 
-theorem CutDiscrepancyLe.mono
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} {ε ε' : ℝ}
-    (h : CutDiscrepancyLe r f g ε) (hε : ε ≤ ε') :
-    CutDiscrepancyLe r f g ε' := by
-  intro u hu0 hu1
-  exact (h u hu0 hu1).trans hε
 
-theorem CutDiscrepancyLe.refl
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f : G → ℝ) :
-    CutDiscrepancyLe r f f 0 := by
-  intro u _ _
-  simp
 
-theorem CutDiscrepancyLe.refl_of_nonneg
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f : G → ℝ) {ε : ℝ} (hε : 0 ≤ ε) :
-    CutDiscrepancyLe r f f ε :=
-  (CutDiscrepancyLe.refl r f).mono hε
 
-theorem CutDiscrepancyLe.of_eq
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} (hfg : f = g) :
-    CutDiscrepancyLe r f g 0 := by
-  subst g
-  exact CutDiscrepancyLe.refl r f
 
 theorem CutDiscrepancyLe.symm
     {G : Type*} [Fintype G] [AddCommGroup G]
@@ -7078,118 +5002,13 @@ theorem CutDiscrepancyLe.symm
   rw [cutCorrelation_swap, abs_neg]
   exact h u hu0 hu1
 
-theorem CutDiscrepancyLe.triangle
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g h : G → ℝ} {ε δ : ℝ}
-    (hfg : CutDiscrepancyLe r f g ε)
-    (hgh : CutDiscrepancyLe r g h δ) :
-    CutDiscrepancyLe r f h (ε + δ) := by
-  intro u hu0 hu1
-  calc
-    |cutCorrelation r f h u| =
-        |cutCorrelation r f g u + cutCorrelation r g h u| := by
-      rw [cutCorrelation_add_middle]
-    _ ≤ |cutCorrelation r f g u| + |cutCorrelation r g h u| :=
-      abs_add_le _ _
-    _ ≤ ε + δ :=
-      add_le_add (hfg u hu0 hu1) (hgh u hu0 hu1)
 
-theorem CutDiscrepancyLe.epsilon_nonneg
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} {ε : ℝ}
-    (h : CutDiscrepancyLe r f g ε) :
-    0 ≤ ε := by
-  exact (abs_nonneg (cutCorrelation r f g
-    (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ)))).trans
-      (h (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ))
-        (fun _ _ => by norm_num) (fun _ _ => le_rfl))
 
-/-- Translation does not change normalized averaging on a finite additive
-group. -/
-theorem mean_add_right
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (h : G → ℝ) (c : G) :
-    mean (fun x => h (x + c)) = mean h := by
-  unfold mean
-  exact Fintype.expect_equiv (Equiv.addRight c)
-    (fun x => h (x + c)) h (fun _ => rfl)
 
-/-- For a nonempty tuple, its coordinate sum is uniformly distributed on a
-finite additive group. -/
-theorem mean_sum_fin_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (n : ℕ) (h : G → ℝ) :
-    mean (fun x : Fin (n + 1) → G => h (∑ i, x i)) = mean h := by
-  calc
-    mean (fun x : Fin (n + 1) → G => h (∑ i, x i)) =
-        mean (fun p : G × (Fin n → G) =>
-          h (p.1 + ∑ i, p.2 i)) := by
-      unfold mean
-      apply Fintype.expect_equiv
-        (Fin.insertNthEquiv (fun _ : Fin (n + 1) => G) 0).symm
-      intro x
-      congr 1
-      rw [Fin.sum_univ_succ]
-      rfl
-    _ = mean₂ (fun a : G => fun y : Fin n → G =>
-          h (a + ∑ i, y i)) := by
-      simpa [mean, mean₂] using
-        (Finset.expect_product (Finset.univ : Finset G)
-          (Finset.univ : Finset (Fin n → G))
-          (fun p : G × (Fin n → G) => h (p.1 + ∑ i, p.2 i)))
-    _ = mean₂ (fun y : Fin n → G => fun a : G =>
-          h (a + ∑ i, y i)) := mean₂_comm _
-    _ = mean (fun _ : Fin n → G => mean h) := by
-      apply congrArg mean
-      funext y
-      exact mean_add_right h (∑ i, y i)
-    _ = mean h := mean_const _
 
-theorem mean_sum_fin_of_pos
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} (hr : 0 < r) (h : G → ℝ) :
-    mean (fun x : Fin r → G => h (∑ i, x i)) = mean h := by
-  cases r with
-  | zero => simp at hr
-  | succ n => exact mean_sum_fin_succ n h
 
-@[simp]
-theorem cutCorrelation_one
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f g : G → ℝ) :
-    cutCorrelation r f g
-      (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ)) =
-    mean (fun x : Fin r → G =>
-      f (∑ i, x i) - g (∑ i, x i)) := by
-  simp [cutCorrelation]
 
-theorem cutCorrelation_one_eq_mean_sub
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} (hr : 0 < r) (f g : G → ℝ) :
-    cutCorrelation r f g
-      (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ)) =
-    mean f - mean g := by
-  calc
-    cutCorrelation r f g
-        (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ)) =
-      mean (fun x : Fin r → G =>
-        f (∑ i, x i) - g (∑ i, x i)) :=
-      cutCorrelation_one r f g
-    _ = mean (fun z : G => f z - g z) :=
-      mean_sum_fin_of_pos hr (fun z => f z - g z)
-    _ = mean f - mean g := mean_sub f g
 
-/-- The constant-one tests show that cut discrepancy controls the difference
-of the means whenever at least one coordinate is present. -/
-theorem CutDiscrepancyLe.abs_mean_sub_le
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} {ε : ℝ}
-    (h : CutDiscrepancyLe r f g ε) (hr : 0 < r) :
-    |mean f - mean g| ≤ ε := by
-  have hone := h
-    (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ))
-    (fun _ _ => by norm_num) (fun _ _ => le_rfl)
-  simpa [cutCorrelation_one_eq_mean_sub hr f g] using hone
 
 end Wikipedia.SzemeredisTheorem
 
@@ -7216,414 +5035,51 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- The tuple with prescribed coordinate sum `z` and prescribed tail `y`.
-The zeroth coordinate is the unique value making the total sum equal `z`. -/
-def sumFiberTuple {G : Type*} [AddCommGroup G]
-    (n : ℕ) (z : G) (y : Fin n → G) : Fin (n + 1) → G :=
-  Fin.cons (z - ∑ i, y i) y
 
-@[simp]
-theorem sumFiberTuple_zero {G : Type*} [AddCommGroup G]
-    (n : ℕ) (z : G) (y : Fin n → G) :
-    sumFiberTuple n z y 0 = z - ∑ i, y i :=
-  rfl
 
-@[simp]
-theorem sumFiberTuple_succ {G : Type*} [AddCommGroup G]
-    (n : ℕ) (z : G) (y : Fin n → G) (i : Fin n) :
-    sumFiberTuple n z y i.succ = y i :=
-  rfl
 
-@[simp]
-theorem sum_sumFiberTuple {G : Type*} [AddCommGroup G]
-    (n : ℕ) (z : G) (y : Fin n → G) :
-    ∑ i, sumFiberTuple n z y i = z := by
-  simp [sumFiberTuple, Fin.sum_univ_succ]
 
-/-- Splitting a nonempty tuple into its coordinate sum and its tail is an
-equivalence. -/
-def sumFiberEquiv (G : Type*) [AddCommGroup G] (n : ℕ) :
-    (Fin (n + 1) → G) ≃ G × (Fin n → G) where
-  toFun x := (∑ i, x i, Fin.tail x)
-  invFun p := sumFiberTuple n p.1 p.2
-  left_inv x := by
-    funext i
-    refine Fin.cases ?_ (fun j => ?_) i
-    · change (∑ k, x k) - ∑ j, Fin.tail x j = x 0
-      rw [Fin.sum_univ_succ]
-      change x 0 + (∑ j : Fin n, x j.succ) -
-        ∑ j : Fin n, x j.succ = x 0
-      abel
-    · rfl
-  right_inv p := by
-    apply Prod.ext
-    · exact sum_sumFiberTuple n p.1 p.2
-    · funext j
-      rfl
 
-/-- The density, relative to uniform measure on `G`, of the only nonempty
-fiber of the zero-coordinate sum map. It equals `|G|` at zero and vanishes
-elsewhere. -/
-noncomputable def zeroFiberDelta
-    {G : Type*} [Fintype G] [AddCommGroup G] (z : G) : ℝ := by
-  classical
-  exact if z = 0 then (Fintype.card G : ℝ) else 0
 
-@[simp]
-theorem zeroFiberDelta_zero
-    {G : Type*} [Fintype G] [AddCommGroup G] :
-    zeroFiberDelta (G := G) 0 = Fintype.card G := by
-  classical
-  simp [zeroFiberDelta]
 
-@[simp]
-theorem zeroFiberDelta_of_ne
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {z : G} (hz : z ≠ 0) :
-    zeroFiberDelta z = 0 := by
-  classical
-  simp [zeroFiberDelta, hz]
 
-theorem zeroFiberDelta_nonneg
-    {G : Type*} [Fintype G] [AddCommGroup G] (z : G) :
-    0 ≤ zeroFiberDelta z := by
-  classical
-  simp only [zeroFiberDelta]
-  split_ifs
-  · positivity
-  · exact le_rfl
 
-/-- The normalized fiber convolution of an arbitrary tuple weight.
 
-For `r = n + 1`, this is the average of `w` on the fiber with sum `z`,
-parametrized by `sumFiberTuple`. For `r = 0`, the scaled delta convention
-preserves the exact disintegration identity. -/
-noncomputable def fiberConvolution
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (w : (Fin r → G) → ℝ) (z : G) : ℝ := by
-  cases r with
-  | zero =>
-      exact zeroFiberDelta z * w (fun i => Fin.elim0 i)
-  | succ n =>
-      exact mean fun y : Fin n → G => w (sumFiberTuple n z y)
 
-@[simp]
-theorem fiberConvolution_arity_zero
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (w : (Fin 0 → G) → ℝ) (z : G) :
-    fiberConvolution 0 w z =
-      zeroFiberDelta z * w (fun i => Fin.elim0 i) :=
-  rfl
-
-@[simp]
-theorem fiberConvolution_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (n : ℕ) (w : (Fin (n + 1) → G) → ℝ) (z : G) :
-    fiberConvolution (n + 1) w z =
-      mean fun y : Fin n → G => w (sumFiberTuple n z y) :=
-  rfl
 
 /-- The product weight associated to a family of deleted-coordinate tests. -/
 def cutTestProduct {G : Type*} {r : ℕ}
     (u : CutTestFamily G r) (x : Fin r → G) : ℝ :=
   ∏ i, u i (eraseCoordinate i x)
 
-@[simp]
-theorem cutTestProduct_one {G : Type*} {r : ℕ} (x : Fin r → G) :
-    cutTestProduct
-      (fun _ : Fin r => fun _ : Fin (r - 1) → G => (1 : ℝ)) x = 1 := by
-  simp [cutTestProduct]
 
-theorem cutTestProduct_nonneg
-    {G : Type*} {r : ℕ} {u : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) (x : Fin r → G) :
-    0 ≤ cutTestProduct u x :=
-  Finset.prod_nonneg fun i _ => hu.nonneg i (eraseCoordinate i x)
 
-theorem cutTestProduct_le_one
-    {G : Type*} {r : ℕ} {u : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) (x : Fin r → G) :
-    cutTestProduct u x ≤ 1 :=
-  Finset.prod_le_one
-    (fun i _ => hu.nonneg i (eraseCoordinate i x))
-    (fun i _ => hu.le_one i (eraseCoordinate i x))
 
-theorem cutTestProduct_mem_Icc
-    {G : Type*} {r : ℕ} {u : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) (x : Fin r → G) :
-    cutTestProduct u x ∈ Set.Icc (0 : ℝ) 1 :=
-  ⟨cutTestProduct_nonneg hu x, cutTestProduct_le_one hu x⟩
 
-@[simp]
-theorem cutTestProduct_mul
-    {G : Type*} {r : ℕ} (u v : CutTestFamily G r)
-    (x : Fin r → G) :
-    cutTestProduct (fun i y => u i y * v i y) x =
-      cutTestProduct u x * cutTestProduct v x := by
-  simp [cutTestProduct, Finset.prod_mul_distrib]
 
-/-- The generalized convolution attached to a family of cut tests. -/
-noncomputable def generalizedConvolution
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (u : CutTestFamily G r) (z : G) : ℝ :=
-  fiberConvolution r (cutTestProduct u) z
 
-@[simp]
-theorem generalizedConvolution_arity_zero
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (u : CutTestFamily G 0) (z : G) :
-    generalizedConvolution 0 u z = zeroFiberDelta z := by
-  simp [generalizedConvolution, cutTestProduct]
 
-@[simp]
-theorem generalizedConvolution_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (n : ℕ) (u : CutTestFamily G (n + 1)) (z : G) :
-    generalizedConvolution (n + 1) u z =
-      mean fun y : Fin n → G =>
-        cutTestProduct u (sumFiberTuple n z y) :=
-  rfl
 
-theorem fiberConvolution_add
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (w v : (Fin r → G) → ℝ) (z : G) :
-    fiberConvolution r (w + v) z =
-      fiberConvolution r w z + fiberConvolution r v z := by
-  cases r with
-  | zero =>
-      rw [fiberConvolution_arity_zero, fiberConvolution_arity_zero,
-        fiberConvolution_arity_zero]
-      simp [mul_add]
-  | succ n =>
-      rw [fiberConvolution_succ, fiberConvolution_succ,
-        fiberConvolution_succ]
-      exact mean_add
-        (fun y : Fin n → G => w (sumFiberTuple n z y))
-        (fun y : Fin n → G => v (sumFiberTuple n z y))
 
-theorem fiberConvolution_smul
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (c : ℝ) (w : (Fin r → G) → ℝ) (z : G) :
-    fiberConvolution r (fun x => c * w x) z =
-      c * fiberConvolution r w z := by
-  cases r with
-  | zero =>
-      rw [fiberConvolution_arity_zero, fiberConvolution_arity_zero]
-      ring
-  | succ n =>
-      rw [fiberConvolution_succ, fiberConvolution_succ]
-      exact mean_smul c (fun y : Fin n → G =>
-        w (sumFiberTuple n z y))
 
-@[simp]
-theorem fiberConvolution_zero_weight
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (z : G) :
-    fiberConvolution r (fun _ => (0 : ℝ)) z = 0 := by
-  simpa using fiberConvolution_smul r 0 (fun _ => (1 : ℝ)) z
 
-@[simp]
-theorem fiberConvolution_const_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (n : ℕ) (c : ℝ) (z : G) :
-    fiberConvolution (n + 1) (fun _ => c) z = c := by
-  rw [fiberConvolution_succ]
-  exact mean_const c
 
-theorem fiberConvolution_linearCombination
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (a b : ℝ) (w v : (Fin r → G) → ℝ) (z : G) :
-    fiberConvolution r (fun x => a * w x + b * v x) z =
-      a * fiberConvolution r w z + b * fiberConvolution r v z := by
-  change fiberConvolution r
-    ((fun x => a * w x) + (fun x => b * v x)) z = _
-  rw [fiberConvolution_add, fiberConvolution_smul,
-    fiberConvolution_smul]
 
-theorem fiberConvolution_nonneg_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {n : ℕ} {w : (Fin (n + 1) → G) → ℝ}
-    (hw : ∀ x, 0 ≤ w x) (z : G) :
-    0 ≤ fiberConvolution (n + 1) w z := by
-  rw [fiberConvolution_succ]
-  exact mean_nonneg fun y => hw (sumFiberTuple n z y)
 
-theorem fiberConvolution_le_one_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {n : ℕ} {w : (Fin (n + 1) → G) → ℝ}
-    (hw : ∀ x, w x ≤ 1) (z : G) :
-    fiberConvolution (n + 1) w z ≤ 1 := by
-  rw [fiberConvolution_succ]
-  exact mean_le_of_le_const fun y => hw (sumFiberTuple n z y)
 
-theorem fiberConvolution_mono_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {n : ℕ} {w v : (Fin (n + 1) → G) → ℝ}
-    (hwv : ∀ x, w x ≤ v x) (z : G) :
-    fiberConvolution (n + 1) w z ≤ fiberConvolution (n + 1) v z := by
-  rw [fiberConvolution_succ, fiberConvolution_succ]
-  exact mean_mono fun y => hwv (sumFiberTuple n z y)
 
-theorem generalizedConvolution_nonneg_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {n : ℕ} {u : CutTestFamily G (n + 1)}
-    (hu : IsBoundedCutTest u) (z : G) :
-    0 ≤ generalizedConvolution (n + 1) u z :=
-  fiberConvolution_nonneg_succ (cutTestProduct_nonneg hu) z
 
-theorem generalizedConvolution_le_one_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {n : ℕ} {u : CutTestFamily G (n + 1)}
-    (hu : IsBoundedCutTest u) (z : G) :
-    generalizedConvolution (n + 1) u z ≤ 1 :=
-  fiberConvolution_le_one_succ (cutTestProduct_le_one hu) z
 
-theorem generalizedConvolution_mem_Icc
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} (hr : 0 < r) {u : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) (z : G) :
-    generalizedConvolution r u z ∈ Set.Icc (0 : ℝ) 1 := by
-  cases r with
-  | zero => simp at hr
-  | succ n =>
-      exact ⟨generalizedConvolution_nonneg_succ hu z,
-        generalizedConvolution_le_one_succ hu z⟩
 
-theorem generalizedConvolution_nonneg
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} (hr : 0 < r) {u : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) (z : G) :
-    0 ≤ generalizedConvolution r u z :=
-  (generalizedConvolution_mem_Icc hr hu z).1
 
-theorem generalizedConvolution_le_one
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} (hr : 0 < r) {u : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) (z : G) :
-    generalizedConvolution r u z ≤ 1 :=
-  (generalizedConvolution_mem_Icc hr hu z).2
 
-@[simp]
-theorem generalizedConvolution_one_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (n : ℕ) (z : G) :
-    generalizedConvolution (n + 1)
-      (fun _ : Fin (n + 1) => fun _ : Fin n → G => (1 : ℝ)) z = 1 := by
-  rw [generalizedConvolution_succ]
-  calc
-    mean (fun y : Fin n → G =>
-        cutTestProduct
-          (fun _ : Fin (n + 1) => fun _ : Fin n → G => (1 : ℝ))
-          (sumFiberTuple n z y)) =
-        mean (fun _ : Fin n → G => (1 : ℝ)) := by
-      apply congrArg mean
-      funext y
-      exact cutTestProduct_one (sumFiberTuple n z y)
-    _ = 1 := mean_const 1
 
-@[simp]
-theorem generalizedConvolution_zero_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (n : ℕ) (z : G) :
-    generalizedConvolution (n + 1)
-      (fun _ : Fin (n + 1) => fun _ : Fin n → G => (0 : ℝ)) z = 0 := by
-  rw [generalizedConvolution_succ]
-  simp [cutTestProduct]
 
-/-- Disintegration over the zero-coordinate sum map. -/
-theorem fiberConvolution_pairing_zero
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (w : (Fin 0 → G) → ℝ) (h : G → ℝ) :
-    mean (fun x : Fin 0 → G => h (∑ i, x i) * w x) =
-      mean (fun z : G => h z * fiberConvolution 0 w z) := by
-  classical
-  let e : Fin 0 → G := fun i => Fin.elim0 i
-  calc
-    mean (fun x : Fin 0 → G => h (∑ i, x i) * w x) =
-        h 0 * w e := by
-      have heq :
-          (fun x : Fin 0 → G => h (∑ i, x i) * w x) =
-            (fun _ : Fin 0 → G => h 0 * w e) := by
-        funext x
-        have hx : x = e := Subsingleton.elim _ _
-        subst x
-        simp [e]
-      rw [heq]
-      exact mean_const _
-    _ = mean (fun z : G => h z * fiberConvolution 0 w z) := by
-      rw [mean, Fintype.expect_eq_sum_div_card]
-      simp [fiberConvolution_arity_zero, zeroFiberDelta, e]
-      field_simp
 
-/-- Disintegration over the coordinate-sum map at positive arity. -/
-theorem fiberConvolution_pairing_succ
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (n : ℕ) (w : (Fin (n + 1) → G) → ℝ) (h : G → ℝ) :
-    mean (fun x : Fin (n + 1) → G => h (∑ i, x i) * w x) =
-      mean (fun z : G => h z * fiberConvolution (n + 1) w z) := by
-  calc
-    mean (fun x : Fin (n + 1) → G => h (∑ i, x i) * w x) =
-        mean (fun p : G × (Fin n → G) =>
-          h p.1 * w (sumFiberTuple n p.1 p.2)) := by
-      unfold mean
-      apply Fintype.expect_equiv (sumFiberEquiv G n)
-      intro x
-      change h (∑ i, x i) * w x =
-        h (∑ i, x i) *
-          w (sumFiberTuple n (∑ i, x i) (Fin.tail x))
-      have hx : sumFiberTuple n (∑ i, x i) (Fin.tail x) = x :=
-        (sumFiberEquiv G n).left_inv x
-      rw [hx]
-    _ = mean₂ (fun z : G => fun y : Fin n → G =>
-          h z * w (sumFiberTuple n z y)) := by
-      simpa [mean, mean₂] using
-        (Finset.expect_product (Finset.univ : Finset G)
-          (Finset.univ : Finset (Fin n → G))
-          (fun p : G × (Fin n → G) =>
-            h p.1 * w (sumFiberTuple n p.1 p.2)))
-    _ = mean (fun z : G =>
-          h z * mean (fun y : Fin n → G =>
-            w (sumFiberTuple n z y))) := by
-      apply congrArg mean
-      funext z
-      exact mean_smul (h z) _
-    _ = mean (fun z : G =>
-          h z * fiberConvolution (n + 1) w z) := by
-      rfl
 
-/-- Exact disintegration over the coordinate-sum map, including arity zero. -/
-theorem fiberConvolution_pairing
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (w : (Fin r → G) → ℝ) (h : G → ℝ) :
-    mean (fun x : Fin r → G => h (∑ i, x i) * w x) =
-      mean (fun z : G => h z * fiberConvolution r w z) := by
-  cases r with
-  | zero => exact fiberConvolution_pairing_zero w h
-  | succ n => exact fiberConvolution_pairing_succ n w h
 
-theorem mean_fiberConvolution
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (w : (Fin r → G) → ℝ) :
-    mean (fiberConvolution r w) = mean w := by
-  have hpair := fiberConvolution_pairing r w (fun _ : G => (1 : ℝ))
-  simpa using hpair.symm
 
-theorem mean_generalizedConvolution
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (u : CutTestFamily G r) :
-    mean (generalizedConvolution r u) = mean (cutTestProduct u) :=
-  mean_fiberConvolution r (cutTestProduct u)
 
-/-- A cut correlation is exactly the pairing of `f-g` with its generalized
-convolution. -/
-theorem cutCorrelation_eq_mean_mul_generalizedConvolution
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f g : G → ℝ) (u : CutTestFamily G r) :
-    cutCorrelation r f g u =
-      mean (fun z : G =>
-        (f z - g z) * generalizedConvolution r u z) := by
-  exact fiberConvolution_pairing r (cutTestProduct u)
-    (fun z => f z - g z)
 
 end Wikipedia.SzemeredisTheorem
 
@@ -7650,773 +5106,80 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped Pointwise
 
-/-- Normalized pairing on a finite probability space. -/
-noncomputable def finitePairing
-    {Ω : Type*} [Fintype Ω] (f q : Ω → ℝ) : ℝ :=
-  mean (fun x => f x * q x)
-
-theorem finitePairing_add_left
-    {Ω : Type*} [Fintype Ω]
-    (f g q : Ω → ℝ) :
-    finitePairing (f + g) q =
-      finitePairing f q + finitePairing g q := by
-  rw [finitePairing, finitePairing, finitePairing, ← mean_add]
-  apply congrArg mean
-  funext x
-  simp only [Pi.add_apply]
-  ring
-
-theorem finitePairing_add_right
-    {Ω : Type*} [Fintype Ω]
-    (f q r : Ω → ℝ) :
-    finitePairing f (q + r) =
-      finitePairing f q + finitePairing f r := by
-  rw [finitePairing, finitePairing, finitePairing, ← mean_add]
-  apply congrArg mean
-  funext x
-  simp only [Pi.add_apply]
-  ring
-
-theorem finitePairing_sub_left
-    {Ω : Type*} [Fintype Ω]
-    (f g q : Ω → ℝ) :
-    finitePairing (f - g) q =
-      finitePairing f q - finitePairing g q := by
-  rw [finitePairing, finitePairing, finitePairing, ← mean_sub]
-  apply congrArg mean
-  funext x
-  simp only [Pi.sub_apply]
-  ring
-
-theorem finitePairing_sub_right
-    {Ω : Type*} [Fintype Ω]
-    (f q r : Ω → ℝ) :
-    finitePairing f (q - r) =
-      finitePairing f q - finitePairing f r := by
-  rw [finitePairing, finitePairing, finitePairing, ← mean_sub]
-  apply congrArg mean
-  funext x
-  simp only [Pi.sub_apply]
-  ring
-
-theorem finitePairing_smul_left
-    {Ω : Type*} [Fintype Ω]
-    (c : ℝ) (f q : Ω → ℝ) :
-    finitePairing (c • f) q = c * finitePairing f q := by
-  rw [finitePairing, finitePairing, ← mean_smul]
-  apply congrArg mean
-  funext x
-  simp only [Pi.smul_apply, smul_eq_mul]
-  ring
-
-theorem finitePairing_smul_right
-    {Ω : Type*} [Fintype Ω]
-    (c : ℝ) (f q : Ω → ℝ) :
-    finitePairing f (c • q) = c * finitePairing f q := by
-  rw [finitePairing, finitePairing, ← mean_smul]
-  apply congrArg mean
-  funext x
-  simp only [Pi.smul_apply, smul_eq_mul]
-  ring
-
-theorem finitePairing_comm
-    {Ω : Type*} [Fintype Ω]
-    (f q : Ω → ℝ) :
-    finitePairing f q = finitePairing q f := by
-  apply congrArg mean
-  funext x
-  exact mul_comm _ _
-
-theorem finitePairing_mono_left
-    {Ω : Type*} [Fintype Ω]
-    {f g q : Ω → ℝ}
-    (hfg : ∀ x, f x ≤ g x) (hq : ∀ x, 0 ≤ q x) :
-    finitePairing f q ≤ finitePairing g q :=
-  mean_mono fun x => mul_le_mul_of_nonneg_right (hfg x) (hq x)
-
-theorem finitePairing_mono_right
-    {Ω : Type*} [Fintype Ω]
-    {f q r : Ω → ℝ}
-    (hf : ∀ x, 0 ≤ f x) (hqr : ∀ x, q x ≤ r x) :
-    finitePairing f q ≤ finitePairing f r :=
-  mean_mono fun x => mul_le_mul_of_nonneg_left (hqr x) (hf x)
-
-/-- Pointwise membership in the dense-model cube. -/
-def IsUnitBounded {Ω : Type*} (g : Ω → ℝ) : Prop :=
-  (∀ x, 0 ≤ g x) ∧ ∀ x, g x ≤ 1
-
-theorem IsUnitBounded.nonneg
-    {Ω : Type*} {g : Ω → ℝ} (hg : IsUnitBounded g) :
-    ∀ x, 0 ≤ g x :=
-  hg.1
-
-theorem IsUnitBounded.le_one
-    {Ω : Type*} {g : Ω → ℝ} (hg : IsUnitBounded g) :
-    ∀ x, g x ≤ 1 :=
-  hg.2
-
-theorem isUnitBounded_zero {Ω : Type*} :
-    IsUnitBounded (fun _ : Ω => (0 : ℝ)) :=
-  ⟨fun _ => le_rfl, fun _ => zero_le_one⟩
-
-theorem isUnitBounded_one {Ω : Type*} :
-    IsUnitBounded (fun _ : Ω => (1 : ℝ)) :=
-  ⟨fun _ => zero_le_one, fun _ => le_rfl⟩
-
-/-- The unit cube as a subset of the finite-dimensional function space. -/
-def unitCubeSet (Ω : Type*) : Set (Ω → ℝ) :=
-  {g | IsUnitBounded g}
-
-theorem unitCubeSet_eq_Icc (Ω : Type*) :
-    unitCubeSet Ω =
-      Set.Icc (fun _ : Ω => (0 : ℝ)) (fun _ => 1) := by
-  ext g
-  simp [unitCubeSet, IsUnitBounded, Set.mem_Icc, Pi.le_def]
-
-theorem unitCubeSet_convex (Ω : Type*) :
-    Convex ℝ (unitCubeSet Ω) := by
-  rw [unitCubeSet_eq_Icc]
-  exact convex_Icc _ _
-
-theorem unitCubeSet_compact (Ω : Type*) [Fintype Ω] :
-    IsCompact (unitCubeSet Ω) := by
-  rw [unitCubeSet_eq_Icc]
-  exact isCompact_Icc
-
-theorem unitCubeSet_closed (Ω : Type*) :
-    IsClosed (unitCubeSet Ω) := by
-  rw [unitCubeSet_eq_Icc]
-  exact isClosed_Icc
-
-theorem unitCubeSet_nonempty (Ω : Type*) :
-    (unitCubeSet Ω).Nonempty :=
-  ⟨fun _ => 0, isUnitBounded_zero⟩
-
-/-- Pairing with a fixed test as a linear functional. -/
-noncomputable def finitePairingLinearMap
-    {Ω : Type*} [Fintype Ω] (q : Ω → ℝ) :
-    (Ω → ℝ) →ₗ[ℝ] ℝ where
-  toFun f := finitePairing f q
-  map_add' f g := finitePairing_add_left f g q
-  map_smul' c f := by
-    simpa [smul_eq_mul] using finitePairing_smul_left c f q
-
-/-- Pairing is continuous because its domain is finite-dimensional. -/
-noncomputable def finitePairingCLM
-    {Ω : Type*} [Fintype Ω] (q : Ω → ℝ) :
-    (Ω → ℝ) →L[ℝ] ℝ :=
-  (finitePairingLinearMap q).toContinuousLinearMap
-
-@[simp]
-theorem finitePairingCLM_apply
-    {Ω : Type*} [Fintype Ω] (q f : Ω → ℝ) :
-    finitePairingCLM q f = finitePairing f q :=
-  rfl
-
-/-- The vector of pairings against a finite family of tests. -/
-noncomputable def finiteTestProfile
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) :
-    (Ω → ℝ) →L[ℝ] (τ → ℝ) :=
-  ContinuousLinearMap.pi (fun t => finitePairingCLM (q t))
-
-@[simp]
-theorem finiteTestProfile_apply
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (f : Ω → ℝ) (t : τ) :
-    finiteTestProfile q f t = finitePairing f (q t) :=
-  rfl
-
-/-- Coordinatewise error cube in the finite profile space. -/
-def profileErrorSet (τ : Type*) (ε : ℝ) : Set (τ → ℝ) :=
-  Set.Icc (fun _ : τ => -ε) (fun _ => ε)
-
-theorem mem_profileErrorSet_iff
-    {τ : Type*} {ε : ℝ} {e : τ → ℝ} :
-    e ∈ profileErrorSet τ ε ↔ ∀ t, |e t| ≤ ε := by
-  constructor
-  · rintro ⟨hlower, hupper⟩ t
-    exact abs_le.mpr ⟨hlower t, hupper t⟩
-  · intro h
-    exact
-      ⟨fun t => (abs_le.mp (h t)).1,
-        fun t => (abs_le.mp (h t)).2⟩
-
-theorem profileErrorSet_convex (τ : Type*) (ε : ℝ) :
-    Convex ℝ (profileErrorSet τ ε) :=
-  convex_Icc _ _
-
-theorem profileErrorSet_compact
-    (τ : Type*) [Fintype τ] (ε : ℝ) :
-    IsCompact (profileErrorSet τ ε) :=
-  isCompact_Icc
-
-theorem profileErrorSet_closed (τ : Type*) (ε : ℝ) :
-    IsClosed (profileErrorSet τ ε) :=
-  isClosed_Icc
-
-theorem profileErrorSet_nonempty
-    (τ : Type*) {ε : ℝ} (hε : 0 ≤ ε) :
-    (profileErrorSet τ ε).Nonempty := by
-  refine ⟨fun _ => 0, ?_⟩
-  rw [mem_profileErrorSet_iff]
-  intro t
-  simpa using hε
-
-/-- Profiles attainable by a dense model, enlarged by the permitted
-coordinatewise error. -/
-noncomputable def denseModelProfileSet
-    (Ω τ : Type*) [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (ε : ℝ) : Set (τ → ℝ) :=
-  finiteTestProfile q '' unitCubeSet Ω + profileErrorSet τ ε
-
-theorem denseModelProfileSet_convex
-    (Ω τ : Type*) [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (ε : ℝ) :
-    Convex ℝ (denseModelProfileSet Ω τ q ε) := by
-  change Convex ℝ
-    (finiteTestProfile q '' unitCubeSet Ω +
-      profileErrorSet τ ε)
-  exact
-    (unitCubeSet_convex Ω).linear_image
-      (finiteTestProfile q).toLinearMap |>.add
-        (profileErrorSet_convex τ ε)
-
-theorem denseModelProfileSet_compact
-    (Ω τ : Type*) [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (ε : ℝ) :
-    IsCompact (denseModelProfileSet Ω τ q ε) := by
-  change IsCompact
-    (finiteTestProfile q '' unitCubeSet Ω +
-      profileErrorSet τ ε)
-  exact
-    ((unitCubeSet_compact Ω).image
-      (finiteTestProfile q).continuous).add
-        (profileErrorSet_compact τ ε)
-
-theorem denseModelProfileSet_closed
-    (Ω τ : Type*) [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (ε : ℝ) :
-    IsClosed (denseModelProfileSet Ω τ q ε) :=
-  (denseModelProfileSet_compact Ω τ q ε).isClosed
-
-theorem denseModelProfileSet_nonempty
-    (Ω τ : Type*) [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) {ε : ℝ} (hε : 0 ≤ ε) :
-    (denseModelProfileSet Ω τ q ε).Nonempty :=
-  by
-    change
-      (finiteTestProfile q '' unitCubeSet Ω +
-        profileErrorSet τ ε).Nonempty
-    exact
-      ((unitCubeSet_nonempty Ω).image
-        (finiteTestProfile q)).add
-          (profileErrorSet_nonempty τ hε)
-
-/-- A bounded model matching `f` against every member of a finite test
-family to accuracy `ε`. -/
-def HasFiniteDenseModel
-    {Ω τ : Type*} [Fintype Ω]
-    (q : τ → Ω → ℝ) (f : Ω → ℝ) (ε : ℝ) : Prop :=
-  ∃ g : Ω → ℝ, IsUnitBounded g ∧
-    ∀ t, |finitePairing (f - g) (q t)| ≤ ε
-
-/-- Feasibility of the finite dense-model problem is exactly membership of
-the target profile in the enlarged profile set. -/
-theorem hasFiniteDenseModel_iff_profile_mem
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (f : Ω → ℝ) (ε : ℝ) :
-    HasFiniteDenseModel q f ε ↔
-      finiteTestProfile q f ∈
-        denseModelProfileSet Ω τ q ε := by
-  constructor
-  · rintro ⟨g, hg, hmatch⟩
-    change
-      finiteTestProfile q f ∈
-        finiteTestProfile q '' unitCubeSet Ω +
-          profileErrorSet τ ε
-    refine ⟨finiteTestProfile q g, ⟨g, hg, rfl⟩,
-      finiteTestProfile q (f - g), ?_, ?_⟩
-    · rw [mem_profileErrorSet_iff]
-      intro t
-      exact hmatch t
-    · ext t
-      simp only [Pi.add_apply, finiteTestProfile_apply]
-      rw [finitePairing_sub_left]
-      ring
-  · intro hmem
-    change
-      finiteTestProfile q f ∈
-        finiteTestProfile q '' unitCubeSet Ω +
-          profileErrorSet τ ε at hmem
-    rcases hmem with ⟨p, ⟨g, hg, rfl⟩, e, he, hsum⟩
-    refine ⟨g, hg, ?_⟩
-    rw [mem_profileErrorSet_iff] at he
-    intro t
-    have ht := congrFun hsum t
-    simp only [Pi.add_apply, finiteTestProfile_apply] at ht
-    rw [finitePairing_sub_left]
-    rw [← ht]
-    simpa using he t
-
-/-- Failure of the finite dense-model problem produces a nonzero continuous
-linear functional which strictly separates the target profile from every
-model profile plus every admissible error vector. -/
-theorem exists_finiteDenseModel_separator
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (f : Ω → ℝ)
-    {ε : ℝ} (hε : 0 ≤ ε)
-    (hfail : ¬HasFiniteDenseModel q f ε) :
-    ∃ L : StrongDual ℝ (τ → ℝ), L ≠ 0 ∧
-      ∀ (g : Ω → ℝ), IsUnitBounded g →
-        ∀ e ∈ profileErrorSet τ ε,
-          L (finiteTestProfile q g + e) <
-            L (finiteTestProfile q f) := by
-  have hnotmem :
-      finiteTestProfile q f ∉
-        denseModelProfileSet Ω τ q ε := by
-    simpa [hasFiniteDenseModel_iff_profile_mem] using hfail
-  obtain ⟨L, u, hleft, hright⟩ :=
-    geometric_hahn_banach_closed_point
-      (denseModelProfileSet_convex Ω τ q ε)
-      (denseModelProfileSet_closed Ω τ q ε)
-      hnotmem
-  have hLne : L ≠ 0 := by
-    obtain ⟨s, hs⟩ :=
-      denseModelProfileSet_nonempty Ω τ q hε
-    intro hzero
-    have hslt := hleft s hs
-    rw [hzero] at hslt hright
-    simp only [zero_apply] at hslt hright
-    linarith
-  refine ⟨L, hLne, ?_⟩
-  intro g hg e he
-  have hmem :
-      finiteTestProfile q g + e ∈
-        denseModelProfileSet Ω τ q ε := by
-    change
-      finiteTestProfile q g + e ∈
-        finiteTestProfile q '' unitCubeSet Ω +
-          profileErrorSet τ ε
-    exact ⟨finiteTestProfile q g, ⟨g, hg, rfl⟩,
-      e, he, rfl⟩
-  exact (hleft _ hmem).trans hright
-
-/-- Coordinates of a continuous linear functional on a finite function
-space, relative to the standard single-coordinate basis. -/
-noncomputable def dualCoefficient
-    {τ : Type*} [Fintype τ]
-    (L : StrongDual ℝ (τ → ℝ)) (t : τ) : ℝ := by
-  classical
-  exact L (Pi.single t 1)
-
-/-- Every continuous linear functional on a finite function space is the
-dot product with its coordinate vector. -/
-theorem dual_apply_eq_sum_coefficient
-    {τ : Type*} [Fintype τ]
-    (L : StrongDual ℝ (τ → ℝ)) (v : τ → ℝ) :
-    L v = ∑ t, dualCoefficient L t * v t := by
-  classical
-  calc
-    L v =
-        L (∑ t, (v t) •
-          Pi.single (M := fun _ : τ => ℝ) t 1) := by
-      rw [← pi_eq_sum_univ' v]
-    _ = ∑ t,
-        L ((v t) •
-          Pi.single (M := fun _ : τ => ℝ) t 1) := by
-      exact map_sum L _ _
-    _ = ∑ t, dualCoefficient L t * v t := by
-      apply Fintype.sum_congr
-      intro t
-      rw [map_smul]
-      simp [dualCoefficient, mul_comm]
-
-/-- The `ℓ¹` size of a coefficient vector. -/
-noncomputable def coefficientL1
-    {τ : Type*} [Fintype τ] (c : τ → ℝ) : ℝ :=
-  ∑ t, |c t|
-
-theorem coefficientL1_nonneg
-    {τ : Type*} [Fintype τ] (c : τ → ℝ) :
-    0 ≤ coefficientL1 c :=
-  Finset.sum_nonneg fun _ _ => abs_nonneg _
-
-/-- The coefficient `ℓ¹`-norm vanishes exactly on the zero vector. -/
-theorem coefficientL1_eq_zero_iff
-    {τ : Type*} [Fintype τ] (c : τ → ℝ) :
-    coefficientL1 c = 0 ↔ c = 0 := by
-  classical
-  constructor
-  · intro h
-    funext t
-    have ht : |c t| = 0 := by
-      exact
-        (Finset.sum_eq_zero_iff_of_nonneg
-          (fun i _ => abs_nonneg (c i))).mp h t
-            (Finset.mem_univ t)
-    exact abs_eq_zero.mp ht
-  · rintro rfl
-    simp [coefficientL1]
-
-/-- Scaling law for the coefficient `ℓ¹`-norm. -/
-theorem coefficientL1_smul
-    {τ : Type*} [Fintype τ] (a : ℝ) (c : τ → ℝ) :
-    coefficientL1 (a • c) = |a| * coefficientL1 c := by
-  classical
-  simp [coefficientL1, abs_mul, Finset.mul_sum]
-
-/-- A nonzero dual functional has a strictly positive coordinate
-`ℓ¹`-norm. -/
-theorem coefficientL1_dualCoefficient_pos
-    {τ : Type*} [Fintype τ]
-    {L : StrongDual ℝ (τ → ℝ)} (hL : L ≠ 0) :
-    0 < coefficientL1 (dualCoefficient L) := by
-  classical
-  have hexists : ∃ t, dualCoefficient L t ≠ 0 := by
-    by_contra h
-    push Not at h
-    apply hL
-    ext v
-    rw [dual_apply_eq_sum_coefficient]
-    simp [h]
-  obtain ⟨t, ht⟩ := hexists
-  unfold coefficientL1
-  exact Finset.sum_pos'
-    (fun i _ => abs_nonneg (dualCoefficient L i))
-    ⟨t, Finset.mem_univ t, abs_pos.mpr ht⟩
-
-/-- Linear combination of a finite test family. -/
-noncomputable def finiteTestCombination
-    {Ω τ : Type*} [Fintype τ]
-    (q : τ → Ω → ℝ) (c : τ → ℝ) : Ω → ℝ :=
-  ∑ t, c t • q t
-
-@[simp]
-theorem finiteTestCombination_zero
-    {Ω τ : Type*} [Fintype τ] (q : τ → Ω → ℝ) :
-    finiteTestCombination q 0 = 0 := by
-  classical
-  ext x
-  simp [finiteTestCombination]
-
-/-- Scaling coefficients scales the corresponding test combination. -/
-theorem finiteTestCombination_smul_coeff
-    {Ω τ : Type*} [Fintype τ]
-    (q : τ → Ω → ℝ) (a : ℝ) (c : τ → ℝ) :
-    finiteTestCombination q (a • c) =
-      a • finiteTestCombination q c := by
-  classical
-  ext x
-  simp [finiteTestCombination, Finset.mul_sum]
-  apply Fintype.sum_congr
-  intro t
-  ring
-
-/-- Pairing distributes across a finite linear combination of tests. -/
-theorem finitePairing_finiteTestCombination
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (f : Ω → ℝ) (q : τ → Ω → ℝ) (c : τ → ℝ) :
-    finitePairing f (finiteTestCombination q c) =
-      ∑ t, c t * finitePairing f (q t) := by
-  rw [finiteTestCombination]
-  unfold finitePairing mean
-  simp_rw [Finset.sum_apply, Pi.smul_apply, smul_eq_mul,
-    Finset.mul_sum]
-  rw [Finset.expect_sum_comm]
-  apply Fintype.sum_congr
-  intro t
-  calc
-    (Finset.univ.expect fun x => f x * (c t * q t x)) =
-        Finset.univ.expect (fun x => c t * (f x * q t x)) := by
-      apply Finset.expect_congr rfl
-      intro x _
-      ring
-    _ = c t *
-        Finset.univ.expect (fun x => f x * q t x) := by
-      exact (Finset.mul_expect Finset.univ
-        (fun x => f x * q t x) (c t)).symm
-
-/-- Applying a dual separator to a profile is the normalized pairing with
-the corresponding linear combination of the original tests. -/
-theorem dual_profile_eq_pairing_combination
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (L : StrongDual ℝ (τ → ℝ))
-    (q : τ → Ω → ℝ) (f : Ω → ℝ) :
-    L (finiteTestProfile q f) =
-      finitePairing f
-        (finiteTestCombination q (dualCoefficient L)) := by
-  rw [dual_apply_eq_sum_coefficient,
-    finitePairing_finiteTestCombination]
-  apply Fintype.sum_congr
-  intro t
-  rw [finiteTestProfile_apply]
-
-/-- The error vector which maximizes a dual functional on the
-coordinatewise error cube. -/
-noncomputable def dualErrorVector
-    {τ : Type*} [Fintype τ]
-    (ε : ℝ) (L : StrongDual ℝ (τ → ℝ)) : τ → ℝ :=
-  fun t => ε *
-    ((SignType.sign (dualCoefficient L t) : SignType) : ℝ)
-
-theorem dualErrorVector_mem
-    {τ : Type*} [Fintype τ]
-    {ε : ℝ} (hε : 0 ≤ ε)
-    (L : StrongDual ℝ (τ → ℝ)) :
-    dualErrorVector ε L ∈ profileErrorSet τ ε := by
-  rw [mem_profileErrorSet_iff]
-  intro t
-  rw [dualErrorVector, abs_mul, abs_of_nonneg hε]
-  have hsign :
-      |((SignType.sign (dualCoefficient L t) : SignType) : ℝ)| ≤ 1 := by
-    rw [sign_apply]
-    split_ifs <;> norm_num
-  simpa using mul_le_mul_of_nonneg_left hsign hε
-
-/-- Exact support value of the error cube under a dual functional. -/
-theorem dual_apply_dualErrorVector
-    {τ : Type*} [Fintype τ]
-    (ε : ℝ) (L : StrongDual ℝ (τ → ℝ)) :
-    L (dualErrorVector ε L) =
-      ε * coefficientL1 (dualCoefficient L) := by
-  rw [dual_apply_eq_sum_coefficient]
-  calc
-    (∑ t, dualCoefficient L t * dualErrorVector ε L t) =
-        ∑ t, ε * |dualCoefficient L t| := by
-      apply Fintype.sum_congr
-      intro t
-      rw [dualErrorVector]
-      rw [← self_mul_sign (dualCoefficient L t)]
-      ring
-    _ = ε * coefficientL1 (dualCoefficient L) := by
-      rw [coefficientL1, Finset.mul_sum]
-
-/-- Pointwise positive part. -/
-def positivePart {Ω : Type*} (q : Ω → ℝ) : Ω → ℝ :=
-  fun x => max (q x) 0
-
-@[simp]
-theorem positivePart_apply
-    {Ω : Type*} (q : Ω → ℝ) (x : Ω) :
-    positivePart q x = max (q x) 0 :=
-  rfl
-
-theorem positivePart_nonneg
-    {Ω : Type*} (q : Ω → ℝ) (x : Ω) :
-    0 ≤ positivePart q x :=
-  le_max_right _ _
-
-theorem le_positivePart
-    {Ω : Type*} (q : Ω → ℝ) (x : Ω) :
-    q x ≤ positivePart q x :=
-  le_max_left _ _
-
-@[simp]
-theorem positivePart_of_nonneg
-    {Ω : Type*} {q : Ω → ℝ} {x : Ω}
-    (hx : 0 ≤ q x) :
-    positivePart q x = q x :=
-  max_eq_left hx
-
-@[simp]
-theorem positivePart_of_nonpos
-    {Ω : Type*} {q : Ω → ℝ} {x : Ω}
-    (hx : q x ≤ 0) :
-    positivePart q x = 0 :=
-  max_eq_right hx
-
-@[simp]
-theorem positivePart_zero {Ω : Type*} :
-    positivePart (0 : Ω → ℝ) = 0 := by
-  ext x
-  simp [positivePart]
-
-/-- Positive part commutes with multiplication by a nonnegative scalar. -/
-theorem positivePart_smul_of_nonneg
-    {Ω : Type*} {a : ℝ} (ha : 0 ≤ a) (q : Ω → ℝ) :
-    positivePart (a • q) = a • positivePart q := by
-  ext x
-  simp only [positivePart, Pi.smul_apply, smul_eq_mul]
-  rw [mul_max_of_nonneg _ _ ha, mul_zero]
-
-/-- The Boolean vertex of the unit cube which maximizes pairing with `q`. -/
-noncomputable def positiveSupportIndicator
-    {Ω : Type*} (q : Ω → ℝ) : Ω → ℝ :=
-  fun x => if 0 ≤ q x then 1 else 0
-
-theorem positiveSupportIndicator_unitBounded
-    {Ω : Type*} (q : Ω → ℝ) :
-    IsUnitBounded (positiveSupportIndicator q) := by
-  constructor <;> intro x <;>
-    simp only [positiveSupportIndicator] <;>
-    split <;> norm_num
-
-@[simp]
-theorem positiveSupportIndicator_mul
-    {Ω : Type*} (q : Ω → ℝ) (x : Ω) :
-    positiveSupportIndicator q x * q x =
-      positivePart q x := by
-  by_cases hx : 0 ≤ q x
-  · simp [positiveSupportIndicator, positivePart, hx]
-  · have hx' : q x ≤ 0 := le_of_not_ge hx
-    simp [positiveSupportIndicator, positivePart, hx, hx']
-
-/-- Exact support function of the pointwise unit cube. -/
-theorem finitePairing_positiveSupportIndicator
-    {Ω : Type*} [Fintype Ω] (q : Ω → ℝ) :
-    finitePairing (positiveSupportIndicator q) q =
-      mean (positivePart q) := by
-  apply congrArg mean
-  funext x
-  exact positiveSupportIndicator_mul q x
-
-/-- Every `[0,1]`-valued function pairs with `q` below the positive-part
-support function. -/
-theorem finitePairing_le_mean_positivePart
-    {Ω : Type*} [Fintype Ω]
-    {g q : Ω → ℝ} (hg : IsUnitBounded g) :
-    finitePairing g q ≤ mean (positivePart q) := by
-  apply mean_mono
-  intro x
-  by_cases hx : 0 ≤ q x
-  · rw [positivePart_of_nonneg hx]
-    exact mul_le_of_le_one_left hx (hg.le_one x)
-  · rw [positivePart_of_nonpos (le_of_not_ge hx)]
-    exact mul_nonpos_of_nonneg_of_nonpos
-      (hg.nonneg x) (le_of_not_ge hx)
-
-/-- Domination by a majorant turns an arbitrary separator into a
-positive-part test of the majorant. -/
-theorem finitePairing_le_majorant_positivePart
-    {Ω : Type*} [Fintype Ω]
-    {f ν q : Ω → ℝ}
-    (hf0 : ∀ x, 0 ≤ f x) (hfν : ∀ x, f x ≤ ν x) :
-    finitePairing f q ≤ finitePairing ν (positivePart q) := by
-  apply mean_mono
-  intro x
-  by_cases hx : 0 ≤ q x
-  · rw [positivePart_of_nonneg hx]
-    exact mul_le_mul_of_nonneg_right (hfν x) hx
-  · rw [positivePart_of_nonpos (le_of_not_ge hx), mul_zero]
-    exact mul_nonpos_of_nonneg_of_nonpos
-      (hf0 x) (le_of_not_ge hx)
-
-/-- The pairing of the constant-one function is the mean. -/
-@[simp]
-theorem finitePairing_one_left
-    {Ω : Type*} [Fintype Ω] (q : Ω → ℝ) :
-    finitePairing (fun _ : Ω => (1 : ℝ)) q = mean q := by
-  simp [finitePairing]
-
-/-- Core dual contradiction in the dense-model theorem.  If one separator
-beats every function in the unit cube by a strict gap `δ`, then `ν - 1`
-correlates with its positive part by more than `δ`. -/
-theorem majorant_positivePart_correlation_of_separates_unitCube
-    {Ω : Type*} [Fintype Ω]
-    {f ν q : Ω → ℝ} {δ : ℝ}
-    (hf0 : ∀ x, 0 ≤ f x) (hfν : ∀ x, f x ≤ ν x)
-    (hsep :
-      ∀ g : Ω → ℝ, IsUnitBounded g →
-        finitePairing g q + δ < finitePairing f q) :
-    δ < finitePairing (ν - fun _ => 1) (positivePart q) := by
-  have hsupport := hsep (positiveSupportIndicator q)
-    (positiveSupportIndicator_unitBounded q)
-  rw [finitePairing_positiveSupportIndicator] at hsupport
-  have hmajorant :
-      finitePairing f q ≤ finitePairing ν (positivePart q) :=
-    finitePairing_le_majorant_positivePart
-      (q := q) hf0 hfν
-  rw [finitePairing_sub_left, finitePairing_one_left]
-  linarith
-
-/-- The exact dual pseudorandomness hypothesis needed for a finite family
-of tests.  It is homogeneous in the coefficients, so no separate
-normalization convention is required. -/
-def HasPositivePartCorrelationBound
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (ν : Ω → ℝ) (ε : ℝ) : Prop :=
-  ∀ c : τ → ℝ,
-    finitePairing (ν - fun _ => 1)
-        (positivePart (finiteTestCombination q c)) ≤
-      ε * coefficientL1 c
-
-/-- Unit-`ℓ¹` form of the positive-part pseudorandomness hypothesis. -/
-def HasNormalizedPositivePartCorrelationBound
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (ν : Ω → ℝ) (ε : ℝ) : Prop :=
-  ∀ c : τ → ℝ, coefficientL1 c = 1 →
-    finitePairing (ν - fun _ => 1)
-        (positivePart (finiteTestCombination q c)) ≤ ε
-
-/-- It suffices to verify the positive-part correlation estimate for
-coefficient vectors of `ℓ¹`-norm one. -/
-theorem hasPositivePartCorrelationBound_of_normalized
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) (ν : Ω → ℝ) (ε : ℝ)
-    (h :
-      HasNormalizedPositivePartCorrelationBound q ν ε) :
-    HasPositivePartCorrelationBound q ν ε := by
-  intro c
-  by_cases hc : coefficientL1 c = 0
-  · have hc0 : c = 0 :=
-      (coefficientL1_eq_zero_iff c).mp hc
-    subst c
-    rw [hc]
-    simp [finitePairing, positivePart]
-  · have hcpos : 0 < coefficientL1 c :=
-      lt_of_le_of_ne (coefficientL1_nonneg c) (Ne.symm hc)
-    let A := coefficientL1 c
-    let c' : τ → ℝ := A⁻¹ • c
-    have hApos : 0 < A := hcpos
-    have hc'L1 : coefficientL1 c' = 1 := by
-      change coefficientL1 (A⁻¹ • c) = 1
-      rw [coefficientL1_smul, abs_of_pos (inv_pos.mpr hApos)]
-      exact inv_mul_cancel₀ hApos.ne'
-    have hnormalized := h c' hc'L1
-    have hcombination :
-        finiteTestCombination q c' =
-          A⁻¹ • finiteTestCombination q c := by
-      exact finiteTestCombination_smul_coeff q A⁻¹ c
-    rw [hcombination,
-      positivePart_smul_of_nonneg (inv_nonneg.mpr hApos.le),
-      finitePairing_smul_right] at hnormalized
-    have hmul :=
-      mul_le_mul_of_nonneg_left hnormalized hApos.le
-    rw [← mul_assoc, mul_inv_cancel₀ hApos.ne', one_mul] at hmul
-    simpa [A, mul_comm] using hmul
-
-/-- Finite dense-model theorem.  A majorized nonnegative function admits a
-`[0,1]`-valued model against every test in a finite family whenever the
-majorant obeys the homogeneous positive-part correlation bound. -/
-theorem hasFiniteDenseModel_of_positivePartCorrelationBound
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (q : τ → Ω → ℝ) {f ν : Ω → ℝ} {ε : ℝ}
-    (hε : 0 ≤ ε)
-    (hf0 : ∀ x, 0 ≤ f x) (hfν : ∀ x, f x ≤ ν x)
-    (hpseudo : HasPositivePartCorrelationBound q ν ε) :
-    HasFiniteDenseModel q f ε := by
-  by_contra hfail
-  obtain ⟨L, _hL, hsep⟩ :=
-    exists_finiteDenseModel_separator q f hε hfail
-  have hsepPair :
-      ∀ g : Ω → ℝ, IsUnitBounded g →
-        finitePairing g
-            (finiteTestCombination q (dualCoefficient L)) +
-              ε * coefficientL1 (dualCoefficient L) <
-          finitePairing f
-            (finiteTestCombination q (dualCoefficient L)) := by
-    intro g hg
-    have h := hsep g hg (dualErrorVector ε L)
-      (dualErrorVector_mem hε L)
-    rw [map_add, dual_profile_eq_pairing_combination,
-      dual_apply_dualErrorVector,
-      dual_profile_eq_pairing_combination] at h
-    exact h
-  have hpositive :=
-    majorant_positivePart_correlation_of_separates_unitCube
-      hf0 hfν hsepPair
-  exact (not_lt_of_ge (hpseudo (dualCoefficient L))) hpositive
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 end Wikipedia.SzemeredisTheorem
 
@@ -8448,431 +5211,34 @@ open scoped BigOperators Polynomial
 
 /-! ## Finite products and polynomial expansions -/
 
-/-- Product of a finite sequence of tests.  The degree-zero monomial is the
-constant-one function. -/
-def testMonomial
-    {Ω τ : Type*} (q : τ → Ω → ℝ)
-    {n : ℕ} (s : Fin n → τ) : Ω → ℝ :=
-  fun x => ∏ i, q (s i) x
 
-@[simp]
-theorem testMonomial_apply
-    {Ω τ : Type*} (q : τ → Ω → ℝ)
-    {n : ℕ} (s : Fin n → τ) (x : Ω) :
-    testMonomial q s x = ∏ i, q (s i) x :=
-  rfl
 
-/-- Sum of the absolute values of the coefficients of a polynomial. -/
-noncomputable def polynomialCoefficientL1 (p : ℝ[X]) : ℝ :=
-  ∑ n ∈ p.support, |p.coeff n|
 
-theorem polynomialCoefficientL1_nonneg (p : ℝ[X]) :
-    0 ≤ polynomialCoefficientL1 p :=
-  Finset.sum_nonneg fun _ _ => abs_nonneg _
 
-@[simp]
-theorem finiteTestCombination_apply
-    {Ω τ : Type*} [Fintype τ]
-    (q : τ → Ω → ℝ) (c : τ → ℝ) (x : Ω) :
-    finiteTestCombination q c x = ∑ t, c t * q t x := by
-  classical
-  simp [finiteTestCombination]
 
-/-- Pairing commutes with a finite sum in its right input. -/
-theorem finitePairing_finset_sum_right
-    {Ω κ : Type*} [Fintype Ω]
-    (f : Ω → ℝ) (s : Finset κ) (q : κ → Ω → ℝ) :
-    finitePairing f (fun x => ∑ i ∈ s, q i x) =
-      ∑ i ∈ s, finitePairing f (q i) := by
-  classical
-  unfold finitePairing mean
-  calc
-    (𝔼 x, f x * ∑ i ∈ s, q i x) =
-        𝔼 x, ∑ i ∈ s, f x * q i x := by
-      apply Finset.expect_congr rfl
-      intro x _
-      rw [Finset.mul_sum]
-    _ = ∑ i ∈ s, 𝔼 x, f x * q i x := by
-      exact Finset.expect_sum_comm Finset.univ s _
 
-/-- Pairing commutes with a sum over a finite type in its right input. -/
-theorem finitePairing_fintype_sum_right
-    {Ω κ : Type*} [Fintype Ω] [Fintype κ]
-    (f : Ω → ℝ) (q : κ → Ω → ℝ) :
-    finitePairing f (fun x => ∑ i, q i x) =
-      ∑ i, finitePairing f (q i) := by
-  simpa using finitePairing_finset_sum_right f Finset.univ q
 
-/-- Exact ordered expansion of a power of a finite test combination. -/
-theorem finiteTestCombination_pow_eq_sum_monomials
-    {Ω τ : Type*} [Fintype τ]
-    (q : τ → Ω → ℝ) (c : τ → ℝ)
-    (n : ℕ) (x : Ω) :
-    (finiteTestCombination q c x) ^ n =
-      ∑ s : Fin n → τ,
-        (∏ i, c (s i)) * testMonomial q s x := by
-  classical
-  rw [finiteTestCombination_apply, Fintype.sum_pow]
-  apply Fintype.sum_congr
-  intro s
-  rw [Finset.prod_mul_distrib]
-  rfl
 
-/-- Exact pointwise expansion of a polynomial evaluated on a finite test
-combination. -/
-theorem polynomial_eval_finiteTestCombination
-    {Ω τ : Type*} [Fintype τ]
-    (p : ℝ[X]) (q : τ → Ω → ℝ) (c : τ → ℝ) (x : Ω) :
-    p.eval (finiteTestCombination q c x) =
-      ∑ n ∈ p.support,
-        ∑ s : Fin n → τ,
-          (p.coeff n * ∏ i, c (s i)) *
-            testMonomial q s x := by
-  classical
-  rw [Polynomial.eval_eq_sum]
-  change
-    (∑ n ∈ p.support,
-      p.coeff n * (finiteTestCombination q c x) ^ n) = _
-  apply Finset.sum_congr rfl
-  intro n hn
-  rw [finiteTestCombination_pow_eq_sum_monomials,
-    Finset.mul_sum]
-  apply Fintype.sum_congr
-  intro s
-  ring
 
-/-- Exact expansion after pairing a polynomial in a test combination with
-an arbitrary function. -/
-theorem finitePairing_polynomial_eval_finiteTestCombination
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    (f : Ω → ℝ) (p : ℝ[X])
-    (q : τ → Ω → ℝ) (c : τ → ℝ) :
-    finitePairing f
-        (fun x => p.eval (finiteTestCombination q c x)) =
-      ∑ n ∈ p.support,
-        ∑ s : Fin n → τ,
-          (p.coeff n * ∏ i, c (s i)) *
-            finitePairing f (testMonomial q s) := by
-  classical
-  have heval :
-      (fun x => p.eval (finiteTestCombination q c x)) =
-        fun x => ∑ n ∈ p.support,
-          ∑ s : Fin n → τ,
-            (p.coeff n * ∏ i, c (s i)) *
-              testMonomial q s x := by
-    funext x
-    exact polynomial_eval_finiteTestCombination p q c x
-  rw [heval, finitePairing_finset_sum_right]
-  apply Finset.sum_congr rfl
-  intro n hn
-  rw [finitePairing_fintype_sum_right]
-  apply Fintype.sum_congr
-  intro s
-  change
-    finitePairing f
-        ((p.coeff n * ∏ i, c (s i)) • testMonomial q s) =
-      _
-  exact
-    finitePairing_smul_right
-      (p.coeff n * ∏ i, c (s i)) f (testMonomial q s)
 
-/-- The sum of absolute ordered monomial coefficients is the corresponding
-power of the coefficient `ℓ¹`-norm. -/
-theorem sum_abs_coefficientMonomial
-    {τ : Type*} [Fintype τ]
-    (c : τ → ℝ) (n : ℕ) :
-    ∑ s : Fin n → τ, |∏ i, c (s i)| =
-      coefficientL1 c ^ n := by
-  classical
-  unfold coefficientL1
-  rw [Fintype.sum_pow]
-  apply Fintype.sum_congr
-  intro s
-  rw [Finset.abs_prod]
 
-/-- Uniform correlation estimate for all products of at most `d` tests. -/
-def HasMonomialCorrelationBound
-    {Ω τ : Type*} [Fintype Ω]
-    (q : τ → Ω → ℝ) (ν : Ω → ℝ)
-    (d : ℕ) (η : ℝ) : Prop :=
-  ∀ (n : ℕ), n ≤ d → ∀ s : Fin n → τ,
-    |finitePairing (ν - fun _ => 1) (testMonomial q s)| ≤ η
 
-/-- Expanding a polynomial loses at most the coefficient `ℓ¹`-norm when the
-coefficient vector of the test combination is normalized. -/
-theorem abs_finitePairing_polynomial_eval_le
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    {q : τ → Ω → ℝ} {ν : Ω → ℝ}
-    {η : ℝ} (p : ℝ[X]) (c : τ → ℝ)
-    (hc : coefficientL1 c = 1)
-    (hmono :
-      HasMonomialCorrelationBound q ν p.natDegree η) :
-    |finitePairing (ν - fun _ => 1)
-        (fun x => p.eval (finiteTestCombination q c x))| ≤
-      polynomialCoefficientL1 p * η := by
-  classical
-  rw [finitePairing_polynomial_eval_finiteTestCombination]
-  calc
-    |∑ n ∈ p.support,
-        ∑ s : Fin n → τ,
-          (p.coeff n * ∏ i, c (s i)) *
-            finitePairing (ν - fun _ => 1)
-              (testMonomial q s)| ≤
-        ∑ n ∈ p.support,
-          |∑ s : Fin n → τ,
-            (p.coeff n * ∏ i, c (s i)) *
-              finitePairing (ν - fun _ => 1)
-                (testMonomial q s)| := by
-      exact Finset.abs_sum_le_sum_abs _ _
-    _ ≤ ∑ n ∈ p.support, |p.coeff n| * η := by
-      apply Finset.sum_le_sum
-      intro n hn
-      calc
-        |∑ s : Fin n → τ,
-            (p.coeff n * ∏ i, c (s i)) *
-              finitePairing (ν - fun _ => 1)
-                (testMonomial q s)| ≤
-            ∑ s : Fin n → τ,
-              |(p.coeff n * ∏ i, c (s i)) *
-                finitePairing (ν - fun _ => 1)
-                  (testMonomial q s)| := by
-          exact Finset.abs_sum_le_sum_abs _ _
-        _ ≤ ∑ s : Fin n → τ,
-              |p.coeff n| * |∏ i, c (s i)| * η := by
-          apply Finset.sum_le_sum
-          intro s hs
-          rw [abs_mul, abs_mul]
-          exact mul_le_mul_of_nonneg_left
-            (hmono n
-              (Polynomial.le_natDegree_of_mem_supp n hn) s)
-            (mul_nonneg (abs_nonneg _) (abs_nonneg _))
-        _ = |p.coeff n| *
-              (∑ s : Fin n → τ, |∏ i, c (s i)|) * η := by
-          rw [Finset.mul_sum, Finset.sum_mul]
-        _ = |p.coeff n| * η := by
-          rw [sum_abs_coefficientMonomial, hc, one_pow, mul_one]
-    _ = polynomialCoefficientL1 p * η := by
-      rw [polynomialCoefficientL1, Finset.sum_mul]
 
 /-! ## Bounded combinations and approximation of positive part -/
 
-/-- Every member of a finite test family is pointwise in `[0,1]`. -/
-def IsUnitBoundedTestFamily
-    {Ω τ : Type*} (q : τ → Ω → ℝ) : Prop :=
-  ∀ t, IsUnitBounded (q t)
 
-/-- A test combination is pointwise bounded by the coefficient `ℓ¹`-norm
-when every test is `[0,1]`-valued. -/
-theorem abs_finiteTestCombination_le_coefficientL1
-    {Ω τ : Type*} [Fintype τ]
-    {q : τ → Ω → ℝ}
-    (hq : IsUnitBoundedTestFamily q)
-    (c : τ → ℝ) (x : Ω) :
-    |finiteTestCombination q c x| ≤ coefficientL1 c := by
-  classical
-  rw [finiteTestCombination_apply]
-  calc
-    |∑ t, c t * q t x| ≤ ∑ t, |c t * q t x| :=
-      Finset.abs_sum_le_sum_abs _ _
-    _ ≤ ∑ t, |c t| := by
-      apply Finset.sum_le_sum
-      intro t ht
-      rw [abs_mul]
-      have habs : |q t x| ≤ 1 := by
-        rw [abs_le]
-        constructor
-        · linarith [(hq t).nonneg x]
-        · exact (hq t).le_one x
-      exact mul_le_of_le_one_right (abs_nonneg (c t)) habs
-    _ = coefficientL1 c := by
-      rfl
 
-/-- A normalized test combination takes values in `[-1,1]`. -/
-theorem finiteTestCombination_mem_unitInterval
-    {Ω τ : Type*} [Fintype τ]
-    {q : τ → Ω → ℝ}
-    (hq : IsUnitBoundedTestFamily q)
-    {c : τ → ℝ} (hc : coefficientL1 c = 1)
-    (x : Ω) :
-    finiteTestCombination q c x ∈ Set.Icc (-1 : ℝ) 1 := by
-  rw [Set.mem_Icc, ← abs_le]
-  simpa [hc] using
-    abs_finiteTestCombination_le_coefficientL1 hq c x
 
-/-- A polynomial uniformly approximates positive part on the unit interval
-to the displayed error. -/
-def ApproximatesPositivePartOnUnitInterval
-    (p : ℝ[X]) (δ : ℝ) : Prop :=
-  ∀ x ∈ Set.Icc (-1 : ℝ) 1,
-    |p.eval x - max x 0| ≤ δ
 
-/-- Weierstrass approximation for positive part on `[-1,1]`. -/
-theorem exists_polynomial_approximating_positivePart
-    {δ : ℝ} (hδ : 0 < δ) :
-    ∃ p : ℝ[X], ApproximatesPositivePartOnUnitInterval p δ := by
-  have hcontinuous :
-      ContinuousOn (fun x : ℝ => max x 0)
-        (Set.Icc (-1 : ℝ) 1) :=
-    (continuous_id.max continuous_const).continuousOn
-  obtain ⟨p, hp⟩ :=
-    exists_polynomial_near_of_continuousOn
-      (-1 : ℝ) 1 (fun x : ℝ => max x 0)
-      hcontinuous δ hδ
-  exact ⟨p, fun x hx => (hp x hx).le⟩
 
-/-- Pointwise polynomial approximation after substituting a normalized test
-combination. -/
-theorem polynomial_eval_approximates_positivePart_combination
-    {Ω τ : Type*} [Fintype τ]
-    {q : τ → Ω → ℝ}
-    (hq : IsUnitBoundedTestFamily q)
-    {p : ℝ[X]} {δ : ℝ}
-    (hp : ApproximatesPositivePartOnUnitInterval p δ)
-    {c : τ → ℝ} (hc : coefficientL1 c = 1)
-    (x : Ω) :
-    |p.eval (finiteTestCombination q c x) -
-        positivePart (finiteTestCombination q c) x| ≤ δ := by
-  exact hp _ (finiteTestCombination_mem_unitInterval hq hc x)
 
 /-! ## Quantitative positive-part correlation -/
 
-/-- An error bounded pointwise by `δ` contributes at most `δ` times the
-mean absolute size of the left factor to a normalized pairing. -/
-theorem abs_finitePairing_le_mul_mean_abs
-    {Ω : Type*} [Fintype Ω]
-    (f e : Ω → ℝ) {δ : ℝ}
-    (he : ∀ x, |e x| ≤ δ) :
-    |finitePairing f e| ≤ δ * mean (fun x => |f x|) := by
-  calc
-    |finitePairing f e| ≤ mean (fun x => |f x * e x|) := by
-      unfold finitePairing mean
-      exact Finset.abs_expect_le Finset.univ _
-    _ ≤ mean (fun x => δ * |f x|) := by
-      apply mean_mono
-      intro x
-      rw [abs_mul]
-      have hmul :=
-        mul_le_mul_of_nonneg_left (he x) (abs_nonneg (f x))
-      simpa [mul_comm] using hmul
-    _ = δ * mean (fun x => |f x|) :=
-      mean_smul δ _
 
-/-- The absolute mean of the centered majorant. -/
-noncomputable def centeredAbsoluteMean
-    {Ω : Type*} [Fintype Ω] (ν : Ω → ℝ) : ℝ :=
-  mean fun x => |ν x - 1|
 
-theorem centeredAbsoluteMean_nonneg
-    {Ω : Type*} [Fintype Ω] (ν : Ω → ℝ) :
-    0 ≤ centeredAbsoluteMean ν :=
-  mean_nonneg fun _ => abs_nonneg _
 
-/-- For a nonnegative majorant, its centered absolute mean is bounded by
-its mean plus one. -/
-theorem centeredAbsoluteMean_le_mean_add_one
-    {Ω : Type*} [Fintype Ω] [Nonempty Ω]
-    {ν : Ω → ℝ} (hν : ∀ x, 0 ≤ ν x) :
-    centeredAbsoluteMean ν ≤ mean ν + 1 := by
-  unfold centeredAbsoluteMean
-  calc
-    mean (fun x => |ν x - 1|) ≤
-        mean (fun x => ν x + 1) := by
-      apply mean_mono
-      intro x
-      rw [abs_le]
-      constructor <;> linarith [hν x]
-    _ = mean ν + mean (fun _ : Ω => (1 : ℝ)) :=
-      mean_add _ _
-    _ = mean ν + 1 := by
-      rw [mean_const]
 
-/-- Polynomial approximation plus monomial correlation estimates imply the
-normalized positive-part correlation bound used by dense-model duality. -/
-theorem hasNormalizedPositivePartCorrelationBound_of_polynomial
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    {q : τ → Ω → ℝ} {ν : Ω → ℝ}
-    (hq : IsUnitBoundedTestFamily q)
-    {p : ℝ[X]} {δ η M : ℝ}
-    (hδ : 0 ≤ δ)
-    (hp : ApproximatesPositivePartOnUnitInterval p δ)
-    (hM : centeredAbsoluteMean ν ≤ M)
-    (hmono :
-      HasMonomialCorrelationBound q ν p.natDegree η) :
-    HasNormalizedPositivePartCorrelationBound q ν
-      (polynomialCoefficientL1 p * η + δ * M) := by
-  intro c hc
-  let Q := finiteTestCombination q c
-  let P : Ω → ℝ := fun x => p.eval (Q x)
-  have hpoly :
-      finitePairing (ν - fun _ => 1) P ≤
-        polynomialCoefficientL1 p * η := by
-    exact le_trans (le_abs_self _) <|
-      abs_finitePairing_polynomial_eval_le p c hc hmono
-  have hpoint :
-      ∀ x, |positivePart Q x - P x| ≤ δ := by
-    intro x
-    have hx :=
-      polynomial_eval_approximates_positivePart_combination
-        hq hp hc x
-    simpa [Q, P, abs_sub_comm] using hx
-  have herr0 :
-      |finitePairing (ν - fun _ => 1)
-        (positivePart Q - P)| ≤
-          δ * centeredAbsoluteMean ν := by
-    have hbase :=
-      abs_finitePairing_le_mul_mean_abs
-        (ν - fun _ => 1) (positivePart Q - P)
-        (by
-          intro x
-          simpa using hpoint x)
-    have hcentered :
-        (fun x =>
-          |(ν - (fun _ : Ω => (1 : ℝ))) x|) =
-          (fun x => |ν x - 1|) := by
-      funext x
-      rfl
-    rw [hcentered] at hbase
-    exact hbase
-  have herr :
-      finitePairing (ν - fun _ => 1)
-          (positivePart Q - P) ≤ δ * M := by
-    calc
-      finitePairing (ν - fun _ => 1)
-          (positivePart Q - P) ≤
-          |finitePairing (ν - fun _ => 1)
-            (positivePart Q - P)| :=
-        le_abs_self _
-      _ ≤ δ * centeredAbsoluteMean ν := herr0
-      _ ≤ δ * M :=
-        mul_le_mul_of_nonneg_left hM hδ
-  have hsplit :
-      finitePairing (ν - fun _ => 1) (positivePart Q) =
-        finitePairing (ν - fun _ => 1) P +
-          finitePairing (ν - fun _ => 1)
-            (positivePart Q - P) := by
-    rw [← finitePairing_add_right]
-    congr 1
-    funext x
-    simp
-  rw [hsplit]
-  exact add_le_add hpoly herr
 
-/-- Homogeneous form of the polynomial dense-model estimate. -/
-theorem hasPositivePartCorrelationBound_of_polynomial
-    {Ω τ : Type*} [Fintype Ω] [Fintype τ]
-    {q : τ → Ω → ℝ} {ν : Ω → ℝ}
-    (hq : IsUnitBoundedTestFamily q)
-    {p : ℝ[X]} {δ η M : ℝ}
-    (hδ : 0 ≤ δ)
-    (hp : ApproximatesPositivePartOnUnitInterval p δ)
-    (hM : centeredAbsoluteMean ν ≤ M)
-    (hmono :
-      HasMonomialCorrelationBound q ν p.natDegree η) :
-    HasPositivePartCorrelationBound q ν
-      (polynomialCoefficientL1 p * η + δ * M) :=
-  hasPositivePartCorrelationBound_of_normalized q ν _
-    (hasNormalizedPositivePartCorrelationBound_of_polynomial
-      hq hδ hp hM hmono)
 
 end Wikipedia.SzemeredisTheorem
 
@@ -9018,13 +5384,6 @@ def cutTestFamilyOfBooleanAssignment
     CutTestFamily G r :=
   fun i y => booleanValue b ⟨i, y⟩
 
-theorem cutTestFamilyOfBooleanAssignment_bounded
-    {G : Type*} {r : ℕ}
-    (b : BooleanCutAssignment G r) :
-    IsBoundedCutTest (cutTestFamilyOfBooleanAssignment b) := by
-  constructor <;> intro i y <;>
-    unfold cutTestFamilyOfBooleanAssignment booleanValue <;>
-    split <;> norm_num
 
 /-- Flatten a cut-test family to its finite vector of scalar coordinates. -/
 def cutTestCoordinateValue
@@ -9069,216 +5428,16 @@ theorem cutTestProduct_eq_sum_boolean
       (cutTestCoordinateValue u)
       (usedCutTestCoordinateEmbedding x))
 
-/-- Exact convex-mixture formula for a cut correlation. -/
-theorem cutCorrelation_eq_sum_boolean
-    {G : Type*} [Fintype G] [DecidableEq G] [AddCommGroup G]
-    (r : ℕ) (f g : G → ℝ) (u : CutTestFamily G r) :
-    cutCorrelation r f g u =
-      ∑ b : BooleanCutAssignment G r,
-        bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b *
-          cutCorrelation r f g
-            (cutTestFamilyOfBooleanAssignment b) := by
-  unfold cutCorrelation
-  calc
-    mean (fun x : Fin r → G =>
-        (f (∑ i, x i) - g (∑ i, x i)) *
-          ∏ i, u i (eraseCoordinate i x)) =
-        mean (fun x : Fin r → G =>
-          ∑ b : BooleanCutAssignment G r,
-            bernoulliAssignmentWeight
-                (cutTestCoordinateValue u) b *
-              ((f (∑ i, x i) - g (∑ i, x i)) *
-                cutTestProduct
-                  (cutTestFamilyOfBooleanAssignment b) x)) := by
-      apply congrArg mean
-      funext x
-      change
-        (f (∑ i, x i) - g (∑ i, x i)) *
-            cutTestProduct u x =
-          _
-      rw [cutTestProduct_eq_sum_boolean u x]
-      rw [Finset.mul_sum]
-      apply Fintype.sum_congr
-      intro b
-      ring
-    _ = ∑ b : BooleanCutAssignment G r,
-        mean (fun x : Fin r → G =>
-          bernoulliAssignmentWeight
-              (cutTestCoordinateValue u) b *
-            ((f (∑ i, x i) - g (∑ i, x i)) *
-              cutTestProduct
-                (cutTestFamilyOfBooleanAssignment b) x)) := by
-      unfold mean
-      exact Finset.expect_sum_comm Finset.univ Finset.univ _
-    _ = ∑ b : BooleanCutAssignment G r,
-        bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b *
-          mean (fun x : Fin r → G =>
-            (f (∑ i, x i) - g (∑ i, x i)) *
-              cutTestProduct
-                (cutTestFamilyOfBooleanAssignment b) x) := by
-      apply Fintype.sum_congr
-      intro b
-      exact mean_smul
-        (bernoulliAssignmentWeight
-          (cutTestCoordinateValue u) b) _
-    _ = _ := by
-      rfl
 
-/-- It is enough to bound all Boolean cut correlations. -/
-theorem abs_cutCorrelation_le_of_boolean
-    {G : Type*} [Fintype G] [DecidableEq G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} {ε : ℝ}
-    (u : CutTestFamily G r) (hu : IsBoundedCutTest u)
-    (hboolean :
-      ∀ b : BooleanCutAssignment G r,
-        |cutCorrelation r f g
-          (cutTestFamilyOfBooleanAssignment b)| ≤ ε) :
-    |cutCorrelation r f g u| ≤ ε := by
-  rw [cutCorrelation_eq_sum_boolean]
-  calc
-    |∑ b : BooleanCutAssignment G r,
-        bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b *
-          cutCorrelation r f g
-            (cutTestFamilyOfBooleanAssignment b)| ≤
-        ∑ b : BooleanCutAssignment G r,
-          |bernoulliAssignmentWeight
-              (cutTestCoordinateValue u) b *
-            cutCorrelation r f g
-              (cutTestFamilyOfBooleanAssignment b)| :=
-      Finset.abs_sum_le_sum_abs _ _
-    _ ≤ ∑ b : BooleanCutAssignment G r,
-        bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b * ε := by
-      apply Finset.sum_le_sum
-      intro b _
-      have hw :
-          0 ≤ bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b :=
-        bernoulliAssignmentWeight_nonneg
-          (p := cutTestCoordinateValue u)
-          (fun q => hu.nonneg q.1 q.2)
-          (fun q => hu.le_one q.1 q.2) b
-      rw [abs_mul, abs_of_nonneg hw]
-      exact mul_le_mul_of_nonneg_left (hboolean b) hw
-    _ = ε := by
-      rw [← Finset.sum_mul,
-        sum_bernoulliAssignmentWeight, one_mul]
 
 /-! ## The finite dense-model test family -/
 
-/-- Generalized convolution belonging to one Boolean cut assignment. -/
-noncomputable def booleanCutConvolution
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (b : BooleanCutAssignment G r) : G → ℝ :=
-  generalizedConvolution r
-    (cutTestFamilyOfBooleanAssignment b)
 
-/-- At positive arity every Boolean generalized convolution is
-`[0,1]`-valued. -/
-theorem booleanCutConvolution_unitBounded
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} (hr : 0 < r)
-    (b : BooleanCutAssignment G r) :
-    IsUnitBounded (booleanCutConvolution r b) := by
-  constructor
-  · intro z
-    exact generalizedConvolution_nonneg hr
-      (cutTestFamilyOfBooleanAssignment_bounded b) z
-  · intro z
-    exact generalizedConvolution_le_one hr
-      (cutTestFamilyOfBooleanAssignment_bounded b) z
 
-/-- The finite Boolean convolution family is pointwise unit bounded at
-positive arity. -/
-theorem booleanCutConvolution_unitBoundedFamily
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} (hr : 0 < r) :
-    IsUnitBoundedTestFamily
-      (booleanCutConvolution (G := G) r) :=
-  fun b => booleanCutConvolution_unitBounded hr b
 
-/-- Pairing with a Boolean generalized convolution is exactly its Boolean
-cut correlation. -/
-theorem cutCorrelation_boolean_eq_pairing
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (f g : G → ℝ)
-    (b : BooleanCutAssignment G r) :
-    cutCorrelation r f g
-        (cutTestFamilyOfBooleanAssignment b) =
-      finitePairing (f - g) (booleanCutConvolution r b) := by
-  rw [cutCorrelation_eq_mean_mul_generalizedConvolution]
-  rfl
 
-/-- A model matching all finitely many Boolean generalized convolutions
-already satisfies the full cut-discrepancy relation against arbitrary
-`[0,1]`-valued cut tests. -/
-theorem exists_cutDiscrepancy_model_of_finiteBooleanModel
-    {G : Type*} [Fintype G] [DecidableEq G] [AddCommGroup G]
-    (r : ℕ) (f : G → ℝ) {ε : ℝ}
-    (hmodel :
-      HasFiniteDenseModel
-        (booleanCutConvolution (G := G) r) f ε) :
-    ∃ g : G → ℝ, IsUnitBounded g ∧
-      CutDiscrepancyLe r f g ε := by
-  obtain ⟨g, hg, hmatch⟩ := hmodel
-  refine ⟨g, hg, ?_⟩
-  intro u hu0 hu1
-  apply abs_cutCorrelation_le_of_boolean u ⟨hu0, hu1⟩
-  intro b
-  rw [cutCorrelation_boolean_eq_pairing]
-  exact hmatch b
 
-/-- Dense-model theorem in the cut norm.  Its sole pseudorandomness input
-is the homogeneous positive-part correlation bound for the finite family
-of Boolean generalized convolutions. -/
-theorem exists_cutDiscrepancy_model_of_positivePartCorrelationBound
-    {G : Type*} [Fintype G] [DecidableEq G] [AddCommGroup G]
-    (r : ℕ) {f ν : G → ℝ} {ε : ℝ}
-    (hε : 0 ≤ ε)
-    (hf0 : ∀ x, 0 ≤ f x) (hfν : ∀ x, f x ≤ ν x)
-    (hpseudo :
-      HasPositivePartCorrelationBound
-        (booleanCutConvolution (G := G) r) ν ε) :
-    ∃ g : G → ℝ, IsUnitBounded g ∧
-      CutDiscrepancyLe r f g ε := by
-  apply exists_cutDiscrepancy_model_of_finiteBooleanModel r f
-  exact hasFiniteDenseModel_of_positivePartCorrelationBound
-    (booleanCutConvolution (G := G) r)
-    hε hf0 hfν hpseudo
 
-/-- Polynomial dense-model theorem in the cut norm.  It replaces the
-positive-part hypothesis by finite correlation estimates for products of
-Boolean generalized convolutions, with all quantitative losses explicit. -/
-theorem exists_cutDiscrepancy_model_of_monomialCorrelationBound
-    {G : Type*} [Fintype G] [DecidableEq G] [AddCommGroup G]
-    (r : ℕ) (hr : 0 < r)
-    {f ν : G → ℝ}
-    {p : ℝ[X]} {δ η M : ℝ}
-    (hδ : 0 ≤ δ) (hη : 0 ≤ η) (hM0 : 0 ≤ M)
-    (hf0 : ∀ x, 0 ≤ f x) (hfν : ∀ x, f x ≤ ν x)
-    (hp : ApproximatesPositivePartOnUnitInterval p δ)
-    (hM : centeredAbsoluteMean ν ≤ M)
-    (hmono :
-      HasMonomialCorrelationBound
-        (booleanCutConvolution (G := G) r)
-        ν p.natDegree η) :
-    ∃ g : G → ℝ, IsUnitBounded g ∧
-      CutDiscrepancyLe r f g
-        (polynomialCoefficientL1 p * η + δ * M) := by
-  apply
-    exists_cutDiscrepancy_model_of_positivePartCorrelationBound
-      r
-  · exact add_nonneg
-      (mul_nonneg (polynomialCoefficientL1_nonneg p) hη)
-      (mul_nonneg hδ hM0)
-  · exact hf0
-  · exact hfν
-  · exact hasPositivePartCorrelationBound_of_polynomial
-      (booleanCutConvolution_unitBoundedFamily hr)
-      hδ hp hM hmono
 
 end Wikipedia.SzemeredisTheorem
 
@@ -9366,47 +5525,8 @@ noncomputable def booleanFaceCutSupports
   classical
   exact Finset.univ.image booleanFaceCutSupport
 
-theorem booleanFaceCutSupport_mem_supports
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (b : BooleanCutAssignment G r) :
-    booleanFaceCutSupport b ∈ booleanFaceCutSupports G r := by
-  classical
-  exact Finset.mem_image.mpr
-    ⟨b, Finset.mem_univ b, rfl⟩
 
-/-- At positive arity, the constantly false assignment has empty full-tuple
-support. -/
-theorem booleanFaceCutSupport_false
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {r : ℕ} (hr : 0 < r) :
-    booleanFaceCutSupport
-        (fun _ : CutTestCoordinate G r => false) =
-      ∅ := by
-  classical
-  ext x
-  constructor
-  · intro hx
-    have hall :=
-      (mem_booleanFaceCutSupport
-        (fun _ : CutTestCoordinate G r => false) x).1 hx
-    have hfalse := hall ⟨0, hr⟩
-    simp at hfalse
-  · intro hx
-    simp at hx
 
-/-- Hence the finite family of Boolean face-cut supports contains the empty
-cut whenever at least one face coordinate is present. -/
-theorem empty_mem_booleanFaceCutSupports
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {r : ℕ} (hr : 0 < r) :
-    (∅ : BooleanCutTest (Fin r → G)) ∈
-      booleanFaceCutSupports G r := by
-  classical
-  apply Finset.mem_image.mpr
-  refine
-    ⟨(fun _ : CutTestCoordinate G r => false),
-      Finset.mem_univ _, ?_⟩
-  exact booleanFaceCutSupport_false hr
 
 namespace FaceRegularityState
 
@@ -9496,178 +5616,9 @@ def IsFaceCutRegular
     IsBoundedCutTest u →
       |S.faceCutCorrelation f u| ≤ ε
 
-/-- Controlling the finite Boolean-support family controls every bounded
-lower-face product test. -/
-theorem isFaceCutRegular_of_regularAgainst_supports
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (S : FaceRegularityState (Fin r → G))
-    (f : (Fin r → G) → ℝ) {ε : ℝ}
-    (hregular :
-      S.IsRegularAgainst f (booleanFaceCutSupports G r) ε) :
-    S.IsFaceCutRegular f ε := by
-  intro u hu
-  rw [faceCutCorrelation_eq_sum_boolean]
-  calc
-    |∑ b : BooleanCutAssignment G r,
-        bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b *
-          S.faceCutCorrelation f
-            (cutTestFamilyOfBooleanAssignment b)| ≤
-        ∑ b : BooleanCutAssignment G r,
-          |bernoulliAssignmentWeight
-              (cutTestCoordinateValue u) b *
-            S.faceCutCorrelation f
-              (cutTestFamilyOfBooleanAssignment b)| :=
-      Finset.abs_sum_le_sum_abs _ _
-    _ ≤
-        ∑ b : BooleanCutAssignment G r,
-          bernoulliAssignmentWeight
-              (cutTestCoordinateValue u) b * ε := by
-      apply Finset.sum_le_sum
-      intro b _
-      have hw :
-          0 ≤ bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b :=
-        bernoulliAssignmentWeight_nonneg
-          (p := cutTestCoordinateValue u)
-          (fun q => hu.nonneg q.1 q.2)
-          (fun q => hu.le_one q.1 q.2) b
-      rw [abs_mul, abs_of_nonneg hw]
-      apply mul_le_mul_of_nonneg_left _ hw
-      rw [faceCutCorrelation_boolean]
-      exact hregular (booleanFaceCutSupport b)
-        (booleanFaceCutSupport_mem_supports b)
-    _ = ε := by
-      rw [← Finset.sum_mul,
-        sum_bernoulliAssignmentWeight, one_mul]
 
-/-- **Finite weak hypergraph regularity.**  A bounded function on an
-`r`-fold finite product has a bounded-complexity partition refinement whose
-residual is small against every lower-face product cut. -/
-theorem exists_faceCutRegular_refinement
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {r : ℕ}
-    (S : FaceRegularityState (Fin r → G))
-    (f : (Fin r → G) → ℝ)
-    {ε : ℝ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 < ε) :
-    ∃ m i : ℕ, ∃ T : FaceRegularityState (Fin r → G),
-      1 < (m : ℝ) * ε ^ 2 ∧
-      i < m ∧
-      T.partition ≤ S.partition ∧
-      T.IsFaceCutRegular f ε ∧
-      FacePartition.complexity T.partition ≤
-        2 ^ i * FacePartition.complexity S.partition := by
-  obtain ⟨m, i, T, hlong, hi, hTS, hregular, hcomplexity⟩ :=
-    S.exists_regular_refinement f
-      (booleanFaceCutSupports G r) hf0 hf1 hε
-  exact
-    ⟨m, i, T, hlong, hi, hTS,
-      T.isFaceCutRegular_of_regularAgainst_supports f hregular,
-      hcomplexity⟩
 
-/-- Fixed-budget, generator-retaining weak regularity.  The prescribed
-budget is essential when this construction is iterated: it keeps every
-complexity bound independent of the ambient finite set and of the function
-being regularized. -/
-theorem exists_faceCutRegular_refinement_with_generators_before
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {r : ℕ} (hr : 0 < r)
-    (S : FaceRegularityState (Fin r → G))
-    (f : (Fin r → G) → ℝ)
-    {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 ≤ ε)
-    (hlong : 1 < (m : ℝ) * ε ^ 2) :
-    ∃ i : ℕ,
-      ∃ T : FaceRegularityState (Fin r → G),
-      ∃ F : Finset (BooleanCutTest (Fin r → G)),
-        i < m ∧
-        T.partition =
-          FacePartition.join S.partition
-            (FacePartition.generatedBy F) ∧
-        F ⊆ booleanFaceCutSupports G r ∧
-        F.card ≤ i ∧
-        T.IsFaceCutRegular f ε ∧
-        FacePartition.complexity T.partition ≤
-          2 ^ i * FacePartition.complexity S.partition := by
-  let cuts := booleanFaceCutSupports G r
-  obtain ⟨i, hi, hregular⟩ :=
-    S.exists_regular_run_index_before f cuts
-      hf0 hf1 hε hlong
-  let T := S.regularityRun f cuts ε i
-  let F := S.regularityRunCuts f cuts ε i
-  have hpart :
-      T.partition =
-        FacePartition.join S.partition
-          (FacePartition.generatedBy F) :=
-    S.regularityRun_partition_eq_join_generatedBy
-      f cuts ε i
-  have hsubset :
-      F ⊆ booleanFaceCutSupports G r := by
-    exact S.regularityRunCuts_subset f cuts ε
-      (by
-        dsimp [cuts]
-        exact empty_mem_booleanFaceCutSupports hr)
-      i
-  have hcard : F.card ≤ i := by
-    unfold F regularityRunCuts
-    exact Finset.card_image_le.trans_eq (Finset.card_range i)
-  have hface : T.IsFaceCutRegular f ε :=
-    T.isFaceCutRegular_of_regularAgainst_supports
-      f hregular
-  have hcomplexity :
-      FacePartition.complexity T.partition ≤
-        2 ^ i * FacePartition.complexity S.partition :=
-    S.regularityRun_complexity_le f cuts ε i
-  exact
-    ⟨i, T, F, hi, hpart, hsubset,
-      hcard, hface, hcomplexity⟩
 
-/-- Generator-retaining form of weak regularity.  At positive arity the
-output partition is explicitly the input partition refined by at most `i`
-Boolean lower-face cut supports, each drawn from the canonical finite support
-family. -/
-theorem exists_faceCutRegular_refinement_with_generators
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {r : ℕ} (hr : 0 < r)
-    (S : FaceRegularityState (Fin r → G))
-    (f : (Fin r → G) → ℝ)
-    {ε : ℝ}
-    (hf0 : ∀ x, 0 ≤ f x)
-    (hf1 : ∀ x, f x ≤ 1)
-    (hε : 0 < ε) :
-    ∃ m i : ℕ,
-      ∃ T : FaceRegularityState (Fin r → G),
-      ∃ F : Finset (BooleanCutTest (Fin r → G)),
-        1 < (m : ℝ) * ε ^ 2 ∧
-        i < m ∧
-        T.partition =
-          FacePartition.join S.partition
-            (FacePartition.generatedBy F) ∧
-        F ⊆ booleanFaceCutSupports G r ∧
-        F.card ≤ i ∧
-        T.IsFaceCutRegular f ε ∧
-        FacePartition.complexity T.partition ≤
-          2 ^ i * FacePartition.complexity S.partition := by
-  have hεsq : 0 < ε ^ 2 := sq_pos_of_pos hε
-  obtain ⟨m, hm⟩ := exists_nat_gt (1 / ε ^ 2)
-  have hlong : 1 < (m : ℝ) * ε ^ 2 := by
-    calc
-      1 = (1 / ε ^ 2) * ε ^ 2 := by
-        field_simp
-      _ < (m : ℝ) * ε ^ 2 :=
-        mul_lt_mul_of_pos_right hm hεsq
-  obtain ⟨i, T, F, hi, hpart, hsubset, hcard,
-      hface, hcomplexity⟩ :=
-    S.exists_faceCutRegular_refinement_with_generators_before
-      hr f hf0 hf1 hε.le hlong
-  exact
-    ⟨m, i, T, F, hlong, hi, hpart, hsubset,
-      hcard, hface, hcomplexity⟩
 
 end FaceRegularityState
 
@@ -9713,537 +5664,34 @@ variable {Ω ι : Type*}
 
 namespace FaceRegularityState
 
-/-- Total energy of a finite family of functions in one common partition. -/
-noncomputable def familyEnergy
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ) : ℝ :=
-  ∑ i, S.energy (f i)
 
-/-- One state is regular for a family when it is regular for every member. -/
-def IsFamilyRegularAgainst
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) : Prop :=
-  ∀ i, S.IsRegularAgainst (f i) cuts ε
 
-/-- Total family energy is nonnegative. -/
-theorem familyEnergy_nonneg
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ) :
-    0 ≤ S.familyEnergy f := by
-  unfold familyEnergy
-  exact Finset.sum_nonneg fun i _ =>
-    partitionEnergy_nonneg S.partition (f i)
 
-/-- A finite family of `[0,1]`-valued functions has total energy at most its
-cardinality. -/
-theorem familyEnergy_le_card [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (hf0 : ∀ i x, 0 ≤ f i x)
-    (hf1 : ∀ i x, f i x ≤ 1) :
-    S.familyEnergy f ≤ (Fintype.card ι : ℝ) := by
-  unfold familyEnergy
-  calc
-    (∑ i, S.energy (f i)) ≤ ∑ _i : ι, (1 : ℝ) := by
-      apply Finset.sum_le_sum
-      intro i _
-      exact partitionEnergy_le_one S.partition
-        (hf0 i) (hf1 i)
-    _ = (Fintype.card ι : ℝ) := by simp
 
-/-- Refining the common partition can only increase total family energy. -/
-theorem familyEnergy_mono
-    (S T : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (hTS : T.partition ≤ S.partition) :
-    S.familyEnergy f ≤ T.familyEnergy f := by
-  unfold familyEnergy
-  apply Finset.sum_le_sum
-  intro i _
-  exact partitionEnergy_mono T.partition S.partition
-    hTS (f i)
 
-/-- If one member of the family gains `ε²` under a refinement, then the
-whole family potential gains `ε²`; all other summands are charged only by
-monotonicity. -/
-theorem familyEnergy_refineBy_increment
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (i : ι) (A : BooleanCutTest Ω) {ε : ℝ}
-    (hgain :
-      S.energy (f i) + ε ^ 2 ≤
-        (S.refineBy A).energy (f i)) :
-    S.familyEnergy f + ε ^ 2 ≤
-      (S.refineBy A).familyEnergy f := by
-  classical
-  let U : Finset ι := Finset.univ
-  have hiU : i ∈ U := by simp [U]
-  have hother :
-      ∑ j ∈ U.erase i, S.energy (f j) ≤
-        ∑ j ∈ U.erase i, (S.refineBy A).energy (f j) := by
-    apply Finset.sum_le_sum
-    intro j _
-    exact partitionEnergy_mono
-      (S.refineBy A).partition S.partition
-      (S.refineBy_le A) (f j)
-  unfold familyEnergy
-  change
-    (∑ j ∈ U, S.energy (f j)) + ε ^ 2 ≤
-      ∑ j ∈ U, (S.refineBy A).energy (f j)
-  calc
-    (∑ j ∈ U, S.energy (f j)) + ε ^ 2 =
-        (∑ j ∈ U.erase i, S.energy (f j)) +
-          (S.energy (f i) + ε ^ 2) := by
-      rw [← Finset.sum_erase_add U
-        (fun j => S.energy (f j)) hiU]
-      ring
-    _ ≤
-        (∑ j ∈ U.erase i, (S.refineBy A).energy (f j)) +
-          (S.refineBy A).energy (f i) :=
-      add_le_add hother hgain
-    _ = ∑ j ∈ U, (S.refineBy A).energy (f j) := by
-      exact Finset.sum_erase_add U
-        (fun j => (S.refineBy A).energy (f j)) hiU
 
-/-- Failure of family regularity identifies both a target and a violating
-Boolean cut. -/
-theorem exists_index_booleanCut_of_not_familyRegular
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) {ε : ℝ}
-    (h : ¬S.IsFamilyRegularAgainst f cuts ε) :
-    ∃ i : ι, ∃ A ∈ cuts,
-      ε < |S.booleanCutCorrelation (f i) A| := by
-  classical
-  unfold IsFamilyRegularAgainst at h
-  obtain ⟨i, hi⟩ := not_forall.mp h
-  obtain ⟨A, hA, hcorr⟩ :=
-    S.exists_booleanCut_of_not_regular (f i) cuts hi
-  exact ⟨i, A, hA, hcorr⟩
 
-/-- Data attached to a failure of simultaneous regularity. -/
-structure FamilyIrregularWitness
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) where
-  index : ι
-  cut : BooleanCutTest Ω
-  mem_cuts : cut ∈ cuts
-  correlation :
-    ε < |S.booleanCutCorrelation (f index) cut|
 
-/-- Choose one violating target/cut pair from a failed family-regularity
-statement. -/
-noncomputable def chosenFamilyIrregularWitness
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (h : ¬S.IsFamilyRegularAgainst f cuts ε) :
-    S.FamilyIrregularWitness f cuts ε := by
-  classical
-  let hex :=
-    S.exists_index_booleanCut_of_not_familyRegular f cuts h
-  let i : ι := Classical.choose hex
-  let hi := Classical.choose_spec hex
-  let A : BooleanCutTest Ω := Classical.choose hi
-  have hA :=
-    (Classical.choose_spec hi).1
-  have hcorr :=
-    (Classical.choose_spec hi).2
-  exact ⟨i, A, hA, hcorr⟩
 
-/-- Select a violating cut for the family.  Once regularity has been reached,
-the empty cut is used so that the iteration remains total. -/
-noncomputable def chosenFamilyIrregularCut
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    BooleanCutTest Ω := by
-  classical
-  exact
-    if h : S.IsFamilyRegularAgainst f cuts ε then ∅
-    else (S.chosenFamilyIrregularWitness f cuts ε h).cut
 
-theorem chosenFamilyIrregularCut_mem
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (h : ¬S.IsFamilyRegularAgainst f cuts ε) :
-    S.chosenFamilyIrregularCut f cuts ε ∈ cuts := by
-  simp only [chosenFamilyIrregularCut, dif_neg h]
-  exact
-    (S.chosenFamilyIrregularWitness f cuts ε h).mem_cuts
 
-/-- At an irregular state, the selected cut witnesses a violation for some
-member of the family. -/
-theorem exists_chosenFamilyIrregularCut_correlation
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (h : ¬S.IsFamilyRegularAgainst f cuts ε) :
-    ∃ i : ι,
-      ε <
-        |S.booleanCutCorrelation (f i)
-          (S.chosenFamilyIrregularCut f cuts ε)| := by
-  let W := S.chosenFamilyIrregularWitness f cuts ε h
-  refine ⟨W.index, ?_⟩
-  simp only [chosenFamilyIrregularCut, dif_neg h]
-  exact W.correlation
 
-/-- The selected violating cut raises total family energy by at least
-`ε²`. -/
-theorem familyEnergy_increment_chosenFamilyCut [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) {ε : ℝ}
-    (hε : 0 ≤ ε)
-    (h : ¬S.IsFamilyRegularAgainst f cuts ε) :
-    S.familyEnergy f + ε ^ 2 ≤
-      (S.refineBy
-        (S.chosenFamilyIrregularCut f cuts ε)).familyEnergy f := by
-  obtain ⟨i, hcorr⟩ :=
-    S.exists_chosenFamilyIrregularCut_correlation f cuts ε h
-  apply S.familyEnergy_refineBy_increment f i
-  exact S.energy_increment_of_booleanCut
-    (f i) (S.chosenFamilyIrregularCut f cuts ε)
-    hε (le_of_lt hcorr)
 
-/-- Canonical common refinement run for a finite family. -/
-noncomputable def familyRegularityRun
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    ℕ → FaceRegularityState Ω
-  | 0 => S
-  | n + 1 =>
-      let T := familyRegularityRun S f cuts ε n
-      T.refineBy (T.chosenFamilyIrregularCut f cuts ε)
 
-@[simp]
-theorem familyRegularityRun_zero
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    S.familyRegularityRun f cuts ε 0 = S :=
-  rfl
 
-@[simp]
-theorem familyRegularityRun_succ
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) (n : ℕ) :
-    S.familyRegularityRun f cuts ε (n + 1) =
-      (S.familyRegularityRun f cuts ε n).refineBy
-        ((S.familyRegularityRun f cuts ε n).chosenFamilyIrregularCut
-          f cuts ε) :=
-  rfl
 
-/-- Every state of the family run refines the input partition. -/
-theorem familyRegularityRun_partition_le
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) (n : ℕ) :
-    (S.familyRegularityRun f cuts ε n).partition ≤
-      S.partition := by
-  induction n with
-  | zero => exact le_rfl
-  | succ n ih =>
-      exact le_trans
-        ((S.familyRegularityRun f cuts ε n).refineBy_le
-          ((S.familyRegularityRun f cuts ε n).chosenFamilyIrregularCut
-            f cuts ε))
-        ih
 
-/-- Complexity grows by at most a factor of two at each family step. -/
-theorem familyRegularityRun_complexity_le
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) (n : ℕ) :
-    FacePartition.complexity
-        (S.familyRegularityRun f cuts ε n).partition ≤
-      2 ^ n * FacePartition.complexity S.partition := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-      calc
-        FacePartition.complexity
-            (S.familyRegularityRun f cuts ε (n + 1)).partition ≤
-            2 * FacePartition.complexity
-              (S.familyRegularityRun f cuts ε n).partition := by
-          rw [familyRegularityRun_succ]
-          exact
-            (S.familyRegularityRun f cuts ε n).complexity_refineBy_le
-              ((S.familyRegularityRun f cuts ε n).chosenFamilyIrregularCut
-                f cuts ε)
-        _ ≤ 2 * (2 ^ n *
-              FacePartition.complexity S.partition) :=
-          Nat.mul_le_mul_left 2 ih
-        _ = 2 ^ (n + 1) *
-              FacePartition.complexity S.partition := by
-          rw [pow_succ]
-          ring
 
-/-- The finite set of cuts adjoined during the first `n` family steps. -/
-noncomputable def familyRegularityRunCuts
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) (n : ℕ) :
-    Finset (BooleanCutTest Ω) := by
-  classical
-  exact (Finset.range n).image fun i =>
-    (S.familyRegularityRun f cuts ε i).chosenFamilyIrregularCut
-      f cuts ε
 
-@[simp]
-theorem familyRegularityRunCuts_zero
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) :
-    S.familyRegularityRunCuts f cuts ε 0 = ∅ := by
-  simp [familyRegularityRunCuts]
 
-@[simp]
-theorem familyRegularityRunCuts_succ
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) (n : ℕ) :
-    S.familyRegularityRunCuts f cuts ε (n + 1) =
-      insert
-        ((S.familyRegularityRun f cuts ε n).chosenFamilyIrregularCut
-          f cuts ε)
-        (S.familyRegularityRunCuts f cuts ε n) := by
-  classical
-  simp [familyRegularityRunCuts, Finset.range_add_one]
 
-/-- If the allowed family contains the empty cut, every selected cut belongs
-to it, including the stationary choices after regularity. -/
-theorem chosenFamilyIrregularCut_mem_of_empty_mem
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (hempty : (∅ : BooleanCutTest Ω) ∈ cuts) :
-    S.chosenFamilyIrregularCut f cuts ε ∈ cuts := by
-  by_cases hregular :
-      S.IsFamilyRegularAgainst f cuts ε
-  · simpa [chosenFamilyIrregularCut, hregular] using hempty
-  · exact S.chosenFamilyIrregularCut_mem f cuts ε hregular
 
-theorem familyRegularityRunCuts_subset
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ)
-    (hempty : (∅ : BooleanCutTest Ω) ∈ cuts) (n : ℕ) :
-    S.familyRegularityRunCuts f cuts ε n ⊆ cuts := by
-  classical
-  intro A hA
-  obtain ⟨i, _hi, rfl⟩ := Finset.mem_image.mp hA
-  exact chosenFamilyIrregularCut_mem_of_empty_mem
-    (S.familyRegularityRun f cuts ε i) f cuts ε hempty
 
-/-- The run partition is exactly the initial partition joined with the
-partition generated by the recorded family cuts. -/
-theorem familyRegularityRun_partition_eq_join_generatedBy
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω)) (ε : ℝ) (n : ℕ) :
-    (S.familyRegularityRun f cuts ε n).partition =
-      FacePartition.join S.partition
-        (FacePartition.generatedBy
-          (S.familyRegularityRunCuts f cuts ε n)) := by
-  induction n with
-  | zero =>
-      rw [familyRegularityRun_zero, familyRegularityRunCuts_zero,
-        FacePartition.generatedBy_empty]
-      change S.partition = S.partition ⊓ ⊤
-      exact (inf_top_eq S.partition).symm
-  | succ n ih =>
-      let A : BooleanCutTest Ω :=
-        (S.familyRegularityRun f cuts ε n).chosenFamilyIrregularCut
-          f cuts ε
-      calc
-        (S.familyRegularityRun f cuts ε (n + 1)).partition =
-            FacePartition.join
-              (S.familyRegularityRun f cuts ε n).partition
-              (FacePartition.generatedBy
-                ({A} : Finset (Finset Ω))) := by
-          rfl
-        _ =
-            FacePartition.join
-              (FacePartition.join S.partition
-                (FacePartition.generatedBy
-                  (S.familyRegularityRunCuts f cuts ε n)))
-              (FacePartition.generatedBy
-                ({A} : Finset (Finset Ω))) := by
-          rw [ih]
-        _ =
-            FacePartition.join S.partition
-              (FacePartition.join
-                (FacePartition.generatedBy
-                  (S.familyRegularityRunCuts f cuts ε n))
-                (FacePartition.generatedBy
-                  ({A} : Finset (Finset Ω)))) := by
-          exact inf_assoc _ _ _
-        _ =
-            FacePartition.join S.partition
-              (FacePartition.generatedBy
-                (insert A
-                  (S.familyRegularityRunCuts f cuts ε n))) := by
-          rw [FacePartition.generatedBy_insert]
-        _ =
-            FacePartition.join S.partition
-              (FacePartition.generatedBy
-                (S.familyRegularityRunCuts f cuts ε (n + 1))) := by
-          rw [familyRegularityRunCuts_succ]
 
-/-- A run with more steps than the total energy budget must meet a state
-regular for every target. -/
-theorem exists_familyRegular_run_index_before [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω))
-    {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ i x, 0 ≤ f i x)
-    (hf1 : ∀ i x, f i x ≤ 1)
-    (hε : 0 ≤ ε)
-    (hlong :
-      (Fintype.card ι : ℝ) < (m : ℝ) * ε ^ 2) :
-    ∃ n : ℕ, n < m ∧
-      (S.familyRegularityRun f cuts ε n).IsFamilyRegularAgainst
-        f cuts ε := by
-  by_contra hregular
-  have hnotregular :
-      ∀ n, n < m →
-        ¬(S.familyRegularityRun f cuts ε n).IsFamilyRegularAgainst
-          f cuts ε := by
-    intro n hn hreg
-    exact hregular ⟨n, hn, hreg⟩
-  have hgain :
-      ∀ n, n < m →
-        (S.familyRegularityRun f cuts ε n).familyEnergy f +
-            ε ^ 2 ≤
-          (S.familyRegularityRun f cuts ε (n + 1)).familyEnergy
-            f := by
-    intro n hn
-    rw [familyRegularityRun_succ]
-    exact
-      familyEnergy_increment_chosenFamilyCut
-        (S.familyRegularityRun f cuts ε n)
-        f cuts hε (hnotregular n hn)
-  have growth :
-      ∀ n : ℕ,
-        (∀ i, i < n →
-          (S.familyRegularityRun f cuts ε i).familyEnergy f +
-              ε ^ 2 ≤
-            (S.familyRegularityRun f cuts ε (i + 1)).familyEnergy f) →
-          (S.familyRegularityRun f cuts ε 0).familyEnergy f +
-              (n : ℝ) * ε ^ 2 ≤
-            (S.familyRegularityRun f cuts ε n).familyEnergy f := by
-    intro n
-    induction n with
-    | zero =>
-        intro _
-        simp
-    | succ n ih =>
-        intro hn
-        have hprevious :=
-          ih (fun i hi =>
-            hn i (Nat.lt_trans hi (Nat.lt_succ_self n)))
-        have hstep := hn n (Nat.lt_succ_self n)
-        calc
-          (S.familyRegularityRun f cuts ε 0).familyEnergy f +
-                (↑(Nat.succ n) : ℝ) * ε ^ 2 =
-              ((S.familyRegularityRun f cuts ε 0).familyEnergy f +
-                (n : ℝ) * ε ^ 2) + ε ^ 2 := by
-            push_cast
-            ring
-          _ ≤
-              (S.familyRegularityRun f cuts ε n).familyEnergy f +
-                ε ^ 2 := by linarith
-          _ ≤
-              (S.familyRegularityRun f cuts ε (n + 1)).familyEnergy
-                f := hstep
-  have hgrowth := growth m hgain
-  have hnonneg :
-      0 ≤ (S.familyRegularityRun f cuts ε 0).familyEnergy f :=
-    (S.familyRegularityRun f cuts ε 0).familyEnergy_nonneg f
-  have hupper :
-      (S.familyRegularityRun f cuts ε m).familyEnergy f ≤
-        (Fintype.card ι : ℝ) :=
-    (S.familyRegularityRun f cuts ε m).familyEnergy_le_card
-      f hf0 hf1
-  linarith
 
-/-- Fixed-budget simultaneous regularity, retaining every actual generator.
-The bound depends only on the finite family size and the requested
-regularity threshold, never on `Fintype.card Ω`. -/
-theorem exists_familyRegular_refinement_with_generators_before [Nonempty Ω]
-    (S : FaceRegularityState Ω) (f : ι → Ω → ℝ)
-    (cuts : Finset (BooleanCutTest Ω))
-    {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ i x, 0 ≤ f i x)
-    (hf1 : ∀ i x, f i x ≤ 1)
-    (hε : 0 ≤ ε)
-    (hlong :
-      (Fintype.card ι : ℝ) < (m : ℝ) * ε ^ 2)
-    (hempty : (∅ : BooleanCutTest Ω) ∈ cuts) :
-    ∃ n : ℕ, ∃ T : FaceRegularityState Ω,
-      ∃ F : Finset (BooleanCutTest Ω),
-        n < m ∧
-        T.partition =
-          FacePartition.join S.partition
-            (FacePartition.generatedBy F) ∧
-        F ⊆ cuts ∧
-        F.card ≤ n ∧
-        T.IsFamilyRegularAgainst f cuts ε ∧
-        FacePartition.complexity T.partition ≤
-          2 ^ n * FacePartition.complexity S.partition := by
-  obtain ⟨n, hn, hregular⟩ :=
-    S.exists_familyRegular_run_index_before f cuts
-      hf0 hf1 hε hlong
-  let T := S.familyRegularityRun f cuts ε n
-  let F := S.familyRegularityRunCuts f cuts ε n
-  refine ⟨n, T, F, hn, ?_, ?_, ?_, hregular, ?_⟩
-  · exact S.familyRegularityRun_partition_eq_join_generatedBy
-      f cuts ε n
-  · exact S.familyRegularityRunCuts_subset f cuts ε hempty n
-  · unfold F familyRegularityRunCuts
-    exact Finset.card_image_le.trans_eq (Finset.card_range n)
-  · exact S.familyRegularityRun_complexity_le f cuts ε n
 
-/-- Simultaneous lower-face cut regularity for a finite family. -/
-def IsFaceCutRegularFamily
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (S : FaceRegularityState (Fin r → G))
-    (f : ι → (Fin r → G) → ℝ) (ε : ℝ) : Prop :=
-  ∀ i, S.IsFaceCutRegular (f i) ε
 
-/-- Boolean support regularity of the family controls all bounded
-lower-face product tests for every target. -/
-theorem isFaceCutRegularFamily_of_familyRegularAgainst_supports
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (S : FaceRegularityState (Fin r → G))
-    (f : ι → (Fin r → G) → ℝ) {ε : ℝ}
-    (hregular :
-      S.IsFamilyRegularAgainst f
-        (booleanFaceCutSupports G r) ε) :
-    S.IsFaceCutRegularFamily f ε := by
-  intro i
-  exact S.isFaceCutRegular_of_regularAgainst_supports
-    (f i) (hregular i)
 
-/-- Fixed-budget, generator-retaining simultaneous weak hypergraph
-regularity.  This is the finite-family kernel used when the targets are the
-indicators of all atoms in one bounded-complexity upper partition. -/
-theorem exists_faceCutRegularFamily_refinement_with_generators_before
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {r : ℕ} (hr : 0 < r)
-    (S : FaceRegularityState (Fin r → G))
-    (f : ι → (Fin r → G) → ℝ)
-    {ε : ℝ} {m : ℕ}
-    (hf0 : ∀ i x, 0 ≤ f i x)
-    (hf1 : ∀ i x, f i x ≤ 1)
-    (hε : 0 ≤ ε)
-    (hlong :
-      (Fintype.card ι : ℝ) < (m : ℝ) * ε ^ 2) :
-    ∃ n : ℕ,
-      ∃ T : FaceRegularityState (Fin r → G),
-      ∃ F : Finset (BooleanCutTest (Fin r → G)),
-        n < m ∧
-        T.partition =
-          FacePartition.join S.partition
-            (FacePartition.generatedBy F) ∧
-        F ⊆ booleanFaceCutSupports G r ∧
-        F.card ≤ n ∧
-        T.IsFaceCutRegularFamily f ε ∧
-        FacePartition.complexity T.partition ≤
-          2 ^ n * FacePartition.complexity S.partition := by
-  obtain ⟨n, T, F, hn, hpart, hsubset, hcard,
-      hregular, hcomplexity⟩ :=
-    S.exists_familyRegular_refinement_with_generators_before
-      f (booleanFaceCutSupports G r)
-      hf0 hf1 hε hlong
-      (empty_mem_booleanFaceCutSupports hr)
-  exact
-    ⟨n, T, F, hn, hpart, hsubset, hcard,
-      T.isFaceCutRegularFamily_of_familyRegularAgainst_supports
-        f hregular,
-      hcomplexity⟩
 
 end FaceRegularityState
 
@@ -10274,218 +5722,12 @@ the size of the ambient vertex class.
 
 namespace Wikipedia.SzemeredisTheorem
 
-/-- A chosen Boolean lower-face assignment representing a cut support.
-Outside the canonical family of cut supports it defaults to the constantly
-false assignment. -/
-noncomputable def representingBooleanFaceCutAssignment
-    (G : Type*) [Fintype G] [DecidableEq G] (r : ℕ)
-    (A : BooleanCutTest (Fin r → G)) :
-    BooleanCutAssignment G r := by
-  classical
-  exact
-    if hA : A ∈ booleanFaceCutSupports G r then
-      Classical.choose
-        (show ∃ b : BooleanCutAssignment G r,
-            booleanFaceCutSupport b = A by
-          obtain ⟨b, _hb, hsupport⟩ :=
-            Finset.mem_image.mp hA
-          exact ⟨b, hsupport⟩)
-    else
-      fun _ => false
 
-/-- A represented member of the canonical cut family is represented
-exactly, not merely extensionally on average. -/
-theorem booleanFaceCutSupport_representing
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    {A : BooleanCutTest (Fin r → G)}
-    (hA : A ∈ booleanFaceCutSupports G r) :
-    booleanFaceCutSupport
-        (representingBooleanFaceCutAssignment G r A) = A := by
-  classical
-  simp only [representingBooleanFaceCutAssignment, dif_pos hA]
-  exact
-    Classical.choose_spec
-      (show ∃ b : BooleanCutAssignment G r,
-          booleanFaceCutSupport b = A by
-        obtain ⟨b, _hb, hsupport⟩ :=
-          Finset.mem_image.mp hA
-        exact ⟨b, hsupport⟩)
 
-/-- One branch chooses a failed lower face for every negative generator. -/
-abbrev GeneratorBranch
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (F : Finset (BooleanCutTest (Fin r → G))) :=
-  F → Fin r
 
-@[simp]
-theorem card_generatorBranch
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (F : Finset (BooleanCutTest (Fin r → G))) :
-    Fintype.card (GeneratorBranch F) = r ^ F.card := by
-  simp [GeneratorBranch]
 
-/-- The lower-face cell at coordinate `i` for a reference tuple and a
-branch.  Positive generators impose their predicate at every coordinate;
-a negative generator imposes failure at the coordinate selected by the
-branch. -/
-noncomputable def lowerGeneratorCell
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (F : Finset (BooleanCutTest (Fin r → G)))
-    (y : Fin r → G) (w : GeneratorBranch F) (i : Fin r) :
-    BooleanCutTest (Fin (r - 1) → G) := by
-  classical
-  exact Finset.univ.filter fun z =>
-    ∀ A : F,
-      (y ∈ A.1 →
-        representingBooleanFaceCutAssignment G r A.1
-            ⟨i, z⟩ = true) ∧
-      (y ∉ A.1 → w A = i →
-        representingBooleanFaceCutAssignment G r A.1
-            ⟨i, z⟩ = false)
 
-@[simp]
-theorem mem_lowerGeneratorCell
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (F : Finset (BooleanCutTest (Fin r → G)))
-    (y : Fin r → G) (w : GeneratorBranch F) (i : Fin r)
-    (z : Fin (r - 1) → G) :
-    z ∈ lowerGeneratorCell F y w i ↔
-      ∀ A : F,
-        (y ∈ A.1 →
-          representingBooleanFaceCutAssignment G r A.1
-              ⟨i, z⟩ = true) ∧
-        (y ∉ A.1 → w A = i →
-          representingBooleanFaceCutAssignment G r A.1
-              ⟨i, z⟩ = false) := by
-  simp [lowerGeneratorCell]
 
-/-- A generated atom is exactly a union of at most `r ^ |F|` products of
-lower-face cells.  This is the combinatorial interface needed to recurse
-from rank `r` to rank `r - 1` in simplex removal. -/
-theorem mem_generatedBy_part_iff_exists_lowerGeneratorCells
-    {G : Type*} [Fintype G] [DecidableEq G] {r : ℕ}
-    (hr : 0 < r)
-    (F : Finset (BooleanCutTest (Fin r → G)))
-    (hF : F ⊆ booleanFaceCutSupports G r)
-    (y x : Fin r → G) :
-    x ∈ (FacePartition.generatedBy F).part y ↔
-      ∃ w : GeneratorBranch F,
-        ∀ i,
-          eraseCoordinate i x ∈
-            lowerGeneratorCell F y w i := by
-  classical
-  constructor
-  · intro hpart
-    have hsignature :
-        ∀ A ∈ F, (y ∈ A ↔ x ∈ A) :=
-      (FacePartition.mem_part_generatedBy_iff F y x).1 hpart
-    have hwitness :
-        ∀ A : F, y ∉ A.1 →
-          ∃ i : Fin r,
-            representingBooleanFaceCutAssignment G r A.1
-                ⟨i, eraseCoordinate i x⟩ = false := by
-      intro A hyA
-      have hxA : x ∉ A.1 := by
-        intro hx
-        exact hyA ((hsignature A.1 A.2).2 hx)
-      have hsupport :
-          booleanFaceCutSupport
-              (representingBooleanFaceCutAssignment G r A.1) =
-            A.1 :=
-        booleanFaceCutSupport_representing (hF A.2)
-      have hnotall :
-          ¬∀ i,
-            representingBooleanFaceCutAssignment G r A.1
-                ⟨i, eraseCoordinate i x⟩ = true := by
-        intro hall
-        apply hxA
-        rw [← hsupport]
-        exact
-          (mem_booleanFaceCutSupport
-            (representingBooleanFaceCutAssignment G r A.1) x).2
-            hall
-      obtain ⟨i, hi⟩ := not_forall.mp hnotall
-      refine ⟨i, ?_⟩
-      cases hb :
-          representingBooleanFaceCutAssignment G r A.1
-            ⟨i, eraseCoordinate i x⟩ with
-      | false => rfl
-      | true => exact (hi hb).elim
-    let w : GeneratorBranch F := fun A =>
-      if hyA : y ∉ A.1 then
-        Classical.choose (hwitness A hyA)
-      else
-        ⟨0, hr⟩
-    refine ⟨w, ?_⟩
-    intro i
-    rw [mem_lowerGeneratorCell]
-    intro A
-    constructor
-    · intro hyA
-      have hxA : x ∈ A.1 :=
-        (hsignature A.1 A.2).1 hyA
-      have hsupport :
-          booleanFaceCutSupport
-              (representingBooleanFaceCutAssignment G r A.1) =
-            A.1 :=
-        booleanFaceCutSupport_representing (hF A.2)
-      have hxSupport :
-          x ∈ booleanFaceCutSupport
-            (representingBooleanFaceCutAssignment G r A.1) := by
-        simpa only [hsupport] using hxA
-      exact
-        (mem_booleanFaceCutSupport
-          (representingBooleanFaceCutAssignment G r A.1) x).1
-          hxSupport i
-    · intro hyA hwi
-      have hchosen :=
-        Classical.choose_spec (hwitness A hyA)
-      have hw :
-          w A = Classical.choose (hwitness A hyA) := by
-        simp [w, hyA]
-      rw [hw] at hwi
-      simpa only [hwi] using hchosen
-  · rintro ⟨w, hcells⟩
-    apply
-      (FacePartition.mem_part_generatedBy_iff F y x).2
-    intro A hAF
-    let A' : F := ⟨A, hAF⟩
-    have hsupport :
-        booleanFaceCutSupport
-            (representingBooleanFaceCutAssignment G r A) =
-          A :=
-      booleanFaceCutSupport_representing (hF hAF)
-    constructor
-    · intro hyA
-      have hall :
-          ∀ i,
-            representingBooleanFaceCutAssignment G r A
-                ⟨i, eraseCoordinate i x⟩ = true := by
-        intro i
-        exact
-          ((mem_lowerGeneratorCell F y w i
-            (eraseCoordinate i x)).1 (hcells i) A').1 hyA
-      rw [← hsupport]
-      exact
-        (mem_booleanFaceCutSupport
-          (representingBooleanFaceCutAssignment G r A) x).2
-          hall
-    · intro hxA
-      by_contra hyA
-      have hxSupport :
-          x ∈ booleanFaceCutSupport
-            (representingBooleanFaceCutAssignment G r A) := by
-        simpa only [hsupport] using hxA
-      have htrue :=
-        (mem_booleanFaceCutSupport
-          (representingBooleanFaceCutAssignment G r A) x).1
-          hxSupport (w A')
-      have hfalse :=
-        ((mem_lowerGeneratorCell F y w (w A')
-          (eraseCoordinate (w A') x)).1
-          (hcells (w A')) A').2 hyA rfl
-      rw [htrue] at hfalse
-      simp at hfalse
 
 end Wikipedia.SzemeredisTheorem
 
@@ -10575,15 +5817,6 @@ def orderedFaceComplementTuple
     OrderedFaceComplement e → G :=
   fun v => x v.1
 
-@[simp]
-theorem splitOrderedFaceEquiv_snd
-    {G : Type*} {k r : ℕ} (e : OrderedFace k r)
-    (x : Fin k → G) :
-    (splitOrderedFaceEquiv e x).2 =
-      orderedFaceComplementTuple e x := by
-  funext v
-  simp [splitOrderedFaceEquiv, orderedFaceSumEquiv,
-    orderedFaceComplementTuple]
 
 @[simp]
 theorem orderedFaceTuple_splitOrderedFaceEquiv_symm
@@ -10595,15 +5828,6 @@ theorem orderedFaceTuple_splitOrderedFaceEquiv_symm
   rw [← splitOrderedFaceEquiv_fst]
   simp
 
-@[simp]
-theorem orderedFaceComplementTuple_splitOrderedFaceEquiv_symm
-    {G : Type*} {k r : ℕ} (e : OrderedFace k r)
-    (y : Fin r → G)
-    (z : OrderedFaceComplement e → G) :
-    orderedFaceComplementTuple e
-        ((splitOrderedFaceEquiv e).symm (y, z)) = z := by
-  rw [← splitOrderedFaceEquiv_snd]
-  simp
 
 /-- Fubini decomposition of a full-tuple mean into an ordered face and its
 complement. -/
@@ -10631,47 +5855,8 @@ theorem mean_splitOrderedFace
             fun z : OrderedFaceComplement e → G =>
               f ((splitOrderedFaceEquiv e).symm (y, z))))
 
-/-- Two distinct increasing faces of the same rank differ by a vertex of
-the first face which is absent from the second. -/
-theorem exists_orderedFace_coordinate_not_mem_range
-    {k r : ℕ} {e f : OrderedFace k r}
-    (hef : e ≠ f) :
-    ∃ i : Fin r, e i ∉ Set.range f := by
-  classical
-  by_contra hnone
-  push Not at hnone
-  have hsubset :
-      Finset.univ.map e.toEmbedding ⊆
-        Finset.univ.map f.toEmbedding := by
-    intro v hv
-    obtain ⟨i, _hi, rfl⟩ := Finset.mem_map.mp hv
-    obtain ⟨j, hj⟩ := hnone i
-    exact Finset.mem_map.mpr
-      ⟨j, Finset.mem_univ _, hj⟩
-  have heq :
-      Finset.univ.map e.toEmbedding =
-        Finset.univ.map f.toEmbedding := by
-    apply Finset.eq_of_subset_of_card_le hsubset
-    simp
-  have hrange : Set.range e = Set.range f := by
-    ext v
-    have hv := Finset.ext_iff.mp heq v
-    simpa using hv
-  exact hef (OrderEmbedding.range_inj.mp hrange)
 
-/-- A canonical missing coordinate for two distinct ordered faces. -/
-noncomputable def orderedFaceMissingCoordinate
-    {k r : ℕ} (e f : OrderedFace k r) (hef : e ≠ f) :
-    Fin r :=
-  Classical.choose
-    (exists_orderedFace_coordinate_not_mem_range hef)
 
-theorem orderedFaceMissingCoordinate_not_mem_range
-    {k r : ℕ} (e f : OrderedFace k r) (hef : e ≠ f) :
-    e (orderedFaceMissingCoordinate e f hef) ∉
-      Set.range f :=
-  Classical.choose_spec
-    (exists_orderedFace_coordinate_not_mem_range hef)
 
 /-- A weighted complete ordered rank-`r` pattern. -/
 structure WeightedOrderedPattern
@@ -10694,26 +5879,8 @@ noncomputable def patternCount
     (H : WeightedOrderedPattern G k r) : ℝ :=
   mean H.patternWeight
 
-/-- Pointwise unit-interval bounds for every ordered edge weight. -/
-def EdgeWeightsInUnitInterval
-    {G : Type*} {k r : ℕ}
-    (H : WeightedOrderedPattern G k r) : Prop :=
-  ∀ e y, 0 ≤ H.edgeWeight e y ∧ H.edgeWeight e y ≤ 1
 
-theorem patternWeight_nonneg
-    {G : Type*} {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (hH : ∀ e y, 0 ≤ H.edgeWeight e y)
-    (x : Fin k → G) :
-    0 ≤ H.patternWeight x := by
-  exact Finset.prod_nonneg fun e _ => hH e _
 
-theorem patternCount_nonneg
-    {G : Type*} [Fintype G] {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (hH : ∀ e y, 0 ≤ H.edgeWeight e y) :
-    0 ≤ H.patternCount :=
-  mean_nonneg (H.patternWeight_nonneg hH)
 
 end WeightedOrderedPattern
 
@@ -10757,31 +5924,8 @@ noncomputable def toWeighted
     { edgeWeight := fun e y =>
         if H.edge e y then 1 else 0 }
 
-theorem toWeighted_edgeWeight_nonneg
-    {G : Type*} {k r : ℕ}
-    (H : OrderedPattern G k r)
-    (e : OrderedFace k r) (y : Fin r → G) :
-    0 ≤ H.toWeighted.edgeWeight e y := by
-  classical
-  by_cases h : H.edge e y <;>
-    simp [toWeighted, h]
 
-theorem toWeighted_edgeWeight_le_one
-    {G : Type*} {k r : ℕ}
-    (H : OrderedPattern G k r)
-    (e : OrderedFace k r) (y : Fin r → G) :
-    H.toWeighted.edgeWeight e y ≤ 1 := by
-  classical
-  by_cases h : H.edge e y <;>
-    simp [toWeighted, h]
 
-theorem toWeighted_unitInterval
-    {G : Type*} {k r : ℕ}
-    (H : OrderedPattern G k r) :
-    H.toWeighted.EdgeWeightsInUnitInterval :=
-  fun e y =>
-    ⟨H.toWeighted_edgeWeight_nonneg e y,
-      H.toWeighted_edgeWeight_le_one e y⟩
 
 /-- An occurrence has zero-one pattern weight one. -/
 theorem toWeighted_patternWeight_of_occurrence
@@ -10853,19 +5997,7 @@ noncomputable def faceDeletionDensity
     (e : OrderedFace k r) : ℝ :=
   (D e).card / Fintype.card (Fin r → G)
 
-/-- Empty ordered deletion family. -/
-def emptyDeletion
-    {G : Type*} [DecidableEq G] (k r : ℕ) :
-    DeletionFamily (G := G) k r :=
-  fun _ => ∅
 
-@[simp]
-theorem faceDeletionDensity_empty
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} (e : OrderedFace k r) :
-    faceDeletionDensity
-        (emptyDeletion (G := G) k r) e = 0 := by
-  simp [faceDeletionDensity, emptyDeletion]
 
 end OrderedPattern
 
@@ -10882,54 +6014,7 @@ def HasUniformOrderedPatternRemoval (k r : ℕ) : Prop :=
               H.IsCover D ∧
                 ∀ e, OrderedPattern.faceDeletionDensity D e ≤ ε
 
-/-- If one rank-zero occurrence exists, every full tuple is an occurrence.
--/
-theorem OrderedPattern.isOccurrence_all_of_rank_zero
-    {G : Type*} {k : ℕ}
-    (H : OrderedPattern G k 0)
-    {x₀ : Fin k → G} (hx₀ : H.IsOccurrence x₀)
-    (x : Fin k → G) :
-    H.IsOccurrence x := by
-  intro e
-  have htuple :
-      orderedFaceTuple e x =
-        orderedFaceTuple e x₀ := by
-    funext i
-    exact Fin.elim0 i
-  rw [htuple]
-  exact hx₀ e
 
-/-- Rank-zero ordered removal: with threshold one, a count below the
-threshold means that there are no occurrences at all. -/
-theorem hasUniformOrderedPatternRemoval_zero (k : ℕ) :
-    HasUniformOrderedPatternRemoval k 0 := by
-  intro ε hε
-  refine ⟨1, by norm_num, ?_⟩
-  intro G _instFintype _instDecidableEq _instNonempty H hcount
-  have hempty : H.occurrenceFinset = ∅ := by
-    by_contra hne
-    obtain ⟨x₀, hx₀⟩ := Finset.nonempty_iff_ne_empty.mpr hne
-    have hx₀' : H.IsOccurrence x₀ :=
-      (H.mem_occurrenceFinset x₀).1 hx₀
-    have hall : H.occurrenceFinset = Finset.univ := by
-      ext x
-      simp only [H.mem_occurrenceFinset,
-        Finset.mem_univ, iff_true]
-      exact H.isOccurrence_all_of_rank_zero hx₀' x
-    have hcount_one :
-        H.toWeighted.patternCount = 1 := by
-      rw [H.toWeighted_patternCount_eq, hall]
-      simp
-    rw [hcount_one] at hcount
-    exact (lt_irrefl 1) hcount
-  refine
-    ⟨OrderedPattern.emptyDeletion k 0, ?_,
-      fun e => ?_⟩
-  · intro x hx
-    rw [hempty] at hx
-    simp at hx
-  · rw [OrderedPattern.faceDeletionDensity_empty]
-    exact hε.le
 
 end Wikipedia.SzemeredisTheorem
 
@@ -10953,75 +6038,16 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- The `j`th term of a cyclic arithmetic progression. -/
-def cyclicAPTerm {k N : ℕ} (a d : ZMod N) (j : Fin k) : ZMod N :=
-  a + (j : ZMod N) * d
 
-/-- The weight contributed by one cyclic `k`-term progression. -/
-def cyclicAPProduct (k N : ℕ) (f : ZMod N → ℝ)
-    (a d : ZMod N) : ℝ :=
-  ∏ j : Fin k, f (cyclicAPTerm a d j)
 
-/-- The normalized weighted count of cyclic `k`-term progressions. The
-average includes the diagonal `d = 0`. -/
-noncomputable def cyclicAPCount (k N : ℕ) [NeZero N]
-    (f : ZMod N → ℝ) : ℝ :=
-  mean₂ (fun a d => cyclicAPProduct k N f a d)
 
-theorem cyclicAPProduct_nonneg {k N : ℕ} {f : ZMod N → ℝ}
-    (hf : ∀ x, 0 ≤ f x) (a d : ZMod N) :
-    0 ≤ cyclicAPProduct k N f a d := by
-  exact Finset.prod_nonneg fun j _ => hf (cyclicAPTerm a d j)
 
-theorem cyclicAPCount_nonneg {k N : ℕ} [NeZero N]
-    {f : ZMod N → ℝ} (hf : ∀ x, 0 ≤ f x) :
-    0 ≤ cyclicAPCount k N f := by
-  apply mean_nonneg
-  intro a
-  apply mean_nonneg
-  intro d
-  exact cyclicAPProduct_nonneg hf a d
 
-@[simp]
-theorem cyclicAPProduct_const (k N : ℕ) (c : ℝ) (a d : ZMod N) :
-    cyclicAPProduct k N (fun _ => c) a d = c ^ k := by
-  simp [cyclicAPProduct]
 
-theorem cyclicAPProduct_smul
-    (k N : ℕ) (c : ℝ) (f : ZMod N → ℝ)
-    (a d : ZMod N) :
-    cyclicAPProduct k N (fun x => c * f x) a d =
-      c ^ k * cyclicAPProduct k N f a d := by
-  simp [cyclicAPProduct, Finset.prod_mul_distrib]
 
-@[simp]
-theorem cyclicAPCount_const (k N : ℕ) [NeZero N] (c : ℝ) :
-    cyclicAPCount k N (fun _ => c) = c ^ k := by
-  simp [cyclicAPCount, mean₂]
 
-theorem cyclicAPCount_smul
-    (k N : ℕ) [NeZero N] (c : ℝ) (f : ZMod N → ℝ) :
-    cyclicAPCount k N (fun x => c * f x) =
-      c ^ k * cyclicAPCount k N f := by
-  simp_rw [cyclicAPCount, mean₂, cyclicAPProduct_smul, mean_smul]
 
-theorem cyclicAPProduct_mono {k N : ℕ} {f g : ZMod N → ℝ}
-    (hf : ∀ x, 0 ≤ f x) (hfg : ∀ x, f x ≤ g x)
-    (a d : ZMod N) :
-    cyclicAPProduct k N f a d ≤ cyclicAPProduct k N g a d := by
-  exact Finset.prod_le_prod
-    (fun j _ => hf (cyclicAPTerm a d j))
-    (fun j _ => hfg (cyclicAPTerm a d j))
 
-theorem cyclicAPCount_mono {k N : ℕ} [NeZero N]
-    {f g : ZMod N → ℝ}
-    (hf : ∀ x, 0 ≤ f x) (hfg : ∀ x, f x ≤ g x) :
-    cyclicAPCount k N f ≤ cyclicAPCount k N g := by
-  apply mean_mono
-  intro a
-  apply mean_mono
-  intro d
-  exact cyclicAPProduct_mono hf hfg a d
 
 end Wikipedia.SzemeredisTheorem
 
@@ -11060,61 +6086,16 @@ structure AffineForm (ι R : Type*) [Zero R] where
 
 namespace AffineForm
 
-/-- Evaluate an affine form at a vector. -/
-def eval {ι R : Type*} [Fintype ι] [Semiring R]
-    (ψ : AffineForm ι R) (x : ι → R) : R :=
-  ψ.constant + ∑ i, ψ.coefficient i * x i
 
-@[simp]
-theorem eval_zero {ι R : Type*} [Fintype ι] [Semiring R]
-    (ψ : AffineForm ι R) :
-    ψ.eval (fun _ => 0) = ψ.constant := by
-  simp [eval]
 
 end AffineForm
 
-/-- A point carrying two independent values in every one of `k`
-coordinates. -/
-abbrev CubePoint (k N : ℕ) :=
-  Fin k → Bool → ZMod N
 
-/-- A Boolean vertex of the `(k-1)`-cube obtained by deleting coordinate
-`j`. -/
-abbrev DeletedCube (k : ℕ) (j : Fin k) :=
-  {i : Fin k // i ≠ j} → Bool
 
-/-- The Conlon--Fox--Zhao form indexed by `j` and `ω`. -/
-def apLinearForm (k N : ℕ) (j : Fin k) (ω : DeletedCube k j)
-    (x : CubePoint k N) : ZMod N :=
-  ∑ i : {i : Fin k // i ≠ j},
-    (((i.1 : ℤ) - (j : ℤ) : ℤ) : ZMod N) * x i.1 (ω i)
 
-/-- Boolean choices of the subproduct of the arithmetic-progression linear-forms
-system to be tested. -/
-abbrev LinearFormsExponent (k : ℕ) :=
-  (j : Fin k) → DeletedCube k j → Bool
 
-/-- The subproduct selected by `e`, evaluated at the doubled variable
-vector `x`. -/
-def linearFormsProduct (k N : ℕ) (ν : ZMod N → ℝ)
-    (e : LinearFormsExponent k) (x : CubePoint k N) : ℝ :=
-  ∏ j : Fin k, ∏ ω : DeletedCube k j,
-    if e j ω then ν (apLinearForm k N j ω x) else 1
 
-/-- Quantitative `k`-linear-forms condition.
 
-Every subproduct of the canonical arithmetic-progression forms must have
-normalized average within `η` of one. -/
-def HasLinearFormsCondition (k N : ℕ) [NeZero N]
-    (ν : ZMod N → ℝ) (η : ℝ) : Prop :=
-  ∀ e : LinearFormsExponent k,
-    |mean (linearFormsProduct k N ν e) - 1| ≤ η
-
-theorem HasLinearFormsCondition.mono {k N : ℕ} [NeZero N]
-    {ν : ZMod N → ℝ} {η η' : ℝ}
-    (hν : HasLinearFormsCondition k N ν η) (hη : η ≤ η') :
-    HasLinearFormsCondition k N ν η' :=
-  fun e => (hν e).trans hη
 
 end Wikipedia.SzemeredisTheorem
 
@@ -11144,11 +6125,6 @@ open scoped BigOperators
 abbrev DeletedVector {k : ℕ} (V : Fin k → Type*) (j : Fin k) :=
   (i : {i : Fin k // i ≠ j}) → V i.1
 
-/-- Delete coordinate `j` from a dependent vector. -/
-def deleteCoordinate {k : ℕ} {V : Fin k → Type*}
-    (x : (i : Fin k) → V i) (j : Fin k) :
-    DeletedVector V j :=
-  fun i => x i.1
 
 /-- A weighted `(k-1)`-uniform, `k`-partite hypergraph. -/
 structure WeightedSimplexSystem {k : ℕ} (V : Fin k → Type*) where
@@ -11156,131 +6132,19 @@ structure WeightedSimplexSystem {k : ℕ} (V : Fin k → Type*) where
 
 namespace WeightedSimplexSystem
 
-/-- Product of the `k` edge weights on a labelled simplex. -/
-def simplexWeight {k : ℕ} {V : Fin k → Type*}
-    (H : WeightedSimplexSystem V) (x : (i : Fin k) → V i) : ℝ :=
-  ∏ j : Fin k, H.edgeWeight j (deleteCoordinate x j)
 
-/-- Normalized count of labelled weighted simplices. -/
-noncomputable def simplexCount {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)] (H : WeightedSimplexSystem V) : ℝ :=
-  mean H.simplexWeight
 
-theorem simplexWeight_nonneg {k : ℕ} {V : Fin k → Type*}
-    (H : WeightedSimplexSystem V)
-    (hH : ∀ j x, 0 ≤ H.edgeWeight j x)
-    (x : (i : Fin k) → V i) :
-    0 ≤ H.simplexWeight x := by
-  exact Finset.prod_nonneg fun j _ => hH j (deleteCoordinate x j)
 
-theorem simplexCount_nonneg {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H : WeightedSimplexSystem V)
-    (hH : ∀ j x, 0 ≤ H.edgeWeight j x) :
-    0 ≤ H.simplexCount :=
-  mean_nonneg (H.simplexWeight_nonneg hH)
 
-/-- Pointwise domination of nonnegative edge weights dominates the full
-simplex weight. -/
-theorem simplexWeight_mono {k : ℕ} {V : Fin k → Type*}
-    (H G : WeightedSimplexSystem V)
-    (hH : ∀ j x, 0 ≤ H.edgeWeight j x)
-    (hHG : ∀ j x, H.edgeWeight j x ≤ G.edgeWeight j x)
-    (x : (i : Fin k) → V i) :
-    H.simplexWeight x ≤ G.simplexWeight x := by
-  exact Finset.prod_le_prod
-    (fun j _ => hH j (deleteCoordinate x j))
-    (fun j _ => hHG j (deleteCoordinate x j))
 
-theorem simplexCount_mono {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H G : WeightedSimplexSystem V)
-    (hH : ∀ j x, 0 ≤ H.edgeWeight j x)
-    (hHG : ∀ j x, H.edgeWeight j x ≤ G.edgeWeight j x) :
-    H.simplexCount ≤ G.simplexCount :=
-  mean_mono (H.simplexWeight_mono G hH hHG)
 
 end WeightedSimplexSystem
 
-/-- The one-copy arithmetic-progression form attached to edge `j`. -/
-def apSimplexForm (k N : ℕ) (j : Fin k)
-    (x : DeletedVector (fun _ : Fin k => ZMod N) j) : ZMod N :=
-  ∑ i : {i : Fin k // i ≠ j},
-    (((i.1 : ℤ) - (j : ℤ) : ℤ) : ZMod N) * x i
 
-/-- Sum of all simplex coordinates.  It becomes the common difference,
-up to sign, in the encoded progression. -/
-def simplexCoordinateSum (k N : ℕ)
-    (x : Fin k → ZMod N) : ZMod N :=
-  ∑ i : Fin k, x i
 
-/-- First moment of the simplex coordinates.  It becomes the initial term
-of the encoded progression. -/
-def simplexCoordinateMoment (k N : ℕ)
-    (x : Fin k → ZMod N) : ZMod N :=
-  ∑ i : Fin k, (i : ZMod N) * x i
 
-/-- The edge form is the first moment minus `j` times the coordinate sum.
-Consequently, the `k` edge values of one simplex form a cyclic arithmetic
-progression. -/
-theorem apSimplexForm_deleteCoordinate (k N : ℕ) (j : Fin k)
-    (x : Fin k → ZMod N) :
-    apSimplexForm k N j (deleteCoordinate x j) =
-      simplexCoordinateMoment k N x -
-        (j : ZMod N) * simplexCoordinateSum k N x := by
-  classical
-  let f : Fin k → ZMod N :=
-    fun i => (((i : ℤ) - (j : ℤ) : ℤ) : ZMod N) * x i
-  have hsplit :=
-    Fintype.sum_subtype_add_sum_subtype (fun i : Fin k => i ≠ j) f
-  have hcomplement :
-      (∑ i : {i : Fin k // ¬i ≠ j}, f i.1) = 0 := by
-    apply Finset.sum_eq_zero
-    intro i
-    simp only [Finset.mem_univ, forall_const]
-    have hij : i.1 = j := not_ne_iff.mp i.2
-    rw [hij]
-    simp [f]
-  have hsum : (∑ i : {i : Fin k // i ≠ j}, f i.1) = ∑ i : Fin k, f i := by
-    rw [hcomplement, add_zero] at hsplit
-    exact hsplit
-  rw [apSimplexForm]
-  change (∑ i : {i : Fin k // i ≠ j}, f i.1) =
-    simplexCoordinateMoment k N x -
-      (j : ZMod N) * simplexCoordinateSum k N x
-  rw [hsum]
-  simp only [simplexCoordinateMoment, simplexCoordinateSum, f]
-  push_cast
-  simp_rw [sub_mul]
-  rw [Finset.sum_sub_distrib, Finset.mul_sum]
 
-/-- The weighted simplex system whose simplices encode arithmetic
-progressions. -/
-def apSimplexSystem (k N : ℕ) (f : ZMod N → ℝ) :
-    WeightedSimplexSystem (fun _ : Fin k => ZMod N) where
-  edgeWeight j x := f (apSimplexForm k N j x)
 
-/-- A labelled simplex in the AP system contributes exactly the weight of
-the cyclic progression with initial term the coordinate moment and common
-difference the negative coordinate sum. -/
-theorem apSimplexSystem_simplexWeight
-    (k N : ℕ) (f : ZMod N → ℝ)
-    (x : Fin k → ZMod N) :
-    (apSimplexSystem k N f).simplexWeight x =
-      cyclicAPProduct k N f
-        (simplexCoordinateMoment k N x)
-        (-simplexCoordinateSum k N x) := by
-  apply Finset.prod_congr rfl
-  intro j _
-  change
-    f (apSimplexForm k N j (deleteCoordinate x j)) =
-      f (cyclicAPTerm
-        (simplexCoordinateMoment k N x)
-        (-simplexCoordinateSum k N x) j)
-  congr 1
-  rw [apSimplexForm_deleteCoordinate]
-  simp [cyclicAPTerm]
-  ring
 
 end Wikipedia.SzemeredisTheorem
 
@@ -11306,128 +6170,16 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- Sum of the free coordinates in a fiber of the AP parameter map. -/
-def simplexTailSum (r N : ℕ) (y : Fin r → ZMod N) : ZMod N :=
-  ∑ i : Fin r, y i
 
-/-- First moment of the free coordinates, using their actual positions
-`2, ..., r + 1` in the full simplex vector. -/
-def simplexTailMoment (r N : ℕ) (y : Fin r → ZMod N) : ZMod N :=
-  ∑ i : Fin r, (i.succ.succ : ZMod N) * y i
 
-/-- Reconstruct simplex coordinates from a cyclic initial term `a`, common
-difference `d`, and the remaining `r` free coordinates. -/
-def simplexCoordinatesOfAP (r N : ℕ) (a d : ZMod N)
-    (y : Fin r → ZMod N) : Fin (r + 2) → ZMod N :=
-  Fin.cases
-    (simplexTailMoment r N y - a - d - simplexTailSum r N y)
-    (Fin.cases (a - simplexTailMoment r N y) y)
 
-@[simp]
-theorem simplexCoordinatesOfAP_zero (r N : ℕ) (a d : ZMod N)
-    (y : Fin r → ZMod N) :
-    simplexCoordinatesOfAP r N a d y 0 =
-      simplexTailMoment r N y - a - d - simplexTailSum r N y :=
-  rfl
 
-@[simp]
-theorem simplexCoordinatesOfAP_one (r N : ℕ) (a d : ZMod N)
-    (y : Fin r → ZMod N) :
-    simplexCoordinatesOfAP r N a d y 1 =
-      a - simplexTailMoment r N y :=
-  rfl
 
-@[simp]
-theorem simplexCoordinatesOfAP_succ_succ (r N : ℕ)
-    (a d : ZMod N) (y : Fin r → ZMod N) (i : Fin r) :
-    simplexCoordinatesOfAP r N a d y i.succ.succ = y i :=
-  rfl
 
-/-- Split the coordinate sum into the first two and the free tail. -/
-theorem simplexCoordinateSum_decompose (r N : ℕ)
-    (x : Fin (r + 2) → ZMod N) :
-    simplexCoordinateSum (r + 2) N x =
-      x 0 + x 1 +
-        simplexTailSum r N (fun i => x i.succ.succ) := by
-  simp [simplexCoordinateSum, simplexTailSum, Fin.sum_univ_succ,
-    add_assoc]
 
-/-- Split the coordinate moment into coordinate one and the free tail;
-coordinate zero has coefficient zero. -/
-theorem simplexCoordinateMoment_decompose (r N : ℕ)
-    (x : Fin (r + 2) → ZMod N) :
-    simplexCoordinateMoment (r + 2) N x =
-      x 1 + simplexTailMoment r N (fun i => x i.succ.succ) := by
-  simp [simplexCoordinateMoment, simplexTailMoment,
-    Fin.sum_univ_succ]
 
-@[simp]
-theorem simplexCoordinateSum_coordinatesOfAP (r N : ℕ)
-    (a d : ZMod N) (y : Fin r → ZMod N) :
-    simplexCoordinateSum (r + 2) N
-        (simplexCoordinatesOfAP r N a d y) = -d := by
-  rw [simplexCoordinateSum_decompose]
-  simp
-  ring
 
-@[simp]
-theorem simplexCoordinateMoment_coordinatesOfAP (r N : ℕ)
-    (a d : ZMod N) (y : Fin r → ZMod N) :
-    simplexCoordinateMoment (r + 2) N
-        (simplexCoordinatesOfAP r N a d y) = a := by
-  rw [simplexCoordinateMoment_decompose]
-  simp
 
-/-- The exact coordinate change: AP parameters, together with `r` free
-coordinates, are equivalent to simplex coordinates of length `r + 2`. -/
-def simplexAPEquiv (r N : ℕ) :
-    (Fin (r + 2) → ZMod N) ≃
-      (ZMod N × ZMod N) × (Fin r → ZMod N) where
-  toFun x :=
-    ((simplexCoordinateMoment (r + 2) N x,
-      -simplexCoordinateSum (r + 2) N x),
-      fun i => x i.succ.succ)
-  invFun y := simplexCoordinatesOfAP r N y.1.1 y.1.2 y.2
-  left_inv x := by
-    funext i
-    refine Fin.cases ?_ (fun i => Fin.cases ?_ (fun _ => rfl) i) i
-    · change
-        simplexCoordinatesOfAP r N
-            (simplexCoordinateMoment (r + 2) N x)
-            (-simplexCoordinateSum (r + 2) N x)
-            (fun i => x i.succ.succ) 0 =
-          x 0
-      rw [simplexCoordinatesOfAP_zero,
-        simplexCoordinateMoment_decompose,
-        simplexCoordinateSum_decompose]
-      ring
-    · change
-        simplexCoordinatesOfAP r N
-            (simplexCoordinateMoment (r + 2) N x)
-            (-simplexCoordinateSum (r + 2) N x)
-            (fun i => x i.succ.succ) 1 =
-          x 1
-      rw [simplexCoordinatesOfAP_one,
-        simplexCoordinateMoment_decompose]
-      ring
-  right_inv y := by
-    rcases y with ⟨⟨a, d⟩, tail⟩
-    apply Prod.ext
-    · apply Prod.ext
-      · change
-          simplexCoordinateMoment (r + 2) N
-              (simplexCoordinatesOfAP r N a d tail) =
-            a
-        exact simplexCoordinateMoment_coordinatesOfAP r N a d tail
-      · change
-          -simplexCoordinateSum (r + 2) N
-              (simplexCoordinatesOfAP r N a d tail) =
-            d
-        rw [simplexCoordinateSum_coordinatesOfAP]
-        simp
-    · funext i
-      change simplexCoordinatesOfAP r N a d tail i.succ.succ = tail i
-      exact simplexCoordinatesOfAP_succ_succ r N a d tail i
 
 /-- Normalized averages are invariant under an equivalence of finite
 indexing types. -/
@@ -11437,62 +6189,8 @@ theorem mean_equiv {α β : Type*} [Fintype α] [Fintype β]
     mean f = mean g := by
   exact Fintype.expect_equiv e f g h
 
-/-- A normalized average over a product is the corresponding iterated
-normalized average. -/
-theorem mean_prod {α β : Type*} [Fintype α] [Fintype β]
-    (f : α → β → ℝ) :
-    mean (fun p : α × β => f p.1 p.2) = mean₂ f := by
-  simpa [mean, mean₂] using
-    (Finset.expect_product'
-      (Finset.univ : Finset α) (Finset.univ : Finset β) f)
 
-/-- Averaging a function that ignores a nonempty product coordinate does
-not change its normalized average. -/
-theorem mean_prod_fst {α β : Type*} [Fintype α] [Fintype β]
-    [Nonempty β] (f : α → ℝ) :
-    mean (fun p : α × β => f p.1) = mean f := by
-  calc
-    mean (fun p : α × β => f p.1) =
-        mean₂ (fun a (_ : β) => f a) := by
-      exact mean_prod (fun a (_ : β) => f a)
-    _ = mean f := by
-      simp [mean₂]
 
-/-- Exact normalized AP/simplex count correspondence.  The extra `r`
-simplex coordinates form a uniform fiber over every pair `(a, d)`, so
-normalization removes that fiber with no cardinality factor. -/
-theorem apSimplexSystem_simplexCount_eq_cyclicAPCount
-    (r N : ℕ) [NeZero N] (f : ZMod N → ℝ) :
-    (apSimplexSystem (r + 2) N f).simplexCount =
-      cyclicAPCount (r + 2) N f := by
-  rw [WeightedSimplexSystem.simplexCount, cyclicAPCount]
-  calc
-    mean (apSimplexSystem (r + 2) N f).simplexWeight =
-        mean (fun x : Fin (r + 2) → ZMod N =>
-          cyclicAPProduct (r + 2) N f
-            (simplexCoordinateMoment (r + 2) N x)
-            (-simplexCoordinateSum (r + 2) N x)) := by
-      apply congrArg mean
-      funext x
-      exact apSimplexSystem_simplexWeight (r + 2) N f x
-    _ =
-        mean (fun y :
-            (ZMod N × ZMod N) × (Fin r → ZMod N) =>
-          cyclicAPProduct (r + 2) N f y.1.1 y.1.2) := by
-      apply mean_equiv (simplexAPEquiv r N)
-      intro x
-      rfl
-    _ =
-        mean (fun p : ZMod N × ZMod N =>
-          cyclicAPProduct (r + 2) N f p.1 p.2) := by
-      exact mean_prod_fst
-        (fun p : ZMod N × ZMod N =>
-          cyclicAPProduct (r + 2) N f p.1 p.2)
-    _ =
-        mean₂ (fun a d =>
-          cyclicAPProduct (r + 2) N f a d) := by
-      exact mean_prod
-        (fun a d => cyclicAPProduct (r + 2) N f a d)
 
 end Wikipedia.SzemeredisTheorem
 
@@ -11517,130 +6215,15 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- Multiplication by a unit, regarded only as an additive automorphism. -/
-noncomputable def mulAddEquivOfIsUnit
-    {R : Type*} [CommRing R] (a : R) (ha : IsUnit a) :
-    R ≃+ R :=
-  DistribMulAction.toAddEquiv R ha.unit
 
-@[simp]
-theorem mulAddEquivOfIsUnit_apply
-    {R : Type*} [CommRing R] (a : R) (ha : IsUnit a)
-    (x : R) :
-    mulAddEquivOfIsUnit a ha x = a * x := by
-  change (ha.unit : R) * x = a * x
-  rw [IsUnit.unit_spec]
 
-/-- Apply an additive automorphism independently in every coordinate. -/
-def coordinatewiseAddEquiv
-    {ι G : Type*} [AddCommGroup G] (e : ι → G ≃+ G) :
-    (ι → G) ≃ (ι → G) where
-  toFun x i := e i (x i)
-  invFun x i := (e i).symm (x i)
-  left_inv x := by
-    funext i
-    exact (e i).symm_apply_apply (x i)
-  right_inv x := by
-    funext i
-    exact (e i).apply_symm_apply (x i)
 
-@[simp]
-theorem coordinatewiseAddEquiv_apply
-    {ι G : Type*} [AddCommGroup G] (e : ι → G ≃+ G)
-    (x : ι → G) (i : ι) :
-    coordinatewiseAddEquiv e x i = e i (x i) :=
-  rfl
 
-@[simp]
-theorem coordinatewiseAddEquiv_symm_apply
-    {ι G : Type*} [AddCommGroup G] (e : ι → G ≃+ G)
-    (x : ι → G) (i : ι) :
-    (coordinatewiseAddEquiv e).symm x i =
-      (e i).symm (x i) :=
-  rfl
 
-/-- Pull a deleted-coordinate test through independent coordinate
-automorphisms. -/
-def pullCutTest
-    {G : Type*} [AddCommGroup G] {r : ℕ}
-    (e : Fin r → G ≃+ G) (u : CutTestFamily G r) :
-    CutTestFamily G r := by
-  cases r with
-  | zero =>
-      exact fun i => Fin.elim0 i
-  | succ n =>
-      exact fun i y =>
-        u i (fun t => (e (i.succAbove t)).symm (y t))
 
-theorem IsBoundedCutTest.pull
-    {G : Type*} [AddCommGroup G] {r : ℕ}
-    {e : Fin r → G ≃+ G} {u : CutTestFamily G r}
-    (hu : IsBoundedCutTest u) :
-    IsBoundedCutTest (pullCutTest e u) := by
-  constructor
-  · intro i x
-    cases r with
-    | zero => exact Fin.elim0 i
-    | succ n =>
-        exact hu.nonneg i
-          (fun t => (e (i.succAbove t)).symm (x t))
-  · intro i x
-    cases r with
-    | zero => exact Fin.elim0 i
-    | succ n =>
-        exact hu.le_one i
-          (fun t => (e (i.succAbove t)).symm (x t))
 
-/-- Cut correlation with an automorphic linear form in place of the literal
-coordinate sum. -/
-noncomputable def linearCutCorrelation
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (e : Fin r → G ≃+ G)
-    (f g : G → ℝ) (u : CutTestFamily G r) : ℝ :=
-  mean fun x : Fin r → G =>
-    (f (∑ i, e i (x i)) -
-        g (∑ i, e i (x i))) *
-      ∏ i, u i (eraseCoordinate i x)
 
-/-- Coordinatewise automorphisms turn a weighted-sum correlation into an
-ordinary sum correlation with pulled-back tests. -/
-theorem linearCutCorrelation_eq_cutCorrelation
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    (r : ℕ) (e : Fin r → G ≃+ G)
-    (f g : G → ℝ) (u : CutTestFamily G r) :
-    linearCutCorrelation r e f g u =
-      cutCorrelation r f g (pullCutTest e u) := by
-  cases r with
-  | zero =>
-      simp [linearCutCorrelation, cutCorrelation, pullCutTest]
-  | succ n =>
-      unfold linearCutCorrelation cutCorrelation mean
-      apply Fintype.expect_equiv (coordinatewiseAddEquiv e)
-      intro x
-      congr 1
-      apply Finset.prod_congr rfl
-      intro i _
-      change
-        u i (eraseCoordinate i x) =
-          u i (fun t =>
-            (e (i.succAbove t)).symm
-              (eraseCoordinate i
-                (coordinatewiseAddEquiv e x) t))
-      congr 1
-      funext t
-      simp
 
-/-- Ordinary cut discrepancy controls every correlation obtained by
-automorphic coordinate scalings. -/
-theorem CutDiscrepancyLe.abs_linearCutCorrelation_le
-    {G : Type*} [Fintype G] [AddCommGroup G]
-    {r : ℕ} {f g : G → ℝ} {ε : ℝ}
-    (h : CutDiscrepancyLe r f g ε)
-    (e : Fin r → G ≃+ G)
-    (u : CutTestFamily G r) (hu : IsBoundedCutTest u) :
-    |linearCutCorrelation r e f g u| ≤ ε := by
-  rw [linearCutCorrelation_eq_cutCorrelation]
-  exact h.apply_bounded (pullCutTest e u) hu.pull
 
 end Wikipedia.SzemeredisTheorem
 
@@ -11666,163 +6249,17 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- Every nonzero AP coefficient is a unit modulo a modulus coprime to
-`(k-1)!`. -/
-theorem apCoefficient_isUnit_of_coprime_factorial
-    {k N : ℕ}
-    (hN : Nat.Coprime N (Nat.factorial (k - 1)))
-    (i j : Fin k) (hij : i ≠ j) :
-    IsUnit (((i : ℤ) - (j : ℤ) : ℤ) : ZMod N) := by
-  rw [ZMod.coe_int_isUnit_iff_isCoprime,
-    Int.isCoprime_iff_nat_coprime]
-  have hdiff :
-      (i : ℤ) - (j : ℤ) ≠ 0 := by
-    intro h
-    apply hij
-    apply Fin.ext
-    exact_mod_cast sub_eq_zero.mp h
-  have hpos :
-      0 < Int.natAbs ((i : ℤ) - (j : ℤ)) :=
-    Int.natAbs_pos.mpr hdiff
-  have hle :
-      Int.natAbs ((i : ℤ) - (j : ℤ)) ≤ k - 1 := by
-    have hi : (i : ℕ) ≤ k - 1 := by omega
-    have hj : (j : ℕ) ≤ k - 1 := by omega
-    exact Int.natAbs_coe_sub_coe_le_of_le hi hj
-  have hdvd :
-      Int.natAbs ((i : ℤ) - (j : ℤ)) ∣
-        Nat.factorial (k - 1) :=
-    Nat.dvd_factorial hpos hle
-  simpa using hN.coprime_dvd_right hdvd
 
-/-- Multiplication by one AP coefficient as an additive automorphism. -/
-noncomputable def apCoefficientAddEquiv
-    {k N : ℕ}
-    (hN : Nat.Coprime N (Nat.factorial (k - 1)))
-    (i j : Fin k) (hij : i ≠ j) :
-    ZMod N ≃+ ZMod N :=
-  mulAddEquivOfIsUnit
-    ((((i : ℤ) - (j : ℤ) : ℤ) : ZMod N))
-    (apCoefficient_isUnit_of_coprime_factorial hN i j hij)
 
-@[simp]
-theorem apCoefficientAddEquiv_apply
-    {k N : ℕ}
-    (hN : Nat.Coprime N (Nat.factorial (k - 1)))
-    (i j : Fin k) (hij : i ≠ j) (x : ZMod N) :
-    apCoefficientAddEquiv hN i j hij x =
-      (((i : ℤ) - (j : ℤ) : ℤ) : ZMod N) * x := by
-  simp [apCoefficientAddEquiv]
 
-/-- `Fin n` is canonically equivalent to the coordinates of `Fin (n+1)`
-other than `j`. -/
-noncomputable def finSuccAboveEquiv {n : ℕ} (j : Fin (n + 1)) :
-    Fin n ≃ {i : Fin (n + 1) // i ≠ j} :=
-  Equiv.ofBijective
-    (fun t : Fin n => ⟨j.succAbove t, Fin.succAbove_ne j t⟩)
-    ⟨by
-      intro a b hab
-      apply Fin.succAbove_right_injective
-      exact congrArg Subtype.val hab,
-    by
-      intro i
-      obtain ⟨t, ht⟩ := Fin.exists_succAbove_eq i.2
-      exact ⟨t, Subtype.ext ht⟩⟩
 
-@[simp]
-theorem finSuccAboveEquiv_apply_val
-    {n : ℕ} (j : Fin (n + 1)) (t : Fin n) :
-    (finSuccAboveEquiv j t).1 = j.succAbove t :=
-  rfl
 
-/-- Convert an ordinary `Fin n` tuple to the dependent deleted-coordinate
-tuple for colour `j`. -/
-noncomputable def finTupleToDeletedVector
-    {n : ℕ} {G : Type*}
-    (j : Fin (n + 1))
-    (y : Fin n → G) :
-    DeletedVector (fun _ : Fin (n + 1) => G) j :=
-  fun i => y ((finSuccAboveEquiv j).symm i)
 
-@[simp]
-theorem finTupleToDeletedVector_succAbove
-    {n : ℕ} {G : Type*}
-    (j : Fin (n + 1))
-    (y : Fin n → G)
-    (t : Fin n) :
-    finTupleToDeletedVector j y
-        (finSuccAboveEquiv j t) =
-      y t := by
-  simp [finTupleToDeletedVector]
 
-/-- Reindex the AP face form from its deleted subtype to `Fin n`. -/
-theorem apSimplexForm_finTupleToDeletedVector
-    (n N : ℕ) (j : Fin (n + 1))
-    (y : Fin n → ZMod N) :
-    apSimplexForm (n + 1) N j
-        (finTupleToDeletedVector j y) =
-      ∑ t : Fin n,
-        ((((j.succAbove t : ℤ) - (j : ℤ) : ℤ) :
-          ZMod N) * y t) := by
-  rw [apSimplexForm]
-  symm
-  exact Fintype.sum_equiv (finSuccAboveEquiv j)
-    (fun t : Fin n =>
-      ((((j.succAbove t : ℤ) - (j : ℤ) : ℤ) :
-        ZMod N) * y t))
-    (fun i : {i : Fin (n + 1) // i ≠ j} =>
-      ((((i.1 : ℤ) - (j : ℤ) : ℤ) : ZMod N) *
-        finTupleToDeletedVector j y i))
-    (fun t => by simp)
 
-/-- Deleting coordinate `j` from a full tuple agrees with the canonical
-`Fin n` presentation of the remaining coordinates. -/
-theorem deleteCoordinate_eq_finTupleToDeletedVector
-    {n : ℕ} {G : Type*}
-    (j : Fin (n + 1)) (x : Fin (n + 1) → G) :
-    deleteCoordinate x j =
-      finTupleToDeletedVector j
-        (fun t => x (j.succAbove t)) := by
-  funext i
-  change x i.1 =
-    x (j.succAbove ((finSuccAboveEquiv j).symm i))
-  apply congrArg x
-  have hi :=
-    congrArg Subtype.val
-      ((finSuccAboveEquiv j).apply_symm_apply i)
-  exact hi.symm
 
-/-- The face form on a deleted full tuple is the weighted coordinate sum
-used by `linearCutCorrelation`. -/
-theorem apSimplexForm_deleteCoordinate_eq_weightedSum
-    (n N : ℕ) (j : Fin (n + 1))
-    (x : Fin (n + 1) → ZMod N) :
-    apSimplexForm (n + 1) N j (deleteCoordinate x j) =
-      ∑ t : Fin n,
-        ((((j.succAbove t : ℤ) - (j : ℤ) : ℤ) :
-          ZMod N) * x (j.succAbove t)) := by
-  rw [deleteCoordinate_eq_finTupleToDeletedVector,
-    apSimplexForm_finTupleToDeletedVector]
 
-/-- The coordinate automorphisms attached to one AP face. -/
-noncomputable def apFaceScalingEquiv
-    {n N : ℕ}
-    (hN : Nat.Coprime N (Nat.factorial n))
-    (j : Fin (n + 1)) (t : Fin n) :
-    ZMod N ≃+ ZMod N :=
-  apCoefficientAddEquiv
-    (by simpa using hN) (j.succAbove t) j
-    (Fin.succAbove_ne j t)
 
-@[simp]
-theorem apFaceScalingEquiv_apply
-    {n N : ℕ}
-    (hN : Nat.Coprime N (Nat.factorial n))
-    (j : Fin (n + 1)) (t : Fin n) (x : ZMod N) :
-    apFaceScalingEquiv hN j t x =
-      ((((j.succAbove t : ℤ) - (j : ℤ) : ℤ) :
-        ZMod N) * x) := by
-  simp [apFaceScalingEquiv]
 
 end Wikipedia.SzemeredisTheorem
 
@@ -11847,131 +6284,13 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- Difference of two finite products, telescoped in the ambient linear
-order.  Earlier factors use `f`, later factors use `g`. -/
-theorem prod_sub_prod_eq_sum_ordered
-    {ι : Type*} [LinearOrder ι]
-    (s : Finset ι) (f g : ι → ℝ) :
-    (∏ i ∈ s, f i) - ∏ i ∈ s, g i =
-      ∑ i ∈ s,
-        (f i - g i) *
-          (∏ j ∈ s with j < i, f j) *
-          ∏ j ∈ s with i < j, g j := by
-  have h :=
-    Finset.prod_add_ordered s g (fun i => f i - g i)
-  have hleft :
-      (∏ i ∈ s, (g i + (f i - g i))) =
-        ∏ i ∈ s, f i := by
-    apply Finset.prod_congr rfl
-    intro i _
-    ring
-  have hlower (i : ι) :
-      (∏ j ∈ s with j < i,
-          (g j + (f j - g j))) =
-        ∏ j ∈ s with j < i, f j := by
-    apply Finset.prod_congr rfl
-    intro j _
-    ring
-  rw [hleft] at h
-  simp_rw [hlower] at h
-  linarith
 
-/-- The mixed term produced while replacing edge colour `j`: earlier
-colours come from `H`, later colours from `G`, and colour `j` contributes
-their difference. -/
-def mixedSimplexTerm {k : ℕ} {V : Fin k → Type*}
-    (H G : WeightedSimplexSystem V) (j : Fin k)
-    (x : (i : Fin k) → V i) : ℝ :=
-  (H.edgeWeight j (deleteCoordinate x j) -
-      G.edgeWeight j (deleteCoordinate x j)) *
-    (∏ i ∈ (Finset.univ : Finset (Fin k)) with i < j,
-      H.edgeWeight i (deleteCoordinate x i)) *
-    ∏ i ∈ (Finset.univ : Finset (Fin k)) with j < i,
-      G.edgeWeight i (deleteCoordinate x i)
 
-/-- Exact pointwise edge-by-edge telescoping of simplex weights. -/
-theorem simplexWeight_sub_eq_sum_mixed
-    {k : ℕ} {V : Fin k → Type*}
-    (H G : WeightedSimplexSystem V)
-    (x : (i : Fin k) → V i) :
-    H.simplexWeight x - G.simplexWeight x =
-      ∑ j : Fin k, mixedSimplexTerm H G j x := by
-  change
-    (∏ j : Fin k,
-        H.edgeWeight j (deleteCoordinate x j)) -
-      ∏ j : Fin k,
-        G.edgeWeight j (deleteCoordinate x j) =
-      ∑ j : Fin k, mixedSimplexTerm H G j x
-  simpa [mixedSimplexTerm] using
-    prod_sub_prod_eq_sum_ordered Finset.univ
-      (fun j : Fin k =>
-        H.edgeWeight j (deleteCoordinate x j))
-      (fun j : Fin k =>
-        G.edgeWeight j (deleteCoordinate x j))
 
-/-- The normalized mixed correlation attached to one edge replacement. -/
-noncomputable def mixedSimplexCorrelation
-    {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H G : WeightedSimplexSystem V) (j : Fin k) : ℝ :=
-  mean (mixedSimplexTerm H G j)
 
-/-- Exact telescoping identity for normalized simplex counts. -/
-theorem simplexCount_sub_eq_sum_mixedCorrelation
-    {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H G : WeightedSimplexSystem V) :
-    H.simplexCount - G.simplexCount =
-      ∑ j : Fin k, mixedSimplexCorrelation H G j := by
-  rw [WeightedSimplexSystem.simplexCount,
-    WeightedSimplexSystem.simplexCount, ← mean_sub]
-  calc
-    mean (fun x => H.simplexWeight x - G.simplexWeight x) =
-        mean (fun x =>
-          ∑ j : Fin k, mixedSimplexTerm H G j x) := by
-      apply congrArg mean
-      funext x
-      exact simplexWeight_sub_eq_sum_mixed H G x
-    _ = ∑ j : Fin k, mean (mixedSimplexTerm H G j) :=
-      mean_finset_sum Finset.univ
-        (fun j => mixedSimplexTerm H G j)
-    _ = ∑ j : Fin k, mixedSimplexCorrelation H G j := by
-      rfl
 
-/-- Absolute comparison reduces to the sum of the absolute mixed
-correlations. -/
-theorem abs_simplexCount_sub_le_sum_mixedCorrelation
-    {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H G : WeightedSimplexSystem V) :
-    |H.simplexCount - G.simplexCount| ≤
-      ∑ j : Fin k, |mixedSimplexCorrelation H G j| := by
-  rw [simplexCount_sub_eq_sum_mixedCorrelation]
-  exact Finset.abs_sum_le_sum_abs _ _
 
-/-- Every mixed edge-replacement correlation is at most `ε`. -/
-def MixedSimplexCorrelationLe
-    {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H G : WeightedSimplexSystem V) (ε : ℝ) : Prop :=
-  ∀ j, |mixedSimplexCorrelation H G j| ≤ ε
 
-/-- Uniform control of the `k` mixed correlations controls the entire
-simplex-count difference by `k ε`. -/
-theorem simplexCount_abs_sub_le_of_mixedCorrelation
-    {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H G : WeightedSimplexSystem V) {ε : ℝ}
-    (h : MixedSimplexCorrelationLe H G ε) :
-    |H.simplexCount - G.simplexCount| ≤ (k : ℝ) * ε := by
-  calc
-    |H.simplexCount - G.simplexCount| ≤
-        ∑ j : Fin k, |mixedSimplexCorrelation H G j| :=
-      abs_simplexCount_sub_le_sum_mixedCorrelation H G
-    _ ≤ ∑ _j : Fin k, ε :=
-      Finset.sum_le_sum fun j _ => h j
-    _ = (k : ℝ) * ε := by
-      simp
 
 end Wikipedia.SzemeredisTheorem
 
@@ -11997,351 +6316,22 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- The factors other than colour `j` in the ordered telescoping term.
-The first factor selects the old weight below `j`; the second selects the
-new weight above `j`.  At `i = j` both factors are one. -/
-def orderedAPEdgeFactor
-    (k N : ℕ) (f g : ZMod N → ℝ)
-    (j i : Fin k) (x : Fin k → ZMod N) : ℝ :=
-  (if i < j then
-      f (apSimplexForm k N i (deleteCoordinate x i))
-    else 1) *
-  (if j < i then
-      g (apSimplexForm k N i (deleteCoordinate x i))
-    else 1)
 
-@[simp]
-theorem orderedAPEdgeFactor_self
-    (k N : ℕ) (f g : ZMod N → ℝ)
-    (j : Fin k) (x : Fin k → ZMod N) :
-    orderedAPEdgeFactor k N f g j j x = 1 := by
-  simp [orderedAPEdgeFactor]
 
-/-- Replacing a coordinate does not change the deleted vector at that
-coordinate. -/
-@[simp]
-theorem deleteCoordinate_update_same
-    {k : ℕ} {G : Type*} [DecidableEq G]
-    (x : Fin k → G) (i : Fin k) (a : G) :
-    deleteCoordinate (Function.update x i a) i =
-      deleteCoordinate x i := by
-  funext q
-  simp [deleteCoordinate, q.2]
 
-/-- Inserting a replacement into the erased tuple is `Function.update`. -/
-theorem insertNth_eraseCoordinate_eq_update
-    {n : ℕ} {G : Type*}
-    (i : Fin (n + 1)) (a : G) (x : Fin (n + 1) → G) :
-    Fin.insertNth i a (eraseCoordinate i x) =
-      Function.update x i a := by
-  exact Fin.insertNth_removeNth i a x
 
-/-- Replacing coordinate `t` before inserting the distinguished coordinate
-`j` only replaces coordinate `j.succAbove t` of the resulting full tuple. -/
-theorem insertNth_insertNth_eraseCoordinate
-    {n : ℕ} {G : Type*} [DecidableEq G]
-    (j : Fin (n + 2)) (t : Fin (n + 1))
-    (a b : G) (y : Fin (n + 1) → G) :
-    Fin.insertNth j a
-        (Fin.insertNth t b (eraseCoordinate t y)) =
-      (Function.update (Fin.insertNth j a y)
-        (j.succAbove t) b : Fin (n + 2) → G) := by
-  rw [insertNth_eraseCoordinate_eq_update, Fin.insertNth_update]
 
-/-- The cut-test family obtained by fixing the distinguished coordinate.
-Its `t`-th member is the edge of colour `j.succAbove t`, evaluated after
-putting an irrelevant zero in the omitted coordinate. -/
-def apMixedCutTest
-    (n N : ℕ) (f g : ZMod N → ℝ)
-    (j : Fin (n + 2)) (a : ZMod N) :
-    CutTestFamily (ZMod N) (n + 1) :=
-  fun t z =>
-    orderedAPEdgeFactor (n + 2) N f g j (j.succAbove t)
-      (Fin.insertNth j a (Fin.insertNth t 0 z))
 
-/-- Evaluating the reconstructed cut test on the erased tuple recovers the
-corresponding edge factor of the original full tuple. -/
-theorem apMixedCutTest_eraseCoordinate
-    (n N : ℕ) (f g : ZMod N → ℝ)
-    (j : Fin (n + 2)) (a : ZMod N)
-    (t : Fin (n + 1)) (y : Fin (n + 1) → ZMod N) :
-    apMixedCutTest n N f g j a t (eraseCoordinate t y) =
-      orderedAPEdgeFactor (n + 2) N f g j (j.succAbove t)
-        (Fin.insertNth j a y) := by
-  rw [apMixedCutTest, insertNth_insertNth_eraseCoordinate]
-  unfold orderedAPEdgeFactor
-  simp only [deleteCoordinate_update_same]
 
-/-- Pointwise `[0,1]` bounds on `f` and `g` give bounded reconstructed cut
-tests. -/
-theorem apMixedCutTest_bounded
-    (n N : ℕ) (f g : ZMod N → ℝ)
-    (hf0 : ∀ x, 0 ≤ f x) (hf1 : ∀ x, f x ≤ 1)
-    (hg0 : ∀ x, 0 ≤ g x) (hg1 : ∀ x, g x ≤ 1)
-    (j : Fin (n + 2)) (a : ZMod N) :
-    IsBoundedCutTest (apMixedCutTest n N f g j a) := by
-  constructor
-  · intro t z
-    unfold apMixedCutTest orderedAPEdgeFactor
-    by_cases htj : j.succAbove t < j
-    · have hjt : ¬j < j.succAbove t :=
-        not_lt_of_ge (le_of_lt htj)
-      simp [htj, hjt, hf0]
-    · by_cases hjt : j < j.succAbove t
-      · simp [htj, hjt, hg0]
-      · exact (Fin.succAbove_ne j t
-          (le_antisymm (not_lt.mp hjt) (not_lt.mp htj))).elim
-  · intro t z
-    unfold apMixedCutTest orderedAPEdgeFactor
-    by_cases htj : j.succAbove t < j
-    · have hjt : ¬j < j.succAbove t :=
-        not_lt_of_ge (le_of_lt htj)
-      simpa [htj, hjt] using
-        hf1 (apSimplexForm (n + 2) N (j.succAbove t)
-          (deleteCoordinate
-            (Fin.insertNth j a (Fin.insertNth t 0 z))
-            (j.succAbove t)))
-    · by_cases hjt : j < j.succAbove t
-      · simpa [htj, hjt] using
-          hg1 (apSimplexForm (n + 2) N (j.succAbove t)
-            (deleteCoordinate
-              (Fin.insertNth j a (Fin.insertNth t 0 z))
-              (j.succAbove t)))
-      · exact (Fin.succAbove_ne j t
-          (le_antisymm (not_lt.mp hjt) (not_lt.mp htj))).elim
 
-/-- The full product of ordered edge factors is the pair of filtered
-products occurring in the telescoping term. -/
-theorem prod_orderedAPEdgeFactor
-    (k N : ℕ) (f g : ZMod N → ℝ)
-    (j : Fin k) (x : Fin k → ZMod N) :
-    (∏ i : Fin k, orderedAPEdgeFactor k N f g j i x) =
-      (∏ i ∈ (Finset.univ : Finset (Fin k)) with i < j,
-        f (apSimplexForm k N i (deleteCoordinate x i))) *
-      ∏ i ∈ (Finset.univ : Finset (Fin k)) with j < i,
-        g (apSimplexForm k N i (deleteCoordinate x i)) := by
-  rw [Finset.prod_filter, Finset.prod_filter,
-    ← Finset.prod_mul_distrib]
-  rfl
 
-/-- The product of the reconstructed deleted-coordinate tests is exactly
-the product of all non-distinguished factors. -/
-theorem prod_apMixedCutTest_eraseCoordinate
-    (n N : ℕ) (f g : ZMod N → ℝ)
-    (j : Fin (n + 2)) (a : ZMod N)
-    (y : Fin (n + 1) → ZMod N) :
-    (∏ t : Fin (n + 1),
-        apMixedCutTest n N f g j a t
-          (eraseCoordinate t y)) =
-      (∏ i ∈ (Finset.univ : Finset (Fin (n + 2))) with i < j,
-        f (apSimplexForm (n + 2) N i
-          (deleteCoordinate (Fin.insertNth j a y) i))) *
-      ∏ i ∈ (Finset.univ : Finset (Fin (n + 2))) with j < i,
-        g (apSimplexForm (n + 2) N i
-          (deleteCoordinate (Fin.insertNth j a y) i)) := by
-  simp_rw [apMixedCutTest_eraseCoordinate]
-  calc
-    (∏ t : Fin (n + 1),
-        orderedAPEdgeFactor (n + 2) N f g j
-          (j.succAbove t) (Fin.insertNth j a y)) =
-        ∏ i : Fin (n + 2),
-          orderedAPEdgeFactor (n + 2) N f g j i
-            (Fin.insertNth j a y) := by
-      symm
-      calc
-        (∏ i : Fin (n + 2),
-            orderedAPEdgeFactor (n + 2) N f g j i
-              (Fin.insertNth j a y)) =
-            orderedAPEdgeFactor (n + 2) N f g j j
-                (Fin.insertNth j a y) *
-              ∏ t : Fin (n + 1),
-                orderedAPEdgeFactor (n + 2) N f g j
-                  (j.succAbove t) (Fin.insertNth j a y) :=
-          Fin.prod_univ_succAbove _ j
-        _ = ∏ t : Fin (n + 1),
-              orderedAPEdgeFactor (n + 2) N f g j
-                (j.succAbove t) (Fin.insertNth j a y) := by
-          rw [orderedAPEdgeFactor_self, one_mul]
-    _ = _ := prod_orderedAPEdgeFactor
-      (n + 2) N f g j (Fin.insertNth j a y)
 
-/-- Inserting the distinguished coordinate exposes the AP face as its
-automorphically weighted sum of the remaining coordinates. -/
-theorem apSimplexForm_deleteCoordinate_insertNth
-    (n N : ℕ) (j : Fin (n + 2))
-    (a : ZMod N) (y : Fin (n + 1) → ZMod N) :
-    apSimplexForm (n + 2) N j
-        (deleteCoordinate (Fin.insertNth j a y) j) =
-      ∑ t : Fin (n + 1),
-        ((((j.succAbove t : ℤ) - (j : ℤ) : ℤ) :
-          ZMod N) * y t) := by
-  rw [apSimplexForm_deleteCoordinate_eq_weightedSum]
-  simp
 
-/-- A normalized average over a tuple can be computed by first fixing one
-coordinate and then averaging the remaining tuple. -/
-theorem mean_insertNth
-    {G : Type*} [Fintype G] (n : ℕ)
-    (j : Fin (n + 1)) (F : (Fin (n + 1) → G) → ℝ) :
-    mean F =
-      mean₂ (fun a : G => fun y : Fin n → G =>
-        F (Fin.insertNth j a y)) := by
-  calc
-    mean F =
-        mean (fun p : G × (Fin n → G) =>
-          F (Fin.insertNth j p.1 p.2)) := by
-      unfold mean
-      apply Fintype.expect_equiv
-        (Fin.insertNthEquiv (fun _ : Fin (n + 1) => G) j).symm
-      intro x
-      congr 1
-      simp
-    _ = mean₂ (fun a : G => fun y : Fin n → G =>
-          F (Fin.insertNth j a y)) := by
-      simpa [mean, mean₂] using
-        (Finset.expect_product
-          (Finset.univ : Finset G)
-          (Finset.univ : Finset (Fin n → G))
-          (fun p : G × (Fin n → G) =>
-            F (Fin.insertNth j p.1 p.2)))
 
-/-- After fixing coordinate `j`, the `j`-th mixed telescoping term is
-literally a linear cut correlation integrand. -/
-theorem mixedSimplexTerm_ap_insertNth
-    (n N : ℕ) (f g : ZMod N → ℝ)
-    (j : Fin (n + 2)) (a : ZMod N)
-    (y : Fin (n + 1) → ZMod N) :
-    mixedSimplexTerm
-        (apSimplexSystem (n + 2) N f)
-        (apSimplexSystem (n + 2) N g) j
-        (Fin.insertNth j a y) =
-      (f (∑ t : Fin (n + 1),
-          ((((j.succAbove t : ℤ) - (j : ℤ) : ℤ) :
-            ZMod N) * y t)) -
-        g (∑ t : Fin (n + 1),
-          ((((j.succAbove t : ℤ) - (j : ℤ) : ℤ) :
-            ZMod N) * y t))) *
-      ∏ t : Fin (n + 1),
-        apMixedCutTest n N f g j a t
-          (eraseCoordinate t y) := by
-  unfold mixedSimplexTerm
-  change
-    (f (apSimplexForm (n + 2) N j
-        (deleteCoordinate (Fin.insertNth j a y) j)) -
-      g (apSimplexForm (n + 2) N j
-        (deleteCoordinate (Fin.insertNth j a y) j))) *
-      (∏ i ∈ (Finset.univ : Finset (Fin (n + 2))) with i < j,
-        f (apSimplexForm (n + 2) N i
-          (deleteCoordinate (Fin.insertNth j a y) i))) *
-      (∏ i ∈ (Finset.univ : Finset (Fin (n + 2))) with j < i,
-        g (apSimplexForm (n + 2) N i
-          (deleteCoordinate (Fin.insertNth j a y) i))) = _
-  rw [apSimplexForm_deleteCoordinate_insertNth,
-    prod_apMixedCutTest_eraseCoordinate]
-  ring
 
-/-- A mixed AP-simplex correlation is the average, over the distinguished
-coordinate, of transported linear cut correlations. -/
-theorem mixedSimplexCorrelation_ap_eq_mean_linearCutCorrelation
-    (n N : ℕ) [NeZero N]
-    (hN : Nat.Coprime N (Nat.factorial (n + 1)))
-    (f g : ZMod N → ℝ) (j : Fin (n + 2)) :
-    mixedSimplexCorrelation
-        (apSimplexSystem (n + 2) N f)
-        (apSimplexSystem (n + 2) N g) j =
-      mean (fun a : ZMod N =>
-        linearCutCorrelation (n + 1)
-          (apFaceScalingEquiv hN j) f g
-          (apMixedCutTest n N f g j a)) := by
-  unfold mixedSimplexCorrelation
-  rw [mean_insertNth (n + 1) j]
-  unfold mean₂
-  apply congrArg mean
-  funext a
-  unfold linearCutCorrelation
-  apply congrArg mean
-  funext y
-  change
-    mixedSimplexTerm
-        (apSimplexSystem (n + 2) N f)
-        (apSimplexSystem (n + 2) N g) j
-        (Fin.insertNth j a y) =
-      (f (∑ i, apFaceScalingEquiv hN j i (y i)) -
-        g (∑ i, apFaceScalingEquiv hN j i (y i))) *
-      ∏ i, apMixedCutTest n N f g j a i
-        (eraseCoordinate i y)
-  rw [mixedSimplexTerm_ap_insertNth]
-  simp only [apFaceScalingEquiv_apply]
 
-/-- Cut discrepancy controls every mixed AP-simplex correlation when the
-remaining edge weights lie in `[0,1]`. -/
-theorem abs_mixedSimplexCorrelation_ap_le
-    (n N : ℕ) [NeZero N]
-    (hN : Nat.Coprime N (Nat.factorial (n + 1)))
-    (f g : ZMod N → ℝ)
-    (hf0 : ∀ x, 0 ≤ f x) (hf1 : ∀ x, f x ≤ 1)
-    (hg0 : ∀ x, 0 ≤ g x) (hg1 : ∀ x, g x ≤ 1)
-    {ε : ℝ} (hcut : CutDiscrepancyLe (n + 1) f g ε)
-    (j : Fin (n + 2)) :
-    |mixedSimplexCorrelation
-        (apSimplexSystem (n + 2) N f)
-        (apSimplexSystem (n + 2) N g) j| ≤ ε := by
-  rw [mixedSimplexCorrelation_ap_eq_mean_linearCutCorrelation
-    n N hN f g j]
-  calc
-    |mean (fun a : ZMod N =>
-        linearCutCorrelation (n + 1)
-          (apFaceScalingEquiv hN j) f g
-          (apMixedCutTest n N f g j a))| ≤
-        mean (fun a : ZMod N =>
-          |linearCutCorrelation (n + 1)
-            (apFaceScalingEquiv hN j) f g
-            (apMixedCutTest n N f g j a)|) := by
-      exact Finset.abs_expect_le Finset.univ _
-    _ ≤ mean (fun _a : ZMod N => ε) := by
-      apply mean_mono
-      intro a
-      exact hcut.abs_linearCutCorrelation_le
-        (apFaceScalingEquiv hN j)
-        (apMixedCutTest n N f g j a)
-        (apMixedCutTest_bounded n N f g
-          hf0 hf1 hg0 hg1 j a)
-    _ = ε := mean_const _
 
-/-- Uniform mixed-correlation control for the two AP simplex systems. -/
-theorem apSimplexSystem_mixedCorrelationLe
-    (n N : ℕ) [NeZero N]
-    (hN : Nat.Coprime N (Nat.factorial (n + 1)))
-    (f g : ZMod N → ℝ)
-    (hf0 : ∀ x, 0 ≤ f x) (hf1 : ∀ x, f x ≤ 1)
-    (hg0 : ∀ x, 0 ≤ g x) (hg1 : ∀ x, g x ≤ 1)
-    {ε : ℝ} (hcut : CutDiscrepancyLe (n + 1) f g ε) :
-    MixedSimplexCorrelationLe
-      (apSimplexSystem (n + 2) N f)
-      (apSimplexSystem (n + 2) N g) ε := by
-  intro j
-  exact abs_mixedSimplexCorrelation_ap_le
-    n N hN f g hf0 hf1 hg0 hg1 hcut j
 
-/-- Dense AP counting lemma in cut-discrepancy form.  For progression
-length `n+2`, the loss is exactly one `ε` for each simplex colour. -/
-theorem cyclicAPCount_abs_sub_le_of_cutDiscrepancy
-    (n N : ℕ) [NeZero N]
-    (hN : Nat.Coprime N (Nat.factorial (n + 1)))
-    (f g : ZMod N → ℝ)
-    (hf0 : ∀ x, 0 ≤ f x) (hf1 : ∀ x, f x ≤ 1)
-    (hg0 : ∀ x, 0 ≤ g x) (hg1 : ∀ x, g x ≤ 1)
-    {ε : ℝ} (hcut : CutDiscrepancyLe (n + 1) f g ε) :
-    |cyclicAPCount (n + 2) N f -
-        cyclicAPCount (n + 2) N g| ≤
-      ((n + 2 : ℕ) : ℝ) * ε := by
-  rw [← apSimplexSystem_simplexCount_eq_cyclicAPCount n N f,
-    ← apSimplexSystem_simplexCount_eq_cyclicAPCount n N g]
-  exact simplexCount_abs_sub_le_of_mixedCorrelation
-    (apSimplexSystem (n + 2) N f)
-    (apSimplexSystem (n + 2) N g)
-    (apSimplexSystem_mixedCorrelationLe
-      n N hN f g hf0 hf1 hg0 hg1 hcut)
 
 end Wikipedia.SzemeredisTheorem
 
@@ -12366,153 +6356,10 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- Every edge weight of `H` lies in the unit interval. -/
-def EdgeWeightsInUnitInterval {k : ℕ} {V : Fin k → Type*}
-    (H : WeightedSimplexSystem V) : Prop :=
-  ∀ j x, 0 ≤ H.edgeWeight j x ∧ H.edgeWeight j x ≤ 1
 
-/-- Corresponding edge weights of `H` and `G` differ by at most `ε`. -/
-def EdgeSupDistanceLe {k : ℕ} {V : Fin k → Type*}
-    (H G : WeightedSimplexSystem V) (ε : ℝ) : Prop :=
-  ∀ j x, |H.edgeWeight j x - G.edgeWeight j x| ≤ ε
 
-/-- A telescoping product estimate for two families in `[0,1]`. -/
-theorem abs_prod_sub_prod_le_card_mul
-    {ι : Type*} [DecidableEq ι]
-    (s : Finset ι) (f g : ι → ℝ) {ε : ℝ}
-    (hε : 0 ≤ ε)
-    (hf0 : ∀ i ∈ s, 0 ≤ f i)
-    (hf1 : ∀ i ∈ s, f i ≤ 1)
-    (hg0 : ∀ i ∈ s, 0 ≤ g i)
-    (hg1 : ∀ i ∈ s, g i ≤ 1)
-    (hfg : ∀ i ∈ s, |f i - g i| ≤ ε) :
-    |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| ≤
-      (s.card : ℝ) * ε := by
-  induction s using Finset.induction_on with
-  | empty =>
-      simp
-  | @insert a s ha ih =>
-      have hfa0 : 0 ≤ f a := hf0 a (Finset.mem_insert_self a s)
-      have hfa1 : f a ≤ 1 := hf1 a (Finset.mem_insert_self a s)
-      have hga0 : 0 ≤ g a := hg0 a (Finset.mem_insert_self a s)
-      have hga1 : g a ≤ 1 := hg1 a (Finset.mem_insert_self a s)
-      have hdiffa :
-          |f a - g a| ≤ ε :=
-        hfg a (Finset.mem_insert_self a s)
-      have hfprod0 : 0 ≤ ∏ i ∈ s, f i :=
-        Finset.prod_nonneg fun i hi => hf0 i (Finset.mem_insert_of_mem hi)
-      have hfprod1 : (∏ i ∈ s, f i) ≤ 1 :=
-        Finset.prod_le_one
-          (fun i hi => hf0 i (Finset.mem_insert_of_mem hi))
-          (fun i hi => hf1 i (Finset.mem_insert_of_mem hi))
-      have hgprod0 : 0 ≤ ∏ i ∈ s, g i :=
-        Finset.prod_nonneg fun i hi => hg0 i (Finset.mem_insert_of_mem hi)
-      have hgprod1 : (∏ i ∈ s, g i) ≤ 1 :=
-        Finset.prod_le_one
-          (fun i hi => hg0 i (Finset.mem_insert_of_mem hi))
-          (fun i hi => hg1 i (Finset.mem_insert_of_mem hi))
-      have ih' :
-          |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| ≤
-            (s.card : ℝ) * ε :=
-        ih
-          (fun i hi => hf0 i (Finset.mem_insert_of_mem hi))
-          (fun i hi => hf1 i (Finset.mem_insert_of_mem hi))
-          (fun i hi => hg0 i (Finset.mem_insert_of_mem hi))
-          (fun i hi => hg1 i (Finset.mem_insert_of_mem hi))
-          (fun i hi => hfg i (Finset.mem_insert_of_mem hi))
-      have hfirst :
-          |f a - g a| * |∏ i ∈ s, f i| ≤ ε := by
-        calc
-          |f a - g a| * |∏ i ∈ s, f i| ≤
-              ε * |∏ i ∈ s, f i| :=
-            mul_le_mul_of_nonneg_right hdiffa (abs_nonneg _)
-          _ ≤ ε * 1 :=
-            mul_le_mul_of_nonneg_left
-              (by simpa [abs_of_nonneg hfprod0] using hfprod1) hε
-          _ = ε := mul_one ε
-      have hsecond :
-          |g a| *
-              |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| ≤
-            (s.card : ℝ) * ε := by
-        calc
-          |g a| *
-                |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| ≤
-              1 *
-                |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| :=
-            mul_le_mul_of_nonneg_right
-              (by simpa [abs_of_nonneg hga0] using hga1)
-              (abs_nonneg _)
-          _ ≤ 1 * ((s.card : ℝ) * ε) :=
-            mul_le_mul_of_nonneg_left ih' zero_le_one
-          _ = (s.card : ℝ) * ε := one_mul _
-      rw [Finset.prod_insert ha, Finset.prod_insert ha,
-        Finset.card_insert_of_notMem ha]
-      calc
-        |f a * (∏ i ∈ s, f i) -
-              g a * ∏ i ∈ s, g i| =
-            |(f a - g a) * (∏ i ∈ s, f i) +
-              g a * ((∏ i ∈ s, f i) - ∏ i ∈ s, g i)| := by
-                congr 1
-                ring
-        _ ≤
-            |f a - g a| * |∏ i ∈ s, f i| +
-              |g a| *
-                |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| := by
-          simpa [abs_mul] using
-            abs_add_le
-              ((f a - g a) * (∏ i ∈ s, f i))
-              (g a * ((∏ i ∈ s, f i) - ∏ i ∈ s, g i))
-        _ ≤ ε + (s.card : ℝ) * ε :=
-          add_le_add hfirst hsecond
-        _ = ((s.card + 1 : ℕ) : ℝ) * ε := by
-          push_cast
-          ring
 
-/-- Uniformly close unit-interval edge weights give pointwise close simplex
-weights. -/
-theorem simplexWeight_abs_sub_le
-    {k : ℕ} {V : Fin k → Type*}
-    (H G : WeightedSimplexSystem V) {ε : ℝ}
-    (hε : 0 ≤ ε)
-    (hH : EdgeWeightsInUnitInterval H)
-    (hG : EdgeWeightsInUnitInterval G)
-    (hHG : EdgeSupDistanceLe H G ε)
-    (x : (i : Fin k) → V i) :
-    |H.simplexWeight x - G.simplexWeight x| ≤ (k : ℝ) * ε := by
-  change
-    |(∏ j : Fin k, H.edgeWeight j (deleteCoordinate x j)) -
-        ∏ j : Fin k, G.edgeWeight j (deleteCoordinate x j)| ≤
-      (k : ℝ) * ε
-  simpa using
-    abs_prod_sub_prod_le_card_mul Finset.univ
-      (fun j => H.edgeWeight j (deleteCoordinate x j))
-      (fun j => G.edgeWeight j (deleteCoordinate x j))
-      hε
-      (fun j _ => (hH j (deleteCoordinate x j)).1)
-      (fun j _ => (hH j (deleteCoordinate x j)).2)
-      (fun j _ => (hG j (deleteCoordinate x j)).1)
-      (fun j _ => (hG j (deleteCoordinate x j)).2)
-      (fun j _ => hHG j (deleteCoordinate x j))
 
-/-- Sup-norm stability of normalized simplex counts. -/
-theorem simplexCount_abs_sub_le
-    {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)] [∀ i, Nonempty (V i)]
-    (H G : WeightedSimplexSystem V) {ε : ℝ}
-    (hε : 0 ≤ ε)
-    (hH : EdgeWeightsInUnitInterval H)
-    (hG : EdgeWeightsInUnitInterval G)
-    (hHG : EdgeSupDistanceLe H G ε) :
-    |H.simplexCount - G.simplexCount| ≤ (k : ℝ) * ε := by
-  rw [WeightedSimplexSystem.simplexCount,
-    WeightedSimplexSystem.simplexCount, ← mean_sub]
-  calc
-    |mean (fun x => H.simplexWeight x - G.simplexWeight x)| ≤
-        mean (fun x => |H.simplexWeight x - G.simplexWeight x|) := by
-      exact Finset.abs_expect_le Finset.univ _
-    _ ≤ mean (fun _ => (k : ℝ) * ε) :=
-      mean_mono fun x => simplexWeight_abs_sub_le H G hε hH hG hHG x
-    _ = (k : ℝ) * ε := mean_const _
 
 end Wikipedia.SzemeredisTheorem
 
@@ -12542,482 +6389,31 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- Canonical `Fin n` presentation of a dependent deleted-coordinate
-vector. -/
-noncomputable def deletedFaceTuple
-    {G : Type*} {n : ℕ} (j : Fin (n + 1))
-    (x : DeletedVector (fun _ : Fin (n + 1) => G) j) :
-    Fin n → G :=
-  fun t => x (finSuccAboveEquiv j t)
 
-@[simp]
-theorem deletedFaceTuple_finTupleToDeletedVector
-    {G : Type*} {n : ℕ} (j : Fin (n + 1))
-    (y : Fin n → G) :
-    deletedFaceTuple j (finTupleToDeletedVector j y) = y := by
-  funext t
-  simp [deletedFaceTuple]
 
-@[simp]
-theorem finTupleToDeletedVector_deletedFaceTuple
-    {G : Type*} {n : ℕ} (j : Fin (n + 1))
-    (x : DeletedVector (fun _ : Fin (n + 1) => G) j) :
-    finTupleToDeletedVector j (deletedFaceTuple j x) = x := by
-  funext i
-  change
-    x (finSuccAboveEquiv j
-      ((finSuccAboveEquiv j).symm i)) = x i
-  rw [(finSuccAboveEquiv j).apply_symm_apply]
 
-@[simp]
-theorem deletedFaceTuple_deleteCoordinate
-    {G : Type*} {n : ℕ} (j : Fin (n + 1))
-    (x : Fin (n + 1) → G) (t : Fin n) :
-    deletedFaceTuple j (deleteCoordinate x j) t =
-      x (j.succAbove t) :=
-  rfl
 
-/-- Reparameterize one edge weight by the canonical `Fin n` face tuple. -/
-noncomputable def canonicalEdgeFunction
-    {G : Type*} {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (j : Fin (n + 1)) :
-    (Fin n → G) → ℝ :=
-  fun y => H.edgeWeight j (finTupleToDeletedVector j y)
 
-/-- A regularity state for every edge colour. -/
-abbrev SimplexRegularitySystem
-    (G : Type*) (n : ℕ)
-    [Fintype G] [DecidableEq G] :=
-  (j : Fin (n + 1)) →
-    FaceRegularityState (Fin n → G)
 
-/-- Replace every edge weight by its conditional mean in the corresponding
-regularity state. -/
-noncomputable def regularizedSimplexSystem
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n) :
-    WeightedSimplexSystem (fun _ : Fin (n + 1) => G) where
-  edgeWeight j x :=
-    (S j).structured (canonicalEdgeFunction H j)
-      (deletedFaceTuple j x)
 
-@[simp]
-theorem regularizedSimplexSystem_edge_finTuple
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n)
-    (j : Fin (n + 1)) (y : Fin n → G) :
-    (regularizedSimplexSystem H S).edgeWeight j
-        (finTupleToDeletedVector j y) =
-      (S j).structured (canonicalEdgeFunction H j) y := by
-  simp [regularizedSimplexSystem]
 
-theorem canonicalEdgeFunction_nonneg
-    {G : Type*} {n : ℕ}
-    {H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G)}
-    (hH : EdgeWeightsInUnitInterval H)
-    (j : Fin (n + 1)) (y : Fin n → G) :
-    0 ≤ canonicalEdgeFunction H j y :=
-  (hH j (finTupleToDeletedVector j y)).1
 
-theorem canonicalEdgeFunction_le_one
-    {G : Type*} {n : ℕ}
-    {H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G)}
-    (hH : EdgeWeightsInUnitInterval H)
-    (j : Fin (n + 1)) (y : Fin n → G) :
-    canonicalEdgeFunction H j y ≤ 1 :=
-  (hH j (finTupleToDeletedVector j y)).2
 
-/-- Conditional averaging preserves the unit-interval edge bounds. -/
-theorem regularizedSimplexSystem_unitInterval
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    {H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G)}
-    (hH : EdgeWeightsInUnitInterval H)
-    (S : SimplexRegularitySystem G n) :
-    EdgeWeightsInUnitInterval (regularizedSimplexSystem H S) := by
-  intro j x
-  constructor
-  · exact
-      (S j).structured_nonneg
-        (canonicalEdgeFunction_nonneg hH j)
-        (deletedFaceTuple j x)
-  · exact
-      (S j).structured_le_one
-        (canonicalEdgeFunction_le_one hH j)
-        (deletedFaceTuple j x)
 
-/-- The non-distinguished factors in an ordered simplex telescoping term. -/
-def orderedSimplexEdgeFactor
-    {G : Type*} {k : ℕ}
-    (H K : WeightedSimplexSystem
-      (fun _ : Fin k => G))
-    (j i : Fin k) (x : Fin k → G) : ℝ :=
-  (if i < j then H.edgeWeight i (deleteCoordinate x i) else 1) *
-  (if j < i then K.edgeWeight i (deleteCoordinate x i) else 1)
 
-@[simp]
-theorem orderedSimplexEdgeFactor_self
-    {G : Type*} {k : ℕ}
-    (H K : WeightedSimplexSystem
-      (fun _ : Fin k => G))
-    (j : Fin k) (x : Fin k → G) :
-    orderedSimplexEdgeFactor H K j j x = 1 := by
-  simp [orderedSimplexEdgeFactor]
 
-/-- Insert the omitted coordinate into a tuple presented with the
-subtraction-based arity used by `eraseCoordinate`. -/
-def insertErasedCoordinate
-    {G : Type*} {n : ℕ} (t : Fin n) (a : G)
-    (z : Fin (n - 1) → G) :
-    Fin n → G := by
-  cases n with
-  | zero => exact Fin.elim0 t
-  | succ m => exact Fin.insertNth t a z
 
-@[simp]
-theorem insertErasedCoordinate_eraseCoordinate
-    {G : Type*} [DecidableEq G] {n : ℕ}
-    (t : Fin n) (a : G) (y : Fin n → G) :
-    insertErasedCoordinate t a (eraseCoordinate t y) =
-      Function.update y t a := by
-  cases n with
-  | zero => exact Fin.elim0 t
-  | succ m =>
-      exact insertNth_eraseCoordinate_eq_update t a y
 
-/-- After fixing the distinguished vertex, the other edge of colour
-`j.succAbove t` is a function omitting face coordinate `t`. -/
-def simplexMixedCutTest
-    {G : Type*} {n : ℕ}
-    (H K : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (j : Fin (n + 1)) (a : G) :
-    CutTestFamily G n :=
-  fun t z =>
-    orderedSimplexEdgeFactor H K j (j.succAbove t)
-      (Fin.insertNth j a (insertErasedCoordinate t a z))
 
-/-- Evaluation on an erased tuple recovers the corresponding
-non-distinguished edge factor. -/
-theorem simplexMixedCutTest_eraseCoordinate
-    {G : Type*} [DecidableEq G] {n : ℕ}
-    (H K : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (j : Fin (n + 1)) (a : G)
-    (t : Fin n) (y : Fin n → G) :
-    simplexMixedCutTest H K j a t (eraseCoordinate t y) =
-      orderedSimplexEdgeFactor H K j (j.succAbove t)
-        (Fin.insertNth j a y) := by
-  rw [simplexMixedCutTest,
-    insertErasedCoordinate_eraseCoordinate,
-    Fin.insertNth_update]
-  unfold orderedSimplexEdgeFactor
-  simp only [deleteCoordinate_update_same]
 
-/-- Unit-interval edge bounds make the reconstructed cut family bounded. -/
-theorem simplexMixedCutTest_bounded
-    {G : Type*} {n : ℕ}
-    (H K : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (hH : EdgeWeightsInUnitInterval H)
-    (hK : EdgeWeightsInUnitInterval K)
-    (j : Fin (n + 1)) (a : G) :
-    IsBoundedCutTest (simplexMixedCutTest H K j a) := by
-  constructor
-  · intro t z
-    unfold simplexMixedCutTest orderedSimplexEdgeFactor
-    by_cases htj : j.succAbove t < j
-    · have hjt : ¬j < j.succAbove t :=
-        not_lt_of_ge (le_of_lt htj)
-      simp [htj, hjt, (hH _ _).1]
-    · by_cases hjt : j < j.succAbove t
-      · simp [htj, hjt, (hK _ _).1]
-      · exact
-          (Fin.succAbove_ne j t
-            (le_antisymm (not_lt.mp hjt)
-              (not_lt.mp htj))).elim
-  · intro t z
-    unfold simplexMixedCutTest orderedSimplexEdgeFactor
-    by_cases htj : j.succAbove t < j
-    · have hjt : ¬j < j.succAbove t :=
-        not_lt_of_ge (le_of_lt htj)
-      simpa [htj, hjt] using
-        (hH (j.succAbove t)
-          (deleteCoordinate
-            (Fin.insertNth j a (insertErasedCoordinate t a z))
-            (j.succAbove t))).2
-    · by_cases hjt : j < j.succAbove t
-      · simpa [htj, hjt] using
-          (hK (j.succAbove t)
-            (deleteCoordinate
-              (Fin.insertNth j a (insertErasedCoordinate t a z))
-              (j.succAbove t))).2
-      · exact
-          (Fin.succAbove_ne j t
-            (le_antisymm (not_lt.mp hjt)
-              (not_lt.mp htj))).elim
 
-/-- The full product of ordered factors is the filtered product in the
-telescoping definition. -/
-theorem prod_orderedSimplexEdgeFactor
-    {G : Type*} {k : ℕ}
-    (H K : WeightedSimplexSystem
-      (fun _ : Fin k => G))
-    (j : Fin k) (x : Fin k → G) :
-    (∏ i : Fin k, orderedSimplexEdgeFactor H K j i x) =
-      (∏ i ∈ (Finset.univ : Finset (Fin k)) with i < j,
-        H.edgeWeight i (deleteCoordinate x i)) *
-      ∏ i ∈ (Finset.univ : Finset (Fin k)) with j < i,
-        K.edgeWeight i (deleteCoordinate x i) := by
-  rw [Finset.prod_filter, Finset.prod_filter,
-    ← Finset.prod_mul_distrib]
-  rfl
 
-/-- The reconstructed cut product is exactly the product of all
-non-distinguished telescoping factors. -/
-theorem prod_simplexMixedCutTest_eraseCoordinate
-    {G : Type*} [DecidableEq G] {n : ℕ}
-    (H K : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (j : Fin (n + 1)) (a : G)
-    (y : Fin n → G) :
-    (∏ t : Fin n,
-        simplexMixedCutTest H K j a t
-          (eraseCoordinate t y)) =
-      (∏ i ∈ (Finset.univ : Finset (Fin (n + 1))) with i < j,
-        H.edgeWeight i
-          (deleteCoordinate (Fin.insertNth j a y) i)) *
-      ∏ i ∈ (Finset.univ : Finset (Fin (n + 1))) with j < i,
-        K.edgeWeight i
-          (deleteCoordinate (Fin.insertNth j a y) i) := by
-  simp_rw [simplexMixedCutTest_eraseCoordinate]
-  calc
-    (∏ t : Fin n,
-        orderedSimplexEdgeFactor H K j (j.succAbove t)
-          (Fin.insertNth j a y)) =
-        ∏ i : Fin (n + 1),
-          orderedSimplexEdgeFactor H K j i
-            (Fin.insertNth j a y) := by
-      symm
-      calc
-        (∏ i : Fin (n + 1),
-            orderedSimplexEdgeFactor H K j i
-              (Fin.insertNth j a y)) =
-            orderedSimplexEdgeFactor H K j j
-                (Fin.insertNth j a y) *
-              ∏ t : Fin n,
-                orderedSimplexEdgeFactor H K j
-                  (j.succAbove t) (Fin.insertNth j a y) :=
-          Fin.prod_univ_succAbove _ j
-        _ =
-            ∏ t : Fin n,
-              orderedSimplexEdgeFactor H K j
-                (j.succAbove t) (Fin.insertNth j a y) := by
-          rw [orderedSimplexEdgeFactor_self, one_mul]
-    _ = _ :=
-      prod_orderedSimplexEdgeFactor H K j
-        (Fin.insertNth j a y)
 
-/-- Fixing coordinate `j` turns its mixed telescoping integrand into the
-face residual paired with the reconstructed cut product. -/
-theorem mixedSimplexTerm_regularized_insertNth
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n)
-    (j : Fin (n + 1)) (a : G) (y : Fin n → G) :
-    mixedSimplexTerm H (regularizedSimplexSystem H S) j
-        (Fin.insertNth j a y) =
-      (S j).residual (canonicalEdgeFunction H j) y *
-        cutTestProduct
-          (simplexMixedCutTest H
-            (regularizedSimplexSystem H S) j a) y := by
-  have hHj :
-      H.edgeWeight j
-          (deleteCoordinate (Fin.insertNth j a y) j) =
-        canonicalEdgeFunction H j y := by
-    simp [canonicalEdgeFunction,
-      deleteCoordinate_eq_finTupleToDeletedVector]
-  have hKj :
-      (regularizedSimplexSystem H S).edgeWeight j
-          (deleteCoordinate (Fin.insertNth j a y) j) =
-        (S j).structured (canonicalEdgeFunction H j) y := by
-    simp [regularizedSimplexSystem,
-      deleteCoordinate_eq_finTupleToDeletedVector]
-  unfold mixedSimplexTerm FaceRegularityState.residual
-  rw [hHj, hKj]
-  rw [show
-      cutTestProduct
-          (simplexMixedCutTest H
-            (regularizedSimplexSystem H S) j a) y =
-        (∏ i ∈ (Finset.univ : Finset (Fin (n + 1))) with i < j,
-          H.edgeWeight i
-            (deleteCoordinate (Fin.insertNth j a y) i)) *
-        ∏ i ∈ (Finset.univ : Finset (Fin (n + 1))) with j < i,
-          (regularizedSimplexSystem H S).edgeWeight i
-            (deleteCoordinate (Fin.insertNth j a y) i) by
-      exact prod_simplexMixedCutTest_eraseCoordinate
-        H (regularizedSimplexSystem H S) j a y]
-  ring
 
-/-- One mixed simplex correlation is the average over the fixed vertex of a
-face-cut residual correlation. -/
-theorem mixedSimplexCorrelation_regularized_eq_mean
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n)
-    (j : Fin (n + 1)) :
-    mixedSimplexCorrelation H (regularizedSimplexSystem H S) j =
-      mean (fun a : G =>
-        (S j).faceCutCorrelation
-          (canonicalEdgeFunction H j)
-          (simplexMixedCutTest H
-            (regularizedSimplexSystem H S) j a)) := by
-  unfold mixedSimplexCorrelation
-  rw [mean_insertNth n j]
-  unfold mean₂
-  apply congrArg mean
-  funext a
-  unfold FaceRegularityState.faceCutCorrelation
-  apply congrArg mean
-  funext y
-  exact mixedSimplexTerm_regularized_insertNth H S j a y
 
-/-- Cut regularity controls one mixed correlation in the weak counting
-telescoping expansion. -/
-theorem abs_mixedSimplexCorrelation_regularized_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (hH : EdgeWeightsInUnitInterval H)
-    (S : SimplexRegularitySystem G n)
-    {ε : ℝ}
-    (hregular :
-      ∀ j, (S j).IsFaceCutRegular
-        (canonicalEdgeFunction H j) ε)
-    (j : Fin (n + 1)) :
-    |mixedSimplexCorrelation H
-        (regularizedSimplexSystem H S) j| ≤ ε := by
-  rw [mixedSimplexCorrelation_regularized_eq_mean]
-  let K := regularizedSimplexSystem H S
-  have hK : EdgeWeightsInUnitInterval K :=
-    regularizedSimplexSystem_unitInterval hH S
-  calc
-    |mean (fun a : G =>
-        (S j).faceCutCorrelation
-          (canonicalEdgeFunction H j)
-          (simplexMixedCutTest H K j a))| ≤
-        mean (fun a : G =>
-          |(S j).faceCutCorrelation
-            (canonicalEdgeFunction H j)
-            (simplexMixedCutTest H K j a)|) :=
-      Finset.abs_expect_le Finset.univ _
-    _ ≤ mean (fun _a : G => ε) := by
-      apply mean_mono
-      intro a
-      exact hregular j
-        (simplexMixedCutTest H K j a)
-        (simplexMixedCutTest_bounded H K hH hK j a)
-    _ = ε := mean_const _
 
-/-- Uniform mixed-correlation bound for weakly regularized edge weights. -/
-theorem regularizedSimplexSystem_mixedCorrelationLe
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (hH : EdgeWeightsInUnitInterval H)
-    (S : SimplexRegularitySystem G n)
-    {ε : ℝ}
-    (hregular :
-      ∀ j, (S j).IsFaceCutRegular
-        (canonicalEdgeFunction H j) ε) :
-    MixedSimplexCorrelationLe H
-      (regularizedSimplexSystem H S) ε := by
-  intro j
-  exact abs_mixedSimplexCorrelation_regularized_le
-    H hH S hregular j
 
-/-- **Weak counting lemma.**  Simultaneous cut-regularity of all edge
-residuals controls the normalized simplex count by one `ε` per colour. -/
-theorem simplexCount_abs_sub_regularized_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (hH : EdgeWeightsInUnitInterval H)
-    (S : SimplexRegularitySystem G n)
-    {ε : ℝ}
-    (hregular :
-      ∀ j, (S j).IsFaceCutRegular
-        (canonicalEdgeFunction H j) ε) :
-    |H.simplexCount -
-        (regularizedSimplexSystem H S).simplexCount| ≤
-      ((n + 1 : ℕ) : ℝ) * ε :=
-  simplexCount_abs_sub_le_of_mixedCorrelation
-    H (regularizedSimplexSystem H S)
-    (regularizedSimplexSystem_mixedCorrelationLe
-      H hH S hregular)
 
-/-- Regularize all edge colours independently and apply the weak counting
-lemma.  Each output partition has an ambient-size-independent power-of-two
-complexity bound relative to its input partition. -/
-theorem exists_regularizedSimplexSystem_count_close
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {n : ℕ}
-    (H : WeightedSimplexSystem
-      (fun _ : Fin (n + 1) => G))
-    (hH : EdgeWeightsInUnitInterval H)
-    (S₀ : SimplexRegularitySystem G n)
-    {ε : ℝ} (hε : 0 < ε) :
-    ∃ S : SimplexRegularitySystem G n,
-      (∀ j, (S j).partition ≤ (S₀ j).partition) ∧
-      (∀ j, (S j).IsFaceCutRegular
-        (canonicalEdgeFunction H j) ε) ∧
-      |H.simplexCount -
-          (regularizedSimplexSystem H S).simplexCount| ≤
-        ((n + 1 : ℕ) : ℝ) * ε ∧
-      ∀ j, ∃ m i : ℕ,
-        1 < (m : ℝ) * ε ^ 2 ∧
-        i < m ∧
-        FacePartition.complexity (S j).partition ≤
-          2 ^ i *
-            FacePartition.complexity (S₀ j).partition := by
-  classical
-  have hj (j : Fin (n + 1)) :
-      ∃ T : FaceRegularityState (Fin n → G),
-        T.partition ≤ (S₀ j).partition ∧
-        T.IsFaceCutRegular (canonicalEdgeFunction H j) ε ∧
-        ∃ m i : ℕ,
-          1 < (m : ℝ) * ε ^ 2 ∧
-          i < m ∧
-          FacePartition.complexity T.partition ≤
-            2 ^ i *
-              FacePartition.complexity (S₀ j).partition := by
-    obtain ⟨m, i, T, hlong, hi, hTS, hregular, hcomplexity⟩ :=
-      (S₀ j).exists_faceCutRegular_refinement
-        (canonicalEdgeFunction H j)
-        (canonicalEdgeFunction_nonneg hH j)
-        (canonicalEdgeFunction_le_one hH j) hε
-    exact
-      ⟨T, hTS, hregular, m, i,
-        hlong, hi, hcomplexity⟩
-  choose S hS using hj
-  refine
-    ⟨S, fun j => (hS j).1, fun j => (hS j).2.1,
-      ?_, fun j => (hS j).2.2⟩
-  exact simplexCount_abs_sub_regularized_le
-    H hH S (fun j => (hS j).2.1)
 
 end Wikipedia.SzemeredisTheorem
 
@@ -13047,12 +6443,6 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- A fixed enumeration order for the finite type of increasing faces.  The
-particular order is irrelevant; it only chooses a telescoping order. -/
-noncomputable local instance orderedFaceLinearOrder
-    (k r : ℕ) : LinearOrder (OrderedFace k r) := by
-  classical
-  exact (Fintype.equivFin (OrderedFace k r)).linearOrder
 
 /-- A weak-regularity state for every ordered rank-`r` face. -/
 abbrev OrderedRegularitySystem
@@ -13072,529 +6462,27 @@ noncomputable def regularizedOrderedPattern
   edgeWeight e :=
     (S e).structured (H.edgeWeight e)
 
-@[simp]
-theorem regularizedOrderedPattern_edgeWeight
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r)
-    (e : OrderedFace k r) (y : Fin r → G) :
-    (regularizedOrderedPattern H S).edgeWeight e y =
-      (S e).structured (H.edgeWeight e) y :=
-  rfl
 
-/-- Conditional averaging preserves all unit-interval bounds. -/
-theorem regularizedOrderedPattern_unitInterval
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {H : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    (S : OrderedRegularitySystem G k r) :
-    (regularizedOrderedPattern H S).EdgeWeightsInUnitInterval := by
-  intro e y
-  exact
-    ⟨(S e).structured_nonneg
-        (fun z => (hH e z).1) y,
-      (S e).structured_le_one
-        (fun z => (hH e z).2) y⟩
 
-/-- Changing one coordinate of a distinguished face does not change the
-tuple seen by a second face which omits that vertex. -/
-theorem orderedFaceTuple_split_update_eq
-    {G : Type*} {k r : ℕ}
-    (e f : OrderedFace k r) (i : Fin r)
-    (hmissing : e i ∉ Set.range f)
-    (a : G) (y : Fin r → G)
-    (z : OrderedFaceComplement e → G) :
-    orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm
-          (Function.update y i a, z)) =
-      orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm (y, z)) := by
-  funext t
-  by_cases hfe : f t ∈ Set.range e
-  · obtain ⟨q, hq⟩ := hfe
-    have hqi : q ≠ i := by
-      intro h
-      apply hmissing
-      exact ⟨t, (h ▸ hq).symm⟩
-    have hleft :=
-      congrFun
-        (orderedFaceTuple_splitOrderedFaceEquiv_symm
-          e (Function.update y i a) z) q
-    have hright :=
-      congrFun
-        (orderedFaceTuple_splitOrderedFaceEquiv_symm
-          e y z) q
-    change
-      ((splitOrderedFaceEquiv e).symm
-          (Function.update y i a, z)) (e q) =
-        Function.update y i a q at hleft
-    change
-      ((splitOrderedFaceEquiv e).symm (y, z)) (e q) =
-        y q at hright
-    change
-      ((splitOrderedFaceEquiv e).symm
-          (Function.update y i a, z)) (f t) =
-        ((splitOrderedFaceEquiv e).symm (y, z)) (f t)
-    rw [← hq]
-    rw [hleft, hright]
-    simp [hqi]
-  · let v : OrderedFaceComplement e := ⟨f t, hfe⟩
-    have hleft :=
-      congrFun
-        (orderedFaceComplementTuple_splitOrderedFaceEquiv_symm
-          e (Function.update y i a) z) v
-    have hright :=
-      congrFun
-        (orderedFaceComplementTuple_splitOrderedFaceEquiv_symm
-          e y z) v
-    exact hleft.trans hright.symm
 
-/-- The update produced by erasing and reinserting a coordinate does not
-change any face which omits the corresponding distinguished vertex. -/
-theorem orderedFaceTuple_split_insertErased_eq
-    {G : Type*} [DecidableEq G] {k r : ℕ}
-    (e f : OrderedFace k r) (i : Fin r)
-    (hmissing : e i ∉ Set.range f)
-    (a : G) (y : Fin r → G)
-    (z : OrderedFaceComplement e → G) :
-    orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm
-          (insertErasedCoordinate i a
-            (eraseCoordinate i y), z)) =
-      orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm (y, z)) := by
-  rw [insertErasedCoordinate_eraseCoordinate]
-  exact orderedFaceTuple_split_update_eq
-    e f i hmissing a y z
 
-/-- The non-distinguished factor in an ordered product-telescoping term. -/
-noncomputable def orderedPatternEdgeFactor
-    {G : Type*} {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e f : OrderedFace k r) (x : Fin k → G) : ℝ :=
-  (if f < e then
-      H.edgeWeight f (orderedFaceTuple f x)
-    else 1) *
-    (if e < f then
-      K.edgeWeight f (orderedFaceTuple f x)
-    else 1)
 
-@[simp]
-theorem orderedPatternEdgeFactor_self
-    {G : Type*} {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e : OrderedFace k r) (x : Fin k → G) :
-    orderedPatternEdgeFactor H K e e x = 1 := by
-  simp [orderedPatternEdgeFactor]
 
-/-- The product of all non-distinguished factors is the pair of filtered
-products appearing in ordered product telescoping. -/
-theorem prod_orderedPatternEdgeFactor
-    {G : Type*} {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e : OrderedFace k r) (x : Fin k → G) :
-    (∏ f : OrderedFace k r,
-        orderedPatternEdgeFactor H K e f x) =
-      (∏ f ∈ (Finset.univ : Finset (OrderedFace k r))
-          with f < e,
-        H.edgeWeight f (orderedFaceTuple f x)) *
-      ∏ f ∈ (Finset.univ : Finset (OrderedFace k r))
-          with e < f,
-        K.edgeWeight f (orderedFaceTuple f x) := by
-  rw [Finset.prod_filter, Finset.prod_filter,
-    ← Finset.prod_mul_distrib]
-  rfl
 
-/-- Reconstructing an erased coordinate leaves a non-distinguished edge
-factor unchanged when the other face omits that coordinate. -/
-theorem orderedPatternEdgeFactor_split_insertErased_eq
-    {G : Type*} [DecidableEq G] {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e f : OrderedFace k r) (i : Fin r)
-    (hmissing : e i ∉ Set.range f)
-    (a : G) (y : Fin r → G)
-    (z : OrderedFaceComplement e → G) :
-    orderedPatternEdgeFactor H K e f
-        ((splitOrderedFaceEquiv e).symm
-          (insertErasedCoordinate i a
-            (eraseCoordinate i y), z)) =
-      orderedPatternEdgeFactor H K e f
-        ((splitOrderedFaceEquiv e).symm (y, z)) := by
-  unfold orderedPatternEdgeFactor
-  rw [orderedFaceTuple_split_insertErased_eq
-    e f i hmissing a y z]
 
-/-- Every mixed edge factor is nonnegative when the two systems have
-nonnegative edge weights. -/
-theorem orderedPatternEdgeFactor_nonneg
-    {G : Type*} {k r : ℕ}
-    {H K : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hK : K.EdgeWeightsInUnitInterval)
-    (e f : OrderedFace k r) (x : Fin k → G) :
-    0 ≤ orderedPatternEdgeFactor H K e f x := by
-  by_cases hfe : f < e
-  · have hef : ¬e < f :=
-      not_lt_of_ge (le_of_lt hfe)
-    simpa [orderedPatternEdgeFactor, hfe, hef] using
-      (hH f (orderedFaceTuple f x)).1
-  · by_cases hef : e < f
-    · simpa [orderedPatternEdgeFactor, hfe, hef] using
-        (hK f (orderedFaceTuple f x)).1
-    · simp [orderedPatternEdgeFactor, hfe, hef]
 
-/-- Every mixed edge factor is at most one when the two systems take values
-in the unit interval. -/
-theorem orderedPatternEdgeFactor_le_one
-    {G : Type*} {k r : ℕ}
-    {H K : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hK : K.EdgeWeightsInUnitInterval)
-    (e f : OrderedFace k r) (x : Fin k → G) :
-    orderedPatternEdgeFactor H K e f x ≤ 1 := by
-  by_cases hfe : f < e
-  · have hef : ¬e < f :=
-      not_lt_of_ge (le_of_lt hfe)
-    simpa [orderedPatternEdgeFactor, hfe, hef] using
-      (hH f (orderedFaceTuple f x)).2
-  · by_cases hef : e < f
-    · simpa [orderedPatternEdgeFactor, hfe, hef] using
-        (hK f (orderedFaceTuple f x)).2
-    · simp [orderedPatternEdgeFactor, hfe, hef]
 
-/-- Group every other face factor under its canonically chosen missing
-coordinate.  Fixing the complement of `e` turns this into a cut-test family
-on the `e`-tuple. -/
-noncomputable def orderedPatternMixedCutTest
-    {G : Type*} {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e : OrderedFace k r) (a : G)
-    (z : OrderedFaceComplement e → G) :
-    CutTestFamily G r :=
-  fun i y =>
-    ∏ f : OrderedFace k r,
-      if hfe : f = e then 1
-      else if
-          orderedFaceMissingCoordinate e f
-              (Ne.symm hfe) = i
-        then
-          orderedPatternEdgeFactor H K e f
-            ((splitOrderedFaceEquiv e).symm
-              (insertErasedCoordinate i a y, z))
-        else 1
 
-/-- The grouped mixed cut family is bounded pointwise. -/
-theorem orderedPatternMixedCutTest_bounded
-    {G : Type*} {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hK : K.EdgeWeightsInUnitInterval)
-    (e : OrderedFace k r) (a : G)
-    (z : OrderedFaceComplement e → G) :
-    IsBoundedCutTest
-      (orderedPatternMixedCutTest H K e a z) := by
-  constructor
-  · intro i y
-    unfold orderedPatternMixedCutTest
-    apply Finset.prod_nonneg
-    intro f _hf
-    split_ifs
-    · positivity
-    · exact orderedPatternEdgeFactor_nonneg
-        hH hK e f _
-    · positivity
-  · intro i y
-    unfold orderedPatternMixedCutTest
-    apply Finset.prod_le_one
-    · intro f _hf
-      split_ifs
-      · positivity
-      · exact orderedPatternEdgeFactor_nonneg
-          hH hK e f _
-      · positivity
-    · intro f _hf
-      split_ifs
-      · exact le_rfl
-      · exact orderedPatternEdgeFactor_le_one
-          hH hK e f _
-      · exact le_rfl
 
-/-- Evaluating the grouped cut product recovers exactly the product of all
-non-distinguished mixed factors. -/
-theorem cutTestProduct_orderedPatternMixedCutTest
-    {G : Type*} [DecidableEq G] {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e : OrderedFace k r) (a : G)
-    (y : Fin r → G)
-    (z : OrderedFaceComplement e → G) :
-    cutTestProduct
-        (orderedPatternMixedCutTest H K e a z) y =
-      ∏ f : OrderedFace k r,
-        orderedPatternEdgeFactor H K e f
-          ((splitOrderedFaceEquiv e).symm (y, z)) := by
-  classical
-  unfold cutTestProduct orderedPatternMixedCutTest
-  rw [Finset.prod_comm]
-  apply Fintype.prod_congr
-  intro f
-  by_cases hfe : f = e
-  · subst f
-    simp
-  · let i :=
-      orderedFaceMissingCoordinate e f (Ne.symm hfe)
-    have hmissing :
-        e i ∉ Set.range f := by
-      exact orderedFaceMissingCoordinate_not_mem_range
-        e f (Ne.symm hfe)
-    calc
-      (∏ j : Fin r,
-          if hfe' : f = e then 1
-          else if
-              orderedFaceMissingCoordinate e f
-                  (Ne.symm hfe') = j
-            then
-              orderedPatternEdgeFactor H K e f
-                ((splitOrderedFaceEquiv e).symm
-                  (insertErasedCoordinate j a
-                    (eraseCoordinate j y), z))
-            else 1) =
-          (if hfe' : f = e then 1
-          else if
-              orderedFaceMissingCoordinate e f
-                  (Ne.symm hfe') = i
-            then
-              orderedPatternEdgeFactor H K e f
-                ((splitOrderedFaceEquiv e).symm
-                  (insertErasedCoordinate i a
-                    (eraseCoordinate i y), z))
-            else 1) := by
-        apply Fintype.prod_eq_single i
-        intro j hji
-        have hne :
-            orderedFaceMissingCoordinate e f
-                (Ne.symm hfe) ≠ j := by
-          intro h
-          exact hji h.symm
-        simp [hfe, hne]
-      _ =
-          orderedPatternEdgeFactor H K e f
-            ((splitOrderedFaceEquiv e).symm
-              (insertErasedCoordinate i a
-                (eraseCoordinate i y), z)) := by
-        simp [hfe, i]
-      _ =
-          orderedPatternEdgeFactor H K e f
-            ((splitOrderedFaceEquiv e).symm (y, z)) :=
-        orderedPatternEdgeFactor_split_insertErased_eq
-          H K e f i hmissing a y z
 
-/-- The mixed term produced while replacing one ordered face weight. -/
-noncomputable def mixedOrderedPatternTerm
-    {G : Type*} {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e : OrderedFace k r) (x : Fin k → G) : ℝ :=
-  (H.edgeWeight e (orderedFaceTuple e x) -
-      K.edgeWeight e (orderedFaceTuple e x)) *
-    (∏ f ∈ (Finset.univ : Finset (OrderedFace k r))
-        with f < e,
-      H.edgeWeight f (orderedFaceTuple f x)) *
-    ∏ f ∈ (Finset.univ : Finset (OrderedFace k r))
-        with e < f,
-      K.edgeWeight f (orderedFaceTuple f x)
 
-/-- Exact pointwise telescoping over all ordered faces. -/
-theorem patternWeight_sub_eq_sum_mixedOrderedPatternTerm
-    {G : Type*} {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (x : Fin k → G) :
-    H.patternWeight x - K.patternWeight x =
-      ∑ e : OrderedFace k r,
-        mixedOrderedPatternTerm H K e x := by
-  unfold WeightedOrderedPattern.patternWeight
-  simpa [mixedOrderedPatternTerm] using
-    prod_sub_prod_eq_sum_ordered
-      (Finset.univ : Finset (OrderedFace k r))
-      (fun e => H.edgeWeight e (orderedFaceTuple e x))
-      (fun e => K.edgeWeight e (orderedFaceTuple e x))
 
-/-- The normalized mixed correlation for one ordered face replacement. -/
-noncomputable def mixedOrderedPatternCorrelation
-    {G : Type*} [Fintype G] {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r)
-    (e : OrderedFace k r) : ℝ :=
-  mean (mixedOrderedPatternTerm H K e)
 
-/-- Exact telescoping identity for normalized ordered-pattern counts. -/
-theorem patternCount_sub_eq_sum_mixedOrderedPatternCorrelation
-    {G : Type*} [Fintype G] {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r) :
-    H.patternCount - K.patternCount =
-      ∑ e : OrderedFace k r,
-        mixedOrderedPatternCorrelation H K e := by
-  rw [WeightedOrderedPattern.patternCount,
-    WeightedOrderedPattern.patternCount, ← mean_sub]
-  calc
-    mean (fun x => H.patternWeight x - K.patternWeight x) =
-        mean (fun x =>
-          ∑ e : OrderedFace k r,
-            mixedOrderedPatternTerm H K e x) := by
-      apply congrArg mean
-      funext x
-      exact
-        patternWeight_sub_eq_sum_mixedOrderedPatternTerm
-          H K x
-    _ =
-        ∑ e : OrderedFace k r,
-          mean (mixedOrderedPatternTerm H K e) :=
-      mean_finset_sum Finset.univ
-        (fun e => mixedOrderedPatternTerm H K e)
-    _ = _ := by
-      rfl
 
-/-- Absolute count comparison reduces to the sum of absolute mixed
-correlations. -/
-theorem abs_patternCount_sub_le_sum_mixedOrderedPatternCorrelation
-    {G : Type*} [Fintype G] {k r : ℕ}
-    (H K : WeightedOrderedPattern G k r) :
-    |H.patternCount - K.patternCount| ≤
-      ∑ e : OrderedFace k r,
-        |mixedOrderedPatternCorrelation H K e| := by
-  rw [patternCount_sub_eq_sum_mixedOrderedPatternCorrelation]
-  exact Finset.abs_sum_le_sum_abs _ _
 
-/-- For a regularized comparison, fixing the complement of the
-distinguished face turns the mixed term into its residual paired with the
-grouped lower-face cut product. -/
-theorem mixedOrderedPatternTerm_regularized_split
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r)
-    (e : OrderedFace k r) (a : G)
-    (y : Fin r → G)
-    (z : OrderedFaceComplement e → G) :
-    mixedOrderedPatternTerm H
-        (regularizedOrderedPattern H S) e
-        ((splitOrderedFaceEquiv e).symm (y, z)) =
-      (S e).residual (H.edgeWeight e) y *
-        cutTestProduct
-          (orderedPatternMixedCutTest H
-            (regularizedOrderedPattern H S) e a z) y := by
-  have hprod :=
-    prod_orderedPatternEdgeFactor
-      H (regularizedOrderedPattern H S) e
-        ((splitOrderedFaceEquiv e).symm (y, z))
-  have hcut :=
-    cutTestProduct_orderedPatternMixedCutTest
-      H (regularizedOrderedPattern H S) e a y z
-  simp only [regularizedOrderedPattern_edgeWeight] at hprod
-  unfold mixedOrderedPatternTerm FaceRegularityState.residual
-  simp only [
-    orderedFaceTuple_splitOrderedFaceEquiv_symm,
-    regularizedOrderedPattern_edgeWeight]
-  rw [mul_assoc, ← hprod, ← hcut]
 
-/-- One mixed ordered-pattern correlation is the mean, over the fixed
-complement, of a face-cut residual correlation. -/
-theorem mixedOrderedPatternCorrelation_regularized_eq_mean
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r)
-    (e : OrderedFace k r) :
-    mixedOrderedPatternCorrelation H
-        (regularizedOrderedPattern H S) e =
-      mean (fun z : OrderedFaceComplement e → G =>
-        (S e).faceCutCorrelation
-          (H.edgeWeight e)
-          (orderedPatternMixedCutTest H
-            (regularizedOrderedPattern H S) e
-            (Classical.choice inferInstance) z)) := by
-  unfold mixedOrderedPatternCorrelation
-  rw [mean_splitOrderedFace e]
-  rw [mean₂_comm]
-  unfold mean₂
-  apply congrArg mean
-  funext z
-  unfold FaceRegularityState.faceCutCorrelation
-  apply congrArg mean
-  funext y
-  exact mixedOrderedPatternTerm_regularized_split
-    H S e (Classical.choice inferInstance) y z
 
-/-- Cut regularity controls each ordered-face telescoping correlation. -/
-theorem abs_mixedOrderedPatternCorrelation_regularized_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (hH : H.EdgeWeightsInUnitInterval)
-    (S : OrderedRegularitySystem G k r)
-    {ε : ℝ}
-    (hregular :
-      ∀ e, (S e).IsFaceCutRegular
-        (H.edgeWeight e) ε)
-    (e : OrderedFace k r) :
-    |mixedOrderedPatternCorrelation H
-        (regularizedOrderedPattern H S) e| ≤ ε := by
-  rw [mixedOrderedPatternCorrelation_regularized_eq_mean]
-  let K := regularizedOrderedPattern H S
-  have hK : K.EdgeWeightsInUnitInterval :=
-    regularizedOrderedPattern_unitInterval hH S
-  calc
-    |mean (fun z : OrderedFaceComplement e → G =>
-        (S e).faceCutCorrelation
-          (H.edgeWeight e)
-          (orderedPatternMixedCutTest H K e
-            (Classical.choice inferInstance) z))| ≤
-        mean (fun z : OrderedFaceComplement e → G =>
-          |(S e).faceCutCorrelation
-            (H.edgeWeight e)
-            (orderedPatternMixedCutTest H K e
-              (Classical.choice inferInstance) z)|) :=
-      Finset.abs_expect_le Finset.univ _
-    _ ≤ mean
-        (fun _z : OrderedFaceComplement e → G => ε) := by
-      apply mean_mono
-      intro z
-      exact hregular e
-        (orderedPatternMixedCutTest H K e
-          (Classical.choice inferInstance) z)
-        (orderedPatternMixedCutTest_bounded
-          H K hH hK e (Classical.choice inferInstance) z)
-    _ = ε := mean_const _
 
-/-- **Weak counting lemma for complete ordered patterns.**  Simultaneous
-rank-`r` cut regularity changes the count by at most one `ε` for every
-increasing rank-`r` face. -/
-theorem patternCount_abs_sub_regularizedOrderedPattern_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (hH : H.EdgeWeightsInUnitInterval)
-    (S : OrderedRegularitySystem G k r)
-    {ε : ℝ}
-    (hregular :
-      ∀ e, (S e).IsFaceCutRegular
-        (H.edgeWeight e) ε) :
-    |H.patternCount -
-        (regularizedOrderedPattern H S).patternCount| ≤
-      (Fintype.card (OrderedFace k r) : ℝ) * ε := by
-  calc
-    |H.patternCount -
-        (regularizedOrderedPattern H S).patternCount| ≤
-        ∑ e : OrderedFace k r,
-          |mixedOrderedPatternCorrelation H
-            (regularizedOrderedPattern H S) e| :=
-      abs_patternCount_sub_le_sum_mixedOrderedPatternCorrelation
-        H (regularizedOrderedPattern H S)
-    _ ≤ ∑ _e : OrderedFace k r, ε :=
-      Finset.sum_le_sum fun e _ =>
-        abs_mixedOrderedPatternCorrelation_regularized_le
-          H hH S hregular e
-    _ = (Fintype.card (OrderedFace k r) : ℝ) * ε := by
-      simp
 
 end Wikipedia.SzemeredisTheorem
 
@@ -13617,20 +6505,7 @@ top atom is an explicit union of products of rank-`r - 1` cells.
 
 namespace Wikipedia.SzemeredisTheorem
 
-/-- The indiscrete regularity state on every ordered face. -/
-def indiscreteOrderedRegularitySystem
-    (G : Type*) [Fintype G] [DecidableEq G]
-    (k r : ℕ) :
-    OrderedRegularitySystem G k r :=
-  fun _ => ⟨FacePartition.indiscrete⟩
 
-@[simp]
-theorem indiscreteOrderedRegularitySystem_partition
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} (e : OrderedFace k r) :
-    (indiscreteOrderedRegularitySystem G k r e).partition =
-      FacePartition.indiscrete :=
-  rfl
 
 /-- Simultaneous regularization data for all ordered faces, including the
 actual lower-face generators. -/
@@ -13667,555 +6542,23 @@ structure GeneratedOrderedPatternRegularization
     ∀ e, FacePartition.complexity (state e).partition ≤
       2 ^ stepIndex e
 
-/-- Simultaneously regularize every ordered face from the indiscrete
-partition, retaining all generators and the exact weak-counting bound. -/
-theorem exists_generatedOrderedPatternRegularization
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ} (hr : 0 < r)
-    (H : WeightedOrderedPattern G k r)
-    (hH : H.EdgeWeightsInUnitInterval)
-    {ε : ℝ} (hε : 0 < ε) :
-    Nonempty
-      (GeneratedOrderedPatternRegularization
-        G k r H ε) := by
-  classical
-  let S₀ :=
-    indiscreteOrderedRegularitySystem G k r
-  have he (e : OrderedFace k r) :
-      ∃ m i : ℕ,
-        ∃ T : FaceRegularityState (Fin r → G),
-        ∃ F : Finset (BooleanCutTest (Fin r → G)),
-          1 < (m : ℝ) * ε ^ 2 ∧
-          i < m ∧
-          T.partition =
-            FacePartition.join (S₀ e).partition
-              (FacePartition.generatedBy F) ∧
-          F ⊆ booleanFaceCutSupports G r ∧
-          F.card ≤ i ∧
-          T.IsFaceCutRegular (H.edgeWeight e) ε ∧
-          FacePartition.complexity T.partition ≤
-            2 ^ i *
-              FacePartition.complexity
-                (S₀ e).partition := by
-    exact
-      (S₀ e).exists_faceCutRegular_refinement_with_generators
-        hr (H.edgeWeight e)
-        (fun y => (hH e y).1)
-        (fun y => (hH e y).2) hε
-  choose m i S F hdata using he
-  have hbudget :
-      ∀ e, 1 < (m e : ℝ) * ε ^ 2 :=
-    fun e => (hdata e).1
-  have hstep :
-      ∀ e, i e < m e :=
-    fun e => (hdata e).2.1
-  have hpartition :
-      ∀ e, (S e).partition =
-        FacePartition.generatedBy (F e) := by
-    intro e
-    have h := (hdata e).2.2.1
-    simpa [S₀, indiscreteOrderedRegularitySystem,
-      FacePartition.join, FacePartition.indiscrete] using h
-  have hsupported :
-      ∀ e, F e ⊆ booleanFaceCutSupports G r :=
-    fun e => (hdata e).2.2.2.1
-  have hcard :
-      ∀ e, (F e).card ≤ i e :=
-    fun e => (hdata e).2.2.2.2.1
-  have hregular :
-      ∀ e, (S e).IsFaceCutRegular
-        (H.edgeWeight e) ε :=
-    fun e => (hdata e).2.2.2.2.2.1
-  have hcomplexity :
-      ∀ e, FacePartition.complexity (S e).partition ≤
-        2 ^ i e := by
-    intro e
-    have h := (hdata e).2.2.2.2.2.2
-    simpa [S₀, indiscreteOrderedRegularitySystem] using h
-  exact
-    ⟨{
-      state := S
-      generators := F
-      budgetLength := m
-      stepIndex := i
-      budget_large := hbudget
-      step_lt_budget := hstep
-      partition_eq_generated := hpartition
-      generators_supported := hsupported
-      generator_card_le := hcard
-      regular := hregular
-      count_close :=
-        patternCount_abs_sub_regularizedOrderedPattern_le
-          H hH S hregular
-      complexity_le := hcomplexity
-    }⟩
 
-/-- Fixed-budget version of simultaneous generated regularization from the
-indiscrete system.  Besides the usual certificate, every face step index is
-strictly below the same prescribed ambient-independent budget `m`. -/
-theorem exists_generatedOrderedPatternRegularization_before
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ} (hr : 0 < r)
-    (H : WeightedOrderedPattern G k r)
-    (hH : H.EdgeWeightsInUnitInterval)
-    {ε : ℝ} {m : ℕ}
-    (hε : 0 ≤ ε)
-    (hlong : 1 < (m : ℝ) * ε ^ 2) :
-    ∃ R : GeneratedOrderedPatternRegularization
-        G k r H ε,
-      ∀ e, R.stepIndex e < m := by
-  classical
-  let S₀ :=
-    indiscreteOrderedRegularitySystem G k r
-  have he (e : OrderedFace k r) :
-      ∃ i : ℕ,
-        ∃ T : FaceRegularityState (Fin r → G),
-        ∃ F : Finset (BooleanCutTest (Fin r → G)),
-          i < m ∧
-          T.partition =
-            FacePartition.join (S₀ e).partition
-              (FacePartition.generatedBy F) ∧
-          F ⊆ booleanFaceCutSupports G r ∧
-          F.card ≤ i ∧
-          T.IsFaceCutRegular (H.edgeWeight e) ε ∧
-          FacePartition.complexity T.partition ≤
-            2 ^ i *
-              FacePartition.complexity
-                (S₀ e).partition := by
-    exact
-      (S₀ e).exists_faceCutRegular_refinement_with_generators_before
-        hr (H.edgeWeight e)
-        (fun y => (hH e y).1)
-        (fun y => (hH e y).2)
-        hε hlong
-  choose i S F hdata using he
-  have hpartition :
-      ∀ e, (S e).partition =
-        FacePartition.generatedBy (F e) := by
-    intro e
-    have h := (hdata e).2.1
-    simpa [S₀, indiscreteOrderedRegularitySystem,
-      FacePartition.join, FacePartition.indiscrete] using h
-  have hsupported :
-      ∀ e, F e ⊆ booleanFaceCutSupports G r :=
-    fun e => (hdata e).2.2.1
-  have hcard :
-      ∀ e, (F e).card ≤ i e :=
-    fun e => (hdata e).2.2.2.1
-  have hregular :
-      ∀ e, (S e).IsFaceCutRegular
-        (H.edgeWeight e) ε :=
-    fun e => (hdata e).2.2.2.2.1
-  have hcomplexity :
-      ∀ e, FacePartition.complexity (S e).partition ≤
-        2 ^ i e := by
-    intro e
-    have h := (hdata e).2.2.2.2.2
-    simpa [S₀, indiscreteOrderedRegularitySystem] using h
-  let R : GeneratedOrderedPatternRegularization
-      G k r H ε := {
-    state := S
-    generators := F
-    budgetLength := fun _ => m
-    stepIndex := i
-    budget_large := fun _ => hlong
-    step_lt_budget := fun e => (hdata e).1
-    partition_eq_generated := hpartition
-    generators_supported := hsupported
-    generator_card_le := hcard
-    regular := hregular
-    count_close :=
-      patternCount_abs_sub_regularizedOrderedPattern_le
-        H hH S hregular
-    complexity_le := hcomplexity
-  }
-  exact ⟨R, fun e => (hdata e).1⟩
 
 namespace GeneratedOrderedPatternRegularization
 
-/-- Simultaneously refine an already generated ordered system using a
-prescribed weak-regularity budget.  The new system retains the union of the
-old and new generators, so every partition remains *exactly* generated by
-lower-face cuts.  In particular, its step index grows by less than `m` on
-every ordered face. -/
-theorem exists_refinement_before
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε η : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r)
-    (hH : H.EdgeWeightsInUnitInterval)
-    {m : ℕ} (hη : 0 ≤ η)
-    (hlong : 1 < (m : ℝ) * η ^ 2) :
-    ∃ T : GeneratedOrderedPatternRegularization
-        G k r H η,
-      (∀ e, (T.state e).partition ≤
-        (R.state e).partition) ∧
-      (∀ e, R.generators e ⊆ T.generators e) ∧
-      ∀ e, T.stepIndex e < R.stepIndex e + m := by
-  classical
-  have he (e : OrderedFace k r) :
-      ∃ i : ℕ,
-        ∃ S : FaceRegularityState (Fin r → G),
-        ∃ F : Finset (BooleanCutTest (Fin r → G)),
-          i < m ∧
-          S.partition =
-            FacePartition.join (R.state e).partition
-              (FacePartition.generatedBy F) ∧
-          F ⊆ booleanFaceCutSupports G r ∧
-          F.card ≤ i ∧
-          S.IsFaceCutRegular (H.edgeWeight e) η ∧
-          FacePartition.complexity S.partition ≤
-            2 ^ i *
-              FacePartition.complexity
-                (R.state e).partition := by
-    exact
-      (R.state e).exists_faceCutRegular_refinement_with_generators_before
-        hr (H.edgeWeight e)
-        (fun y => (hH e y).1)
-        (fun y => (hH e y).2)
-        hη hlong
-  choose i S F hdata using he
-  let U :
-      (e : OrderedFace k r) →
-        Finset (BooleanCutTest (Fin r → G)) :=
-    fun e => R.generators e ∪ F e
-  have hbudget :
-      ∀ e,
-        1 <
-          ((R.stepIndex e + m : ℕ) : ℝ) * η ^ 2 := by
-    intro e
-    have hm :
-        (m : ℝ) ≤ ((R.stepIndex e + m : ℕ) : ℝ) := by
-      exact_mod_cast Nat.le_add_left m (R.stepIndex e)
-    exact hlong.trans_le
-      (mul_le_mul_of_nonneg_right hm (sq_nonneg η))
-  have hstep :
-      ∀ e,
-        R.stepIndex e + i e <
-          R.stepIndex e + m :=
-    fun e => Nat.add_lt_add_left (hdata e).1 _
-  have hpartition :
-      ∀ e, (S e).partition =
-        FacePartition.generatedBy (U e) := by
-    intro e
-    calc
-      (S e).partition =
-          FacePartition.join (R.state e).partition
-            (FacePartition.generatedBy (F e)) :=
-        (hdata e).2.1
-      _ =
-          FacePartition.join
-            (FacePartition.generatedBy (R.generators e))
-            (FacePartition.generatedBy (F e)) := by
-        rw [R.partition_eq_generated e]
-      _ = FacePartition.generatedBy (U e) := by
-        exact
-          (FacePartition.generatedBy_union
-            (R.generators e) (F e)).symm
-  have hsupported :
-      ∀ e, U e ⊆ booleanFaceCutSupports G r := by
-    intro e
-    exact Finset.union_subset
-      (R.generators_supported e)
-      (hdata e).2.2.1
-  have hcard :
-      ∀ e, (U e).card ≤ R.stepIndex e + i e := by
-    intro e
-    calc
-      (U e).card ≤
-          (R.generators e).card + (F e).card :=
-        by
-          change
-            (R.generators e ∪ F e).card ≤
-              (R.generators e).card + (F e).card
-          exact Finset.card_union_le
-            (R.generators e) (F e)
-      _ ≤ R.stepIndex e + i e :=
-        Nat.add_le_add
-          (R.generator_card_le e)
-          (hdata e).2.2.2.1
-  have hregular :
-      ∀ e, (S e).IsFaceCutRegular
-        (H.edgeWeight e) η :=
-    fun e => (hdata e).2.2.2.2.1
-  have hcomplexity :
-      ∀ e, FacePartition.complexity (S e).partition ≤
-        2 ^ (R.stepIndex e + i e) := by
-    intro e
-    calc
-      FacePartition.complexity (S e).partition ≤
-          2 ^ i e *
-            FacePartition.complexity
-              (R.state e).partition :=
-        (hdata e).2.2.2.2.2
-      _ ≤ 2 ^ i e * 2 ^ R.stepIndex e :=
-        Nat.mul_le_mul_left _ (R.complexity_le e)
-      _ = 2 ^ (R.stepIndex e + i e) := by
-        simp [pow_add, Nat.mul_comm]
-  let T : GeneratedOrderedPatternRegularization
-      G k r H η := {
-    state := S
-    generators := U
-    budgetLength := fun e => R.stepIndex e + m
-    stepIndex := fun e => R.stepIndex e + i e
-    budget_large := hbudget
-    step_lt_budget := hstep
-    partition_eq_generated := hpartition
-    generators_supported := hsupported
-    generator_card_le := hcard
-    regular := hregular
-    count_close :=
-      patternCount_abs_sub_regularizedOrderedPattern_le
-        H hH S hregular
-    complexity_le := hcomplexity
-  }
-  refine ⟨T, ?_, ?_, ?_⟩
-  · intro e
-    change (S e).partition ≤ (R.state e).partition
-    rw [(hdata e).2.1]
-    exact FacePartition.join_le_left _ _
-  · intro e
-    change R.generators e ⊆ U e
-    exact Finset.subset_union_left
-  · intro e
-    change R.stepIndex e + i e <
-      R.stepIndex e + m
-    exact hstep e
 
-/-- A simultaneous lower-face branch choice for every ordered top face. -/
-abbrev BranchSystem
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε) :=
-  (e : OrderedFace k r) →
-    GeneratorBranch (R.generators e)
 
-@[simp]
-theorem card_branchSystem
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε) :
-    Fintype.card R.BranchSystem =
-      ∏ e : OrderedFace k r,
-        r ^ (R.generators e).card := by
-  simp [BranchSystem]
 
-/-- The number of branch systems is bounded solely by the retained
-regularity step indices. -/
-theorem card_branchSystem_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r) :
-    Fintype.card R.BranchSystem ≤
-      ∏ e : OrderedFace k r,
-        r ^ R.stepIndex e := by
-  rw [R.card_branchSystem]
-  apply Finset.prod_le_prod
-  · intro e _he
-    exact Nat.zero_le _
-  · intro e _he
-    exact
-      Nat.pow_le_pow_right hr
-        (R.generator_card_le e)
 
-/-- One structured atom choice for every ordered top face. -/
-abbrev TopAtomChoice
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε) :=
-  (e : OrderedFace k r) →
-    (R.state e).partition.parts
 
-@[simp]
-theorem card_topAtomChoice
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε) :
-    Fintype.card R.TopAtomChoice =
-      ∏ e : OrderedFace k r,
-        FacePartition.complexity
-          (R.state e).partition := by
-  simp [TopAtomChoice, FacePartition.complexity]
 
-/-- The number of simultaneous top-atom choices has an
-ambient-size-independent bound. -/
-theorem card_topAtomChoice_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε) :
-    Fintype.card R.TopAtomChoice ≤
-      ∏ e : OrderedFace k r,
-        2 ^ R.stepIndex e := by
-  rw [R.card_topAtomChoice]
-  apply Finset.prod_le_prod
-  · intro e _he
-    exact Nat.zero_le _
-  · intro e _he
-    exact R.complexity_le e
 
-/-- The simultaneous structured atom occupied by a full tuple. -/
-noncomputable def topAtomChoiceOf
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (x : Fin k → G) :
-    R.TopAtomChoice :=
-  fun e =>
-    ⟨(R.state e).partition.part
-        (orderedFaceTuple e x),
-      (R.state e).partition.part_mem.2
-        (Finset.mem_univ _)⟩
 
-/-- A tuple belongs to each atom selected by its atom choice. -/
-theorem mem_topAtomChoiceOf
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (x : Fin k → G) (e : OrderedFace k r) :
-    orderedFaceTuple e x ∈
-      (R.topAtomChoiceOf x e).1 :=
-  (R.state e).partition.mem_part
-    (Finset.mem_univ _)
 
-/-- Membership in the product of lower-face cells selected for every top
-face of a reference tuple. -/
-def IsInCell
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (reference : Fin k → G)
-    (w : R.BranchSystem)
-    (x : Fin k → G) : Prop :=
-  ∀ e i,
-    eraseCoordinate i (orderedFaceTuple e x) ∈
-      lowerGeneratorCell (R.generators e)
-        (orderedFaceTuple e reference)
-        (w e) i
 
-/-- One ordered top atom is exactly a union of products of its generated
-lower-face cells. -/
-theorem mem_state_part_iff_exists_lowerGeneratorCells
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r) (e : OrderedFace k r)
-    (y x : Fin r → G) :
-    x ∈ (R.state e).partition.part y ↔
-      ∃ w : GeneratorBranch (R.generators e),
-        ∀ i,
-          eraseCoordinate i x ∈
-            lowerGeneratorCell
-              (R.generators e) y w i := by
-  rw [R.partition_eq_generated e]
-  exact
-    mem_generatedBy_part_iff_exists_lowerGeneratorCells
-      hr (R.generators e)
-        (R.generators_supported e) y x
 
-/-- Two tuples occupy the same structured top atoms exactly when a
-simultaneous lower-face branch system accepts the second tuple. -/
-theorem same_top_atoms_iff_exists_branchSystem
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r)
-    (reference x : Fin k → G) :
-    (∀ e,
-      orderedFaceTuple e x ∈
-        (R.state e).partition.part
-          (orderedFaceTuple e reference)) ↔
-      ∃ w : R.BranchSystem,
-        R.IsInCell reference w x := by
-  classical
-  constructor
-  · intro hsame
-    have he (e : OrderedFace k r) :
-        ∃ w : GeneratorBranch (R.generators e),
-          ∀ i,
-            eraseCoordinate i
-                (orderedFaceTuple e x) ∈
-              lowerGeneratorCell (R.generators e)
-                (orderedFaceTuple e reference)
-                w i :=
-      (R.mem_state_part_iff_exists_lowerGeneratorCells
-        hr e _ _).1 (hsame e)
-    choose w hw using he
-    exact ⟨w, fun e i => hw e i⟩
-  · rintro ⟨w, hcell⟩
-    intro e
-    exact
-      (R.mem_state_part_iff_exists_lowerGeneratorCells
-        hr e _ _).2 ⟨w e, hcell e⟩
 
-/-- A regularized ordered edge weight is constant on its generated atom. -/
-theorem regularized_edgeWeight_eq_of_mem_state_part
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (e : OrderedFace k r)
-    (reference x : Fin k → G)
-    (hmem :
-      orderedFaceTuple e x ∈
-        (R.state e).partition.part
-          (orderedFaceTuple e reference)) :
-    (regularizedOrderedPattern H R.state).edgeWeight e
-        (orderedFaceTuple e x) =
-      (regularizedOrderedPattern H R.state).edgeWeight e
-        (orderedFaceTuple e reference) := by
-  exact
-    conditionalMean_eq_of_mem_part
-      (R.state e).partition (H.edgeWeight e) hmem
 
-/-- The entire regularized ordered-pattern weight is constant on a
-simultaneous branch cell. -/
-theorem regularized_patternWeight_eq_of_isInCell
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r)
-    (reference x : Fin k → G)
-    (w : R.BranchSystem)
-    (hcell : R.IsInCell reference w x) :
-    (regularizedOrderedPattern H R.state).patternWeight x =
-      (regularizedOrderedPattern H R.state).patternWeight
-        reference := by
-  have hsame :=
-    (R.same_top_atoms_iff_exists_branchSystem
-      hr reference x).2 ⟨w, hcell⟩
-  apply Finset.prod_congr rfl
-  intro e _he
-  exact
-    R.regularized_edgeWeight_eq_of_mem_state_part
-      e reference x (hsame e)
 
 end GeneratedOrderedPatternRegularization
 
@@ -14248,158 +6591,18 @@ structure SimplexHypergraph {k : ℕ} (V : Fin k → Type*) where
 
 namespace SimplexHypergraph
 
-/-- The finite set of edges of one colour. -/
-noncomputable def edgeFinset {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (j : Fin k) :
-    Finset (DeletedVector V j) := by
-  classical
-  exact Finset.univ.filter (H.edge j)
 
-@[simp]
-theorem mem_edgeFinset {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (j : Fin k)
-    (x : DeletedVector V j) :
-    x ∈ H.edgeFinset j ↔ H.edge j x := by
-  classical
-  simp [edgeFinset]
 
-/-- The finite set of labelled simplices. -/
-noncomputable def simplexFinset {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) :
-    Finset ((i : Fin k) → V i) := by
-  classical
-  exact Finset.univ.filter fun x => ∀ j, H.edge j (deleteCoordinate x j)
 
-@[simp]
-theorem mem_simplexFinset {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (x : (i : Fin k) → V i) :
-    x ∈ H.simplexFinset ↔
-      ∀ j, H.edge j (deleteCoordinate x j) := by
-  classical
-  simp [simplexFinset]
 
-/-- Regard an unweighted hypergraph as a zero-one weighted system. -/
-noncomputable def toWeighted {k : ℕ} {V : Fin k → Type*}
-    (H : SimplexHypergraph V) : WeightedSimplexSystem V := by
-  classical
-  exact
-    { edgeWeight := fun j x => if H.edge j x then 1 else 0 }
 
-@[simp]
-theorem toWeighted_edgeWeight_of_edge {k : ℕ}
-    {V : Fin k → Type*} (H : SimplexHypergraph V)
-    {j : Fin k} {x : DeletedVector V j}
-    (hx : H.edge j x) :
-    H.toWeighted.edgeWeight j x = 1 := by
-  classical
-  simp [toWeighted, hx]
 
-@[simp]
-theorem toWeighted_edgeWeight_of_not_edge {k : ℕ}
-    {V : Fin k → Type*} (H : SimplexHypergraph V)
-    {j : Fin k} {x : DeletedVector V j}
-    (hx : ¬H.edge j x) :
-    H.toWeighted.edgeWeight j x = 0 := by
-  classical
-  simp [toWeighted, hx]
 
-theorem toWeighted_edgeWeight_nonneg {k : ℕ}
-    {V : Fin k → Type*} (H : SimplexHypergraph V)
-    (j : Fin k) (x : DeletedVector V j) :
-    0 ≤ H.toWeighted.edgeWeight j x := by
-  classical
-  simp only [toWeighted]
-  split <;> norm_num
 
-theorem toWeighted_edgeWeight_le_one {k : ℕ}
-    {V : Fin k → Type*} (H : SimplexHypergraph V)
-    (j : Fin k) (x : DeletedVector V j) :
-    H.toWeighted.edgeWeight j x ≤ 1 := by
-  classical
-  simp only [toWeighted]
-  split <;> norm_num
 
-/-- A zero-one simplex weight is exactly the indicator of the labelled
-simplex finset. -/
-theorem toWeighted_simplexWeight_eq_indicator {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    [∀ i, DecidableEq (V i)]
-    (H : SimplexHypergraph V) (x : (i : Fin k) → V i) :
-    H.toWeighted.simplexWeight x =
-      finsetIndicator H.simplexFinset x := by
-  classical
-  by_cases hx : x ∈ H.simplexFinset
-  · have hedges :
-        ∀ j, H.edge j (deleteCoordinate x j) :=
-      (H.mem_simplexFinset x).mp hx
-    simp [WeightedSimplexSystem.simplexWeight, toWeighted,
-      finsetIndicator, hx, hedges]
-  · have hnot :
-        ¬∀ j, H.edge j (deleteCoordinate x j) := by
-      simpa using hx
-    push Not at hnot
-    obtain ⟨j, hj⟩ := hnot
-    have hzero :
-        ∏ i : Fin k,
-            H.toWeighted.edgeWeight i (deleteCoordinate x i) = 0 := by
-      apply Finset.prod_eq_zero (Finset.mem_univ j)
-      exact toWeighted_edgeWeight_of_not_edge H hj
-    rw [WeightedSimplexSystem.simplexWeight, hzero]
-    exact (finsetIndicator_of_not_mem hx).symm
 
-/-- The normalized weighted count is the number of labelled simplices divided
-by the size of the ambient product. -/
-theorem toWeighted_simplexCount_eq_card_div {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    [∀ i, DecidableEq (V i)]
-    (H : SimplexHypergraph V) :
-    H.toWeighted.simplexCount =
-      (H.simplexFinset.card : ℝ) /
-        Fintype.card ((i : Fin k) → V i) := by
-  classical
-  rw [WeightedSimplexSystem.simplexCount]
-  have hfun :
-      H.toWeighted.simplexWeight =
-        finsetIndicator H.simplexFinset := by
-    funext x
-    exact toWeighted_simplexWeight_eq_indicator H x
-  rw [hfun, mean_finsetIndicator]
 
-/-- A family of deleted edge sets meets every labelled simplex. -/
-def IsSimplexCover {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V)
-    (deleted : (j : Fin k) → Finset (DeletedVector V j)) : Prop :=
-  ∀ x ∈ H.simplexFinset,
-    ∃ j, deleteCoordinate x j ∈ deleted j
 
-/-- Equivalently, after deleting a simplex cover, no labelled simplex
-survives. -/
-theorem isSimplexCover_iff {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V)
-    (deleted : (j : Fin k) → Finset (DeletedVector V j)) :
-    H.IsSimplexCover deleted ↔
-      ∀ x, (∀ j, deleteCoordinate x j ∉ deleted j) →
-        ∃ j, ¬H.edge j (deleteCoordinate x j) := by
-  classical
-  constructor
-  · intro hcover x hsurvives
-    by_contra h
-    push Not at h
-    have hx : x ∈ H.simplexFinset := by
-      simpa using h
-    obtain ⟨j, hj⟩ := hcover x hx
-    exact hsurvives j hj
-  · intro hnosimplex x hx
-    by_contra h
-    push Not at h
-    obtain ⟨j, hj⟩ := hnosimplex x h
-    exact hj ((H.mem_simplexFinset x).mp hx j)
 
 end SimplexHypergraph
 
@@ -14432,514 +6635,58 @@ open scoped BigOperators
 
 namespace SimplexHypergraph
 
-/-- One finite set of deleted faces for each edge colour. -/
-abbrev DeletionFamily {k : ℕ} (V : Fin k → Type*) :=
-  (j : Fin k) → Finset (DeletedVector V j)
 
-/-- Delete a family of faces from an unweighted simplex hypergraph. -/
-noncomputable def deleteEdges {k : ℕ} {V : Fin k → Type*}
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V) :
-    SimplexHypergraph V := by
-  classical
-  exact
-    { edge := fun j x => H.edge j x ∧ x ∉ deleted j }
 
-@[simp]
-theorem deleteEdges_edge {k : ℕ} {V : Fin k → Type*}
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V)
-    (j : Fin k) (x : DeletedVector V j) :
-    (H.deleteEdges deleted).edge j x ↔
-      H.edge j x ∧ x ∉ deleted j := by
-  classical
-  simp [deleteEdges]
 
-/-- Exact description of the labelled simplices surviving a deletion. -/
-@[simp]
-theorem mem_deleteEdges_simplexFinset {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V)
-    (x : (i : Fin k) → V i) :
-    x ∈ (H.deleteEdges deleted).simplexFinset ↔
-      x ∈ H.simplexFinset ∧
-        ∀ j, deleteCoordinate x j ∉ deleted j := by
-  classical
-  simp only [mem_simplexFinset, deleteEdges_edge, forall_and]
 
-/-- A finite hypergraph is simplex-free when its labelled simplex finset is
-empty. -/
-def IsSimplexFree {k : ℕ} {V : Fin k → Type*}
-    [∀ i, Fintype (V i)] (H : SimplexHypergraph V) : Prop :=
-  H.simplexFinset = ∅
 
-theorem isSimplexFree_iff {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) :
-    H.IsSimplexFree ↔
-      ∀ x, ∃ j, ¬H.edge j (deleteCoordinate x j) := by
-  classical
-  rw [IsSimplexFree, Finset.eq_empty_iff_forall_notMem]
-  simp only [mem_simplexFinset]
-  push Not
-  rfl
 
-/-- The empty deletion family. -/
-def emptyDeletion {k : ℕ} (V : Fin k → Type*) :
-    DeletionFamily V :=
-  fun _ => ∅
 
-@[simp]
-theorem mem_emptyDeletion {k : ℕ} {V : Fin k → Type*}
-    (j : Fin k) (x : DeletedVector V j) :
-    x ∉ emptyDeletion V j := by
-  simp [emptyDeletion]
 
-/-- Deleting nothing leaves the labelled simplex finset unchanged. -/
-@[simp]
-theorem deleteEdges_empty_simplexFinset {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) :
-    (H.deleteEdges (emptyDeletion V)).simplexFinset =
-      H.simplexFinset := by
-  classical
-  ext x
-  simp
 
-/-- Increasing every deleted-face set can only remove surviving simplices. -/
-theorem deleteEdges_simplexFinset_antitone {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V)
-    {deleted₁ deleted₂ : DeletionFamily V}
-    (hdel : ∀ j, deleted₁ j ⊆ deleted₂ j) :
-    (H.deleteEdges deleted₂).simplexFinset ⊆
-      (H.deleteEdges deleted₁).simplexFinset := by
-  intro x hx
-  rw [mem_deleteEdges_simplexFinset] at hx ⊢
-  exact ⟨hx.1, fun j hj => hx.2 j (hdel j hj)⟩
 
-/-- A cover remains a cover after enlarging each deleted-face set. -/
-theorem IsSimplexCover.mono {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    {H : SimplexHypergraph V}
-    {deleted₁ deleted₂ : DeletionFamily V}
-    (hcover : H.IsSimplexCover deleted₁)
-    (hdel : ∀ j, deleted₁ j ⊆ deleted₂ j) :
-    H.IsSimplexCover deleted₂ := by
-  intro x hx
-  obtain ⟨j, hj⟩ := hcover x hx
-  exact ⟨j, hdel j hj⟩
 
-/-- A deletion family is supported on actual edges of the hypergraph. -/
-def IsEdgeDeletion {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V) : Prop :=
-  ∀ j, deleted j ⊆ H.edgeFinset j
 
-/-- Remove irrelevant nonedges from a deletion family. -/
-noncomputable def trimDeletion {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V) :
-    DeletionFamily V := by
-  classical
-  exact fun j => deleted j ∩ H.edgeFinset j
 
-theorem trimDeletion_isEdgeDeletion {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V) :
-    H.IsEdgeDeletion (H.trimDeletion deleted) := by
-  classical
-  intro j
-  exact Finset.inter_subset_right
 
-theorem trimDeletion_subset {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V)
-    (j : Fin k) :
-    H.trimDeletion deleted j ⊆ deleted j := by
-  classical
-  exact Finset.inter_subset_left
 
-/-- Trimming a cover to actual edges preserves the cover property. -/
-theorem IsSimplexCover.trim {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    {H : SimplexHypergraph V} {deleted : DeletionFamily V}
-    (hcover : H.IsSimplexCover deleted) :
-    H.IsSimplexCover (H.trimDeletion deleted) := by
-  classical
-  intro x hx
-  obtain ⟨j, hj⟩ := hcover x hx
-  refine ⟨j, Finset.mem_inter.mpr ⟨hj, ?_⟩⟩
-  exact H.mem_edgeFinset j (deleteCoordinate x j) |>.2
-    ((H.mem_simplexFinset x).1 hx j)
 
-/-- Trimming irrelevant nonedges does not change the surviving simplices. -/
-theorem trimDeletion_simplexFinset {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V) :
-    (H.deleteEdges (H.trimDeletion deleted)).simplexFinset =
-      (H.deleteEdges deleted).simplexFinset := by
-  classical
-  ext x
-  rw [mem_deleteEdges_simplexFinset,
-    mem_deleteEdges_simplexFinset]
-  constructor
-  · rintro ⟨hx, havoid⟩
-    refine ⟨hx, fun j hj => ?_⟩
-    apply havoid j
-    refine Finset.mem_inter.mpr ⟨hj, ?_⟩
-    exact (H.mem_edgeFinset j (deleteCoordinate x j)).2
-      ((H.mem_simplexFinset x).1 hx j)
-  · rintro ⟨hx, havoid⟩
-    exact ⟨hx, fun j hj => havoid j (Finset.mem_inter.mp hj).1⟩
 
-/-- The canonical deletion family consisting of all actual edges. -/
-noncomputable def fullEdgeDeletion {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) : DeletionFamily V :=
-  H.edgeFinset
 
-theorem fullEdgeDeletion_isEdgeDeletion {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) :
-    H.IsEdgeDeletion H.fullEdgeDeletion :=
-  fun _ => Finset.Subset.rfl
 
-/-- When there is at least one edge colour, deleting all actual edges covers
-every simplex. -/
-theorem fullEdgeDeletion_isSimplexCover {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    [Nonempty (Fin k)] (H : SimplexHypergraph V) :
-    H.IsSimplexCover H.fullEdgeDeletion := by
-  classical
-  intro x hx
-  let j : Fin k := Classical.choice inferInstance
-  refine ⟨j, ?_⟩
-  exact (H.mem_edgeFinset j (deleteCoordinate x j)).2
-    ((H.mem_simplexFinset x).1 hx j)
 
-/-- Project every labelled simplex to each of its coloured faces. -/
-noncomputable def projectedSimplexDeletion {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) : DeletionFamily V := by
-  classical
-  exact fun j =>
-    H.simplexFinset.image (fun x => deleteCoordinate x j)
 
-theorem projectedSimplexDeletion_isEdgeDeletion {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) :
-    H.IsEdgeDeletion H.projectedSimplexDeletion := by
-  classical
-  intro j e he
-  obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp he
-  exact (H.mem_edgeFinset j (deleteCoordinate x j)).2
-    ((H.mem_simplexFinset x).1 hx j)
 
-/-- If a colour exists, the projected faces of the simplices form a cover. -/
-theorem projectedSimplexDeletion_isSimplexCover {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    [Nonempty (Fin k)] (H : SimplexHypergraph V) :
-    H.IsSimplexCover H.projectedSimplexDeletion := by
-  classical
-  intro x hx
-  let j : Fin k := Classical.choice inferInstance
-  refine ⟨j, ?_⟩
-  exact Finset.mem_image.mpr ⟨x, hx, rfl⟩
 
-theorem card_projectedSimplexDeletion_le {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (j : Fin k) :
-    (H.projectedSimplexDeletion j).card ≤
-      H.simplexFinset.card := by
-  classical
-  exact Finset.card_image_le
 
-/-- Total number of deleted coloured faces. -/
-def deletionCount {k : ℕ} {V : Fin k → Type*}
-    (deleted : DeletionFamily V) : ℕ :=
-  ∑ j, (deleted j).card
 
-@[simp]
-theorem deletionCount_empty {k : ℕ} (V : Fin k → Type*) :
-    deletionCount (emptyDeletion V) = 0 := by
-  simp [deletionCount, emptyDeletion]
 
-theorem deletionCount_mono {k : ℕ} {V : Fin k → Type*}
-    {deleted₁ deleted₂ : DeletionFamily V}
-    (hdel : ∀ j, deleted₁ j ⊆ deleted₂ j) :
-    deletionCount deleted₁ ≤ deletionCount deleted₂ := by
-  apply Finset.sum_le_sum
-  intro j _
-  exact Finset.card_le_card (hdel j)
 
-/-- A uniform per-colour cardinality bound controls the total deletion
-count. -/
-theorem deletionCount_le_of_card_le {k m : ℕ}
-    {V : Fin k → Type*} (deleted : DeletionFamily V)
-    (hcard : ∀ j, (deleted j).card ≤ m) :
-    deletionCount deleted ≤ k * m := by
-  calc
-    deletionCount deleted ≤ ∑ _j : Fin k, m := by
-      apply Finset.sum_le_sum
-      intro j _
-      exact hcard j
-    _ = k * m := by
-      simp
 
-theorem deletionCount_trim_le {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V) :
-    deletionCount (H.trimDeletion deleted) ≤
-      deletionCount deleted :=
-  deletionCount_mono (H.trimDeletion_subset deleted)
 
-theorem deletionCount_projectedSimplexDeletion_le {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) :
-    deletionCount H.projectedSimplexDeletion ≤
-      k * H.simplexFinset.card := by
-  calc
-    deletionCount H.projectedSimplexDeletion ≤
-        ∑ _j : Fin k, H.simplexFinset.card := by
-      apply Finset.sum_le_sum
-      intro j _
-      exact H.card_projectedSimplexDeletion_le j
-    _ = k * H.simplexFinset.card := by
-      simp
 
-/-- A canonical finite cover deletes at most one projected face per labelled
-simplex in each colour. -/
-theorem exists_simplexCover_card_le_simplexFinset {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    [Nonempty (Fin k)] (H : SimplexHypergraph V) :
-    ∃ deleted : DeletionFamily V,
-      H.IsSimplexCover deleted ∧
-      H.IsEdgeDeletion deleted ∧
-      (∀ j, (deleted j).card ≤ H.simplexFinset.card) ∧
-      deletionCount deleted ≤ k * H.simplexFinset.card :=
-  ⟨H.projectedSimplexDeletion,
-    H.projectedSimplexDeletion_isSimplexCover,
-    H.projectedSimplexDeletion_isEdgeDeletion,
-    H.card_projectedSimplexDeletion_le,
-    H.deletionCount_projectedSimplexDeletion_le⟩
 
-/-- Total number of available coloured face slots. -/
-def deletionCapacity {k : ℕ} (V : Fin k → Type*)
-    [∀ i, Fintype (V i)] : ℕ :=
-  ∑ j, Fintype.card (DeletedVector V j)
 
-@[simp]
-theorem card_deletedVector_fin (k n : ℕ) (j : Fin k) :
-    Fintype.card
-        (DeletedVector (fun _ : Fin k => Fin n) j) =
-      n ^ (k - 1) := by
-  simp [DeletedVector, Fintype.card_pi]
 
-@[simp]
-theorem deletionCapacity_fin (k n : ℕ) :
-    deletionCapacity (fun _ : Fin k => Fin n) =
-      k * n ^ (k - 1) := by
-  simp [deletionCapacity]
 
-theorem deletionCount_le_capacity {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (deleted : DeletionFamily V) :
-    deletionCount deleted ≤ deletionCapacity V := by
-  apply Finset.sum_le_sum
-  intro j _
-  exact (deleted j).card_le_univ
 
-/-- Density of the deleted faces in one colour class. -/
-noncomputable def colorDeletionDensity {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (deleted : DeletionFamily V) (j : Fin k) : ℝ :=
-  ((deleted j).card : ℝ) /
-    Fintype.card (DeletedVector V j)
 
-theorem colorDeletionDensity_nonneg {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (deleted : DeletionFamily V) (j : Fin k) :
-    0 ≤ colorDeletionDensity deleted j :=
-  div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
 
-theorem colorDeletionDensity_le_one {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (deleted : DeletionFamily V) (j : Fin k) :
-    colorDeletionDensity deleted j ≤ 1 := by
-  apply div_le_one_of_le₀
-  · exact_mod_cast (deleted j).card_le_univ
-  · exact Nat.cast_nonneg _
 
-@[simp]
-theorem colorDeletionDensity_fin {k n : ℕ}
-    (deleted :
-      DeletionFamily (fun _ : Fin k => Fin n))
-    (j : Fin k) :
-    colorDeletionDensity deleted j =
-      ((deleted j).card : ℝ) / (n ^ (k - 1) : ℕ) := by
-  simp [colorDeletionDensity]
 
-/-- Deleted-face density among all coloured face slots.  If the capacity is
-zero, Lean's field division convention makes the value zero. -/
-noncomputable def normalizedDeletionCost {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (deleted : DeletionFamily V) : ℝ :=
-  (deletionCount deleted : ℝ) / (deletionCapacity V : ℝ)
 
-theorem normalizedDeletionCost_nonneg {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (deleted : DeletionFamily V) :
-    0 ≤ normalizedDeletionCost deleted := by
-  exact div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
 
-theorem normalizedDeletionCost_le_one {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (deleted : DeletionFamily V) :
-    normalizedDeletionCost deleted ≤ 1 := by
-  apply div_le_one_of_le₀
-  · exact_mod_cast deletionCount_le_capacity deleted
-  · exact Nat.cast_nonneg _
 
-theorem normalizedDeletionCost_mono {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    {deleted₁ deleted₂ : DeletionFamily V}
-    (hdel : ∀ j, deleted₁ j ⊆ deleted₂ j) :
-    normalizedDeletionCost deleted₁ ≤
-      normalizedDeletionCost deleted₂ := by
-  apply div_le_div_of_nonneg_right
-  · exact_mod_cast deletionCount_mono hdel
-  · exact Nat.cast_nonneg _
 
-theorem normalizedDeletionCost_trim_le {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) (deleted : DeletionFamily V) :
-    normalizedDeletionCost (H.trimDeletion deleted) ≤
-      normalizedDeletionCost deleted :=
-  normalizedDeletionCost_mono (H.trimDeletion_subset deleted)
 
-@[simp]
-theorem normalizedDeletionCost_empty {k : ℕ}
-    (V : Fin k → Type*) [∀ i, Fintype (V i)] :
-    normalizedDeletionCost (emptyDeletion V) = 0 := by
-  simp [normalizedDeletionCost]
 
-/-- There is a minimum-cardinality cover, and it may be chosen to contain
-only actual edges.  This is the finite compactness statement underlying later
-quantitative optimization. -/
-theorem exists_minimum_simplexCover {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    [Nonempty (Fin k)] (H : SimplexHypergraph V) :
-    ∃ deleted : DeletionFamily V,
-      H.IsSimplexCover deleted ∧
-      H.IsEdgeDeletion deleted ∧
-      ∀ other : DeletionFamily V,
-        H.IsSimplexCover other →
-          deletionCount deleted ≤ deletionCount other := by
-  classical
-  let covers : Finset (DeletionFamily V) :=
-    Finset.univ.filter H.IsSimplexCover
-  have covers_nonempty : covers.Nonempty := by
-    refine ⟨H.fullEdgeDeletion, ?_⟩
-    exact Finset.mem_filter.mpr
-      ⟨Finset.mem_univ _, H.fullEdgeDeletion_isSimplexCover⟩
-  obtain ⟨deleted, hdeleted, hminimal⟩ :=
-    Finset.exists_min_image covers deletionCount covers_nonempty
-  have hcover : H.IsSimplexCover deleted :=
-    (Finset.mem_filter.mp hdeleted).2
-  refine
-    ⟨H.trimDeletion deleted, hcover.trim,
-      H.trimDeletion_isEdgeDeletion deleted, ?_⟩
-  intro other hother
-  calc
-    deletionCount (H.trimDeletion deleted) ≤
-        deletionCount deleted :=
-      H.deletionCount_trim_le deleted
-    _ ≤ deletionCount other := by
-      apply hminimal other
-      exact Finset.mem_filter.mpr
-        ⟨Finset.mem_univ _, hother⟩
 
-/-- The same finite minimizer is optimal for normalized deletion cost. -/
-theorem exists_minimum_normalized_simplexCover {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    [Nonempty (Fin k)] (H : SimplexHypergraph V) :
-    ∃ deleted : DeletionFamily V,
-      H.IsSimplexCover deleted ∧
-      H.IsEdgeDeletion deleted ∧
-      ∀ other : DeletionFamily V,
-        H.IsSimplexCover other →
-          normalizedDeletionCost deleted ≤
-            normalizedDeletionCost other := by
-  obtain ⟨deleted, hcover, hedge, hminimal⟩ :=
-    H.exists_minimum_simplexCover
-  refine ⟨deleted, hcover, hedge, ?_⟩
-  intro other hother
-  apply div_le_div_of_nonneg_right
-  · exact_mod_cast hminimal other hother
-  · exact Nat.cast_nonneg _
 
 end SimplexHypergraph
 
-/-- No labelled simplex survives after deleting the specified faces. -/
-def NoSimplexAfterDeleting {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V)
-    (deleted : SimplexHypergraph.DeletionFamily V) : Prop :=
-  (H.deleteEdges deleted).IsSimplexFree
 
-/-- Exact correspondence between combinatorial covers and simplex-free
-surviving hypergraphs. -/
-theorem isSimplexCover_iff_noSimplexAfterDeleting {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V)
-    (deleted : SimplexHypergraph.DeletionFamily V) :
-    H.IsSimplexCover deleted ↔
-      NoSimplexAfterDeleting H deleted := by
-  classical
-  constructor
-  · intro hcover
-    rw [NoSimplexAfterDeleting,
-      SimplexHypergraph.IsSimplexFree,
-      Finset.eq_empty_iff_forall_notMem]
-    intro x hx
-    rw [SimplexHypergraph.mem_deleteEdges_simplexFinset] at hx
-    obtain ⟨j, hj⟩ := hcover x hx.1
-    exact hx.2 j hj
-  · intro hfree x hx
-    by_contra h
-    push Not at h
-    have hsurvives :
-        x ∈ (H.deleteEdges deleted).simplexFinset :=
-      (H.mem_deleteEdges_simplexFinset deleted x).2 ⟨hx, h⟩
-    rw [NoSimplexAfterDeleting,
-      SimplexHypergraph.IsSimplexFree] at hfree
-    rw [hfree] at hsurvives
-    simp at hsurvives
 
-/-- Enlarging a deletion family preserves absence of surviving simplices. -/
-theorem NoSimplexAfterDeleting.mono {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    {H : SimplexHypergraph V}
-    {deleted₁ deleted₂ : SimplexHypergraph.DeletionFamily V}
-    (hfree : NoSimplexAfterDeleting H deleted₁)
-    (hdel : ∀ j, deleted₁ j ⊆ deleted₂ j) :
-    NoSimplexAfterDeleting H deleted₂ := by
-  apply (isSimplexCover_iff_noSimplexAfterDeleting H deleted₂).1
-  apply SimplexHypergraph.IsSimplexCover.mono
-    ((isSimplexCover_iff_noSimplexAfterDeleting
-      H deleted₁).2 hfree)
-  exact hdel
 
-/-- Deleting nothing is a cover exactly in the simplex-free case. -/
-theorem emptyDeletion_isSimplexCover_iff {k : ℕ}
-    {V : Fin k → Type*} [∀ i, Fintype (V i)]
-    (H : SimplexHypergraph V) :
-    H.IsSimplexCover (SimplexHypergraph.emptyDeletion V) ↔
-      H.IsSimplexFree := by
-  rw [isSimplexCover_iff_noSimplexAfterDeleting,
-    NoSimplexAfterDeleting,
-    SimplexHypergraph.IsSimplexFree,
-    SimplexHypergraph.deleteEdges_empty_simplexFinset]
-  rfl
 
 end Wikipedia.SzemeredisTheorem
 
@@ -14973,492 +6720,29 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- A function taking only the values zero and one. -/
-def IsZeroOneValued {Ω : Type*} (f : Ω → ℝ) : Prop :=
-  ∀ x, f x = 0 ∨ f x = 1
 
 namespace FaceRegularityState
 
-/-- The set on which the structured conditional density is below `τ`. -/
-noncomputable def structuredSublevel
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ) (τ : ℝ) :
-    BooleanCutTest Ω := by
-  classical
-  exact Finset.univ.filter fun x => S.structured f x < τ
 
-@[simp]
-theorem mem_structuredSublevel
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ) (τ : ℝ)
-    (x : Ω) :
-    x ∈ S.structuredSublevel f τ ↔
-      S.structured f x < τ := by
-  simp [structuredSublevel]
 
-/-- A sublevel set of a structured function is measurable for its
-partition. -/
-theorem structuredSublevel_measurable
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ) (τ : ℝ) :
-    IsPartitionMeasurable S.partition
-      (S.structuredSublevel f τ).eval := by
-  intro x y hy
-  have hstructured :
-      S.structured f y = S.structured f x :=
-    conditionalMean_eq_of_mem_part S.partition f hy
-  by_cases hx : S.structured f x < τ
-  · have hy' : S.structured f y < τ := by
-      simpa [hstructured] using hx
-    have hmy : y ∈ S.structuredSublevel f τ :=
-      mem_structuredSublevel S f τ y |>.2 hy'
-    have hmx : x ∈ S.structuredSublevel f τ :=
-      mem_structuredSublevel S f τ x |>.2 hx
-    rw [BooleanCutTest.eval_of_mem _ hmy,
-      BooleanCutTest.eval_of_mem _ hmx]
-  · have hy' : ¬S.structured f y < τ := by
-      simpa [hstructured] using hx
-    have hmy : y ∉ S.structuredSublevel f τ :=
-      fun hmem =>
-        hy' (mem_structuredSublevel S f τ y |>.1 hmem)
-    have hmx : x ∉ S.structuredSublevel f τ :=
-      fun hmem =>
-        hx (mem_structuredSublevel S f τ x |>.1 hmem)
-    rw [BooleanCutTest.eval_of_not_mem _ hmy,
-      BooleanCutTest.eval_of_not_mem _ hmx]
 
-/-- Pairing with the low-structured-density region is unchanged when the
-original function is replaced by its conditional mean. -/
-theorem mean_mul_structuredSublevel_eq
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ) (τ : ℝ) :
-    mean (fun x =>
-        f x * (S.structuredSublevel f τ).eval x) =
-      mean (fun x =>
-        S.structured f x *
-          (S.structuredSublevel f τ).eval x) := by
-  exact
-    mean_mul_eq_mean_conditionalMean_mul
-      S.partition f (S.structuredSublevel f τ).eval
-      (S.structuredSublevel_measurable f τ)
 
-/-- The portion of a zero-one function lying in low-density structured
-atoms. -/
-noncomputable def lowStructuredOneFinset
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ) (τ : ℝ) :
-    Finset Ω := by
-  classical
-  exact Finset.univ.filter fun x =>
-    f x = 1 ∧ S.structured f x < τ
 
-@[simp]
-theorem mem_lowStructuredOneFinset
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω) (f : Ω → ℝ) (τ : ℝ)
-    (x : Ω) :
-    x ∈ S.lowStructuredOneFinset f τ ↔
-      f x = 1 ∧ S.structured f x < τ := by
-  simp [lowStructuredOneFinset]
 
-/-- The indicator of the deleted one-set is the original zero-one function
-times the indicator of the low structured region. -/
-theorem indicator_lowStructuredOneFinset
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (S : FaceRegularityState Ω) {f : Ω → ℝ}
-    (hf : IsZeroOneValued f) (τ : ℝ) (x : Ω) :
-    finsetIndicator (S.lowStructuredOneFinset f τ) x =
-      f x * (S.structuredSublevel f τ).eval x := by
-  rcases hf x with hzero | hone
-  · rw [hzero, zero_mul]
-    apply finsetIndicator_of_not_mem
-    intro hx
-    exact zero_ne_one
-      (hzero.symm.trans
-        (mem_lowStructuredOneFinset S f τ x |>.1 hx).1)
-  · rw [hone, one_mul]
-    by_cases hx : S.structured f x < τ
-    · rw [finsetIndicator_of_mem,
-        BooleanCutTest.eval_of_mem]
-      · exact mem_structuredSublevel S f τ x |>.2 hx
-      · exact mem_lowStructuredOneFinset S f τ x |>.2
-          ⟨hone, hx⟩
-    · rw [finsetIndicator_of_not_mem,
-        BooleanCutTest.eval_of_not_mem]
-      · exact fun hmem =>
-          hx (mem_structuredSublevel S f τ x |>.1 hmem)
-      · exact fun hmem =>
-          hx (mem_lowStructuredOneFinset S f τ x |>.1 hmem).2
 
-/-- **Low-cell charging lemma.**  At most a `τ` fraction of a zero-one
-function can lie in partition atoms whose conditional density is below
-`τ`. -/
-theorem mean_indicator_lowStructuredOneFinset_le
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω] [Nonempty Ω]
-    (S : FaceRegularityState Ω) {f : Ω → ℝ}
-    (hf01 : IsZeroOneValued f)
-    {τ : ℝ} (hτ : 0 ≤ τ) :
-    mean (finsetIndicator
-      (S.lowStructuredOneFinset f τ)) ≤ τ := by
-  rw [show
-      finsetIndicator (S.lowStructuredOneFinset f τ) =
-        fun x =>
-          f x * (S.structuredSublevel f τ).eval x by
-    funext x
-    exact S.indicator_lowStructuredOneFinset hf01 τ x]
-  rw [S.mean_mul_structuredSublevel_eq f τ]
-  calc
-    mean (fun x =>
-        S.structured f x *
-          (S.structuredSublevel f τ).eval x) ≤
-        mean (fun _x : Ω => τ) := by
-      apply mean_mono
-      intro x
-      by_cases hx : S.structured f x < τ
-      · rw [BooleanCutTest.eval_of_mem]
-        · simpa using hx.le
-        · exact mem_structuredSublevel S f τ x |>.2 hx
-      · rw [BooleanCutTest.eval_of_not_mem, mul_zero]
-        · exact hτ
-        · exact fun hmem =>
-            hx (mem_structuredSublevel S f τ x |>.1 hmem)
-    _ = τ := mean_const _
 
 end FaceRegularityState
 
-/-- The canonical equivalence between a dependent deleted face and its
-ordered `Fin n` presentation. -/
-noncomputable def deletedFaceEquiv
-    {G : Type*} {n : ℕ} (j : Fin (n + 1)) :
-    DeletedVector (fun _ : Fin (n + 1) => G) j ≃
-      (Fin n → G) where
-  toFun := deletedFaceTuple j
-  invFun := finTupleToDeletedVector j
-  left_inv := finTupleToDeletedVector_deletedFaceTuple j
-  right_inv := deletedFaceTuple_finTupleToDeletedVector j
 
-/-- A zero-one edge system has zero-one canonical edge functions. -/
-theorem canonicalEdgeFunction_toWeighted_zeroOne
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (j : Fin (n + 1)) :
-    IsZeroOneValued
-      (canonicalEdgeFunction H.toWeighted j) := by
-  intro y
-  classical
-  by_cases hy :
-      H.edge j (finTupleToDeletedVector j y)
-  · right
-    exact H.toWeighted_edgeWeight_of_edge hy
-  · left
-    exact H.toWeighted_edgeWeight_of_not_edge hy
 
-/-- Delete precisely those actual edges whose structured atom density is
-below `τ`. -/
-noncomputable def lowStructuredDeletion
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n) (τ : ℝ) :
-    SimplexHypergraph.DeletionFamily
-      (fun _ : Fin (n + 1) => G) :=
-  fun j =>
-    ((S j).lowStructuredOneFinset
-      (canonicalEdgeFunction H.toWeighted j) τ).map
-        (deletedFaceEquiv j).symm.toEmbedding
 
-@[simp]
-theorem card_lowStructuredDeletion
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n) (τ : ℝ)
-    (j : Fin (n + 1)) :
-    (lowStructuredDeletion H S τ j).card =
-      ((S j).lowStructuredOneFinset
-        (canonicalEdgeFunction H.toWeighted j) τ).card := by
-  classical
-  simp [lowStructuredDeletion]
 
-@[simp]
-theorem mem_lowStructuredDeletion_iff
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n) (τ : ℝ)
-    (j : Fin (n + 1))
-    (x : DeletedVector (fun _ : Fin (n + 1) => G) j) :
-    x ∈ lowStructuredDeletion H S τ j ↔
-      deletedFaceTuple j x ∈
-        (S j).lowStructuredOneFinset
-          (canonicalEdgeFunction H.toWeighted j) τ := by
-  classical
-  constructor
-  · intro hx
-    obtain ⟨y, hy, hyx⟩ := Finset.mem_map.mp hx
-    have heq :
-        y = deletedFaceTuple j x := by
-      change y = (deletedFaceEquiv j) x
-      calc
-        y =
-            (deletedFaceEquiv j)
-              ((deletedFaceEquiv j).symm y) :=
-          ((deletedFaceEquiv j).apply_symm_apply y).symm
-        _ = (deletedFaceEquiv j) x :=
-          congrArg (deletedFaceEquiv j) hyx
-    simpa [heq] using hy
-  · intro hx
-    apply Finset.mem_map.mpr
-    refine ⟨deletedFaceTuple j x, hx, ?_⟩
-    exact (deletedFaceEquiv j).symm_apply_apply x
 
-/-- The low-structured deletion contains only actual hypergraph edges. -/
-theorem lowStructuredDeletion_isEdgeDeletion
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n) (τ : ℝ) :
-    H.IsEdgeDeletion (lowStructuredDeletion H S τ) := by
-  intro j x hx
-  apply (H.mem_edgeFinset j x).2
-  have hlow :=
-    (mem_lowStructuredDeletion_iff H S τ j x).1 hx
-  have hone :=
-    ((S j).mem_lowStructuredOneFinset
-      (canonicalEdgeFunction H.toWeighted j) τ
-      (deletedFaceTuple j x)).1 hlow |>.1
-  by_contra hedge
-  have hzero :
-      H.toWeighted.edgeWeight j x = 0 :=
-    H.toWeighted_edgeWeight_of_not_edge hedge
-  have hcanonical :
-      canonicalEdgeFunction H.toWeighted j
-          (deletedFaceTuple j x) =
-        H.toWeighted.edgeWeight j x := by
-    simp [canonicalEdgeFunction]
-  rw [hcanonical, hzero] at hone
-  norm_num at hone
 
-/-- The deleted density in each colour is at most the cleaning threshold. -/
-theorem colorDeletionDensity_lowStructuredDeletion_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n)
-    {τ : ℝ} (hτ : 0 ≤ τ)
-    (j : Fin (n + 1)) :
-    SimplexHypergraph.colorDeletionDensity
-        (lowStructuredDeletion H S τ) j ≤ τ := by
-  have hmean :=
-    (S j).mean_indicator_lowStructuredOneFinset_le
-      (canonicalEdgeFunction_toWeighted_zeroOne H j) hτ
-  rw [mean_finsetIndicator] at hmean
-  rw [SimplexHypergraph.colorDeletionDensity,
-    card_lowStructuredDeletion]
-  have hcard :
-      Fintype.card
-          (DeletedVector
-            (fun _ : Fin (n + 1) => G) j) =
-        Fintype.card (Fin n → G) :=
-    Fintype.card_congr (deletedFaceEquiv j)
-  rw [hcard]
-  exact hmean
 
-/-- With equal vertex classes, low-structured cleaning has total normalized
-deletion cost at most `τ`. -/
-theorem normalizedDeletionCost_lowStructuredDeletion_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n)
-    {τ : ℝ} (hτ : 0 ≤ τ) :
-    SimplexHypergraph.normalizedDeletionCost
-        (lowStructuredDeletion H S τ) ≤ τ := by
-  let M : ℕ := Fintype.card (Fin n → G)
-  have hM : 0 < M := Fintype.card_pos
-  have hface (j : Fin (n + 1)) :
-      Fintype.card
-          (DeletedVector
-            (fun _ : Fin (n + 1) => G) j) = M := by
-    exact Fintype.card_congr (deletedFaceEquiv j)
-  have hcard (j : Fin (n + 1)) :
-      ((lowStructuredDeletion H S τ j).card : ℝ) ≤
-        τ * M := by
-    have hdensity :=
-      colorDeletionDensity_lowStructuredDeletion_le
-        H S hτ j
-    rw [SimplexHypergraph.colorDeletionDensity,
-      hface] at hdensity
-    have hMR : (0 : ℝ) < M := by exact_mod_cast hM
-    exact (div_le_iff₀ hMR).mp hdensity
-  have hcount :
-      (SimplexHypergraph.deletionCount
-          (lowStructuredDeletion H S τ) : ℝ) ≤
-        (n + 1 : ℝ) * (τ * M) := by
-    calc
-      (SimplexHypergraph.deletionCount
-          (lowStructuredDeletion H S τ) : ℝ) =
-          ∑ j : Fin (n + 1),
-            ((lowStructuredDeletion H S τ j).card : ℝ) := by
-        simp [SimplexHypergraph.deletionCount]
-      _ ≤ ∑ _j : Fin (n + 1), τ * M :=
-        Finset.sum_le_sum fun j _ => hcard j
-      _ = (n + 1 : ℝ) * (τ * M) := by
-        simp
-  have hcapacity :
-      SimplexHypergraph.deletionCapacity
-          (fun _ : Fin (n + 1) => G) =
-        (n + 1) * M := by
-    unfold SimplexHypergraph.deletionCapacity
-    simp_rw [hface]
-    simp
-  rw [SimplexHypergraph.normalizedDeletionCost,
-    hcapacity]
-  have hdenom :
-      (0 : ℝ) < ((n + 1) * M : ℕ) := by
-    exact_mod_cast Nat.mul_pos (by omega) hM
-  apply (div_le_iff₀ hdenom).2
-  calc
-    (SimplexHypergraph.deletionCount
-        (lowStructuredDeletion H S τ) : ℝ) ≤
-        (n + 1 : ℝ) * (τ * M) := hcount
-    _ = τ * (((n + 1) * M : ℕ) : ℝ) := by
-      push_cast
-      ring
 
-/-- An actual edge which survives low-density cleaning has structured
-conditional density at least `τ`. -/
-theorem regularized_edgeWeight_ge_of_not_mem_lowDeletion
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n) (τ : ℝ)
-    (j : Fin (n + 1))
-    (x : DeletedVector (fun _ : Fin (n + 1) => G) j)
-    (hx : H.edge j x)
-    (hnot : x ∉ lowStructuredDeletion H S τ j) :
-    τ ≤
-      (regularizedSimplexSystem H.toWeighted S).edgeWeight j x := by
-  have hone :
-      canonicalEdgeFunction H.toWeighted j
-          (deletedFaceTuple j x) = 1 := by
-    rw [canonicalEdgeFunction]
-    have hface :
-        finTupleToDeletedVector j (deletedFaceTuple j x) = x :=
-      finTupleToDeletedVector_deletedFaceTuple j x
-    rw [hface]
-    exact H.toWeighted_edgeWeight_of_edge hx
-  have hnlow :
-      deletedFaceTuple j x ∉
-        (S j).lowStructuredOneFinset
-          (canonicalEdgeFunction H.toWeighted j) τ := by
-    exact fun hmem =>
-      hnot ((mem_lowStructuredDeletion_iff H S τ j x).2 hmem)
-  have hnotlt :
-      ¬(S j).structured
-          (canonicalEdgeFunction H.toWeighted j)
-          (deletedFaceTuple j x) < τ := by
-    intro hlt
-    apply hnlow
-    exact
-      ((S j).mem_lowStructuredOneFinset
-        (canonicalEdgeFunction H.toWeighted j) τ
-        (deletedFaceTuple j x)).2
-        ⟨hone, hlt⟩
-  exact not_lt.mp hnotlt
 
-/-- Every original simplex avoiding the low-density deletion has structured
-simplex weight at least `τ^(n+1)`. -/
-theorem pow_le_regularized_simplexWeight_of_avoids_lowDeletion
-    {G : Type*} [Fintype G] [DecidableEq G] {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n)
-    {τ : ℝ} (hτ : 0 ≤ τ)
-    (x : Fin (n + 1) → G)
-    (hx : x ∈ H.simplexFinset)
-    (havoid :
-      ∀ j, deleteCoordinate x j ∉
-        lowStructuredDeletion H S τ j) :
-    τ ^ (n + 1) ≤
-      (regularizedSimplexSystem H.toWeighted S).simplexWeight x := by
-  change
-    τ ^ (n + 1) ≤
-      ∏ j : Fin (n + 1),
-        (regularizedSimplexSystem H.toWeighted S).edgeWeight j
-          (deleteCoordinate x j)
-  calc
-    τ ^ (n + 1) = ∏ _j : Fin (n + 1), τ := by
-      simp
-    _ ≤
-        ∏ j : Fin (n + 1),
-          (regularizedSimplexSystem H.toWeighted S).edgeWeight j
-            (deleteCoordinate x j) := by
-      apply Finset.prod_le_prod
-      · intro _ _
-        exact hτ
-      · intro j _
-        exact regularized_edgeWeight_ge_of_not_mem_lowDeletion
-          H S τ j (deleteCoordinate x j)
-          ((H.mem_simplexFinset x).1 hx j) (havoid j)
 
-/-- An exact finite stopping criterion: if the structured count is smaller
-than the contribution of one surviving `τ`-dense tuple, low-cell deletion
-already covers every original simplex.  The denominator still depends on the
-ambient space; recursive skeleton cleaning is what replaces this by a
-uniform threshold in the full removal lemma. -/
-theorem lowStructuredDeletion_isSimplexCover_of_count_lt
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {n : ℕ}
-    (H : SimplexHypergraph
-      (fun _ : Fin (n + 1) => G))
-    (S : SimplexRegularitySystem G n)
-    {τ : ℝ} (hτ : 0 < τ)
-    (hcount :
-      (regularizedSimplexSystem H.toWeighted S).simplexCount <
-        τ ^ (n + 1) /
-          Fintype.card (Fin (n + 1) → G)) :
-    H.IsSimplexCover (lowStructuredDeletion H S τ) := by
-  classical
-  by_contra hcover
-  unfold SimplexHypergraph.IsSimplexCover at hcover
-  push Not at hcover
-  obtain ⟨x, hx, havoid⟩ := hcover
-  let K := regularizedSimplexSystem H.toWeighted S
-  have hK :
-      EdgeWeightsInUnitInterval K :=
-    regularizedSimplexSystem_unitInterval
-      (fun j y => ⟨H.toWeighted_edgeWeight_nonneg j y,
-        by
-          classical
-          by_cases hy : H.edge j y
-          · rw [H.toWeighted_edgeWeight_of_edge hy]
-          · rw [H.toWeighted_edgeWeight_of_not_edge hy]
-            norm_num⟩)
-      S
-  have hpoint :
-      τ ^ (n + 1) ≤ K.simplexWeight x :=
-    pow_le_regularized_simplexWeight_of_avoids_lowDeletion
-      H S hτ.le x hx havoid
-  have hsingle :
-      K.simplexWeight x ≤ ∑ y, K.simplexWeight y := by
-    apply Finset.single_le_sum
-    · intro y _
-      exact K.simplexWeight_nonneg
-        (fun j z => (hK j z).1) y
-    · exact Finset.mem_univ x
-  have hmean :
-      τ ^ (n + 1) /
-          Fintype.card (Fin (n + 1) → G) ≤
-        K.simplexCount := by
-    rw [WeightedSimplexSystem.simplexCount, mean,
-      Fintype.expect_eq_sum_div_card]
-    exact div_le_div_of_nonneg_right
-      (hpoint.trans hsingle) (Nat.cast_nonneg _)
-  exact (not_lt_of_ge hmean) hcount
 
 end Wikipedia.SzemeredisTheorem
 
@@ -15491,1122 +6775,48 @@ def eraseOrderedFace
   | succ n =>
       exact (Fin.succAboveOrderEmb i).trans e
 
-/-- Restricting a full tuple to a deleted ordered face is the same as
-erasing the corresponding coordinate from the top-face tuple. -/
-@[simp]
-theorem orderedFaceTuple_eraseOrderedFace
-    {G : Type*} {k r : ℕ}
-    (e : OrderedFace k r) (i : Fin r)
-    (x : Fin k → G) :
-    orderedFaceTuple (eraseOrderedFace e i) x =
-      eraseCoordinate i (orderedFaceTuple e x) := by
-  cases r with
-  | zero => exact Fin.elim0 i
-  | succ n =>
-      rfl
 
-/-- Every ordered rank-`r - 1` face is obtained by deleting a coordinate
-from some ordered rank-`r` face, provided `0 < r ≤ k`. -/
-theorem exists_orderedCoface
-    {k r : ℕ} (hr : 0 < r) (hrk : r ≤ k)
-    (g : OrderedFace k (r - 1)) :
-    ∃ e : OrderedFace k r, ∃ i : Fin r,
-      eraseOrderedFace e i = g := by
-  classical
-  cases r with
-  | zero => omega
-  | succ n =>
-      let s : Finset (Fin k) :=
-        Finset.univ.map g.toEmbedding
-      have hs : s.card = n := by
-        rw [show s.card =
-            (Finset.univ :
-              Finset (Fin (n + 1 - 1))).card by
-          exact Finset.card_map g.toEmbedding]
-        exact Fintype.card_fin n
-      have hnk : n < k := by
-        omega
-      have hs_ne_univ : s ≠ Finset.univ := by
-        intro h
-        have : n = k := by
-          calc
-            n = s.card := hs.symm
-            _ = Finset.univ.card := congrArg Finset.card h
-            _ = k := by simp
-        omega
-      obtain ⟨v, hv⟩ :
-          ∃ v : Fin k, v ∉ s := by
-        by_contra h
-        push Not at h
-        exact hs_ne_univ (Finset.eq_univ_of_forall h)
-      let t : Finset (Fin k) := insert v s
-      have ht : t.card = n + 1 := by
-        simp [t, hv, hs]
-      let e : OrderedFace k (n + 1) :=
-        t.orderEmbOfFin ht
-      have hv_t : v ∈ t := by
-        simp [t]
-      let vInT : t := ⟨v, hv_t⟩
-      let i : Fin (n + 1) :=
-        (t.orderIsoOfFin ht).symm vInT
-      have hei : e i = v := by
-        change
-          t.orderEmbOfFin ht
-              ((t.orderIsoOfFin ht).symm vInT) =
-            v
-        rw [← Finset.coe_orderIsoOfFin_apply]
-        simp [vInT]
-      have herase_mem :
-          ∀ q, eraseOrderedFace e i q ∈ s := by
-        intro q
-        have htmem :
-            e (i.succAbove q) ∈ t := by
-          exact t.orderEmbOfFin_mem ht (i.succAbove q)
-        have hne :
-            e (i.succAbove q) ≠ v := by
-          intro h
-          have heq :
-              e (i.succAbove q) = e i :=
-            h.trans hei.symm
-          exact
-            (i.succAbove_ne q)
-              (e.injective heq)
-        change e (i.succAbove q) ∈ s
-        have hor : e (i.succAbove q) = v ∨
-            e (i.succAbove q) ∈ s := by
-          simpa [t] using htmem
-        exact hor.resolve_left hne
-      have herase :
-          eraseOrderedFace e i =
-            s.orderEmbOfFin hs :=
-        Finset.orderEmbOfFin_unique' hs herase_mem
-      have hg :
-          g = s.orderEmbOfFin hs := by
-        apply Finset.orderEmbOfFin_unique' hs
-        intro q
-        exact Finset.mem_map.mpr
-          ⟨q, Finset.mem_univ _, rfl⟩
-      exact ⟨e, i, herase.trans hg.symm⟩
 
 namespace OrderedPattern
 
-/-- The cylinder over one deleted lower-rank face set. -/
-noncomputable def deletionCylinder
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1))
-    (e : OrderedFace k r) (i : Fin r) :
-    Finset (Fin r → G) := by
-  classical
-  exact Finset.univ.filter fun y =>
-    eraseCoordinate i y ∈ D (eraseOrderedFace e i)
 
-@[simp]
-theorem mem_deletionCylinder
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1))
-    (e : OrderedFace k r) (i : Fin r)
-    (y : Fin r → G) :
-    y ∈ deletionCylinder D e i ↔
-      eraseCoordinate i y ∈
-        D (eraseOrderedFace e i) := by
-  simp [deletionCylinder]
 
-/-- A deletion cylinder has one free `G`-coordinate over every deleted
-lower tuple. -/
-theorem card_deletionCylinder
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1))
-    (e : OrderedFace k r) (i : Fin r) :
-    (deletionCylinder D e i).card =
-      Fintype.card G *
-        (D (eraseOrderedFace e i)).card := by
-  classical
-  cases r with
-  | zero => exact Fin.elim0 i
-  | succ n =>
-      change DeletionFamily (G := G) k n at D
-      let S : (j : Fin (n + 1)) → Finset G :=
-        fun _ => Finset.univ
-      have h :=
-        Finset.card_insertNthEquiv_filter_piFinset
-          (S := S) (p := i)
-          (P := fun z =>
-            z ∈ D (eraseOrderedFace e i))
-      simp only [S, Fin.removeNth_fun_const,
-        Fintype.piFinset_univ] at h
-      simp only [Finset.filter_univ_mem] at h
-      have hcylinder :
-          deletionCylinder D e i =
-            Finset.univ.filter fun x :
-                Fin (n + 1) → G =>
-              Fin.removeNth i x ∈
-                D (eraseOrderedFace e i) := by
-        ext x
-        simp [eraseCoordinate_eq_removeNth]
-      rw [hcylinder]
-      exact h
 
-/-- Lift a lower-rank deletion family by taking the union of all coordinate
-cylinders inside each ordered top face. -/
-noncomputable def liftLowerDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1)) :
-    DeletionFamily (G := G) k r := by
-  classical
-  exact fun e =>
-    Finset.univ.biUnion fun i =>
-      deletionCylinder D e i
 
-@[simp]
-theorem mem_liftLowerDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1))
-    (e : OrderedFace k r) (y : Fin r → G) :
-    y ∈ liftLowerDeletion D e ↔
-      ∃ i : Fin r,
-        eraseCoordinate i y ∈
-          D (eraseOrderedFace e i) := by
-  classical
-  simp [liftLowerDeletion]
 
-/-- Cardinality union bound for a lifted lower deletion. -/
-theorem card_liftLowerDeletion_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1))
-    (e : OrderedFace k r) :
-    (liftLowerDeletion D e).card ≤
-      ∑ i : Fin r,
-        (deletionCylinder D e i).card := by
-  classical
-  exact Finset.card_biUnion_le
 
-/-- Normalized density of one deletion cylinder equals the normalized
-density of its lower-rank base. -/
-theorem deletionCylinder_density_eq
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1))
-    (e : OrderedFace k r) (i : Fin r) :
-    ((deletionCylinder D e i).card : ℝ) /
-        Fintype.card (Fin r → G) =
-      faceDeletionDensity D
-        (eraseOrderedFace e i) := by
-  cases r with
-  | zero => exact Fin.elim0 i
-  | succ n =>
-      change DeletionFamily (G := G) k n at D
-      rw [card_deletionCylinder]
-      unfold faceDeletionDensity
-      simp only [Fintype.card_fun, Fintype.card_fin,
-        Nat.cast_mul, Nat.cast_pow]
-      have hG : (0 : ℝ) <
-          Fintype.card G := by
-        positivity
-      rw [pow_succ]
-      field_simp [ne_of_gt hG]
-      simp
 
-/-- Lifting loses at most the factor `r` in normalized deletion density. -/
-theorem faceDeletionDensity_liftLowerDeletion_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (D : DeletionFamily (G := G) k (r - 1))
-    {δ : ℝ}
-    (hD : ∀ g, faceDeletionDensity D g ≤ δ)
-    (e : OrderedFace k r) :
-    faceDeletionDensity (liftLowerDeletion D) e ≤
-      (r : ℝ) * δ := by
-  unfold faceDeletionDensity
-  have hdenom :
-      (0 : ℝ) <
-        Fintype.card (Fin r → G) := by
-    positivity
-  calc
-    ((liftLowerDeletion D e).card : ℝ) /
-          Fintype.card (Fin r → G) ≤
-        (∑ i : Fin r,
-          (deletionCylinder D e i).card : ℕ) /
-            Fintype.card (Fin r → G) := by
-      apply div_le_div_of_nonneg_right
-      · exact_mod_cast card_liftLowerDeletion_le D e
-      · exact hdenom.le
-    _ =
-        ∑ i : Fin r,
-          ((deletionCylinder D e i).card : ℝ) /
-            Fintype.card (Fin r → G) := by
-      rw [Nat.cast_sum, Finset.sum_div]
-    _ =
-        ∑ i : Fin r,
-          faceDeletionDensity D
-            (eraseOrderedFace e i) := by
-      apply Finset.sum_congr rfl
-      intro i _hi
-      exact deletionCylinder_density_eq D e i
-    _ ≤ ∑ _i : Fin r, δ := by
-      apply Finset.sum_le_sum
-      intro i _hi
-      exact hD (eraseOrderedFace e i)
-    _ = (r : ℝ) * δ := by
-      simp
 
-/-- Union a finite family of ordered deletion families face by face. -/
-noncomputable def unionDeletion
-    {ι G : Type*} [Fintype ι]
-    [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : ι → DeletionFamily (G := G) k r) :
-    DeletionFamily (G := G) k r := by
-  classical
-  exact fun e =>
-    Finset.univ.biUnion fun t => D t e
 
-@[simp]
-theorem mem_unionDeletion
-    {ι G : Type*} [Fintype ι]
-    [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (D : ι → DeletionFamily (G := G) k r)
-    (e : OrderedFace k r) (y : Fin r → G) :
-    y ∈ unionDeletion D e ↔
-      ∃ t : ι, y ∈ D t e := by
-  classical
-  simp [unionDeletion]
 
-/-- The density of a finite union is bounded by the sum of the component
-densities. -/
-theorem faceDeletionDensity_unionDeletion_le
-    {ι G : Type*} [Fintype ι]
-    [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (D : ι → DeletionFamily (G := G) k r)
-    (e : OrderedFace k r) :
-    faceDeletionDensity (unionDeletion D) e ≤
-      ∑ t : ι, faceDeletionDensity (D t) e := by
-  unfold faceDeletionDensity unionDeletion
-  have hdenom :
-      (0 : ℝ) <
-        Fintype.card (Fin r → G) := by
-    positivity
-  calc
-    (((Finset.univ.biUnion fun t => D t e).card : ℕ) : ℝ) /
-          Fintype.card (Fin r → G) ≤
-        (∑ t : ι, (D t e).card : ℕ) /
-          Fintype.card (Fin r → G) := by
-      apply div_le_div_of_nonneg_right
-      · exact_mod_cast (Finset.card_biUnion_le :
-          (Finset.univ.biUnion fun t => D t e).card ≤
-            ∑ t : ι, (D t e).card)
-      · exact hdenom.le
-    _ =
-        ∑ t : ι,
-          ((D t e).card : ℝ) /
-            Fintype.card (Fin r → G) := by
-      rw [Nat.cast_sum, Finset.sum_div]
 
-/-- Ordered-pattern edge indicators take only the values zero and one. -/
-theorem toWeighted_edgeWeight_zeroOne
-    {G : Type*} {k r : ℕ}
-    (H : OrderedPattern G k r)
-    (e : OrderedFace k r) :
-    IsZeroOneValued (H.toWeighted.edgeWeight e) := by
-  intro y
-  classical
-  by_cases hy : H.edge e y
-  · right
-    simp [OrderedPattern.toWeighted, hy]
-  · left
-    simp [OrderedPattern.toWeighted, hy]
 
-/-- Delete actual ordered edges which lie in structured atoms of density
-below `τ`. -/
-noncomputable def lowStructuredDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : OrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r)
-    (τ : ℝ) :
-    DeletionFamily (G := G) k r :=
-  fun e =>
-    (S e).lowStructuredOneFinset
-      (H.toWeighted.edgeWeight e) τ
 
-@[simp]
-theorem mem_lowStructuredDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : OrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r)
-    (τ : ℝ) (e : OrderedFace k r)
-    (y : Fin r → G) :
-    y ∈ lowStructuredDeletion H S τ e ↔
-      H.toWeighted.edgeWeight e y = 1 ∧
-        (S e).structured
-          (H.toWeighted.edgeWeight e) y < τ := by
-  exact
-    (S e).mem_lowStructuredOneFinset
-      (H.toWeighted.edgeWeight e) τ y
 
-/-- Low structured top atoms cost at most `τ` in every ordered face. -/
-theorem faceDeletionDensity_lowStructuredDeletion_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (H : OrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r)
-    {τ : ℝ} (hτ : 0 ≤ τ)
-    (e : OrderedFace k r) :
-    faceDeletionDensity
-        (lowStructuredDeletion H S τ) e ≤ τ := by
-  have hmean :=
-    (S e).mean_indicator_lowStructuredOneFinset_le
-      (H.toWeighted_edgeWeight_zeroOne e) hτ
-  rw [mean_finsetIndicator] at hmean
-  exact hmean
 
-/-- An actual ordered edge surviving low-cell cleaning has structured
-conditional density at least `τ`. -/
-theorem regularized_edgeWeight_ge_of_not_mem_lowDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : OrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r)
-    (τ : ℝ) (e : OrderedFace k r)
-    (y : Fin r → G)
-    (hy : H.edge e y)
-    (hnot : y ∉ lowStructuredDeletion H S τ e) :
-    τ ≤
-      (regularizedOrderedPattern H.toWeighted S).edgeWeight e y := by
-  have hone :
-      H.toWeighted.edgeWeight e y = 1 := by
-    classical
-    simp [OrderedPattern.toWeighted, hy]
-  have hnotlt :
-      ¬(S e).structured
-          (H.toWeighted.edgeWeight e) y < τ := by
-    intro hlt
-    exact hnot
-      ((mem_lowStructuredDeletion H S τ e y).2
-        ⟨hone, hlt⟩)
-  exact not_lt.mp hnotlt
 
-/-- A lower-rank cover lifts to a top-rank cover on every occurrence of the
-lower pattern. -/
-theorem lowerCover_lifts
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (hr : 0 < r) (hrk : r ≤ k)
-    (L : OrderedPattern G k (r - 1))
-    (D : DeletionFamily (G := G) k (r - 1))
-    (hcover : L.IsCover D)
-    {x : Fin k → G}
-    (hx : L.IsOccurrence x) :
-    ∃ e : OrderedFace k r,
-      orderedFaceTuple e x ∈
-        liftLowerDeletion D e := by
-  classical
-  have hxfinset : x ∈ L.occurrenceFinset := by
-    exact (L.mem_occurrenceFinset x).2 hx
-  obtain ⟨g, hg⟩ := hcover x hxfinset
-  obtain ⟨e, i, hei⟩ :=
-    exists_orderedCoface hr hrk g
-  refine ⟨e, (mem_liftLowerDeletion D e _).2
-    ⟨i, ?_⟩⟩
-  rw [← hei] at hg
-  simpa using hg
 
 end OrderedPattern
 
 namespace GeneratedOrderedPatternRegularization
 
-/-- Membership in all lower-face cells selected by an arbitrary top-atom
-choice and branch system. -/
-def IsInAtomBranch
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (a : R.TopAtomChoice)
-    (w : R.BranchSystem)
-    (x : Fin k → G) : Prop :=
-  ∀ e i,
-    eraseCoordinate i (orderedFaceTuple e x) ∈
-      lowerGeneratorCell (R.generators e)
-        ((R.state e).partition.representative (a e))
-        (w e) i
 
-/-- The complete lower-rank pattern cut out by one structured top-atom
-choice and one branch system.  A global lower face may occur inside several
-top faces, so all corresponding local cell constraints are conjoined. -/
-noncomputable def lowerCellPattern
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (a : R.TopAtomChoice)
-    (w : R.BranchSystem) :
-    OrderedPattern G k (r - 1) where
-  edge g z :=
-    ∀ (e : OrderedFace k r) (i : Fin r),
-      eraseOrderedFace e i = g →
-        z ∈ lowerGeneratorCell (R.generators e)
-          ((R.state e).partition.representative (a e))
-          (w e) i
 
-/-- Occurrences of the lower-cell pattern are exactly the full tuples
-accepted by every local lower-face cell. -/
-theorem lowerCellPattern_isOccurrence_iff
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (a : R.TopAtomChoice)
-    (w : R.BranchSystem)
-    (x : Fin k → G) :
-    (R.lowerCellPattern a w).IsOccurrence x ↔
-      R.IsInAtomBranch a w x := by
-  constructor
-  · intro hocc e i
-    have h :=
-      hocc (eraseOrderedFace e i) e i rfl
-    simpa using h
-  · intro hcell g e i hsubface
-    rw [← hsubface]
-    simpa using hcell e i
 
-/-- Membership in an arbitrary simultaneous top-atom choice is exactly a
-union over the retained lower-face branch systems. -/
-theorem mem_all_topAtoms_iff_exists_branchSystem
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r)
-    (a : R.TopAtomChoice)
-    (x : Fin k → G) :
-    (∀ e, orderedFaceTuple e x ∈ (a e).1) ↔
-      ∃ w : R.BranchSystem,
-        R.IsInAtomBranch a w x := by
-  classical
-  constructor
-  · intro hmem
-    have he (e : OrderedFace k r) :
-        ∃ w : GeneratorBranch (R.generators e),
-          ∀ i,
-            eraseCoordinate i
-                (orderedFaceTuple e x) ∈
-              lowerGeneratorCell (R.generators e)
-                ((R.state e).partition.representative
-                  (a e)) w i := by
-      apply
-        (R.mem_state_part_iff_exists_lowerGeneratorCells
-          hr e _ _).1
-      rw [(R.state e).partition.part_representative]
-      exact hmem e
-    choose w hw using he
-    exact ⟨w, fun e i => hw e i⟩
-  · rintro ⟨w, hcell⟩
-    intro e
-    have h :=
-      (R.mem_state_part_iff_exists_lowerGeneratorCells
-        hr e _ _).2 ⟨w e, hcell e⟩
-    rw [(R.state e).partition.part_representative] at h
-    exact h
 
-/-- The structured edge value attached to a chosen top atom. -/
-noncomputable def atomEdgeWeight
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (a : R.TopAtomChoice)
-    (e : OrderedFace k r) : ℝ :=
-  (regularizedOrderedPattern H R.state).edgeWeight e
-    ((R.state e).partition.representative (a e))
 
-/-- The regularized edge weight on a tuple in a chosen atom equals the
-atom's representative value. -/
-theorem regularized_edgeWeight_eq_atomEdgeWeight
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (a : R.TopAtomChoice)
-    (e : OrderedFace k r)
-    (x : Fin k → G)
-    (hmem : orderedFaceTuple e x ∈ (a e).1) :
-    (regularizedOrderedPattern H R.state).edgeWeight e
-        (orderedFaceTuple e x) =
-      R.atomEdgeWeight a e := by
-  unfold atomEdgeWeight
-  apply conditionalMean_eq_of_mem_part
-  rw [(R.state e).partition.part_representative]
-  exact hmem
 
-/-- The full regularized pattern weight on a tuple in every selected atom is
-the product of the atom representative weights. -/
-theorem regularized_patternWeight_eq_prod_atomEdgeWeight
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (a : R.TopAtomChoice)
-    (x : Fin k → G)
-    (hmem : ∀ e, orderedFaceTuple e x ∈ (a e).1) :
-    (regularizedOrderedPattern H R.state).patternWeight x =
-      ∏ e : OrderedFace k r,
-        R.atomEdgeWeight a e := by
-  apply Finset.prod_congr rfl
-  intro e _he
-  exact R.regularized_edgeWeight_eq_atomEdgeWeight
-    a e x (hmem e)
 
-/-- Every selected top atom has structured edge density at least `τ`. -/
-def IsHeavy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (τ : ℝ) (a : R.TopAtomChoice) : Prop :=
-  ∀ e, τ ≤ R.atomEdgeWeight a e
 
-/-- The finite index of every simultaneous top-atom and lower-branch
-choice. -/
-abbrev CellIndex
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε) :=
-  R.TopAtomChoice × R.BranchSystem
 
-@[simp]
-theorem card_cellIndex
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε) :
-    Fintype.card R.CellIndex =
-      Fintype.card R.TopAtomChoice *
-        Fintype.card R.BranchSystem := by
-  simp [CellIndex]
 
-/-- Generator and partition complexity bound for the number of recursive
-cell problems. -/
-theorem card_cellIndex_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r) :
-    Fintype.card R.CellIndex ≤
-      (∏ e : OrderedFace k r,
-        2 ^ R.stepIndex e) *
-      ∏ e : OrderedFace k r,
-        r ^ R.stepIndex e := by
-  rw [R.card_cellIndex]
-  exact Nat.mul_le_mul
-    R.card_topAtomChoice_le
-    (R.card_branchSystem_le hr)
 
-/-- On an occurrence of a lower-cell pattern belonging to a heavy atom
-choice, the structured top pattern has weight at least one factor `τ` per
-ordered top face. -/
-theorem pow_le_regularized_patternWeight_of_lowerCellOccurrence
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε τ : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hr : 0 < r) (hτ : 0 ≤ τ)
-    (a : R.TopAtomChoice) (ha : R.IsHeavy τ a)
-    (w : R.BranchSystem)
-    {x : Fin k → G}
-    (hx : (R.lowerCellPattern a w).IsOccurrence x) :
-    τ ^ Fintype.card (OrderedFace k r) ≤
-      (regularizedOrderedPattern H R.state).patternWeight x := by
-  have hcell :
-      R.IsInAtomBranch a w x :=
-    (R.lowerCellPattern_isOccurrence_iff a w x).1 hx
-  have hmem :
-      ∀ e, orderedFaceTuple e x ∈ (a e).1 :=
-    (R.mem_all_topAtoms_iff_exists_branchSystem
-      hr a x).2 ⟨w, hcell⟩
-  rw [R.regularized_patternWeight_eq_prod_atomEdgeWeight
-    a x hmem]
-  have hprod :
-      (∏ _e : OrderedFace k r, τ) ≤
-        ∏ e : OrderedFace k r,
-          R.atomEdgeWeight a e := by
-    apply Finset.prod_le_prod
-    · intro e _he
-      exact hτ
-    · intro e _he
-      exact ha e
-  simpa using hprod
 
-/-- Pointwise domination of the scaled lower-cell indicator by the
-structured top-pattern weight. -/
-theorem pow_mul_lowerCellPattern_weight_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε τ : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hr : 0 < r) (hτ : 0 ≤ τ)
-    (a : R.TopAtomChoice) (ha : R.IsHeavy τ a)
-    (w : R.BranchSystem)
-    (x : Fin k → G) :
-    τ ^ Fintype.card (OrderedFace k r) *
-        (R.lowerCellPattern a w).toWeighted.patternWeight x ≤
-      (regularizedOrderedPattern H R.state).patternWeight x := by
-  classical
-  by_cases hx : (R.lowerCellPattern a w).IsOccurrence x
-  · rw [(R.lowerCellPattern a w).toWeighted_patternWeight_of_occurrence
-      hx, mul_one]
-    exact
-      R.pow_le_regularized_patternWeight_of_lowerCellOccurrence
-        hr hτ a ha w hx
-  · rw [(R.lowerCellPattern a w).toWeighted_patternWeight_of_not_occurrence
-      hx, mul_zero]
-    exact
-      (regularizedOrderedPattern H R.state).patternWeight_nonneg
-        (fun e y =>
-          ((regularizedOrderedPattern_unitInterval hH R.state)
-            e y).1) x
 
-/-- The scaled count of every heavy lower-cell pattern is bounded by the
-entire structured top-pattern count. -/
-theorem pow_mul_lowerCellPattern_count_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε τ : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hr : 0 < r) (hτ : 0 ≤ τ)
-    (a : R.TopAtomChoice) (ha : R.IsHeavy τ a)
-    (w : R.BranchSystem) :
-    τ ^ Fintype.card (OrderedFace k r) *
-        (R.lowerCellPattern a w).toWeighted.patternCount ≤
-      (regularizedOrderedPattern H R.state).patternCount := by
-  rw [WeightedOrderedPattern.patternCount,
-    WeightedOrderedPattern.patternCount,
-    ← mean_smul]
-  exact mean_mono fun x =>
-    R.pow_mul_lowerCellPattern_weight_le
-      hH hr hτ a ha w x
 
-/-- A sufficiently small structured top count forces every heavy
-lower-cell pattern below the supplied lower-rank threshold. -/
-theorem lowerCellPattern_count_lt_of_regularized_count_lt
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ} {H : WeightedOrderedPattern G k r}
-    {ε τ c : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H ε)
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hr : 0 < r) (hτ : 0 < τ)
-    (a : R.TopAtomChoice) (ha : R.IsHeavy τ a)
-    (w : R.BranchSystem)
-    (hsmall :
-      (regularizedOrderedPattern H R.state).patternCount <
-        τ ^ Fintype.card (OrderedFace k r) * c) :
-    (R.lowerCellPattern a w).toWeighted.patternCount < c := by
-  have hscaled :
-      τ ^ Fintype.card (OrderedFace k r) *
-          (R.lowerCellPattern a w).toWeighted.patternCount <
-        τ ^ Fintype.card (OrderedFace k r) * c :=
-    lt_of_le_of_lt
-      (R.pow_mul_lowerCellPattern_count_le
-        hH hr hτ.le a ha w)
-      hsmall
-  exact
-    lt_of_mul_lt_mul_left hscaled
-      (pow_pos hτ
-        (Fintype.card (OrderedFace k r))).le
 
-/-- **Conditional generated-cell induction step.**  If every heavy
-lower-cell pattern is below a threshold at which rank-`r - 1` removal is
-available, low top atoms together with all lifted lower covers form a
-rank-`r` cover.  The explicit loss is one `τ` plus one lifted cost for every
-atom/branch cell index.
 
-An active-cell predicate allows a later strong-regularity argument to send
-stable cells to recursive removal while charging all unstable cells to one
-exceptional top-rank deletion. -/
-theorem exists_generatedCellCover_of_activeLowerCellCounts
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (H : OrderedPattern G k r)
-    {η τ δ ξ cLower : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H.toWeighted η)
-    (hr : 0 < r) (hrk : r ≤ k)
-    (hτ : 0 < τ) (hδ : 0 ≤ δ)
-    (active : R.CellIndex → Prop)
-    (exceptionalDeletion :
-      OrderedPattern.DeletionFamily (G := G) k r)
-    (hexceptionalDensity :
-      ∀ e,
-        OrderedPattern.faceDeletionDensity
-          exceptionalDeletion e ≤ ξ)
-    (hexceptionalCover :
-      ∀ (a : R.TopAtomChoice) (w : R.BranchSystem)
-          (x : Fin k → G),
-        R.IsHeavy τ a →
-        (R.lowerCellPattern a w).IsOccurrence x →
-        ¬ active (a, w) →
-          ∃ e,
-            orderedFaceTuple e x ∈
-              exceptionalDeletion e)
-    (hcellSmall :
-      ∀ a : R.TopAtomChoice,
-        R.IsHeavy τ a →
-          ∀ w : R.BranchSystem,
-            active (a, w) →
-            (R.lowerCellPattern a w).toWeighted.patternCount <
-              cLower)
-    (hremove :
-      ∀ L : OrderedPattern G k (r - 1),
-        L.toWeighted.patternCount < cLower →
-          ∃ D : OrderedPattern.DeletionFamily
-              (G := G) k (r - 1),
-            L.IsCover D ∧
-              ∀ g,
-                OrderedPattern.faceDeletionDensity D g ≤ δ) :
-    ∃ D : OrderedPattern.DeletionFamily
-        (G := G) k r,
-      H.IsCover D ∧
-        ∀ e,
-          OrderedPattern.faceDeletionDensity D e ≤
-            τ +
-              (Fintype.card R.CellIndex : ℝ) *
-                (r : ℝ) * δ +
-              ξ := by
-  classical
-  have hchoice (p : R.CellIndex) :
-      ∃ D : OrderedPattern.DeletionFamily
-          (G := G) k (r - 1),
-        (R.IsHeavy τ p.1 →
-          active p →
-          (R.lowerCellPattern p.1 p.2).IsCover D) ∧
-        ∀ g,
-          OrderedPattern.faceDeletionDensity D g ≤ δ := by
-    by_cases hp : R.IsHeavy τ p.1
-    · by_cases hactive : active p
-      · have hcount :
-            (R.lowerCellPattern p.1 p.2).toWeighted.patternCount <
-              cLower :=
-          hcellSmall p.1 hp p.2 hactive
-        obtain ⟨D, hcover, hdensity⟩ :=
-          hremove (R.lowerCellPattern p.1 p.2) hcount
-        exact ⟨D, fun _ _ => hcover, hdensity⟩
-      · refine
-          ⟨OrderedPattern.emptyDeletion k (r - 1),
-            fun _ h => (hactive h).elim, fun g => ?_⟩
-        rw [OrderedPattern.faceDeletionDensity_empty]
-        exact hδ
-    · refine
-        ⟨OrderedPattern.emptyDeletion k (r - 1),
-          fun hheavy _ => (hp hheavy).elim, fun g => ?_⟩
-      rw [OrderedPattern.faceDeletionDensity_empty]
-      exact hδ
-  choose lowerDeletion hlower using hchoice
-  let liftedCellDeletion :
-      R.CellIndex →
-        OrderedPattern.DeletionFamily (G := G) k r :=
-    fun p =>
-      OrderedPattern.liftLowerDeletion
-        (lowerDeletion p)
-  let cellDeletion :
-      OrderedPattern.DeletionFamily (G := G) k r :=
-    OrderedPattern.unionDeletion liftedCellDeletion
-  let lowDeletion :
-      OrderedPattern.DeletionFamily (G := G) k r :=
-    OrderedPattern.lowStructuredDeletion
-      H R.state τ
-  let baseComponents :
-      Bool →
-        OrderedPattern.DeletionFamily (G := G) k r :=
-    fun b => if b then cellDeletion else lowDeletion
-  let baseDeletion :
-      OrderedPattern.DeletionFamily (G := G) k r :=
-    OrderedPattern.unionDeletion baseComponents
-  let components :
-      Bool →
-        OrderedPattern.DeletionFamily (G := G) k r :=
-    fun b =>
-      if b then exceptionalDeletion else baseDeletion
-  let totalDeletion :
-      OrderedPattern.DeletionFamily (G := G) k r :=
-    OrderedPattern.unionDeletion components
-  have hcellDensity (e : OrderedFace k r) :
-      OrderedPattern.faceDeletionDensity
-          cellDeletion e ≤
-        (Fintype.card R.CellIndex : ℝ) *
-          (r : ℝ) * δ := by
-    calc
-      OrderedPattern.faceDeletionDensity
-          cellDeletion e ≤
-          ∑ p : R.CellIndex,
-            OrderedPattern.faceDeletionDensity
-              (liftedCellDeletion p) e := by
-        exact
-          OrderedPattern.faceDeletionDensity_unionDeletion_le
-            liftedCellDeletion e
-      _ ≤ ∑ _p : R.CellIndex, (r : ℝ) * δ := by
-        apply Finset.sum_le_sum
-        intro p _hp
-        exact
-          OrderedPattern.faceDeletionDensity_liftLowerDeletion_le
-            (lowerDeletion p) (hlower p).2 e
-      _ =
-          (Fintype.card R.CellIndex : ℝ) *
-            (r : ℝ) * δ := by
-        simp
-        ring
-  have hbaseDensity (e : OrderedFace k r) :
-      OrderedPattern.faceDeletionDensity
-          baseDeletion e ≤
-        τ +
-          (Fintype.card R.CellIndex : ℝ) *
-            (r : ℝ) * δ := by
-    calc
-      OrderedPattern.faceDeletionDensity
-          baseDeletion e ≤
-          ∑ b : Bool,
-            OrderedPattern.faceDeletionDensity
-              (baseComponents b) e := by
-        exact
-          OrderedPattern.faceDeletionDensity_unionDeletion_le
-            baseComponents e
-      _ =
-          OrderedPattern.faceDeletionDensity lowDeletion e +
-            OrderedPattern.faceDeletionDensity cellDeletion e := by
-        simp [baseComponents]
-        ring
-      _ ≤
-          τ +
-            (Fintype.card R.CellIndex : ℝ) *
-              (r : ℝ) * δ :=
-        add_le_add
-          (OrderedPattern.faceDeletionDensity_lowStructuredDeletion_le
-            H R.state hτ.le e)
-          (hcellDensity e)
-  have htotalDensity (e : OrderedFace k r) :
-      OrderedPattern.faceDeletionDensity
-          totalDeletion e ≤
-        τ +
-          (Fintype.card R.CellIndex : ℝ) *
-            (r : ℝ) * δ +
-          ξ := by
-    calc
-      OrderedPattern.faceDeletionDensity
-          totalDeletion e ≤
-          ∑ b : Bool,
-            OrderedPattern.faceDeletionDensity
-              (components b) e := by
-        exact
-          OrderedPattern.faceDeletionDensity_unionDeletion_le
-            components e
-      _ =
-          OrderedPattern.faceDeletionDensity baseDeletion e +
-            OrderedPattern.faceDeletionDensity
-              exceptionalDeletion e := by
-        simp [components]
-        ring
-      _ ≤
-          (τ +
-            (Fintype.card R.CellIndex : ℝ) *
-              (r : ℝ) * δ) +
-            ξ :=
-        add_le_add (hbaseDensity e)
-          (hexceptionalDensity e)
-  refine ⟨totalDeletion, ?_, htotalDensity⟩
-  intro x hx
-  have hxocc : H.IsOccurrence x :=
-    (H.mem_occurrenceFinset x).1 hx
-  by_cases hlow :
-      ∃ e : OrderedFace k r,
-        orderedFaceTuple e x ∈ lowDeletion e
-  · obtain ⟨e, he⟩ := hlow
-    have hbase :
-        orderedFaceTuple e x ∈ baseDeletion e := by
-      apply
-        (OrderedPattern.mem_unionDeletion
-          baseComponents e _).2
-      refine ⟨false, ?_⟩
-      simpa [baseComponents] using he
-    refine ⟨e,
-      (OrderedPattern.mem_unionDeletion
-        components e _).2 ⟨false, ?_⟩⟩
-    simpa [components] using hbase
-  · push Not at hlow
-    let a : R.TopAtomChoice :=
-      R.topAtomChoiceOf x
-    have ha : R.IsHeavy τ a := by
-      intro e
-      have hmem :
-          orderedFaceTuple e x ∈ (a e).1 :=
-        R.mem_topAtomChoiceOf x e
-      rw [← R.regularized_edgeWeight_eq_atomEdgeWeight
-        a e x hmem]
-      exact
-        OrderedPattern.regularized_edgeWeight_ge_of_not_mem_lowDeletion
-          H R.state τ e (orderedFaceTuple e x)
-          (hxocc e) (hlow e)
-    have hbranch :
-        ∃ w : R.BranchSystem,
-          R.IsInAtomBranch a w x :=
-      (R.mem_all_topAtoms_iff_exists_branchSystem
-        hr a x).1
-        (fun e => R.mem_topAtomChoiceOf x e)
-    obtain ⟨w, hw⟩ := hbranch
-    have hlowerOccurrence :
-        (R.lowerCellPattern a w).IsOccurrence x :=
-      (R.lowerCellPattern_isOccurrence_iff
-        a w x).2 hw
-    by_cases hactive : active (a, w)
-    · have hlowerCover :
-          (R.lowerCellPattern a w).IsCover
-            (lowerDeletion (a, w)) :=
-        (hlower (a, w)).1 ha hactive
-      obtain ⟨e, he⟩ :=
-        OrderedPattern.lowerCover_lifts
-          hr hrk (R.lowerCellPattern a w)
-          (lowerDeletion (a, w))
-          hlowerCover hlowerOccurrence
-      have hcell :
-          orderedFaceTuple e x ∈ cellDeletion e := by
-        apply
-          (OrderedPattern.mem_unionDeletion
-            liftedCellDeletion e _).2
-        exact ⟨(a, w), he⟩
-      have hbase :
-          orderedFaceTuple e x ∈ baseDeletion e := by
-        apply
-          (OrderedPattern.mem_unionDeletion
-            baseComponents e _).2
-        refine ⟨true, ?_⟩
-        simpa [baseComponents] using hcell
-      refine ⟨e,
-        (OrderedPattern.mem_unionDeletion
-          components e _).2 ⟨false, ?_⟩⟩
-      simpa [components] using hbase
-    · obtain ⟨e, he⟩ :=
-        hexceptionalCover a w x ha
-          hlowerOccurrence hactive
-      refine ⟨e,
-        (OrderedPattern.mem_unionDeletion
-          components e _).2 ⟨true, ?_⟩⟩
-      simpa [components] using he
 
-/-- The all-active specialization of
-`exists_generatedCellCover_of_activeLowerCellCounts`. -/
-theorem exists_generatedCellCover_of_lowerCellCounts
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (H : OrderedPattern G k r)
-    {η τ δ cLower : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H.toWeighted η)
-    (hr : 0 < r) (hrk : r ≤ k)
-    (hτ : 0 < τ) (hδ : 0 ≤ δ)
-    (hcellSmall :
-      ∀ a : R.TopAtomChoice,
-        R.IsHeavy τ a →
-          ∀ w : R.BranchSystem,
-            (R.lowerCellPattern a w).toWeighted.patternCount <
-              cLower)
-    (hremove :
-      ∀ L : OrderedPattern G k (r - 1),
-        L.toWeighted.patternCount < cLower →
-          ∃ D : OrderedPattern.DeletionFamily
-              (G := G) k (r - 1),
-            L.IsCover D ∧
-              ∀ g,
-                OrderedPattern.faceDeletionDensity D g ≤ δ) :
-    ∃ D : OrderedPattern.DeletionFamily
-        (G := G) k r,
-      H.IsCover D ∧
-        ∀ e,
-          OrderedPattern.faceDeletionDensity D e ≤
-            τ +
-              (Fintype.card R.CellIndex : ℝ) *
-                (r : ℝ) * δ := by
-  simpa using
-    R.exists_generatedCellCover_of_activeLowerCellCounts
-      (ξ := 0) H hr hrk hτ hδ
-      (fun _ => True)
-      (OrderedPattern.emptyDeletion k r)
-      (fun e => by
-        rw [OrderedPattern.faceDeletionDensity_empty])
-      (by
-        intro a w x ha hx hnot
-        exact (hnot trivial).elim)
-      (by
-        intro a ha w _hactive
-        exact hcellSmall a ha w)
-      hremove
-
-/-- The one-level structured-count form of
-`exists_generatedCellCover_of_lowerCellCounts`.  It remains useful when a
-single generated regularization already has sufficiently small structured
-pattern count. -/
-theorem exists_generatedCellCover
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (H : OrderedPattern G k r)
-    {η τ δ cLower : ℝ}
-    (R : GeneratedOrderedPatternRegularization
-      G k r H.toWeighted η)
-    (hr : 0 < r) (hrk : r ≤ k)
-    (hτ : 0 < τ) (hδ : 0 ≤ δ)
-    (hsmall :
-      (regularizedOrderedPattern
-          H.toWeighted R.state).patternCount <
-        τ ^ Fintype.card (OrderedFace k r) *
-          cLower)
-    (hremove :
-      ∀ L : OrderedPattern G k (r - 1),
-        L.toWeighted.patternCount < cLower →
-          ∃ D : OrderedPattern.DeletionFamily
-              (G := G) k (r - 1),
-            L.IsCover D ∧
-              ∀ g,
-                OrderedPattern.faceDeletionDensity D g ≤ δ) :
-    ∃ D : OrderedPattern.DeletionFamily
-        (G := G) k r,
-      H.IsCover D ∧
-        ∀ e,
-          OrderedPattern.faceDeletionDensity D e ≤
-            τ +
-              (Fintype.card R.CellIndex : ℝ) *
-                (r : ℝ) * δ := by
-  apply R.exists_generatedCellCover_of_lowerCellCounts
-    H hr hrk hτ hδ
-  · intro a ha w
-    exact
-      R.lowerCellPattern_count_lt_of_regularized_count_lt
-        H.toWeighted_unitInterval hr hτ
-        a ha w hsmall
-  · exact hremove
 
 end GeneratedOrderedPatternRegularization
 
@@ -16698,12 +6908,6 @@ theorem trans
 
 end OrderedFacePartitionRefines
 
-/-- The indiscrete shared partition layer. -/
-def indiscreteOrderedFacePartitionSystem
-    (G : Type*) [Fintype G] [DecidableEq G]
-    (k j : ℕ) :
-    OrderedFacePartitionSystem G k j :=
-  fun _ => FacePartition.indiscrete
 
 /-- Pull one actual lower-face partition back to an upper tuple space. -/
 def orderedImmediateBoundaryPartition
@@ -16775,117 +6979,9 @@ theorem mem_orderedBoundaryPartition_part_iff
     orderedImmediateBoundaryPartition,
     FacePartition.mem_part_pullback_iff_image_mem]
 
-/-- Equivalent same-atom formulation of boundary membership. -/
-theorem mem_orderedBoundaryPartition_part_iff_part_eq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (x y : Fin (j + 1) → G) :
-    y ∈ (orderedBoundaryPartition P e).part x ↔
-      ∀ i : Fin (j + 1),
-        (P (eraseBoundaryFace e i)).part
-            (eraseBoundaryCoordinate i y) =
-          (P (eraseBoundaryFace e i)).part
-            (eraseBoundaryCoordinate i x) := by
-  rw [mem_orderedBoundaryPartition_part_iff]
-  constructor
-  · intro h i
-    exact
-      ((P (eraseBoundaryFace e i)).mem_part_iff_part_eq_part
-        (Finset.mem_univ (eraseBoundaryCoordinate i y))
-        (Finset.mem_univ (eraseBoundaryCoordinate i x))).1
-        (h i)
-  · intro h i
-    exact
-      ((P (eraseBoundaryFace e i)).mem_part_iff_part_eq_part
-        (Finset.mem_univ (eraseBoundaryCoordinate i y))
-        (Finset.mem_univ (eraseBoundaryCoordinate i x))).2
-        (h i)
 
-/-- On full labelled tuples, boundary compatibility is precisely
-compatibility on every actual immediate ordered subface. -/
-theorem orderedFaceTuple_mem_boundary_part_iff
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (x y : Fin k → G) :
-    orderedFaceTuple e y ∈
-        (orderedBoundaryPartition P e).part
-          (orderedFaceTuple e x) ↔
-      ∀ i : Fin (j + 1),
-        orderedFaceTuple (eraseBoundaryFace e i) y ∈
-          (P (eraseBoundaryFace e i)).part
-            (orderedFaceTuple (eraseBoundaryFace e i) x) := by
-  rw [mem_orderedBoundaryPartition_part_iff]
-  constructor
-  · intro h i
-    rw [orderedFaceTuple_eraseBoundaryFace e i y,
-      orderedFaceTuple_eraseBoundaryFace e i x]
-    exact h i
-  · intro h i
-    rw [← orderedFaceTuple_eraseBoundaryFace e i y,
-      ← orderedFaceTuple_eraseBoundaryFace e i x]
-    exact h i
 
-/-- A boundary common refinement has no more atoms than the product of the
-atom counts of the genuine lower-face partitions. -/
-theorem complexity_orderedBoundaryPartition_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1)) :
-    FacePartition.complexity
-        (orderedBoundaryPartition P e) ≤
-      ∏ i : Fin (j + 1),
-        FacePartition.complexity
-          (P (eraseBoundaryFace e i)) := by
-  calc
-    FacePartition.complexity
-        (orderedBoundaryPartition P e) ≤
-        ∏ i : Fin (j + 1),
-          FacePartition.complexity
-            (orderedImmediateBoundaryPartition P e i) := by
-      exact FacePartition.complexity_joinFinset_le
-        (Finset.univ : Finset (Fin (j + 1)))
-        (orderedImmediateBoundaryPartition P e)
-    _ ≤
-        ∏ i : Fin (j + 1),
-          FacePartition.complexity
-            (P (eraseBoundaryFace e i)) := by
-      apply Finset.prod_le_prod
-      · intro i _
-        exact Nat.zero_le _
-      intro i _
-      exact FacePartition.complexity_pullback_le
-        (eraseBoundaryCoordinate i) (P (eraseBoundaryFace e i))
 
-/-- A uniform lower-layer complexity bound raises to the number of boundary
-coordinates. -/
-theorem complexity_orderedBoundaryPartition_le_pow
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k j M : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (hP : ∀ g, FacePartition.complexity (P g) ≤ M)
-    (e : OrderedFace k (j + 1)) :
-    FacePartition.complexity
-        (orderedBoundaryPartition P e) ≤
-      M ^ (j + 1) := by
-  calc
-    FacePartition.complexity
-        (orderedBoundaryPartition P e) ≤
-        ∏ i : Fin (j + 1),
-          FacePartition.complexity
-            (P (eraseBoundaryFace e i)) :=
-      complexity_orderedBoundaryPartition_le P e
-    _ ≤ ∏ _i : Fin (j + 1), M := by
-      apply Finset.prod_le_prod
-      · intro i _
-        exact Nat.zero_le _
-      intro i _
-      exact hP (eraseBoundaryFace e i)
-    _ = M ^ (j + 1) := by simp
 
 /-- Canonical boundary atom containing an upper tuple. -/
 noncomputable def orderedBoundaryAtomAt
@@ -16899,29 +6995,7 @@ noncomputable def orderedBoundaryAtomAt
     (orderedBoundaryPartition P e).part_mem.2
       (Finset.mem_univ x)⟩
 
-@[simp]
-theorem orderedBoundaryAtomAt_val
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (x : Fin (j + 1) → G) :
-    (orderedBoundaryAtomAt P e x).1 =
-      (orderedBoundaryPartition P e).part x :=
-  rfl
 
-theorem mem_orderedBoundaryAtomAt_iff
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (x y : Fin (j + 1) → G) :
-    y ∈ (orderedBoundaryAtomAt P e x).1 ↔
-      ∀ i : Fin (j + 1),
-        eraseBoundaryCoordinate i y ∈
-          (P (eraseBoundaryFace e i)).part
-            (eraseBoundaryCoordinate i x) :=
-  mem_orderedBoundaryPartition_part_iff P e x y
 
 /-- Conditional mean of an upper-face function relative to its shared
 immediate boundary. -/
@@ -16934,48 +7008,8 @@ noncomputable def orderedBoundaryStructured
     (Fin (j + 1) → G) → ℝ :=
   conditionalMean (orderedBoundaryPartition P e) f
 
-/-- Energy of an upper-face function visible from its shared immediate
-boundary. -/
-noncomputable def orderedBoundaryEnergy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (f : (Fin (j + 1) → G) → ℝ) : ℝ :=
-  partitionEnergy (orderedBoundaryPartition P e) f
 
-/-- Shared lower-face refinement increases every upper boundary energy. -/
-theorem orderedBoundaryEnergy_mono
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    {fine coarse : OrderedFacePartitionSystem G k j}
-    (hfc : OrderedFacePartitionRefines fine coarse)
-    (e : OrderedFace k (j + 1))
-    (f : (Fin (j + 1) → G) → ℝ) :
-    orderedBoundaryEnergy coarse e f ≤
-      orderedBoundaryEnergy fine e f :=
-  partitionEnergy_mono
-    (orderedBoundaryPartition fine e)
-    (orderedBoundaryPartition coarse e)
-    (orderedBoundaryPartition_mono hfc e) f
 
-/-- Pythagoras for coarse/fine shared boundary layers. -/
-theorem orderedBoundaryEnergy_sub_eq_mean_sq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    {fine coarse : OrderedFacePartitionSystem G k j}
-    (hfc : OrderedFacePartitionRefines fine coarse)
-    (e : OrderedFace k (j + 1))
-    (f : (Fin (j + 1) → G) → ℝ) :
-    orderedBoundaryEnergy fine e f -
-        orderedBoundaryEnergy coarse e f =
-      mean (fun x =>
-        (orderedBoundaryStructured fine e f x -
-          orderedBoundaryStructured coarse e f x) ^ 2) := by
-  exact partitionEnergy_sub_eq_mean_sq
-    (orderedBoundaryPartition fine e)
-    (orderedBoundaryPartition coarse e)
-    (orderedBoundaryPartition_mono hfc e) f
 
 /-- A bounded hierarchy of shared partitions, one layer for every rank from
 zero through `r`. -/
@@ -16998,15 +7032,6 @@ def layer
     OrderedFacePartitionSystem G k j :=
   C.partition ⟨j, Nat.lt_succ_iff.mpr hj⟩
 
-/-- The immediate-boundary partition supplied by rank `j` of a complex. -/
-def boundary
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r j : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (hj : j < r)
-    (e : OrderedFace k (j + 1)) :
-    FacePartition (Fin (j + 1) → G) :=
-  orderedBoundaryPartition (C.layer j (Nat.le_of_lt hj)) e
 
 /-- Pointwise refinement at every rank of two partition complexes. -/
 def Refines
@@ -17030,19 +7055,6 @@ theorem Refines.trans
     C.Refines E :=
   fun j e => le_trans (hCD j e) (hDE j e)
 
-/-- Refinement of complexes induces refinement of every rank boundary. -/
-theorem boundary_mono
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r j : ℕ}
-    {fine coarse : OrderedPartitionComplex G k r}
-    (hfc : fine.Refines coarse)
-    (hj : j < r)
-    (e : OrderedFace k (j + 1)) :
-    fine.boundary hj e ≤ coarse.boundary hj e := by
-  apply orderedBoundaryPartition_mono
-  intro g
-  exact hfc
-    ⟨j, Nat.lt_succ_iff.mpr (Nat.le_of_lt hj)⟩ g
 
 end OrderedPartitionComplex
 
@@ -17144,30 +7156,7 @@ theorem sum_partitionAtomIndicator
   · intro hax
     exact (hax (Finset.mem_univ ax)).elim
 
-/-- Conditional averaging commutes with a finite sum of functions. -/
-theorem conditionalMean_fintype_sum
-    {Ω κ : Type*}
-    [Fintype Ω] [DecidableEq Ω] [Fintype κ]
-    (P : FacePartition Ω) (f : κ → Ω → ℝ) (x : Ω) :
-    conditionalMean P (fun y => ∑ i : κ, f i y) x =
-      ∑ i : κ, conditionalMean P (f i) x := by
-  unfold conditionalMean
-  exact Finset.expect_sum_comm
-    (P.part x) (Finset.univ : Finset κ)
-    (fun y i => f i y)
 
-/-- The conditional probabilities of all genuine atoms sum to one at every
-point. -/
-theorem sum_conditionalMean_partitionAtomIndicator
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (P Q : FacePartition Ω) (x : Ω) :
-    ∑ a : Q.parts,
-        conditionalMean P (partitionAtomIndicator Q a) x =
-      1 := by
-  rw [← conditionalMean_fintype_sum]
-  convert conditionalMean_const P 1 x using 2
-  funext y
-  exact sum_partitionAtomIndicator Q y
 
 /-- Aggregate energy of all genuine atoms of `Q`, observed through `P`. -/
 noncomputable def partitionAtomEnergy
@@ -18099,32 +8088,6 @@ theorem exists_preliminaryOrderedRegularityRun_index_before
     orderedLayerAtomEnergy_le_card _ _
   linarith
 
-/-- Fixed-budget preliminary shared-face regularity. -/
-theorem exists_preliminaryOrderedRegular_refinement_before
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k j : ℕ}
-    (lower : OrderedFacePartitionSystem G k j)
-    (upper : OrderedFacePartitionSystem G k (j + 1))
-    {ε : ℝ} {m : ℕ}
-    (hε : 0 ≤ ε)
-    (hlong :
-      (Fintype.card (OrderedFace k (j + 1)) : ℝ) <
-        (m : ℝ) * ε ^ 2) :
-    ∃ n : ℕ,
-      ∃ fine : OrderedFacePartitionSystem G k j,
-        n < m ∧
-        OrderedFacePartitionRefines fine lower ∧
-        IsPreliminaryOrderedRegular fine upper ε := by
-  obtain ⟨n, hn, hregular⟩ :=
-    exists_preliminaryOrderedRegularityRun_index_before
-      lower upper hε hlong
-  exact
-    ⟨n,
-      preliminaryOrderedRegularityRun lower upper ε n,
-      hn,
-      preliminaryOrderedRegularityRun_refines
-        lower upper ε n,
-      hregular⟩
 
 /-! ## Ambient-independent complexity bounds -/
 
@@ -18429,27 +8392,6 @@ theorem boundaryBernoulliWeight_nonneg
       (fun q => hu.le_one q.1 q.2)
       (booleanAssignmentOfBoundary b)
 
-/-- The boundary component indicator is the corresponding Boolean scalar
-coordinate. -/
-theorem boundaryBooleanComponentCut_eval
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {j : ℕ}
-    (b : BoundaryBooleanCutAssignment G j)
-    (i : Fin (j + 1)) (z : Fin j → G) :
-    (boundaryBooleanComponentCut b i).eval z =
-      booleanValue (booleanAssignmentOfBoundary b) ⟨i, z⟩ := by
-  classical
-  by_cases h : b i z = true
-  · have hz : z ∈ boundaryBooleanComponentCut b i := by
-      rw [mem_boundaryBooleanComponentCut]
-      exact h
-    rw [BooleanCutTest.eval_of_mem _ hz]
-    simp [booleanValue, booleanAssignmentOfBoundary, h]
-  · have hz : z ∉ boundaryBooleanComponentCut b i := by
-      rw [mem_boundaryBooleanComponentCut]
-      exact h
-    rw [BooleanCutTest.eval_of_not_mem _ hz]
-    simp [booleanValue, booleanAssignmentOfBoundary, h]
 
 /-- At successor arity the specialized boundary erasure is the ordinary
 cut-test coordinate erasure. -/
@@ -18474,85 +8416,8 @@ theorem boundaryBooleanCutSupport_eq_booleanFaceCutSupport
   simp only [booleanAssignmentOfBoundary,
     eraseBoundaryCoordinate_eq_eraseCoordinate]
 
-/-- Evaluating a boundary Boolean support gives exactly the product of its
-Boolean component indicators. -/
-theorem boundaryBooleanCutSupport_eval
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {j : ℕ}
-    (b : BoundaryBooleanCutAssignment G j)
-    (x : Fin (j + 1) → G) :
-    (boundaryBooleanCutSupport b).eval x =
-      cutTestProduct
-        (cutTestFamilyOfBooleanAssignment
-          (booleanAssignmentOfBoundary b)) x := by
-  rw [boundaryBooleanCutSupport_eq_booleanFaceCutSupport,
-    booleanFaceCutSupport_eval]
 
-/-- Every scalar boundary factor is the exact Bernoulli expectation of its
-Boolean component indicators. -/
-theorem boundaryFactor_eq_sum_boolean
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {j : ℕ}
-    (u : CutTestFamily G (j + 1))
-    (i : Fin (j + 1)) (z : Fin j → G) :
-    u i z =
-      ∑ b : BoundaryBooleanCutAssignment G j,
-        boundaryBernoulliWeight u b *
-          (boundaryBooleanComponentCut b i).eval z := by
-  classical
-  have hmoment :
-      (∑ b : BooleanCutAssignment G (j + 1),
-          bernoulliAssignmentWeight
-              (cutTestCoordinateValue u) b *
-            booleanValue b ⟨i, z⟩) =
-        u i z := by
-    simpa [cutTestCoordinateValue] using
-      (sum_bernoulliAssignmentWeight_mul_selected
-        (cutTestCoordinateValue u)
-        ({⟨i, z⟩} :
-          Finset (CutTestCoordinate G (j + 1))))
-  rw [← hmoment]
-  exact
-    Fintype.sum_equiv
-      (booleanBoundaryAssignmentEquiv G j)
-      (fun b : BooleanCutAssignment G (j + 1) =>
-        bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b *
-          booleanValue b ⟨i, z⟩)
-      (fun b : BoundaryBooleanCutAssignment G j =>
-        boundaryBernoulliWeight u b *
-          (boundaryBooleanComponentCut b i).eval z)
-      (fun b => by
-        simp [boundaryBernoulliWeight,
-          boundaryBooleanComponentCut_eval])
 
-/-- Every boundary product is the exact convex mixture of the indicators of
-boundary Boolean cut supports. -/
-theorem boundaryCutProduct_eq_sum_boolean
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {j : ℕ}
-    (u : CutTestFamily G (j + 1))
-    (x : Fin (j + 1) → G) :
-    cutTestProduct u x =
-      ∑ b : BoundaryBooleanCutAssignment G j,
-        boundaryBernoulliWeight u b *
-          (boundaryBooleanCutSupport b).eval x := by
-  classical
-  rw [cutTestProduct_eq_sum_boolean]
-  exact
-    Fintype.sum_equiv
-      (booleanBoundaryAssignmentEquiv G j)
-      (fun b : BooleanCutAssignment G (j + 1) =>
-        bernoulliAssignmentWeight
-            (cutTestCoordinateValue u) b *
-          cutTestProduct
-            (cutTestFamilyOfBooleanAssignment b) x)
-      (fun b : BoundaryBooleanCutAssignment G j =>
-        boundaryBernoulliWeight u b *
-          (boundaryBooleanCutSupport b).eval x)
-      (fun b => by
-        simp [boundaryBernoulliWeight,
-          boundaryBooleanCutSupport_eval])
 
 namespace FaceRegularityState
 
@@ -18744,16 +8609,6 @@ theorem topLayer_appendTop
     (appendTop C top).topLayer = top := by
   simp [topLayer, appendTop]
 
-@[simp]
-theorem dropTop_appendTop
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (top : OrderedFacePartitionSystem G k (r + 1)) :
-    (appendTop C top).dropTop = C := by
-  cases C with
-  | mk partition =>
-      simp [dropTop, appendTop]
 
 @[simp]
 theorem topLayer_withTopLayer
@@ -18764,16 +8619,6 @@ theorem topLayer_withTopLayer
     (withTopLayer C top).topLayer = top := by
   simp [topLayer, withTopLayer]
 
-@[simp]
-theorem withTopLayer_partition_castSucc
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k (r + 1))
-    (top : OrderedFacePartitionSystem G k (r + 1))
-    (j : Fin (r + 1)) :
-    (withTopLayer C top).partition j.castSucc =
-      C.partition j.castSucc := by
-  simp [withTopLayer]
 
 @[simp]
 theorem appendTop_partition_castSucc
@@ -18796,16 +8641,6 @@ theorem appendTop_partition_last
       top := by
   simp [appendTop]
 
-@[simp]
-theorem withTopLayer_partition_castSucc_general
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (top : OrderedFacePartitionSystem G k r)
-    (i : Fin r) :
-    (withTopLayer C top).partition i.castSucc =
-      C.partition i.castSucc := by
-  simp [withTopLayer]
 
 @[simp]
 theorem appendTop_dropTop_topLayer
@@ -18822,15 +8657,6 @@ theorem appendTop_dropTop_topLayer
         simp only [Fin.lastCases_last,
           Fin.lastCases_castSucc]
 
-/-- Dropping the top layer preserves pointwise refinement. -/
-theorem dropTop_refines
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {fine coarse : OrderedPartitionComplex G k (r + 1)}
-    (hfc : fine.Refines coarse) :
-    fine.dropTop.Refines coarse.dropTop := by
-  intro j e
-  exact hfc j.castSucc e
 
 /-- Appending pointwise-refining top and lower layers preserves refinement
 of the whole complex. -/
@@ -18892,41 +8718,8 @@ structure OrderedCoarseFineComplex
 
 namespace OrderedCoarseFineComplex
 
-/-- Coarse/fine compatibility descends to every induced boundary
-partition. -/
-theorem boundaryRefines
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r j : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (hj : j < r)
-    (e : OrderedFace k (j + 1)) :
-    P.fine.boundary hj e ≤ P.coarse.boundary hj e :=
-  OrderedPartitionComplex.boundary_mono P.refines hj e
 
-/-- The frozen-upper atom-energy increment at one genuine upper face. -/
-noncomputable def faceAtomEnergyGap
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) (e : OrderedFace k (j.1 + 1)) : ℝ :=
-  orderedAtomEnergy
-      (P.fine.partition j.castSucc) e
-      (P.fine.partition j.succ e) -
-    orderedAtomEnergy
-      (P.coarse.partition j.castSucc) e
-      (P.fine.partition j.succ e)
 
-/-- Every local frozen-upper atom-energy gap is nonnegative. -/
-theorem faceAtomEnergyGap_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) (e : OrderedFace k (j.1 + 1)) :
-    0 ≤ P.faceAtomEnergyGap j e := by
-  apply sub_nonneg.mpr
-  exact orderedAtomEnergy_mono
-    (fun f => P.refines j.castSucc f)
-    e (P.fine.partition j.succ e)
 
 /-- At rank `j`, compare coarse and fine lower boundaries against the same
 family of atoms: the atoms of the fine rank-`j+1` layer.  Freezing this upper
@@ -18943,58 +8736,8 @@ noncomputable def layerAtomEnergyGap
       (P.coarse.partition j.castSucc)
       (P.fine.partition j.succ)
 
-/-- A layer gap is exactly the sum of its local face gaps. -/
-theorem layerAtomEnergyGap_eq_sum_face
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) :
-    P.layerAtomEnergyGap j =
-      ∑ e : OrderedFace k (j.1 + 1),
-        P.faceAtomEnergyGap j e := by
-  unfold layerAtomEnergyGap faceAtomEnergyGap
-    orderedLayerAtomEnergy
-  rw [Finset.sum_sub_distrib]
-  rfl
 
-/-- Every frozen-upper-family atom-energy gap is nonnegative. -/
-theorem layerAtomEnergyGap_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) :
-    0 ≤ P.layerAtomEnergyGap j := by
-  apply sub_nonneg.mpr
-  exact orderedLayerAtomEnergy_mono
-    (fun e => P.refines j.castSucc e)
-    (P.fine.partition j.succ)
 
-/-- A single rank gap is bounded by the number of genuine upper faces. -/
-theorem layerAtomEnergyGap_le_card
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) :
-    P.layerAtomEnergyGap j ≤
-      (Fintype.card (OrderedFace k (j.1 + 1)) : ℝ) := by
-  have hfine :=
-    orderedLayerAtomEnergy_le_card
-      (P.fine.partition j.castSucc)
-      (P.fine.partition j.succ)
-  have hcoarse :=
-    orderedLayerAtomEnergy_nonneg
-      (P.coarse.partition j.castSucc)
-      (P.fine.partition j.succ)
-  have hfine' :
-      orderedLayerAtomEnergy
-          (P.fine.partition j.castSucc)
-          (P.fine.partition j.succ) ≤
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) := by
-    convert hfine using 1
-    rfl
-  unfold layerAtomEnergyGap
-  linarith
 
 /-- Total frozen-upper-family gap over every adjacent pair of ranks. -/
 noncomputable def totalAtomEnergyGap
@@ -19003,60 +8746,10 @@ noncomputable def totalAtomEnergyGap
     (P : OrderedCoarseFineComplex G k r) : ℝ :=
   ∑ j : Fin r, P.layerAtomEnergyGap j
 
-theorem totalAtomEnergyGap_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) :
-    0 ≤ P.totalAtomEnergyGap := by
-  exact Finset.sum_nonneg fun j _ =>
-    P.layerAtomEnergyGap_nonneg j
 
-/-- One local face gap is bounded by its enclosing layer gap. -/
-theorem faceAtomEnergyGap_le_layer
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) (e : OrderedFace k (j.1 + 1)) :
-    P.faceAtomEnergyGap j e ≤
-      P.layerAtomEnergyGap j := by
-  rw [P.layerAtomEnergyGap_eq_sum_face j]
-  exact Finset.single_le_sum
-    (fun f _ => P.faceAtomEnergyGap_nonneg j f)
-    (Finset.mem_univ e)
 
-/-- One layer gap is bounded by the total all-rank gap. -/
-theorem layerAtomEnergyGap_le_total
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) :
-    P.layerAtomEnergyGap j ≤
-      P.totalAtomEnergyGap := by
-  unfold totalAtomEnergyGap
-  exact Finset.single_le_sum
-    (fun i _ => P.layerAtomEnergyGap_nonneg i)
-    (Finset.mem_univ j)
 
-/-- Every local face gap is bounded by the total all-rank gap. -/
-theorem faceAtomEnergyGap_le_total
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) (e : OrderedFace k (j.1 + 1)) :
-    P.faceAtomEnergyGap j e ≤
-      P.totalAtomEnergyGap :=
-  (P.faceAtomEnergyGap_le_layer j e).trans
-    (P.layerAtomEnergyGap_le_total j)
 
-theorem totalAtomEnergyGap_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) :
-    P.totalAtomEnergyGap ≤
-      ∑ j : Fin r,
-        (Fintype.card (OrderedFace k (j.1 + 1)) : ℝ) := by
-  exact Finset.sum_le_sum fun j _ =>
-    P.layerAtomEnergyGap_le_card j
 
 end OrderedCoarseFineComplex
 
@@ -19065,11 +8758,7 @@ end OrderedCoarseFineComplex
 /-- One tolerance for every adjacent rank pair `(j, j + 1)`. -/
 abbrev OrderedRegularityTolerance (r : ℕ) := Fin r → ℝ
 
-/-- One finite iteration budget for every adjacent rank pair. -/
-abbrev OrderedRegularityBudget (r : ℕ) := Fin r → ℕ
 
-/-- The actual stopping index selected at every adjacent rank pair. -/
-abbrev OrderedRegularityStepSchedule (r : ℕ) := Fin r → ℕ
 
 /-- Every adjacent rank pair in a complex is preliminarily regular. -/
 def IsFullyPreliminaryOrderedRegular
@@ -19083,267 +8772,12 @@ def IsFullyPreliminaryOrderedRegular
       (C.partition j.succ)
       (ε j)
 
-/-- The per-rank budgets strictly exceed the corresponding atom-energy
-ceilings after division by the squared tolerances. -/
-def IsOrderedRegularityBudget
-    (k r : ℕ)
-    (ε : OrderedRegularityTolerance r)
-    (m : OrderedRegularityBudget r) : Prop :=
-  ∀ j : Fin r,
-    (Fintype.card (OrderedFace k (j.1 + 1)) : ℝ) <
-      (m j : ℝ) * (ε j) ^ 2
 
-/-- The explicit ambient-independent complexity certificate associated to
-a stopping-time schedule.  The top layer is deliberately excluded: it is
-preserved exactly. -/
-def HasOrderedRegularityComplexityBound
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r)
-    (steps : OrderedRegularityStepSchedule r) : Prop :=
-  ∀ (j : Fin r) (e : OrderedFace k j.1),
-    FacePartition.complexity
-        (fine.partition j.castSucc e) ≤
-      (2 ^ (j.1 + 1)) ^ (steps j) *
-        FacePartition.complexity
-          (coarse.partition j.castSucc e)
 
 /-! ## The top-down all-rank construction -/
 
-/-- Complete output data for the all-rank preliminary regularity pass. -/
-structure FullOrderedRegularityCertificate
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (coarse : OrderedPartitionComplex G k r)
-    (ε : OrderedRegularityTolerance r)
-    (m : OrderedRegularityBudget r) where
-  steps : OrderedRegularityStepSchedule r
-  fine : OrderedPartitionComplex G k r
-  refines : fine.Refines coarse
-  topLayer_eq :
-    fine.topLayer = coarse.topLayer
-  steps_lt : ∀ j, steps j < m j
-  regular :
-    IsFullyPreliminaryOrderedRegular fine ε
-  complexity :
-    HasOrderedRegularityComplexityBound
-      fine coarse steps
 
-/-- A top-down pass combines the adjacent-rank energy increments into one
-compatible complex.  Each non-top rank is changed exactly during its own
-stage.  Thus its final complexity is bounded by its own stopping-time
-multiplier, without any factor involving `Fintype.card G`. -/
-theorem exists_fullOrderedRegularityCertificate
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (ε : OrderedRegularityTolerance r)
-    (m : OrderedRegularityBudget r)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hbudget : IsOrderedRegularityBudget k r ε m) :
-    Nonempty (FullOrderedRegularityCertificate C ε m) := by
-  induction r with
-  | zero =>
-      let steps : OrderedRegularityStepSchedule 0 :=
-        fun j => Fin.elim0 j
-      refine ⟨{
-        steps := steps
-        fine := C
-        refines := OrderedPartitionComplex.Refines.refl C
-        topLayer_eq := rfl
-        steps_lt := ?_
-        regular := ?_
-        complexity := ?_ }⟩
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-  | succ r ih =>
-      let lowerComplex : OrderedPartitionComplex G k r :=
-        C.dropTop
-      let upper : OrderedFacePartitionSystem G k (r + 1) :=
-        C.topLayer
-      have hεtop : 0 ≤ ε (Fin.last r) :=
-        hε (Fin.last r)
-      have hbudgetTop :
-          (Fintype.card (OrderedFace k (r + 1)) : ℝ) <
-            (m (Fin.last r) : ℝ) *
-              (ε (Fin.last r)) ^ 2 := by
-        have hb := hbudget (Fin.last r)
-        change
-          (Fintype.card (OrderedFace k (r + 1)) : ℝ) <
-            (m (Fin.last r) : ℝ) *
-              (ε (Fin.last r)) ^ 2 at hb
-        exact hb
-      obtain ⟨n, lower, hn, hlowerRefines,
-          hlowerRegular, hlowerComplexity⟩ :=
-        exists_preliminaryOrderedRegular_refinement_with_complexity_before
-          lowerComplex.topLayer upper hεtop hbudgetTop
-      let prepared : OrderedPartitionComplex G k r :=
-        lowerComplex.withTopLayer lower
-      have hpreparedRefines :
-          prepared.Refines lowerComplex := by
-        exact OrderedPartitionComplex.withTopLayer_refines
-          lowerComplex lower hlowerRefines
-      let εlower : OrderedRegularityTolerance r :=
-        fun j => ε j.castSucc
-      let mlower : OrderedRegularityBudget r :=
-        fun j => m j.castSucc
-      have hεlower : ∀ j, 0 ≤ εlower j := by
-        intro j
-        exact hε j.castSucc
-      have hbudgetLower :
-          IsOrderedRegularityBudget k r εlower mlower := by
-        intro j
-        exact hbudget j.castSucc
-      obtain ⟨lowerCertificate⟩ :=
-        ih prepared εlower mlower hεlower hbudgetLower
-      let fine : OrderedPartitionComplex G k (r + 1) :=
-        lowerCertificate.fine.appendTop upper
-      let steps : OrderedRegularityStepSchedule (r + 1) :=
-        fun j =>
-          Fin.lastCases n lowerCertificate.steps j
-      have hlowerCertificateTop :
-          lowerCertificate.fine.topLayer = lower := by
-        calc
-          lowerCertificate.fine.topLayer =
-              prepared.topLayer :=
-            lowerCertificate.topLayer_eq
-          _ = lower :=
-            OrderedPartitionComplex.topLayer_withTopLayer
-              lowerComplex lower
-      refine ⟨{
-        steps := steps
-        fine := fine
-        refines := ?_
-        topLayer_eq := ?_
-        steps_lt := ?_
-        regular := ?_
-        complexity := ?_ }⟩
-      · have hprefixFinal :
-            lowerCertificate.fine.Refines lowerComplex :=
-          OrderedPartitionComplex.Refines.trans
-            lowerCertificate.refines hpreparedRefines
-        have happended :
-            fine.Refines
-              (lowerComplex.appendTop upper) := by
-          exact OrderedPartitionComplex.appendTop_refines
-            hprefixFinal
-            (OrderedFacePartitionRefines.refl upper)
-        simpa [fine, lowerComplex, upper] using happended
-      · simp [fine, upper]
-      · intro j
-        cases j using Fin.lastCases with
-        | last =>
-            simpa [steps] using hn
-        | cast i =>
-            simpa [steps] using
-              lowerCertificate.steps_lt i
-      · intro j
-        cases j using Fin.lastCases with
-        | last =>
-            have htop :
-                IsPreliminaryOrderedRegular
-                  lowerCertificate.fine.topLayer
-                  upper (ε (Fin.last r)) := by
-              rw [hlowerCertificateTop]
-              exact hlowerRegular
-            simp only [fine,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.appendTop_partition_last,
-              Fin.succ_last]
-            change
-              @IsPreliminaryOrderedRegular
-                G _ _ k r
-                (lowerCertificate.fine.partition
-                  (Fin.last r))
-                upper (ε (Fin.last r))
-            exact htop
-        | cast i =>
-            have hi := lowerCertificate.regular i
-            simp only [fine, εlower,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              Fin.succ_castSucc]
-            change
-              @IsPreliminaryOrderedRegular
-                G _ _ k i.1
-                (lowerCertificate.fine.partition i.castSucc)
-                (lowerCertificate.fine.partition i.succ)
-                (ε i.castSucc)
-            exact hi
-      · intro j
-        cases j using Fin.lastCases with
-        | last =>
-            intro e
-            have htop :
-                FacePartition.complexity
-                    (lowerCertificate.fine.topLayer e) ≤
-                  (2 ^ (r + 1)) ^ n *
-                    FacePartition.complexity
-                      (lowerComplex.topLayer e) := by
-              rw [hlowerCertificateTop]
-              exact hlowerComplexity e
-            simp only [fine, steps,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              Fin.lastCases_last]
-            change OrderedFace k r at e
-            change
-              FacePartition.complexity
-                  (lowerCertificate.fine.partition
-                    (Fin.last r) e) ≤
-                (2 ^ (r + 1)) ^ n *
-                  FacePartition.complexity
-                    (C.partition
-                      (Fin.last r).castSucc e)
-            exact htop
-        | cast i =>
-            intro e
-            change OrderedFace k i.1 at e
-            have hi := lowerCertificate.complexity i e
-            simp only [prepared, lowerComplex,
-              OrderedPartitionComplex.withTopLayer,
-              OrderedPartitionComplex.dropTop,
-              Fin.lastCases_castSucc] at hi
-            simp only [fine, steps, εlower, mlower,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              Fin.lastCases_castSucc]
-            change
-              FacePartition.complexity
-                  (lowerCertificate.fine.partition
-                    i.castSucc e) ≤
-                (2 ^ (i.1 + 1)) ^
-                    lowerCertificate.steps i *
-                  FacePartition.complexity
-                    (C.partition
-                      i.castSucc.castSucc e)
-            exact hi
 
-/-- Existential form of the all-rank fixed-budget theorem. -/
-theorem exists_fullyPreliminaryOrderedRegular_refinement
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (ε : OrderedRegularityTolerance r)
-    (m : OrderedRegularityBudget r)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hbudget : IsOrderedRegularityBudget k r ε m) :
-    ∃ (steps : OrderedRegularityStepSchedule r)
-        (fine : OrderedPartitionComplex G k r),
-      fine.Refines C ∧
-      fine.topLayer = C.topLayer ∧
-      (∀ j, steps j < m j) ∧
-      IsFullyPreliminaryOrderedRegular fine ε ∧
-      HasOrderedRegularityComplexityBound
-        fine C steps := by
-  obtain ⟨certificate⟩ :=
-    exists_fullOrderedRegularityCertificate
-      C ε m hε hbudget
-  exact ⟨certificate.steps, certificate.fine,
-    certificate.refines, certificate.topLayer_eq,
-    certificate.steps_lt, certificate.regular,
-    certificate.complexity⟩
 
 end Wikipedia.SzemeredisTheorem
 
@@ -19391,12 +8825,6 @@ def partitionAtomAt
     P.parts :=
   ⟨P.part x, P.part_mem.2 (Finset.mem_univ x)⟩
 
-@[simp]
-theorem partitionAtomAt_val
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (P : FacePartition Ω) (x : Ω) :
-    (partitionAtomAt P x).1 = P.part x :=
-  rfl
 
 @[simp]
 theorem partitionAtomAt_eq_iff_mem
@@ -19482,25 +8910,7 @@ theorem mem_partitionAtomUnion_iff_atomAt_mem
         ⟨partitionAtomAt P x, hx,
           P.mem_part (Finset.mem_univ x)⟩
 
-/-- Any selected family of genuine atoms remains pairwise disjoint. -/
-theorem selectedPartitionAtoms_pairwiseDisjoint
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (P : FacePartition Ω) (s : Finset P.parts) :
-    (↑s : Set P.parts).PairwiseDisjoint
-      (fun a => a.1) := by
-  intro a _ha b _hb hab
-  exact
-    P.disjoint a.2 b.2
-      (fun hv => hab (Subtype.ext hv))
 
-/-- Exact cardinality of a union of selected genuine atoms. -/
-theorem card_partitionAtomUnion
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (P : FacePartition Ω) (s : Finset P.parts) :
-    (partitionAtomUnion P s).card =
-      ∑ a ∈ s, a.1.card := by
-  exact Finset.card_biUnion
-    (selectedPartitionAtoms_pairwiseDisjoint P s)
 
 /-- The indicator of an atom union is the sum of the indicators of its
 selected atoms. -/
@@ -19534,23 +8944,6 @@ theorem finsetIndicator_partitionAtomUnion
     exact hx
       ((mem_partitionAtomUnion P s x).2 ⟨a, ha, hxa⟩)
 
-/-- The normalized mass of a disjoint union of genuine atoms is the sum of
-their normalized masses. -/
-theorem mean_finsetIndicator_partitionAtomUnion
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (P : FacePartition Ω) (s : Finset P.parts) :
-    mean (finsetIndicator (partitionAtomUnion P s)) =
-      ∑ a ∈ s, mean (partitionAtomIndicator P a) := by
-  rw [show
-      finsetIndicator (partitionAtomUnion P s) =
-        fun x => ∑ a ∈ s, partitionAtomIndicator P a x by
-    funext x
-    exact finsetIndicator_partitionAtomUnion P s x]
-  unfold mean
-  exact
-    Finset.expect_sum_comm
-      (Finset.univ : Finset Ω) s
-      (fun x a => partitionAtomIndicator P a x)
 
 /-- Every union of atoms is measurable for the underlying partition. -/
 theorem partitionAtomUnion_indicator_measurable
@@ -19762,19 +9155,6 @@ theorem mul_mean_indicator_largeAverageBaseSupport_le
         exact conditionalMean_nonneg P hf x
     _ = mean f := mean_conditionalMean P f
 
-/-- Divided form of the localized Markov estimate. -/
-theorem mean_indicator_largeAverageBaseSupport_le
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (P : FacePartition Ω) (f : Ω → ℝ)
-    (hf : ∀ x, 0 ≤ f x)
-    {β : ℝ} (hβ : 0 < β) :
-    mean (finsetIndicator
-        (largeAverageBaseSupport P f β)) ≤
-      mean f / β := by
-  apply (le_div_iff₀ hβ).2
-  simpa [mul_comm] using
-    mul_mean_indicator_largeAverageBaseSupport_le
-      P f hf hβ.le
 
 /-! ## Coarse--fine defect bases -/
 
@@ -19801,105 +9181,12 @@ theorem atomBoundaryDefectSq_nonneg
     0 ≤ atomBoundaryDefectSq fine coarse upper a x :=
   sq_nonneg _
 
-/-- Coarse boundary atoms whose local mean-square defect exceeds `β`. -/
-noncomputable def largeDefectBaseAtoms
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fine coarse upper : FacePartition Ω)
-    (a : upper.parts) (β : ℝ) :
-    Finset coarse.parts :=
-  largeAverageBaseAtoms coarse
-    (atomBoundaryDefectSq fine coarse upper a) β
 
-/-- Union of coarse boundary atoms with excessive local defect. -/
-noncomputable def largeDefectBaseSupport
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fine coarse upper : FacePartition Ω)
-    (a : upper.parts) (β : ℝ) :
-    Finset Ω :=
-  partitionAtomUnion coarse
-    (largeDefectBaseAtoms fine coarse upper a β)
 
-@[simp]
-theorem mem_largeDefectBaseSupport
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fine coarse upper : FacePartition Ω)
-    (a : upper.parts) (β : ℝ) (x : Ω) :
-    x ∈ largeDefectBaseSupport fine coarse upper a β ↔
-      β <
-        conditionalMean coarse
-          (atomBoundaryDefectSq fine coarse upper a) x := by
-  exact
-    mem_largeAverageBaseSupport coarse
-      (atomBoundaryDefectSq fine coarse upper a) β x
 
-/-- The mean-square defect of one atom is bounded by the aggregate
-coarse--fine atom-energy gap. -/
-theorem mean_atomBoundaryDefectSq_le_atomEnergy_sub
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fine coarse : FacePartition Ω}
-    (hfc : fine ≤ coarse)
-    (upper : FacePartition Ω) (a : upper.parts) :
-    mean (atomBoundaryDefectSq fine coarse upper a) ≤
-      partitionAtomEnergy fine upper -
-        partitionAtomEnergy coarse upper := by
-  rw [partitionAtomEnergy_sub_eq_sum_mean_sq hfc upper]
-  exact
-    Finset.single_le_sum
-      (s := (Finset.univ : Finset upper.parts))
-      (f := fun b =>
-        mean (fun x =>
-          (conditionalMean fine
-                (partitionAtomIndicator upper b) x -
-            conditionalMean coarse
-                (partitionAtomIndicator upper b) x) ^ 2))
-      (fun b _ => mean_nonneg fun x => sq_nonneg _)
-      (Finset.mem_univ a)
 
-/-- Markov accounting for excessive-defect coarse atoms, charged directly
-to the aggregate atom-energy gap. -/
-theorem mul_mean_indicator_largeDefectBaseSupport_le_atomEnergy_sub
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fine coarse : FacePartition Ω}
-    (hfc : fine ≤ coarse)
-    (upper : FacePartition Ω) (a : upper.parts)
-    {β : ℝ} (hβ : 0 ≤ β) :
-    β * mean (finsetIndicator
-        (largeDefectBaseSupport fine coarse upper a β)) ≤
-      partitionAtomEnergy fine upper -
-        partitionAtomEnergy coarse upper := by
-  exact
-    (mul_mean_indicator_largeAverageBaseSupport_le
-      coarse (atomBoundaryDefectSq fine coarse upper a)
-      (atomBoundaryDefectSq_nonneg fine coarse upper a)
-      hβ).trans
-      (mean_atomBoundaryDefectSq_le_atomEnergy_sub
-        hfc upper a)
 
-theorem mean_indicator_largeDefectBaseSupport_le_atomEnergy_sub_div
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fine coarse : FacePartition Ω}
-    (hfc : fine ≤ coarse)
-    (upper : FacePartition Ω) (a : upper.parts)
-    {β : ℝ} (hβ : 0 < β) :
-    mean (finsetIndicator
-        (largeDefectBaseSupport fine coarse upper a β)) ≤
-      (partitionAtomEnergy fine upper -
-        partitionAtomEnergy coarse upper) / β := by
-  apply (le_div_iff₀ hβ).2
-  simpa [mul_comm] using
-    mul_mean_indicator_largeDefectBaseSupport_le_atomEnergy_sub
-      hfc upper a hβ.le
 
-/-- Union of the low-density and large-defect coarse bad bases for one
-upper atom. -/
-noncomputable def atomBadBaseSupport
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fine coarse upper : FacePartition Ω)
-    (a : upper.parts) (α β : ℝ) :
-    Finset Ω :=
-  smallAverageBaseSupport coarse
-      (partitionAtomIndicator upper a) α ∪
-    largeDefectBaseSupport fine coarse upper a β
 
 /-- Elementary normalized union bound, with the second set allowed to be
 larger than its intersection with `A`. -/
@@ -19932,106 +9219,11 @@ theorem mean_indicator_inter_union_le_add
       (by
         by_cases hxc : x ∈ C <;> simp [hxc])
 
-/-- **Localized bad-base accounting.**  The part of one upper atom lying
-above low-density or large-defect coarse bases is bounded by the density
-threshold plus the aggregate atom-energy gap divided by the defect
-threshold. -/
-theorem mean_indicator_atom_inter_badBaseSupport_le
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω] [Nonempty Ω]
-    {fine coarse : FacePartition Ω}
-    (hfc : fine ≤ coarse)
-    (upper : FacePartition Ω) (a : upper.parts)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) :
-    mean (finsetIndicator
-        (a.1 ∩ atomBadBaseSupport fine coarse upper a α β)) ≤
-      α +
-        (partitionAtomEnergy fine upper -
-          partitionAtomEnergy coarse upper) / β := by
-  calc
-    mean (finsetIndicator
-        (a.1 ∩ atomBadBaseSupport fine coarse upper a α β)) ≤
-        mean (finsetIndicator
-          (a.1 ∩ smallAverageBaseSupport coarse
-            (partitionAtomIndicator upper a) α)) +
-        mean (finsetIndicator
-          (largeDefectBaseSupport fine coarse upper a β)) := by
-      exact
-        mean_indicator_inter_union_le_add
-          a.1
-          (smallAverageBaseSupport coarse
-            (partitionAtomIndicator upper a) α)
-          (largeDefectBaseSupport fine coarse upper a β)
-    _ ≤
-        α +
-          (partitionAtomEnergy fine upper -
-            partitionAtomEnergy coarse upper) / β :=
-      add_le_add
-        (mean_indicator_inter_smallAverageBaseSupport_le
-          coarse a.1 hα)
-        (mean_indicator_largeDefectBaseSupport_le_atomEnergy_sub_div
-          hfc upper a hβ)
 
 /-! ## Ordered boundary specialization -/
 
-/-- Canonical genuine atom on one ordered face. -/
-def orderedFaceAtomAt
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k j) (x : Fin j → G) :
-    (P e).parts :=
-  partitionAtomAt (P e) x
 
-@[simp]
-theorem orderedFaceAtomAt_val
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k j) (x : Fin j → G) :
-    (orderedFaceAtomAt P e x).1 = (P e).part x :=
-  rfl
 
-/-- Equality of canonical boundary atoms is exactly compatibility on every
-immediate genuine lower face. -/
-theorem orderedBoundaryAtomAt_eq_iff
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (P : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (x y : Fin (j + 1) → G) :
-    orderedBoundaryAtomAt P e y =
-        orderedBoundaryAtomAt P e x ↔
-      ∀ i : Fin (j + 1),
-        orderedFaceAtomAt P (eraseBoundaryFace e i)
-            (eraseBoundaryCoordinate i y) =
-          orderedFaceAtomAt P (eraseBoundaryFace e i)
-            (eraseBoundaryCoordinate i x) := by
-  rw [Subtype.ext_iff,
-    orderedBoundaryAtomAt_val,
-    orderedBoundaryAtomAt_val]
-  constructor
-  · intro h i
-    apply Subtype.ext
-    rw [orderedFaceAtomAt_val, orderedFaceAtomAt_val]
-    have hmem :
-        y ∈ (orderedBoundaryPartition P e).part x := by
-      rw [← h]
-      exact
-        (orderedBoundaryPartition P e).mem_part
-          (Finset.mem_univ y)
-    exact
-      (mem_orderedBoundaryPartition_part_iff_part_eq
-        P e x y).1 hmem i
-  · intro h
-    apply
-      (orderedBoundaryPartition P e).part_eq_of_mem
-        ((orderedBoundaryPartition P e).part_mem.2
-          (Finset.mem_univ x))
-    apply
-      (mem_orderedBoundaryPartition_part_iff_part_eq
-        P e x y).2
-    intro i
-    exact congrArg Subtype.val (h i)
 
 /-- Ordered version of the coarse--fine conditional-density defect. -/
 noncomputable def orderedAtomBoundaryDefect
@@ -20046,167 +9238,14 @@ noncomputable def orderedAtomBoundaryDefect
     (orderedBoundaryPartition coarse e)
     upper a x
 
-/-- Normalized mass of one genuine ordered coarse boundary atom. -/
-noncomputable def orderedBoundaryAtomMass
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (b : (orderedBoundaryPartition coarse e).parts) : ℝ :=
-  mean
-    (partitionAtomIndicator
-      (orderedBoundaryPartition coarse e) b)
 
-/-- Global mass of the squared defect localized to one genuine ordered
-coarse boundary atom. -/
-noncomputable def orderedLocalizedAtomDefectSq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts)
-    (b : (orderedBoundaryPartition coarse e).parts) : ℝ :=
-  mean fun x =>
-    orderedAtomBoundaryDefect fine coarse e upper a x ^ 2 *
-      partitionAtomIndicator
-        (orderedBoundaryPartition coarse e) b x
 
-/-- Exact conversion between the localized global defect mass and its
-conditional average on the selected coarse boundary atom. -/
-theorem orderedLocalizedAtomDefectSq_eq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts)
-    (b : (orderedBoundaryPartition coarse e).parts) :
-    orderedLocalizedAtomDefectSq fine coarse e upper a b =
-      conditionalMean (orderedBoundaryPartition coarse e)
-          (fun x =>
-            orderedAtomBoundaryDefect
-              fine coarse e upper a x ^ 2)
-          ((orderedBoundaryPartition coarse e).representative b) *
-        orderedBoundaryAtomMass coarse e b := by
-  exact
-    mean_mul_partitionAtomIndicator
-      (orderedBoundaryPartition coarse e)
-      (fun x =>
-        orderedAtomBoundaryDefect fine coarse e upper a x ^ 2)
-      b
 
-/-- A conditional local defect bound gives the localized mass inequality
-used by the good-configuration counting argument. -/
-theorem orderedLocalizedAtomDefectSq_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts)
-    (b : (orderedBoundaryPartition coarse e).parts)
-    {β : ℝ}
-    (hβ :
-      conditionalMean (orderedBoundaryPartition coarse e)
-          (fun x =>
-            orderedAtomBoundaryDefect
-              fine coarse e upper a x ^ 2)
-          ((orderedBoundaryPartition coarse e).representative b) ≤
-        β) :
-    orderedLocalizedAtomDefectSq fine coarse e upper a b ≤
-      β * orderedBoundaryAtomMass coarse e b := by
-  exact
-    mean_mul_partitionAtomIndicator_le
-      (orderedBoundaryPartition coarse e)
-      (fun x =>
-        orderedAtomBoundaryDefect fine coarse e upper a x ^ 2)
-      b hβ
 
-/-- Coarse boundary atoms with excessive localized ordered defect. -/
-noncomputable def orderedLargeDefectBaseAtoms
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts) (β : ℝ) :
-    Finset (orderedBoundaryPartition coarse e).parts :=
-  largeDefectBaseAtoms
-    (orderedBoundaryPartition fine e)
-    (orderedBoundaryPartition coarse e)
-    upper a β
 
-/-- Union of the ordered coarse boundary atoms with excessive defect. -/
-noncomputable def orderedLargeDefectBaseSupport
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts) (β : ℝ) :
-    Finset (Fin (j + 1) → G) :=
-  largeDefectBaseSupport
-    (orderedBoundaryPartition fine e)
-    (orderedBoundaryPartition coarse e)
-    upper a β
 
-/-- Union of low-density and excessive-defect ordered coarse boundary
-atoms. -/
-noncomputable def orderedAtomBadBaseSupport
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts) (α β : ℝ) :
-    Finset (Fin (j + 1) → G) :=
-  atomBadBaseSupport
-    (orderedBoundaryPartition fine e)
-    (orderedBoundaryPartition coarse e)
-    upper a α β
 
-/-- Ordered localized defect atoms obey the global ordered atom-energy
-budget. -/
-theorem mul_mean_indicator_orderedLargeDefectBaseSupport_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    {fine coarse : OrderedFacePartitionSystem G k j}
-    (hfc : OrderedFacePartitionRefines fine coarse)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts)
-    {β : ℝ} (hβ : 0 ≤ β) :
-    β * mean (finsetIndicator
-        (orderedLargeDefectBaseSupport
-          fine coarse e upper a β)) ≤
-      orderedAtomEnergy fine e upper -
-        orderedAtomEnergy coarse e upper := by
-  exact
-    mul_mean_indicator_largeDefectBaseSupport_le_atomEnergy_sub
-      (orderedBoundaryPartition_mono hfc e)
-      upper a hβ
 
-/-- Ordered headline bad-base estimate. -/
-theorem mean_indicator_orderedAtom_inter_badBaseSupport_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k j : ℕ}
-    {fine coarse : OrderedFacePartitionSystem G k j}
-    (hfc : OrderedFacePartitionRefines fine coarse)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) :
-    mean (finsetIndicator
-        (a.1 ∩ orderedAtomBadBaseSupport
-          fine coarse e upper a α β)) ≤
-      α +
-        (orderedAtomEnergy fine e upper -
-          orderedAtomEnergy coarse e upper) / β := by
-  exact
-    mean_indicator_atom_inter_badBaseSupport_le
-      (orderedBoundaryPartition_mono hfc e)
-      upper a hα hβ
 
 /-! ## Good local configurations and closed atom configurations -/
 
@@ -20229,82 +9268,7 @@ def OrderedAtomIsGoodAtBoundary
           fine coarse e upper a y ^ 2) x ≤
       β
 
-/-- Avoidance of the two bad-base supports is exactly the pair of good
-local inequalities. -/
-theorem orderedAtomIsGoodAtBoundary_of_not_mem_badBase
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts) (x : Fin (j + 1) → G)
-    (α β : ℝ)
-    (hx : x ∉ orderedAtomBadBaseSupport
-      fine coarse e upper a α β) :
-    OrderedAtomIsGoodAtBoundary
-      fine coarse e upper a x α β := by
-  have hlow :
-      x ∉ smallAverageBaseSupport
-        (orderedBoundaryPartition coarse e)
-        (partitionAtomIndicator upper a) α := by
-    intro h
-    exact hx (Finset.mem_union_left _ h)
-  have hdefect :
-      x ∉ orderedLargeDefectBaseSupport
-        fine coarse e upper a β := by
-    intro h
-    exact hx (Finset.mem_union_right _ h)
-  constructor
-  · exact not_lt.mp
-      (fun h =>
-        hlow
-          ((mem_smallAverageBaseSupport
-            (orderedBoundaryPartition coarse e)
-            (partitionAtomIndicator upper a) α x).2 h))
-  · exact not_lt.mp
-      (fun h =>
-        hdefect
-          ((mem_largeDefectBaseSupport
-            (orderedBoundaryPartition fine e)
-            (orderedBoundaryPartition coarse e)
-            upper a β x).2 h))
 
-/-- The local-average defect clause in pointwise goodness implies the
-localized global-mass clause on the canonical boundary atom. -/
-theorem OrderedAtomIsGoodAtBoundary.localized_defect
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (a : upper.parts) (x : Fin (j + 1) → G)
-    (α β : ℝ)
-    (hgood :
-      OrderedAtomIsGoodAtBoundary
-        fine coarse e upper a x α β) :
-    orderedLocalizedAtomDefectSq
-        fine coarse e upper a
-        (orderedBoundaryAtomAt coarse e x) ≤
-      β *
-        orderedBoundaryAtomMass coarse e
-          (orderedBoundaryAtomAt coarse e x) := by
-  apply orderedLocalizedAtomDefectSq_le
-  have hrep :
-      (orderedBoundaryPartition coarse e).representative
-          (orderedBoundaryAtomAt coarse e x) ∈
-        (orderedBoundaryPartition coarse e).part x := by
-    exact
-      (orderedBoundaryPartition coarse e).representative_mem
-        (orderedBoundaryAtomAt coarse e x)
-  have heq :=
-    conditionalMean_eq_of_mem_part
-      (orderedBoundaryPartition coarse e)
-      (fun y =>
-        orderedAtomBoundaryDefect
-          fine coarse e upper a y ^ 2)
-      hrep
-  rw [heq]
-  exact hgood.2
 
 /-- A realizable closed atom configuration for all ranks of an ordered
 partition complex.  The witness ensures that all chosen atoms are
@@ -20352,94 +9316,9 @@ theorem atom_eq_partitionAtomAt
     ((C.partition j e).part_eq_of_mem
       (A.atom j e).2 (A.mem_atom j e)).symm
 
-/-- Goodness of a closed configuration at one successor-rank face. -/
-def IsGoodAt
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r fine)
-    (j : ℕ) (hj : j < r)
-    (e : OrderedFace k (j + 1))
-    (α β : ℝ) : Prop :=
-  OrderedAtomIsGoodAtBoundary
-    (fine.layer j (Nat.le_of_lt hj))
-    (coarse.layer j (Nat.le_of_lt hj))
-    e
-    (fine.partition
-      ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-    (A.atom ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-    (orderedFaceTuple e A.witness)
-    α β
 
-/-- A closed atom configuration is good when it is good at every
-successor-rank face, with rank-dependent thresholds. -/
-def IsGood
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r fine)
-    (α β : ℕ → ℝ) : Prop :=
-  ∀ (j : ℕ) (hj : j < r) (e : OrderedFace k (j + 1)),
-    A.IsGoodAt fine coarse j hj e (α (j + 1)) (β (j + 1))
 
-/-- Avoiding the bad base attached to the selected upper atom makes a
-closed configuration good at that face. -/
-theorem isGoodAt_of_not_mem_badBase
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r fine)
-    (j : ℕ) (hj : j < r)
-    (e : OrderedFace k (j + 1))
-    (α β : ℝ)
-    (havoid :
-      orderedFaceTuple e A.witness ∉
-        orderedAtomBadBaseSupport
-          (fine.layer j (Nat.le_of_lt hj))
-          (coarse.layer j (Nat.le_of_lt hj))
-          e
-          (fine.partition
-            ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-          (A.atom ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-          α β) :
-    A.IsGoodAt fine coarse j hj e α β :=
-  orderedAtomIsGoodAtBoundary_of_not_mem_badBase
-    (fine.layer j (Nat.le_of_lt hj))
-    (coarse.layer j (Nat.le_of_lt hj))
-    e
-    (fine.partition
-      ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-    (A.atom ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-    (orderedFaceTuple e A.witness)
-    α β havoid
 
-/-- Simultaneous avoidance of every selected bad base makes the entire
-closed configuration good. -/
-theorem isGood_of_avoids_badBases
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r fine)
-    (α β : ℕ → ℝ)
-    (havoid :
-      ∀ (j : ℕ) (hj : j < r)
-        (e : OrderedFace k (j + 1)),
-        orderedFaceTuple e A.witness ∉
-          orderedAtomBadBaseSupport
-            (fine.layer j (Nat.le_of_lt hj))
-            (coarse.layer j (Nat.le_of_lt hj))
-            e
-            (fine.partition
-              ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-            (A.atom ⟨j + 1, Nat.succ_lt_succ hj⟩ e)
-            (α (j + 1)) (β (j + 1))) :
-    A.IsGood fine coarse α β := by
-  intro j hj e
-  exact
-    A.isGoodAt_of_not_mem_badBase
-      fine coarse j hj e
-      (α (j + 1)) (β (j + 1))
-      (havoid j hj e)
 
 end ClosedOrderedAtomConfiguration
 
@@ -20649,45 +9528,6 @@ theorem conditionalMean_finset_sum
   exact Finset.expect_sum_comm (P.part x) s
     (fun y i => f i y)
 
-/-- Face-cut correlation is linear over a finite sum of target
-functions. -/
-theorem FaceRegularityState.faceCutCorrelation_finset_sum
-    {G ι : Type*} [Fintype G] [DecidableEq G]
-    [Fintype ι] [DecidableEq ι]
-    {r : ℕ}
-    (S : FaceRegularityState (Fin r → G))
-    (s : Finset ι)
-    (f : ι → (Fin r → G) → ℝ)
-    (u : CutTestFamily G r) :
-    S.faceCutCorrelation
-        (fun x => ∑ i ∈ s, f i x) u =
-      ∑ i ∈ s, S.faceCutCorrelation (f i) u := by
-  unfold FaceRegularityState.faceCutCorrelation
-  calc
-    mean (fun x =>
-        S.residual (fun y => ∑ i ∈ s, f i y) x *
-          cutTestProduct u x) =
-        mean (fun x =>
-          ∑ i ∈ s,
-            S.residual (f i) x *
-              cutTestProduct u x) := by
-      apply congrArg mean
-      funext x
-      unfold FaceRegularityState.residual
-        FaceRegularityState.structured
-      rw [conditionalMean_finset_sum]
-      rw [← Finset.sum_sub_distrib, Finset.sum_mul]
-    _ =
-        ∑ i ∈ s,
-          mean (fun x =>
-            S.residual (f i) x *
-              cutTestProduct u x) :=
-      mean_finset_sum s
-        (fun i x =>
-          S.residual (f i) x *
-            cutTestProduct u x)
-    _ = ∑ i ∈ s, S.faceCutCorrelation (f i) u := by
-      rfl
 
 /-- Boolean-cut correlation is linear over a finite sum of target
 functions. -/
@@ -20725,49 +9565,6 @@ theorem FaceRegularityState.booleanCutCorrelation_finset_sum
           S.booleanCutCorrelation (f i) A := by
       rfl
 
-/-- If every contained fine atom is face-cut regular with error `ε`, then
-the containing coarse atom has error at most the number of contained atoms
-times `ε`. -/
-theorem FaceRegularityState.abs_coarseAtom_faceCutCorrelation_le_card_mul
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {r : ℕ}
-    (S : FaceRegularityState (Fin r → G))
-    {fineUpper coarseUpper :
-      FacePartition (Fin r → G)}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts)
-    {ε : ℝ}
-    (hregular :
-      ∀ b : fineUpper.parts,
-        S.IsFaceCutRegular
-          (partitionAtomIndicator fineUpper b) ε)
-    (u : CutTestFamily G r)
-    (hu : IsBoundedCutTest u) :
-    |S.faceCutCorrelation
-        (partitionAtomIndicator coarseUpper a) u| ≤
-      ((fineAtomsInCoarseAtom
-        fineUpper coarseUpper a).card : ℝ) * ε := by
-  rw [partitionAtomIndicator_eq_sum_fineAtomsInCoarseAtom_fun
-    hupper a,
-    S.faceCutCorrelation_finset_sum]
-  calc
-    |∑ b ∈ fineAtomsInCoarseAtom fineUpper coarseUpper a,
-        S.faceCutCorrelation
-          (partitionAtomIndicator fineUpper b) u| ≤
-        ∑ b ∈ fineAtomsInCoarseAtom fineUpper coarseUpper a,
-          |S.faceCutCorrelation
-            (partitionAtomIndicator fineUpper b) u| :=
-      Finset.abs_sum_le_sum_abs _ _
-    _ ≤
-        ∑ _b ∈ fineAtomsInCoarseAtom
-            fineUpper coarseUpper a, ε := by
-      apply Finset.sum_le_sum
-      intro b _
-      exact hregular b u hu
-    _ =
-        ((fineAtomsInCoarseAtom
-          fineUpper coarseUpper a).card : ℝ) * ε := by
-      simp
 
 /-- Boolean-cut version of the coarse-atom regularity transfer. -/
 theorem FaceRegularityState.abs_coarseAtom_booleanCutCorrelation_le_card_mul
@@ -20809,66 +9606,7 @@ theorem FaceRegularityState.abs_coarseAtom_booleanCutCorrelation_le_card_mul
           fineUpper coarseUpper a).card : ℝ) * ε := by
       simp
 
-/-- Preliminary regularity for all fine upper atoms controls every bounded
-cut correlation of a coarse upper atom, with the exact coarse-fiber
-cardinality loss. -/
-theorem abs_orderedCoarseUpperAtom_faceCutCorrelation_le_card_mul
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (lower : OrderedFacePartitionSystem G k j)
-    (fineUpper coarseUpper :
-      OrderedFacePartitionSystem G k (j + 1))
-    (hupper :
-      OrderedFacePartitionRefines fineUpper coarseUpper)
-    {ε : ℝ}
-    (hregular :
-      IsPreliminaryOrderedRegular lower fineUpper ε)
-    (e : OrderedFace k (j + 1))
-    (a : (coarseUpper e).parts)
-    (u : CutTestFamily G (j + 1))
-    (hu : IsBoundedCutTest u) :
-    |(⟨orderedBoundaryPartition lower e⟩ :
-        FaceRegularityState (Fin (j + 1) → G)).faceCutCorrelation
-        (partitionAtomIndicator (coarseUpper e) a) u| ≤
-      ((fineAtomsInCoarseAtom
-        (fineUpper e) (coarseUpper e) a).card : ℝ) * ε := by
-  apply
-    FaceRegularityState.abs_coarseAtom_faceCutCorrelation_le_card_mul
-      (⟨orderedBoundaryPartition lower e⟩ :
-        FaceRegularityState (Fin (j + 1) → G))
-      (hupper e) a
-  · intro b
-    exact (hregular.toBounded) e b
-  · exact hu
 
-/-- Complexity-only form of the bounded coarse-upper cut estimate. -/
-theorem abs_orderedCoarseUpperAtom_faceCutCorrelation_le_complexity_mul
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (lower : OrderedFacePartitionSystem G k j)
-    (fineUpper coarseUpper :
-      OrderedFacePartitionSystem G k (j + 1))
-    (hupper :
-      OrderedFacePartitionRefines fineUpper coarseUpper)
-    {ε : ℝ} (hε : 0 ≤ ε)
-    (hregular :
-      IsPreliminaryOrderedRegular lower fineUpper ε)
-    (e : OrderedFace k (j + 1))
-    (a : (coarseUpper e).parts)
-    (u : CutTestFamily G (j + 1))
-    (hu : IsBoundedCutTest u) :
-    |(⟨orderedBoundaryPartition lower e⟩ :
-        FaceRegularityState (Fin (j + 1) → G)).faceCutCorrelation
-        (partitionAtomIndicator (coarseUpper e) a) u| ≤
-      (FacePartition.complexity (fineUpper e) : ℝ) * ε := by
-  exact le_trans
-    (abs_orderedCoarseUpperAtom_faceCutCorrelation_le_card_mul
-      lower fineUpper coarseUpper hupper hregular e a u hu)
-    (mul_le_mul_of_nonneg_right
-      (Nat.cast_le.mpr
-        (card_fineAtomsInCoarseAtom_le_complexity
-          (fineUpper e) (coarseUpper e) a))
-      hε)
 
 /-- A uniform bound on fine-upper complexity transfers preliminary
 regularity itself from the fine upper system to the coarse upper system. -/
@@ -20906,213 +9644,11 @@ theorem IsPreliminaryOrderedRegular.coarseUpper
 
 /-! ## Coarse-upper atom-energy gaps -/
 
-/-- The coarse-upper boundary defect is the sum of the boundary defects of
-the fine atoms in its fiber. -/
-theorem atomBoundaryDefect_coarseAtom_eq_sum_fineAtoms
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineBoundary coarseBoundary :
-      FacePartition Ω)
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts) (x : Ω) :
-    atomBoundaryDefect
-        fineBoundary coarseBoundary coarseUpper a x =
-      ∑ b ∈ fineAtomsInCoarseAtom
-          fineUpper coarseUpper a,
-        atomBoundaryDefect
-          fineBoundary coarseBoundary fineUpper b x := by
-  unfold atomBoundaryDefect
-  rw [partitionAtomIndicator_eq_sum_fineAtomsInCoarseAtom_fun
-    hupper a]
-  rw [conditionalMean_finset_sum,
-    conditionalMean_finset_sum,
-    ← Finset.sum_sub_distrib]
 
-/-- Pointwise finite Cauchy--Schwarz for the defect of one coarse upper
-atom. -/
-theorem atomBoundaryDefect_coarseAtom_sq_le_card_mul_sum
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineBoundary coarseBoundary :
-      FacePartition Ω)
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts) (x : Ω) :
-    atomBoundaryDefect
-          fineBoundary coarseBoundary coarseUpper a x ^ 2 ≤
-      ((fineAtomsInCoarseAtom
-          fineUpper coarseUpper a).card : ℝ) *
-        ∑ b ∈ fineAtomsInCoarseAtom
-            fineUpper coarseUpper a,
-          atomBoundaryDefect
-            fineBoundary coarseBoundary fineUpper b x ^ 2 := by
-  rw [atomBoundaryDefect_coarseAtom_eq_sum_fineAtoms
-    fineBoundary coarseBoundary hupper a x]
-  simpa using
-    (sq_sum_le_card_mul_sum_sq
-      (s := fineAtomsInCoarseAtom
-        fineUpper coarseUpper a)
-      (f := fun b =>
-        atomBoundaryDefect
-          fineBoundary coarseBoundary fineUpper b x))
 
-/-- Averaged square-defect bound for one coarse upper atom, retaining the
-exact fiber cardinality. -/
-theorem mean_atomBoundaryDefect_coarseAtom_sq_le_card_mul_sum
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineBoundary coarseBoundary :
-      FacePartition Ω)
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper)
-    (a : coarseUpper.parts) :
-    mean (fun x =>
-        atomBoundaryDefect
-          fineBoundary coarseBoundary coarseUpper a x ^ 2) ≤
-      ((fineAtomsInCoarseAtom
-          fineUpper coarseUpper a).card : ℝ) *
-        ∑ b ∈ fineAtomsInCoarseAtom
-            fineUpper coarseUpper a,
-          mean (fun x =>
-            atomBoundaryDefect
-              fineBoundary coarseBoundary fineUpper b x ^ 2) := by
-  calc
-    mean (fun x =>
-        atomBoundaryDefect
-          fineBoundary coarseBoundary coarseUpper a x ^ 2) ≤
-        mean (fun x =>
-          ((fineAtomsInCoarseAtom
-              fineUpper coarseUpper a).card : ℝ) *
-            ∑ b ∈ fineAtomsInCoarseAtom
-                fineUpper coarseUpper a,
-              atomBoundaryDefect
-                fineBoundary coarseBoundary fineUpper b x ^ 2) :=
-      mean_mono fun x =>
-        atomBoundaryDefect_coarseAtom_sq_le_card_mul_sum
-          fineBoundary coarseBoundary hupper a x
-    _ =
-        ((fineAtomsInCoarseAtom
-            fineUpper coarseUpper a).card : ℝ) *
-          mean (fun x =>
-            ∑ b ∈ fineAtomsInCoarseAtom
-                fineUpper coarseUpper a,
-              atomBoundaryDefect
-                fineBoundary coarseBoundary fineUpper b x ^ 2) :=
-      mean_smul _ _
-    _ =
-        ((fineAtomsInCoarseAtom
-            fineUpper coarseUpper a).card : ℝ) *
-          ∑ b ∈ fineAtomsInCoarseAtom
-              fineUpper coarseUpper a,
-            mean (fun x =>
-              atomBoundaryDefect
-                fineBoundary coarseBoundary fineUpper b x ^ 2) := by
-      rw [mean_finset_sum]
 
-/-- The coarse fibers partition all fine atoms, so a fiberwise double sum
-counts each fine atom exactly once. -/
-theorem sum_fineAtomsInCoarseAtom
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fineUpper coarseUpper : FacePartition Ω)
-    (F : fineUpper.parts → ℝ) :
-    ∑ a : coarseUpper.parts,
-        ∑ b ∈ fineAtomsInCoarseAtom
-            fineUpper coarseUpper a, F b =
-      ∑ b : fineUpper.parts, F b := by
-  classical
-  simpa [fineAtomsInCoarseAtom] using
-    (Finset.sum_fiberwise
-      (Finset.univ : Finset fineUpper.parts)
-      (coarseAtomOfFineAtom fineUpper coarseUpper) F)
 
-/-- **Coarse-upper atom-energy bridge.**  For fixed fine and coarse
-observing partitions, replacing a fine upper partition by a coarser upper
-partition increases the atom-energy gap by at most one factor of the fine
-upper complexity. -/
-theorem partitionAtomEnergy_sub_coarseUpper_le_complexity_mul_fineUpper
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    {fineBoundary coarseBoundary :
-      FacePartition Ω}
-    (hboundary : fineBoundary ≤ coarseBoundary)
-    {fineUpper coarseUpper : FacePartition Ω}
-    (hupper : fineUpper ≤ coarseUpper) :
-    partitionAtomEnergy fineBoundary coarseUpper -
-        partitionAtomEnergy coarseBoundary coarseUpper ≤
-      (FacePartition.complexity fineUpper : ℝ) *
-        (partitionAtomEnergy fineBoundary fineUpper -
-          partitionAtomEnergy coarseBoundary fineUpper) := by
-  rw [partitionAtomEnergy_sub_eq_sum_mean_sq
-    hboundary coarseUpper,
-    partitionAtomEnergy_sub_eq_sum_mean_sq
-      hboundary fineUpper]
-  change
-    (∑ a : coarseUpper.parts,
-      mean (fun x =>
-        atomBoundaryDefect
-          fineBoundary coarseBoundary coarseUpper a x ^ 2)) ≤
-      (FacePartition.complexity fineUpper : ℝ) *
-        ∑ b : fineUpper.parts,
-          mean (fun x =>
-            atomBoundaryDefect
-              fineBoundary coarseBoundary fineUpper b x ^ 2)
-  calc
-    (∑ a : coarseUpper.parts,
-        mean (fun x =>
-          atomBoundaryDefect
-            fineBoundary coarseBoundary coarseUpper a x ^ 2)) ≤
-        ∑ a : coarseUpper.parts,
-          (FacePartition.complexity fineUpper : ℝ) *
-            ∑ b ∈ fineAtomsInCoarseAtom
-                fineUpper coarseUpper a,
-              mean (fun x =>
-                atomBoundaryDefect
-                  fineBoundary coarseBoundary fineUpper b x ^ 2) := by
-      apply Finset.sum_le_sum
-      intro a _
-      exact le_trans
-        (mean_atomBoundaryDefect_coarseAtom_sq_le_card_mul_sum
-          fineBoundary coarseBoundary hupper a)
-        (mul_le_mul_of_nonneg_right
-          (Nat.cast_le.mpr
-            (card_fineAtomsInCoarseAtom_le_complexity
-              fineUpper coarseUpper a))
-          (Finset.sum_nonneg fun b _ =>
-            mean_nonneg fun x => sq_nonneg _))
-    _ =
-        (FacePartition.complexity fineUpper : ℝ) *
-          ∑ a : coarseUpper.parts,
-            ∑ b ∈ fineAtomsInCoarseAtom
-                fineUpper coarseUpper a,
-              mean (fun x =>
-                atomBoundaryDefect
-                  fineBoundary coarseBoundary fineUpper b x ^ 2) := by
-      rw [Finset.mul_sum]
-    _ =
-        (FacePartition.complexity fineUpper : ℝ) *
-          ∑ b : fineUpper.parts,
-            mean (fun x =>
-              atomBoundaryDefect
-                fineBoundary coarseBoundary fineUpper b x ^ 2) := by
-      rw [sum_fineAtomsInCoarseAtom]
 
-/-- Ordered-face specialization of the coarse-upper atom-energy bridge. -/
-theorem orderedAtomEnergy_sub_coarseUpper_le_complexity_mul_fineUpper
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    {fineLower coarseLower :
-      OrderedFacePartitionSystem G k j}
-    (hlower :
-      OrderedFacePartitionRefines fineLower coarseLower)
-    (e : OrderedFace k (j + 1))
-    {fineUpper coarseUpper :
-      FacePartition (Fin (j + 1) → G)}
-    (hupper : fineUpper ≤ coarseUpper) :
-    orderedAtomEnergy fineLower e coarseUpper -
-        orderedAtomEnergy coarseLower e coarseUpper ≤
-      (FacePartition.complexity fineUpper : ℝ) *
-        (orderedAtomEnergy fineLower e fineUpper -
-          orderedAtomEnergy coarseLower e fineUpper) := by
-  exact
-    partitionAtomEnergy_sub_coarseUpper_le_complexity_mul_fineUpper
-      (orderedBoundaryPartition_mono hlower e) hupper
 
 namespace OrderedCoarseFineComplex
 
@@ -21142,21 +9678,6 @@ theorem coarseUpperFaceAtomEnergyGap_nonneg
     (fun f => P.refines j.castSucc f)
     e (P.coarse.partition j.succ e)
 
-/-- The coarse-upper local gap is controlled by the existing frozen
-fine-upper gap with one fine-upper complexity factor. -/
-theorem coarseUpperFaceAtomEnergyGap_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) (e : OrderedFace k (j.1 + 1)) :
-    P.coarseUpperFaceAtomEnergyGap j e ≤
-      (FacePartition.complexity
-          (P.fine.partition j.succ e) : ℝ) *
-        P.faceAtomEnergyGap j e := by
-  exact
-    orderedAtomEnergy_sub_coarseUpper_le_complexity_mul_fineUpper
-      (fun f => P.refines j.castSucc f) e
-      (P.refines j.succ e)
 
 /-- The rank-`j` coarse-upper gap, summed over all ordered upper faces. -/
 noncomputable def coarseUpperLayerAtomEnergyGap
@@ -21186,82 +9707,8 @@ theorem coarseUpperLayerAtomEnergyGap_eq_sum_face
   rw [Finset.sum_sub_distrib]
   rfl
 
-/-- Sharp facewise-complexity form of the coarse-upper layer-gap
-comparison. -/
-theorem coarseUpperLayerAtomEnergyGap_le_sum_complexity_mul
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) :
-    P.coarseUpperLayerAtomEnergyGap j ≤
-      ∑ e : OrderedFace k (j.1 + 1),
-        (FacePartition.complexity
-            (P.fine.partition j.succ e) : ℝ) *
-          P.faceAtomEnergyGap j e := by
-  rw [P.coarseUpperLayerAtomEnergyGap_eq_sum_face j]
-  exact Finset.sum_le_sum fun e _ =>
-    P.coarseUpperFaceAtomEnergyGap_le j e
 
-/-- Uniform-complexity form of the coarse-upper layer-gap comparison. -/
-theorem coarseUpperLayerAtomEnergyGap_le
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r) (M : ℕ)
-    (hcomplexity :
-      ∀ e : OrderedFace k (j.1 + 1),
-        FacePartition.complexity
-          (P.fine.partition j.succ e) ≤ M) :
-    P.coarseUpperLayerAtomEnergyGap j ≤
-      (M : ℝ) * P.layerAtomEnergyGap j := by
-  rw [P.layerAtomEnergyGap_eq_sum_face j]
-  calc
-    P.coarseUpperLayerAtomEnergyGap j ≤
-        ∑ e : OrderedFace k (j.1 + 1),
-          (FacePartition.complexity
-              (P.fine.partition j.succ e) : ℝ) *
-            P.faceAtomEnergyGap j e :=
-      P.coarseUpperLayerAtomEnergyGap_le_sum_complexity_mul j
-    _ ≤
-        ∑ e : OrderedFace k (j.1 + 1),
-          (M : ℝ) * P.faceAtomEnergyGap j e := by
-      apply Finset.sum_le_sum
-      intro e _
-      exact mul_le_mul_of_nonneg_right
-        (Nat.cast_le.mpr (hcomplexity e))
-        (P.faceAtomEnergyGap_nonneg j e)
-    _ =
-        (M : ℝ) *
-          ∑ e : OrderedFace k (j.1 + 1),
-            P.faceAtomEnergyGap j e := by
-      rw [Finset.mul_sum]
 
-/-- Full preliminary regularity of the fine complex transfers at one rank
-to the coarse upper layer, with a preassigned fine-upper complexity
-bound.  The observing lower boundary remains the fine lower layer. -/
-theorem preliminaryRegular_coarseUpper
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (j : Fin r) (M : ℕ)
-    (hε : 0 ≤ ε j)
-    (hcomplexity :
-      ∀ e : OrderedFace k (j.1 + 1),
-        FacePartition.complexity
-          (P.fine.partition j.succ e) ≤ M) :
-    IsPreliminaryOrderedRegular
-      (P.fine.partition j.castSucc)
-      (P.coarse.partition j.succ)
-      ((M : ℝ) * ε j) := by
-  exact (hregular j).coarseUpper
-    (P.fine.partition j.castSucc)
-    (P.fine.partition j.succ)
-    (P.coarse.partition j.succ)
-    (fun e => P.refines j.succ e)
-    hε M hcomplexity
 
 end OrderedCoarseFineComplex
 
@@ -21288,153 +9735,21 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- A fixed enumeration used only to unfold ordered telescoping terms. -/
-noncomputable local instance orderedEnergyFaceLinearOrder
-    (k r : ℕ) : LinearOrder (OrderedFace k r) :=
-  (Fintype.equivFin (OrderedFace k r)).linearOrder
 
 namespace FaceRegularityState
 
-/-- The energy gain between arbitrary fine and coarse regularity states is
-the mean-square change of their structured components. -/
-theorem energy_sub_eq_mean_sq_of_le
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (T S : FaceRegularityState Ω)
-    (hTS : T.partition ≤ S.partition)
-    (f : Ω → ℝ) :
-    T.energy f - S.energy f =
-      mean (fun x =>
-        (T.structured f x - S.structured f x) ^ 2) := by
-  simpa [energy, structured] using
-    partitionEnergy_sub_eq_mean_sq
-      T.partition S.partition hTS f
 
-/-- Refining a regularity state can only increase its energy. -/
-theorem energy_mono_of_le
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (T S : FaceRegularityState Ω)
-    (hTS : T.partition ≤ S.partition)
-    (f : Ω → ℝ) :
-    S.energy f ≤ T.energy f := by
-  simpa [energy] using
-    partitionEnergy_mono
-      T.partition S.partition hTS f
 
 end FaceRegularityState
 
-/-- Pointwise refinement of ordered regularity systems.  As for
-`FacePartition`, the finer system is written on the left. -/
-def OrderedRefines
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (T S : OrderedRegularitySystem G k r) : Prop :=
-  ∀ e, (T e).partition ≤ (S e).partition
 
-theorem OrderedRefines.refl
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (S : OrderedRegularitySystem G k r) :
-    OrderedRefines S S :=
-  fun _ => le_rfl
 
-theorem OrderedRefines.trans
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {U T S : OrderedRegularitySystem G k r}
-    (hUT : OrderedRefines U T)
-    (hTS : OrderedRefines T S) :
-    OrderedRefines U S :=
-  fun e => (hUT e).trans (hTS e)
 
-/-- Sum of the partition energies visible on all ordered faces. -/
-noncomputable def orderedTotalEnergy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r) : ℝ :=
-  ∑ e : OrderedFace k r,
-    (S e).energy (H.edgeWeight e)
 
-theorem orderedTotalEnergy_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    (S : OrderedRegularitySystem G k r) :
-    0 ≤ orderedTotalEnergy H S := by
-  unfold orderedTotalEnergy
-  apply Finset.sum_nonneg
-  intro e _he
-  exact partitionEnergy_nonneg
-    (S e).partition (H.edgeWeight e)
 
-/-- A unit-interval ordered pattern has at most one unit of energy per
-ordered face. -/
-theorem orderedTotalEnergy_le_card
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {H : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    (S : OrderedRegularitySystem G k r) :
-    orderedTotalEnergy H S ≤
-      Fintype.card (OrderedFace k r) := by
-  unfold orderedTotalEnergy
-  calc
-    (∑ e : OrderedFace k r,
-        (S e).energy (H.edgeWeight e)) ≤
-        ∑ _e : OrderedFace k r, (1 : ℝ) := by
-      apply Finset.sum_le_sum
-      intro e _he
-      exact partitionEnergy_le_one
-        (S e).partition
-        (fun y => (hH e y).1)
-        (fun y => (hH e y).2)
-    _ = Fintype.card (OrderedFace k r) := by
-      simp
 
-/-- Aggregate energy is monotone under pointwise refinement. -/
-theorem orderedTotalEnergy_mono
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    {T S : OrderedRegularitySystem G k r}
-    (hTS : OrderedRefines T S) :
-    orderedTotalEnergy H S ≤ orderedTotalEnergy H T := by
-  unfold orderedTotalEnergy
-  apply Finset.sum_le_sum
-  intro e _he
-  exact (T e).energy_mono_of_le
-    (S e) (hTS e) (H.edgeWeight e)
 
-/-- Exact system-level Pythagoras: the total energy increment is the sum of
-the facewise mean-square changes of structured density. -/
-theorem orderedTotalEnergy_sub_eq_sum_mean_sq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    {T S : OrderedRegularitySystem G k r}
-    (hTS : OrderedRefines T S) :
-    orderedTotalEnergy H T - orderedTotalEnergy H S =
-      ∑ e : OrderedFace k r,
-        mean (fun y =>
-          ((T e).structured (H.edgeWeight e) y -
-            (S e).structured (H.edgeWeight e) y) ^ 2) := by
-  unfold orderedTotalEnergy
-  rw [← Finset.sum_sub_distrib]
-  apply Finset.sum_congr rfl
-  intro e _he
-  exact
-    (T e).energy_sub_eq_mean_sq_of_le
-      (S e) (hTS e) (H.edgeWeight e)
 
-theorem orderedTotalEnergy_sub_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (H : WeightedOrderedPattern G k r)
-    {T S : OrderedRegularitySystem G k r}
-    (hTS : OrderedRefines T S) :
-    0 ≤ orderedTotalEnergy H T -
-      orderedTotalEnergy H S :=
-  sub_nonneg.mpr (orderedTotalEnergy_mono H hTS)
 
 /-- Averaging a function pulled back along one ordered face gives its face
 average. -/
@@ -21449,243 +9764,10 @@ theorem mean_comp_orderedFaceTuple
   unfold mean₂
   simp
 
-/-- In a mixed telescoping term between two unit-interval patterns, all
-nondistinguished factors have magnitude at most one. -/
-theorem mixedOrderedPatternTerm_sq_le_edgeDiff_sq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {H K : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hK : K.EdgeWeightsInUnitInterval)
-    (e : OrderedFace k r) (x : Fin k → G) :
-    mixedOrderedPatternTerm H K e x ^ 2 ≤
-      (H.edgeWeight e (orderedFaceTuple e x) -
-        K.edgeWeight e (orderedFaceTuple e x)) ^ 2 := by
-  let A : ℝ :=
-    ∏ f ∈ (Finset.univ : Finset (OrderedFace k r))
-        with f < e,
-      H.edgeWeight f (orderedFaceTuple f x)
-  let B : ℝ :=
-    ∏ f ∈ (Finset.univ : Finset (OrderedFace k r))
-        with e < f,
-      K.edgeWeight f (orderedFaceTuple f x)
-  have hA0 : 0 ≤ A := by
-    unfold A
-    apply Finset.prod_nonneg
-    intro f hf
-    exact (hH f (orderedFaceTuple f x)).1
-  have hA1 : A ≤ 1 := by
-    unfold A
-    apply Finset.prod_le_one
-    · intro f hf
-      exact (hH f (orderedFaceTuple f x)).1
-    · intro f hf
-      exact (hH f (orderedFaceTuple f x)).2
-  have hB0 : 0 ≤ B := by
-    unfold B
-    apply Finset.prod_nonneg
-    intro f hf
-    exact (hK f (orderedFaceTuple f x)).1
-  have hB1 : B ≤ 1 := by
-    unfold B
-    apply Finset.prod_le_one
-    · intro f hf
-      exact (hK f (orderedFaceTuple f x)).1
-    · intro f hf
-      exact (hK f (orderedFaceTuple f x)).2
-  have hAB0 : 0 ≤ A * B :=
-    mul_nonneg hA0 hB0
-  have hAB1 : A * B ≤ 1 := by
-    calc
-      A * B ≤ 1 * B :=
-        mul_le_mul_of_nonneg_right hA1 hB0
-      _ ≤ 1 * 1 :=
-        mul_le_mul_of_nonneg_left hB1 zero_le_one
-      _ = 1 := one_mul 1
-  have hABsq : (A * B) ^ 2 ≤ 1 := by
-    simpa using
-      (sq_le_sq₀ hAB0 zero_le_one).2 hAB1
-  unfold mixedOrderedPatternTerm
-  change
-    ((H.edgeWeight e (orderedFaceTuple e x) -
-        K.edgeWeight e (orderedFaceTuple e x)) *
-      A * B) ^ 2 ≤
-      (H.edgeWeight e (orderedFaceTuple e x) -
-        K.edgeWeight e (orderedFaceTuple e x)) ^ 2
-  calc
-    ((H.edgeWeight e (orderedFaceTuple e x) -
-          K.edgeWeight e (orderedFaceTuple e x)) *
-        A * B) ^ 2 =
-        (H.edgeWeight e (orderedFaceTuple e x) -
-          K.edgeWeight e (orderedFaceTuple e x)) ^ 2 *
-            (A * B) ^ 2 := by ring
-    _ ≤
-        (H.edgeWeight e (orderedFaceTuple e x) -
-          K.edgeWeight e (orderedFaceTuple e x)) ^ 2 * 1 :=
-      mul_le_mul_of_nonneg_left hABsq (sq_nonneg _)
-    _ = _ := mul_one _
 
-/-- One mixed telescoping correlation is controlled in square by the
-mean-square discrepancy on its distinguished face. -/
-theorem mixedOrderedPatternCorrelation_sq_le_mean_edgeDiff_sq
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {H K : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    (hK : K.EdgeWeightsInUnitInterval)
-    (e : OrderedFace k r) :
-    |mixedOrderedPatternCorrelation H K e| ^ 2 ≤
-      mean (fun y =>
-        (H.edgeWeight e y - K.edgeWeight e y) ^ 2) := by
-  calc
-    |mixedOrderedPatternCorrelation H K e| ^ 2 =
-        mixedOrderedPatternCorrelation H K e ^ 2 := by
-      rw [sq_abs]
-    _ ≤
-        mean (fun x =>
-          mixedOrderedPatternTerm H K e x ^ 2) := by
-      exact mean_square_le_mean_square _
-    _ ≤
-        mean (fun x =>
-          (H.edgeWeight e (orderedFaceTuple e x) -
-            K.edgeWeight e (orderedFaceTuple e x)) ^ 2) := by
-      exact mean_mono fun x =>
-        mixedOrderedPatternTerm_sq_le_edgeDiff_sq
-          hH hK e x
-    _ =
-        mean (fun y =>
-          (H.edgeWeight e y - K.edgeWeight e y) ^ 2) :=
-      mean_comp_orderedFaceTuple
-        (G := G) (k := k) (r := r) e
-        (fun y =>
-          (H.edgeWeight e y - K.edgeWeight e y) ^ 2)
 
-/-- Squared count discrepancy between nested coarse and fine structured
-patterns is controlled by the aggregate energy increment. -/
-theorem regularizedOrderedPattern_count_sub_sq_le_totalEnergyGap
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {H : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    {fine coarse : OrderedRegularitySystem G k r}
-    (hrefines : OrderedRefines fine coarse) :
-    |(regularizedOrderedPattern H fine).patternCount -
-        (regularizedOrderedPattern H coarse).patternCount| ^ 2 ≤
-      (Fintype.card (OrderedFace k r) : ℝ) *
-        (orderedTotalEnergy H fine -
-          orderedTotalEnergy H coarse) := by
-  let F := regularizedOrderedPattern H fine
-  let C := regularizedOrderedPattern H coarse
-  have hF : F.EdgeWeightsInUnitInterval :=
-    regularizedOrderedPattern_unitInterval hH fine
-  have hC : C.EdgeWeightsInUnitInterval :=
-    regularizedOrderedPattern_unitInterval hH coarse
-  have habs :
-      |F.patternCount - C.patternCount| ≤
-        ∑ e : OrderedFace k r,
-          |mixedOrderedPatternCorrelation F C e| :=
-    abs_patternCount_sub_le_sum_mixedOrderedPatternCorrelation F C
-  have hsum0 :
-      0 ≤ ∑ e : OrderedFace k r,
-        |mixedOrderedPatternCorrelation F C e| :=
-    Finset.sum_nonneg fun e _ => abs_nonneg _
-  have hsquare :
-      |F.patternCount - C.patternCount| ^ 2 ≤
-        (∑ e : OrderedFace k r,
-          |mixedOrderedPatternCorrelation F C e|) ^ 2 :=
-    (sq_le_sq₀ (abs_nonneg _) hsum0).2 habs
-  calc
-    |F.patternCount - C.patternCount| ^ 2 ≤
-        (∑ e : OrderedFace k r,
-          |mixedOrderedPatternCorrelation F C e|) ^ 2 :=
-      hsquare
-    _ ≤
-        (Fintype.card (OrderedFace k r) : ℝ) *
-          ∑ e : OrderedFace k r,
-            |mixedOrderedPatternCorrelation F C e| ^ 2 := by
-      simpa using
-        sq_sum_le_card_mul_sum_sq
-          (s := (Finset.univ :
-            Finset (OrderedFace k r)))
-          (f := fun e =>
-            |mixedOrderedPatternCorrelation F C e|)
-    _ ≤
-        (Fintype.card (OrderedFace k r) : ℝ) *
-          ∑ e : OrderedFace k r,
-            mean (fun y =>
-              ((fine e).structured (H.edgeWeight e) y -
-                (coarse e).structured
-                  (H.edgeWeight e) y) ^ 2) := by
-      apply mul_le_mul_of_nonneg_left
-      · apply Finset.sum_le_sum
-        intro e _he
-        exact
-          mixedOrderedPatternCorrelation_sq_le_mean_edgeDiff_sq
-            hF hC e
-      · positivity
-    _ =
-        (Fintype.card (OrderedFace k r) : ℝ) *
-          (orderedTotalEnergy H fine -
-            orderedTotalEnergy H coarse) := by
-      rw [orderedTotalEnergy_sub_eq_sum_mean_sq H hrefines]
 
-/-- Strict count comparison obtained by placing the total energy gap below a
-prescribed square. -/
-theorem regularizedOrderedPattern_count_abs_sub_lt_of_energyGap
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {H : WeightedOrderedPattern G k r}
-    (hH : H.EdgeWeightsInUnitInterval)
-    {fine coarse : OrderedRegularitySystem G k r}
-    (hrefines : OrderedRefines fine coarse)
-    {γ : ℝ} (hγ : 0 < γ)
-    (hgap :
-      (Fintype.card (OrderedFace k r) : ℝ) *
-          (orderedTotalEnergy H fine -
-            orderedTotalEnergy H coarse) <
-        γ ^ 2) :
-    |(regularizedOrderedPattern H fine).patternCount -
-        (regularizedOrderedPattern H coarse).patternCount| <
-      γ := by
-  have hsquare :
-      |(regularizedOrderedPattern H fine).patternCount -
-          (regularizedOrderedPattern H coarse).patternCount| ^ 2 <
-        γ ^ 2 :=
-    (regularizedOrderedPattern_count_sub_sq_le_totalEnergyGap
-      hH hrefines).trans_lt hgap
-  exact
-    (sq_lt_sq₀ (abs_nonneg _) hγ.le).mp hsquare
 
-/-- A bounded sequence has a small adjacent increment.  Monotonicity is not
-needed: telescoping and the endpoint bounds suffice. -/
-theorem exists_adjacent_sub_le_div
-    (E : ℕ → ℝ) {m : ℕ} (hm : 0 < m)
-    {B : ℝ}
-    (hE0 : 0 ≤ E 0)
-    (hEm : E m ≤ B) :
-    ∃ i : ℕ, i < m ∧
-      E (i + 1) - E i ≤ B / m := by
-  have htel :
-      ∑ i ∈ Finset.range m,
-          (E (i + 1) - E i) =
-        E m - E 0 := by
-    exact Finset.sum_range_sub E m
-  have hsum :
-      ∑ i ∈ Finset.range m,
-          (E (i + 1) - E i) ≤
-        ∑ _i ∈ Finset.range m, B / (m : ℝ) := by
-    rw [htel]
-    calc
-      E m - E 0 ≤ B := by linarith
-      _ = ∑ _i ∈ Finset.range m,
-          B / (m : ℝ) := by
-        simp only [Finset.sum_const, Finset.card_range,
-          nsmul_eq_mul]
-        field_simp
-  obtain ⟨i, hi, hsmall⟩ :=
-    Finset.exists_le_of_sum_le
-      ⟨0, Finset.mem_range.mpr hm⟩ hsum
-  exact ⟨i, Finset.mem_range.mp hi, hsmall⟩
 
 end Wikipedia.SzemeredisTheorem
 
@@ -21765,194 +9847,14 @@ theorem mean_finsetIndicator_biUnion_le_sum
 
 /-! ## The bad base attached to the tuple's own upper atom -/
 
-/-- Union, over all genuine upper atoms, of the part of that atom lying
-above its own bad boundary base. -/
-noncomputable def ownAtomBadBaseSupport
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fine coarse upper : FacePartition Ω)
-    (α β : ℝ) : Finset Ω := by
-  classical
-  exact
-    (Finset.univ : Finset upper.parts).biUnion fun a =>
-      a.1 ∩ atomBadBaseSupport fine coarse upper a α β
 
-@[simp]
-theorem mem_ownAtomBadBaseSupport
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω]
-    (fine coarse upper : FacePartition Ω)
-    (α β : ℝ) (x : Ω) :
-    x ∈ ownAtomBadBaseSupport fine coarse upper α β ↔
-      x ∈ atomBadBaseSupport fine coarse upper
-        (partitionAtomAt upper x) α β := by
-  classical
-  constructor
-  · intro hx
-    rw [ownAtomBadBaseSupport] at hx
-    obtain ⟨a, _ha, hxpart⟩ :=
-      Finset.mem_biUnion.mp hx
-    have hxa : x ∈ a.1 :=
-      (Finset.mem_inter.mp hxpart).1
-    have hbad :
-        x ∈ atomBadBaseSupport
-          fine coarse upper a α β :=
-      (Finset.mem_inter.mp hxpart).2
-    have hcanonical :
-        partitionAtomAt upper x = a :=
-      (partitionAtomAt_eq_iff_mem upper x a).2 hxa
-    simpa [hcanonical] using hbad
-  · intro hbad
-    rw [ownAtomBadBaseSupport]
-    apply Finset.mem_biUnion.mpr
-    refine
-      ⟨partitionAtomAt upper x, Finset.mem_univ _, ?_⟩
-    apply Finset.mem_inter.mpr
-    exact
-      ⟨upper.mem_part (Finset.mem_univ x), hbad⟩
 
-/-- Per-atom bad-base estimate charged to that atom's own square-defect
-mass, before summing over atoms. -/
-theorem mean_indicator_atom_inter_badBaseSupport_le_local
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω] [Nonempty Ω]
-    (fine coarse upper : FacePartition Ω)
-    (a : upper.parts)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) :
-    mean (finsetIndicator
-        (a.1 ∩ atomBadBaseSupport
-          fine coarse upper a α β)) ≤
-      α + mean
-        (atomBoundaryDefectSq fine coarse upper a) / β := by
-  calc
-    mean (finsetIndicator
-        (a.1 ∩ atomBadBaseSupport
-          fine coarse upper a α β)) ≤
-        mean (finsetIndicator
-          (a.1 ∩ smallAverageBaseSupport coarse
-            (partitionAtomIndicator upper a) α)) +
-        mean (finsetIndicator
-          (largeDefectBaseSupport
-            fine coarse upper a β)) := by
-      exact
-        mean_indicator_inter_union_le_add
-          a.1
-          (smallAverageBaseSupport coarse
-            (partitionAtomIndicator upper a) α)
-          (largeDefectBaseSupport fine coarse upper a β)
-    _ ≤
-        α + mean
-          (atomBoundaryDefectSq fine coarse upper a) / β :=
-      add_le_add
-        (mean_indicator_inter_smallAverageBaseSupport_le
-          coarse a.1 hα)
-        (mean_indicator_largeAverageBaseSupport_le
-          coarse
-          (atomBoundaryDefectSq fine coarse upper a)
-          (atomBoundaryDefectSq_nonneg
-            fine coarse upper a) hβ)
 
-/-- **Summed own-atom bad-base estimate.**  Low-density bases cost one
-`α` per upper atom, while all excessive-defect bases together cost only the
-single aggregate atom-energy gap divided by `β`. -/
-theorem mean_indicator_ownAtomBadBaseSupport_le
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω] [Nonempty Ω]
-    {fine coarse : FacePartition Ω}
-    (hfc : fine ≤ coarse)
-    (upper : FacePartition Ω)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) :
-    mean (finsetIndicator
-        (ownAtomBadBaseSupport fine coarse upper α β)) ≤
-      (FacePartition.complexity upper : ℝ) * α +
-        (partitionAtomEnergy fine upper -
-          partitionAtomEnergy coarse upper) / β := by
-  calc
-    mean (finsetIndicator
-        (ownAtomBadBaseSupport fine coarse upper α β)) ≤
-        ∑ a : upper.parts,
-          mean (finsetIndicator
-            (a.1 ∩ atomBadBaseSupport
-              fine coarse upper a α β)) := by
-      exact
-        mean_finsetIndicator_biUnion_le_sum
-          (Finset.univ : Finset upper.parts)
-          (fun a =>
-            a.1 ∩ atomBadBaseSupport
-              fine coarse upper a α β)
-    _ ≤
-        ∑ a : upper.parts,
-          (α +
-            mean (atomBoundaryDefectSq
-              fine coarse upper a) / β) := by
-      apply Finset.sum_le_sum
-      intro a _ha
-      exact
-        mean_indicator_atom_inter_badBaseSupport_le_local
-          fine coarse upper a hα hβ
-    _ =
-        (FacePartition.complexity upper : ℝ) * α +
-          (partitionAtomEnergy fine upper -
-            partitionAtomEnergy coarse upper) / β := by
-      rw [partitionAtomEnergy_sub_eq_sum_mean_sq hfc upper]
-      unfold atomBoundaryDefectSq atomBoundaryDefect
-      rw [Finset.sum_add_distrib]
-      simp only [Finset.sum_const, Finset.card_univ,
-        nsmul_eq_mul, Finset.sum_div]
-      rw [Fintype.card_coe]
-      rfl
 
 /-! ## Ordered specialization -/
 
-/-- Tuples whose boundary lies in the bad base attached to their own
-genuine upper atom. -/
-noncomputable def orderedOwnAtomBadBaseSupport
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (α β : ℝ) :
-    Finset (Fin (j + 1) → G) :=
-  ownAtomBadBaseSupport
-    (orderedBoundaryPartition fine e)
-    (orderedBoundaryPartition coarse e)
-    upper α β
 
-@[simp]
-theorem mem_orderedOwnAtomBadBaseSupport
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k j : ℕ}
-    (fine coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    (α β : ℝ) (x : Fin (j + 1) → G) :
-    x ∈ orderedOwnAtomBadBaseSupport
-        fine coarse e upper α β ↔
-      x ∈ orderedAtomBadBaseSupport
-        fine coarse e upper
-          (partitionAtomAt upper x) α β := by
-  exact
-    mem_ownAtomBadBaseSupport
-      (orderedBoundaryPartition fine e)
-      (orderedBoundaryPartition coarse e)
-      upper α β x
 
-/-- Ordered summed own-atom cleaning estimate. -/
-theorem mean_indicator_orderedOwnAtomBadBaseSupport_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k j : ℕ}
-    {fine coarse : OrderedFacePartitionSystem G k j}
-    (hfc : OrderedFacePartitionRefines fine coarse)
-    (e : OrderedFace k (j + 1))
-    (upper : FacePartition (Fin (j + 1) → G))
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) :
-    mean (finsetIndicator
-        (orderedOwnAtomBadBaseSupport
-          fine coarse e upper α β)) ≤
-      (FacePartition.complexity upper : ℝ) * α +
-        (orderedAtomEnergy fine e upper -
-          orderedAtomEnergy coarse e upper) / β := by
-  exact
-    mean_indicator_ownAtomBadBaseSupport_le
-      (orderedBoundaryPartition_mono hfc e)
-      upper hα hβ
 
 /-! ## Pullback to top faces -/
 
@@ -22057,335 +9959,14 @@ theorem mean_indicator_orderedFacePullbackFinset
   exact mean_comp_orderedFaceTuple d
     (finsetIndicator S)
 
-/-- Delete a top tuple when any of its positive-rank ordered subfaces lies
-in the bad base attached to its own frozen fine upper atom. -/
-noncomputable def orderedTopBadBaseDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r)
-    (e : OrderedFace k r)
-    (α β : ℕ → ℝ) :
-    Finset (Fin r → G) := by
-  classical
-  exact
-    (Finset.univ :
-      Finset (OrderedPositiveSubface r)).biUnion fun q =>
-      orderedFacePullbackFinset q.2
-        (orderedOwnAtomBadBaseSupport
-          (fine.layer q.1.1
-            (Nat.le_of_lt q.1.2))
-          (coarse.layer q.1.1
-            (Nat.le_of_lt q.1.2))
-          (q.2.trans e)
-          (fine.partition q.1.succ
-            (q.2.trans e))
-          (α (q.1.1 + 1))
-          (β (q.1.1 + 1)))
 
-/-- Explicit union-bound cost of the top-face bad-base deletion. -/
-theorem mean_indicator_orderedTopBadBaseDeletion_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {fine coarse : OrderedPartitionComplex G k r}
-    (hfc : fine.Refines coarse)
-    (e : OrderedFace k r)
-    (α β : ℕ → ℝ)
-    (hα : ∀ j, 0 ≤ α (j + 1))
-    (hβ : ∀ j, 0 < β (j + 1)) :
-    mean (finsetIndicator
-        (orderedTopBadBaseDeletion fine coarse e α β)) ≤
-      ∑ q : OrderedPositiveSubface r,
-        ((FacePartition.complexity
-            (fine.partition q.1.succ
-              (q.2.trans e)) : ℝ) *
-            α (q.1.1 + 1) +
-          (orderedAtomEnergy
-              (fine.layer q.1.1
-                (Nat.le_of_lt q.1.2))
-              (q.2.trans e)
-              (fine.partition q.1.succ
-                (q.2.trans e)) -
-            orderedAtomEnergy
-              (coarse.layer q.1.1
-                (Nat.le_of_lt q.1.2))
-              (q.2.trans e)
-              (fine.partition q.1.succ
-                (q.2.trans e))) /
-            β (q.1.1 + 1)) := by
-  calc
-    mean (finsetIndicator
-        (orderedTopBadBaseDeletion fine coarse e α β)) ≤
-        ∑ q : OrderedPositiveSubface r,
-          mean (finsetIndicator
-            (orderedFacePullbackFinset q.2
-              (orderedOwnAtomBadBaseSupport
-                (fine.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (coarse.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (q.2.trans e)
-                (fine.partition q.1.succ
-                  (q.2.trans e))
-                (α (q.1.1 + 1))
-                (β (q.1.1 + 1))))) := by
-      exact
-        mean_finsetIndicator_biUnion_le_sum
-          (Finset.univ :
-            Finset (OrderedPositiveSubface r))
-          (fun q =>
-            orderedFacePullbackFinset q.2
-              (orderedOwnAtomBadBaseSupport
-                (fine.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (coarse.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (q.2.trans e)
-                (fine.partition q.1.succ
-                  (q.2.trans e))
-                (α (q.1.1 + 1))
-                (β (q.1.1 + 1))))
-    _ ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (fine.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-              α (q.1.1 + 1) +
-            (orderedAtomEnergy
-                (fine.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (q.2.trans e)
-                (fine.partition q.1.succ
-                  (q.2.trans e)) -
-              orderedAtomEnergy
-                (coarse.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (q.2.trans e)
-                (fine.partition q.1.succ
-                  (q.2.trans e))) /
-              β (q.1.1 + 1)) := by
-      apply Finset.sum_le_sum
-      intro q _hq
-      rw [mean_indicator_orderedFacePullbackFinset]
-      have hlayer :
-          OrderedFacePartitionRefines
-            (fine.layer q.1.1
-              (Nat.le_of_lt q.1.2))
-            (coarse.layer q.1.1
-              (Nat.le_of_lt q.1.2)) := by
-        intro g
-        exact hfc
-          ⟨q.1.1,
-            Nat.lt_succ_iff.mpr
-              (Nat.le_of_lt q.1.2)⟩ g
-      exact
-        mean_indicator_orderedOwnAtomBadBaseSupport_le
-          hlayer
-          (q.2.trans e)
-          (fine.partition q.1.succ
-            (q.2.trans e))
-          (hα q.1.1) (hβ q.1.1)
 
-/-- The bad-base top deletions, one for every top ordered face. -/
-noncomputable def orderedBadBaseDeletionFamily
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r)
-    (α β : ℕ → ℝ) :
-    OrderedPattern.DeletionFamily (G := G) k r :=
-  fun e => orderedTopBadBaseDeletion fine coarse e α β
 
-/-- Per-top-face density bound for the bad-base deletion family. -/
-theorem faceDeletionDensity_orderedBadBaseDeletionFamily_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {fine coarse : OrderedPartitionComplex G k r}
-    (hfc : fine.Refines coarse)
-    (α β : ℕ → ℝ)
-    (hα : ∀ j, 0 ≤ α (j + 1))
-    (hβ : ∀ j, 0 < β (j + 1))
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          fine coarse α β) e ≤
-      ∑ q : OrderedPositiveSubface r,
-        ((FacePartition.complexity
-            (fine.partition q.1.succ
-              (q.2.trans e)) : ℝ) *
-            α (q.1.1 + 1) +
-          (orderedAtomEnergy
-              (fine.layer q.1.1
-                (Nat.le_of_lt q.1.2))
-              (q.2.trans e)
-              (fine.partition q.1.succ
-                (q.2.trans e)) -
-            orderedAtomEnergy
-              (coarse.layer q.1.1
-                (Nat.le_of_lt q.1.2))
-              (q.2.trans e)
-              (fine.partition q.1.succ
-                (q.2.trans e))) /
-            β (q.1.1 + 1)) := by
-  rw [show
-      OrderedPattern.faceDeletionDensity
-          (orderedBadBaseDeletionFamily
-            fine coarse α β) e =
-        mean (finsetIndicator
-          (orderedTopBadBaseDeletion
-            fine coarse e α β)) by
-    unfold OrderedPattern.faceDeletionDensity
-      orderedBadBaseDeletionFamily
-    rw [mean_finsetIndicator]]
-  exact
-    mean_indicator_orderedTopBadBaseDeletion_le
-      hfc e α β hα hβ
 
-/-- A coarse but convenient constant-threshold deletion estimate.  If all
-fine atoms have complexity at most `M`, every local energy loss is bounded
-by the total all-rank frozen-upper gap. -/
-theorem faceDeletionDensity_orderedBadBaseDeletionFamily_constant_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r M : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (hcomplex :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (P.fine.partition j e) ≤ M)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          P.fine P.coarse (fun _ => α) (fun _ => β)) e ≤
-      (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-        ((M : ℝ) * α + P.totalAtomEnergyGap / β) := by
-  calc
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          P.fine P.coarse (fun _ => α) (fun _ => β)) e ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.fine.partition q.1.succ
-                (q.2.trans e)) : ℝ) * α +
-            (orderedAtomEnergy
-                (P.fine.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (q.2.trans e)
-                (P.fine.partition q.1.succ
-                  (q.2.trans e)) -
-              orderedAtomEnergy
-                (P.coarse.layer q.1.1
-                  (Nat.le_of_lt q.1.2))
-                (q.2.trans e)
-                (P.fine.partition q.1.succ
-                  (q.2.trans e))) / β) := by
-      exact
-        faceDeletionDensity_orderedBadBaseDeletionFamily_le
-          P.refines (fun _ => α) (fun _ => β)
-          (fun _ => hα) (fun _ => hβ) e
-    _ ≤
-        ∑ _q : OrderedPositiveSubface r,
-          ((M : ℝ) * α +
-            P.totalAtomEnergyGap / β) := by
-      apply Finset.sum_le_sum
-      intro q _hq
-      apply add_le_add
-      · apply mul_le_mul_of_nonneg_right _ hα
-        exact_mod_cast
-          hcomplex q.1.succ (q.2.trans e)
-      · apply div_le_div_of_nonneg_right _ hβ.le
-        have hfineLayer :
-            P.fine.layer q.1.1
-                (Nat.le_of_lt q.1.2) =
-              P.fine.partition q.1.castSucc := by
-          rfl
-        have hcoarseLayer :
-            P.coarse.layer q.1.1
-                (Nat.le_of_lt q.1.2) =
-              P.coarse.partition q.1.castSucc := by
-          rfl
-        rw [hfineLayer, hcoarseLayer]
-        change
-          P.faceAtomEnergyGap q.1 (q.2.trans e) ≤
-            P.totalAtomEnergyGap
-        exact
-          P.faceAtomEnergyGap_le_total
-            q.1 (q.2.trans e)
-    _ =
-        (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-          ((M : ℝ) * α +
-            P.totalAtomEnergyGap / β) := by
-      simp only [Finset.sum_const, Finset.card_univ,
-        nsmul_eq_mul]
 
-/-- Parameter-ready form of the constant-threshold estimate. -/
-theorem faceDeletionDensity_orderedBadBaseDeletionFamily_constant_le_of_bound
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r M : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (hcomplex :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (P.fine.partition j e) ≤ M)
-    {α β ε : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (hparameters :
-      (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-          ((M : ℝ) * α + P.totalAtomEnergyGap / β) ≤
-        ε)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          P.fine P.coarse (fun _ => α) (fun _ => β)) e ≤
-      ε :=
-  (faceDeletionDensity_orderedBadBaseDeletionFamily_constant_le
-    P hcomplex hα hβ e).trans hparameters
 
 /-! ## Surviving tuples induce good closed configurations -/
 
-/-- If a full tuple avoids the bad-base deletion on every top face, then
-its canonical fine atom configuration is good at every positive rank.
-The proof extends each lower face to a top face and reads the corresponding
-pullback component of the deletion union. -/
-theorem ClosedOrderedAtomConfiguration.isGood_of_avoids_topBadBaseDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} (hrk : r ≤ k)
-    (fine coarse : OrderedPartitionComplex G k r)
-    (x : Fin k → G) (α β : ℕ → ℝ)
-    (havoid :
-      ∀ e : OrderedFace k r,
-        orderedFaceTuple e x ∉
-          orderedTopBadBaseDeletion
-            fine coarse e α β) :
-    (ClosedOrderedAtomConfiguration.ofTuple fine x).IsGood
-      fine coarse α β := by
-  apply
-    (ClosedOrderedAtomConfiguration.ofTuple fine x).isGood_of_avoids_badBases
-      fine coarse α β
-  intro j hj f hbad
-  obtain ⟨e, d, hde⟩ :=
-    exists_orderedFace_factor_through
-      (Nat.succ_le_iff.mpr hj) hrk f
-  apply havoid e
-  rw [orderedTopBadBaseDeletion]
-  apply Finset.mem_biUnion.mpr
-  refine
-    ⟨⟨⟨j, hj⟩, d⟩, Finset.mem_univ _, ?_⟩
-  rw [mem_orderedFacePullbackFinset]
-  have htuple :
-      orderedFaceTuple d (orderedFaceTuple e x) =
-        orderedFaceTuple f x := by
-    rw [show
-        orderedFaceTuple d (orderedFaceTuple e x) =
-          orderedFaceTuple (d.trans e) x by rfl,
-      hde]
-  rw [htuple, hde]
-  exact
-    (mem_orderedOwnAtomBadBaseSupport
-      (fine.layer j (Nat.le_of_lt hj))
-      (coarse.layer j (Nat.le_of_lt hj))
-      f
-      (fine.partition
-        ⟨j + 1, Nat.succ_lt_succ hj⟩ f)
-      (α (j + 1)) (β (j + 1))
-      (orderedFaceTuple f x)).2 hbad
 
 end Wikipedia.SzemeredisTheorem
 
@@ -22428,66 +10009,8 @@ open scoped BigOperators
 
 namespace OrderedCoarseFineComplex
 
-/-- Tuples whose mixed fine/coarse boundary lies in the bad base attached
-to their own atom of the coarse upper face partition. -/
-noncomputable def orderedCoarseOwnAtomBadBaseSupport
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r)
-    (e : OrderedFace k (j.1 + 1))
-    (α β : ℝ) :
-    Finset (Fin (j.1 + 1) → G) :=
-  orderedOwnAtomBadBaseSupport
-    (P.fine.partition j.castSucc)
-    (P.coarse.partition j.castSucc)
-    e
-    (P.coarse.partition j.succ e)
-    α β
 
-@[simp]
-theorem mem_orderedCoarseOwnAtomBadBaseSupport
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r)
-    (e : OrderedFace k (j.1 + 1))
-    (α β : ℝ) (x : Fin (j.1 + 1) → G) :
-    x ∈ P.orderedCoarseOwnAtomBadBaseSupport j e α β ↔
-      x ∈ orderedAtomBadBaseSupport
-        (P.fine.partition j.castSucc)
-        (P.coarse.partition j.castSucc)
-        e
-        (P.coarse.partition j.succ e)
-        (partitionAtomAt
-          (P.coarse.partition j.succ e) x)
-        α β := by
-  exact
-    mem_orderedOwnAtomBadBaseSupport
-      (P.fine.partition j.castSucc)
-      (P.coarse.partition j.castSucc)
-      e (P.coarse.partition j.succ e) α β x
 
-/-- The direct own-coarse-atom cleaning estimate on one ordered face. -/
-theorem mean_indicator_orderedCoarseOwnAtomBadBaseSupport_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (j : Fin r)
-    (e : OrderedFace k (j.1 + 1))
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) :
-    mean (finsetIndicator
-        (P.orderedCoarseOwnAtomBadBaseSupport
-          j e α β)) ≤
-      (FacePartition.complexity
-          (P.coarse.partition j.succ e) : ℝ) * α +
-        P.coarseUpperFaceAtomEnergyGap j e / β := by
-  unfold orderedCoarseOwnAtomBadBaseSupport
-    coarseUpperFaceAtomEnergyGap
-  apply
-    mean_indicator_orderedOwnAtomBadBaseSupport_le
-      (fun f => P.refines j.castSucc f)
-      e (P.coarse.partition j.succ e) hα hβ
 
 end OrderedCoarseFineComplex
 
@@ -22530,67 +10053,7 @@ def IsMixedGood
     A.IsMixedGoodAt P j hj e
       (α (j + 1)) (β (j + 1))
 
-/-- Avoiding the coarse-own-atom bad support makes the selected coarse
-atom mixed-good at that face. -/
-theorem isMixedGoodAt_of_not_mem_coarseBadBase
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (j : ℕ) (hj : j < r)
-    (e : OrderedFace k (j + 1))
-    (α β : ℝ)
-    (havoid :
-      orderedFaceTuple e A.witness ∉
-        P.orderedCoarseOwnAtomBadBaseSupport
-          ⟨j, hj⟩ e α β) :
-    A.IsMixedGoodAt P j hj e α β := by
-  apply
-    orderedAtomIsGoodAtBoundary_of_not_mem_badBase
-      (P.fine.partition
-        (⟨j, hj⟩ : Fin r).castSucc)
-      (P.coarse.partition
-        (⟨j, hj⟩ : Fin r).castSucc)
-      e
-      (P.coarse.partition
-        (⟨j, hj⟩ : Fin r).succ e)
-      (A.atom (⟨j, hj⟩ : Fin r).succ e)
-      (orderedFaceTuple e A.witness)
-      α β
-  intro hbad
-  apply havoid
-  unfold
-    OrderedCoarseFineComplex.orderedCoarseOwnAtomBadBaseSupport
-    orderedOwnAtomBadBaseSupport
-    ownAtomBadBaseSupport
-  apply Finset.mem_biUnion.mpr
-  refine
-    ⟨A.atom (⟨j, hj⟩ : Fin r).succ e,
-      Finset.mem_univ _, ?_⟩
-  exact Finset.mem_inter.mpr
-    ⟨A.mem_atom (⟨j, hj⟩ : Fin r).succ e, hbad⟩
 
-/-- Facewise avoidance of all coarse-own-atom bad bases implies global
-mixed goodness. -/
-theorem isMixedGood_of_avoids_coarseBadBases
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (havoid :
-      ∀ (j : ℕ) (hj : j < r)
-        (e : OrderedFace k (j + 1)),
-        orderedFaceTuple e A.witness ∉
-          P.orderedCoarseOwnAtomBadBaseSupport
-            ⟨j, hj⟩ e
-            (α (j + 1)) (β (j + 1))) :
-    A.IsMixedGood P α β := by
-  intro j hj e
-  exact
-    A.isMixedGoodAt_of_not_mem_coarseBadBase
-      P j hj e (α (j + 1)) (β (j + 1))
-      (havoid j hj e)
 
 end ClosedOrderedAtomConfiguration
 
@@ -22598,257 +10061,11 @@ end ClosedOrderedAtomConfiguration
 
 namespace OrderedCoarseFineComplex
 
-/-- Delete a top tuple when one of its positive-rank subfaces lies in the
-mixed bad base attached to its own coarse upper atom. -/
-noncomputable def orderedCoarseTopBadBaseDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (e : OrderedFace k r)
-    (α β : ℕ → ℝ) :
-    Finset (Fin r → G) := by
-  classical
-  exact
-    (Finset.univ :
-      Finset (OrderedPositiveSubface r)).biUnion fun q =>
-      orderedFacePullbackFinset q.2
-        (P.orderedCoarseOwnAtomBadBaseSupport
-          q.1 (q.2.trans e)
-          (α (q.1.1 + 1))
-          (β (q.1.1 + 1)))
 
-/-- The coarse bad-base top deletions, one for every top ordered face. -/
-noncomputable def orderedCoarseBadBaseDeletionFamily
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (α β : ℕ → ℝ) :
-    OrderedPattern.DeletionFamily (G := G) k r :=
-  fun e => P.orderedCoarseTopBadBaseDeletion e α β
 
-/-- Direct union-bound cost of the coarse-own-atom top deletion. -/
-theorem mean_indicator_orderedCoarseTopBadBaseDeletion_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (e : OrderedFace k r)
-    (α β : ℕ → ℝ)
-    (hα : ∀ j, 0 ≤ α (j + 1))
-    (hβ : ∀ j, 0 < β (j + 1)) :
-    mean (finsetIndicator
-        (P.orderedCoarseTopBadBaseDeletion e α β)) ≤
-      ∑ q : OrderedPositiveSubface r,
-        ((FacePartition.complexity
-            (P.coarse.partition q.1.succ
-              (q.2.trans e)) : ℝ) *
-            α (q.1.1 + 1) +
-          P.coarseUpperFaceAtomEnergyGap
-              q.1 (q.2.trans e) /
-            β (q.1.1 + 1)) := by
-  calc
-    mean (finsetIndicator
-        (P.orderedCoarseTopBadBaseDeletion e α β)) ≤
-        ∑ q : OrderedPositiveSubface r,
-          mean (finsetIndicator
-            (orderedFacePullbackFinset q.2
-              (P.orderedCoarseOwnAtomBadBaseSupport
-                q.1 (q.2.trans e)
-                (α (q.1.1 + 1))
-                (β (q.1.1 + 1))))) := by
-      exact
-        mean_finsetIndicator_biUnion_le_sum
-          (Finset.univ :
-            Finset (OrderedPositiveSubface r))
-          (fun q =>
-            orderedFacePullbackFinset q.2
-              (P.orderedCoarseOwnAtomBadBaseSupport
-                q.1 (q.2.trans e)
-                (α (q.1.1 + 1))
-                (β (q.1.1 + 1))))
-    _ ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.coarse.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-              α (q.1.1 + 1) +
-            P.coarseUpperFaceAtomEnergyGap
-                q.1 (q.2.trans e) /
-              β (q.1.1 + 1)) := by
-      apply Finset.sum_le_sum
-      intro q _hq
-      rw [mean_indicator_orderedFacePullbackFinset]
-      exact
-        mean_indicator_orderedCoarseOwnAtomBadBaseSupport_le
-          P q.1 (q.2.trans e)
-          (hα q.1.1) (hβ q.1.1)
 
-/-- Per-top-face density bound in terms of coarse-upper complexity and the
-coarse-upper atom-energy gap. -/
-theorem faceDeletionDensity_orderedCoarseBadBaseDeletionFamily_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (α β : ℕ → ℝ)
-    (hα : ∀ j, 0 ≤ α (j + 1))
-    (hβ : ∀ j, 0 < β (j + 1))
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (P.orderedCoarseBadBaseDeletionFamily α β) e ≤
-      ∑ q : OrderedPositiveSubface r,
-        ((FacePartition.complexity
-            (P.coarse.partition q.1.succ
-              (q.2.trans e)) : ℝ) *
-            α (q.1.1 + 1) +
-          P.coarseUpperFaceAtomEnergyGap
-              q.1 (q.2.trans e) /
-            β (q.1.1 + 1)) := by
-  rw [show
-      OrderedPattern.faceDeletionDensity
-          (P.orderedCoarseBadBaseDeletionFamily α β) e =
-        mean (finsetIndicator
-          (P.orderedCoarseTopBadBaseDeletion e α β)) by
-    unfold OrderedPattern.faceDeletionDensity
-      orderedCoarseBadBaseDeletionFamily
-    rw [mean_finsetIndicator]]
-  exact
-    mean_indicator_orderedCoarseTopBadBaseDeletion_le
-      P e α β hα hβ
 
-/-- Coarse-atom deletion cost expressed entirely through the coarse/fine
-upper complexities and the existing fine-upper face atom-energy gaps. -/
-theorem faceDeletionDensity_orderedCoarseBadBaseDeletionFamily_le_fineGap
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (α β : ℕ → ℝ)
-    (hα : ∀ j, 0 ≤ α (j + 1))
-    (hβ : ∀ j, 0 < β (j + 1))
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (P.orderedCoarseBadBaseDeletionFamily α β) e ≤
-      ∑ q : OrderedPositiveSubface r,
-        ((FacePartition.complexity
-            (P.coarse.partition q.1.succ
-              (q.2.trans e)) : ℝ) *
-            α (q.1.1 + 1) +
-          ((FacePartition.complexity
-              (P.fine.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-            P.faceAtomEnergyGap
-              q.1 (q.2.trans e)) /
-            β (q.1.1 + 1)) := by
-  calc
-    OrderedPattern.faceDeletionDensity
-        (P.orderedCoarseBadBaseDeletionFamily α β) e ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.coarse.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-              α (q.1.1 + 1) +
-            P.coarseUpperFaceAtomEnergyGap
-                q.1 (q.2.trans e) /
-              β (q.1.1 + 1)) :=
-      faceDeletionDensity_orderedCoarseBadBaseDeletionFamily_le
-        P α β hα hβ e
-    _ ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.coarse.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-              α (q.1.1 + 1) +
-            ((FacePartition.complexity
-                (P.fine.partition q.1.succ
-                  (q.2.trans e)) : ℝ) *
-              P.faceAtomEnergyGap
-                q.1 (q.2.trans e)) /
-              β (q.1.1 + 1)) := by
-      apply Finset.sum_le_sum
-      intro q _hq
-      exact add_le_add
-        (le_refl _)
-        (div_le_div_of_nonneg_right
-          (P.coarseUpperFaceAtomEnergyGap_le
-            q.1 (q.2.trans e))
-          (hβ q.1.1).le)
 
-/-- Constant-threshold form using separate uniform bounds for coarse and
-fine upper complexity and the existing total fine-upper atom-energy gap. -/
-theorem faceDeletionDensity_orderedCoarseBadBaseDeletionFamily_constant_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r coarseBound fineBound : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (hcoarse :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (P.coarse.partition j e) ≤ coarseBound)
-    (hfine :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (P.fine.partition j e) ≤ fineBound)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (P.orderedCoarseBadBaseDeletionFamily
-          (fun _ => α) (fun _ => β)) e ≤
-      (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-        ((coarseBound : ℝ) * α +
-          (fineBound : ℝ) * P.totalAtomEnergyGap / β) := by
-  calc
-    OrderedPattern.faceDeletionDensity
-        (P.orderedCoarseBadBaseDeletionFamily
-          (fun _ => α) (fun _ => β)) e ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.coarse.partition q.1.succ
-                (q.2.trans e)) : ℝ) * α +
-            ((FacePartition.complexity
-                (P.fine.partition q.1.succ
-                  (q.2.trans e)) : ℝ) *
-              P.faceAtomEnergyGap
-                q.1 (q.2.trans e)) / β) := by
-      exact
-        faceDeletionDensity_orderedCoarseBadBaseDeletionFamily_le_fineGap
-          P (fun _ => α) (fun _ => β)
-          (fun _ => hα) (fun _ => hβ) e
-    _ ≤
-        ∑ _q : OrderedPositiveSubface r,
-          ((coarseBound : ℝ) * α +
-            (fineBound : ℝ) * P.totalAtomEnergyGap / β) := by
-      apply Finset.sum_le_sum
-      intro q _hq
-      apply add_le_add
-      · exact mul_le_mul_of_nonneg_right
-          (Nat.cast_le.mpr
-            (hcoarse q.1.succ (q.2.trans e)))
-          hα
-      · apply div_le_div_of_nonneg_right _ hβ.le
-        calc
-          (FacePartition.complexity
-                (P.fine.partition q.1.succ
-                  (q.2.trans e)) : ℝ) *
-              P.faceAtomEnergyGap
-                q.1 (q.2.trans e) ≤
-              (fineBound : ℝ) *
-                P.faceAtomEnergyGap
-                  q.1 (q.2.trans e) :=
-            mul_le_mul_of_nonneg_right
-              (Nat.cast_le.mpr
-                (hfine q.1.succ (q.2.trans e)))
-              (P.faceAtomEnergyGap_nonneg
-                q.1 (q.2.trans e))
-          _ ≤
-              (fineBound : ℝ) *
-                P.totalAtomEnergyGap :=
-            mul_le_mul_of_nonneg_left
-              (P.faceAtomEnergyGap_le_total
-                q.1 (q.2.trans e))
-              (Nat.cast_nonneg fineBound)
-    _ =
-        (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-          ((coarseBound : ℝ) * α +
-            (fineBound : ℝ) * P.totalAtomEnergyGap / β) := by
-      simp only [Finset.sum_const, Finset.card_univ,
-        nsmul_eq_mul]
 
 end OrderedCoarseFineComplex
 
@@ -22856,43 +10073,6 @@ end OrderedCoarseFineComplex
 
 namespace ClosedOrderedAtomConfiguration
 
-/-- If a full tuple avoids every coarse-own-atom top deletion, its
-canonical coarse atom configuration is mixed-good at every positive rank. -/
-theorem isMixedGood_of_avoids_coarseTopBadBaseDeletion
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ} (hrk : r ≤ k)
-    (P : OrderedCoarseFineComplex G k r)
-    (x : Fin k → G) (α β : ℕ → ℝ)
-    (havoid :
-      ∀ e : OrderedFace k r,
-        orderedFaceTuple e x ∉
-          P.orderedCoarseTopBadBaseDeletion e α β) :
-    (ClosedOrderedAtomConfiguration.ofTuple
-      P.coarse x).IsMixedGood P α β := by
-  apply
-    (ClosedOrderedAtomConfiguration.ofTuple
-      P.coarse x).isMixedGood_of_avoids_coarseBadBases
-      P α β
-  intro j hj f hbad
-  obtain ⟨e, d, hde⟩ :=
-    exists_orderedFace_factor_through
-      (Nat.succ_le_iff.mpr hj) hrk f
-  apply havoid e
-  rw [
-    OrderedCoarseFineComplex.orderedCoarseTopBadBaseDeletion]
-  apply Finset.mem_biUnion.mpr
-  refine
-    ⟨⟨⟨j, hj⟩, d⟩, Finset.mem_univ _, ?_⟩
-  rw [mem_orderedFacePullbackFinset]
-  have htuple :
-      orderedFaceTuple d (orderedFaceTuple e x) =
-        orderedFaceTuple f x := by
-    rw [show
-        orderedFaceTuple d (orderedFaceTuple e x) =
-          orderedFaceTuple (d.trans e) x by rfl,
-      hde]
-  rw [htuple, hde]
-  exact hbad
 
 end ClosedOrderedAtomConfiguration
 
@@ -22925,281 +10105,14 @@ namespace Wikipedia.SzemeredisTheorem
 
 open scoped BigOperators
 
-/-- If every nonempty finite family admits one edge whose removal satisfies
-a `δ`-accurate multiplicative recurrence, the total error is at most one
-`δ` per edge. -/
-theorem abs_finiteCount_sub_prod_le_card_mul
-    {ι : Type*} [DecidableEq ι]
-    (count : Finset ι → ℝ)
-    (p : ι → ℝ)
-    {δ : ℝ} (hδ : 0 ≤ δ)
-    (hempty : count ∅ = 1)
-    (hp : ∀ i, 0 ≤ p i ∧ p i ≤ 1)
-    (hstep :
-      ∀ s : Finset ι, s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ δ)
-    (s : Finset ι) :
-    |count s - ∏ e ∈ s, p e| ≤
-      (s.card : ℝ) * δ := by
-  refine Finset.strongInductionOn s ?_
-  intro s ih
-  by_cases hs : s = ∅
-  · subst s
-    simp [hempty]
-  · have hsne : s.Nonempty :=
-      Finset.nonempty_iff_ne_empty.mpr hs
-    obtain ⟨e, he, hrec⟩ := hstep s hsne
-    have herase : s.erase e ⊂ s :=
-      Finset.erase_ssubset he
-    have hind :
-        |count (s.erase e) -
-            ∏ f ∈ s.erase e, p f| ≤
-          ((s.erase e).card : ℝ) * δ :=
-      ih (s.erase e) herase
-    have hpe0 : 0 ≤ p e := (hp e).1
-    have hpe1 : p e ≤ 1 := (hp e).2
-    have hright0 :
-        0 ≤ ((s.erase e).card : ℝ) * δ :=
-      mul_nonneg (Nat.cast_nonneg _) hδ
-    have hprod :
-        (∏ f ∈ s, p f) =
-          p e * ∏ f ∈ s.erase e, p f := by
-      exact
-        (Finset.mul_prod_erase s p he).symm
-    calc
-      |count s - ∏ f ∈ s, p f| =
-          |(count s - p e * count (s.erase e)) +
-            p e *
-              (count (s.erase e) -
-                ∏ f ∈ s.erase e, p f)| := by
-        rw [hprod]
-        congr 1
-        ring
-      _ ≤
-          |count s - p e * count (s.erase e)| +
-            |p e *
-              (count (s.erase e) -
-                ∏ f ∈ s.erase e, p f)| :=
-        abs_add_le _ _
-      _ =
-          |count s - p e * count (s.erase e)| +
-            p e *
-              |count (s.erase e) -
-                ∏ f ∈ s.erase e, p f| := by
-        rw [abs_mul, abs_of_nonneg hpe0]
-      _ ≤
-          δ + p e *
-            (((s.erase e).card : ℝ) * δ) := by
-        exact add_le_add hrec
-          (mul_le_mul_of_nonneg_left hind hpe0)
-      _ ≤
-          δ + ((s.erase e).card : ℝ) * δ := by
-        exact add_le_add le_rfl
-          (mul_le_of_le_one_left hright0 hpe1)
-      _ = (s.card : ℝ) * δ := by
-        rw [Finset.card_erase_of_mem he]
-        have hcard : 1 ≤ s.card :=
-          Finset.one_le_card.mpr hsne
-        rw [Nat.cast_sub hcard]
-        ring
 
-/-- One-sided form of the recurrence estimate. -/
-theorem finiteCount_prod_sub_card_mul_le
-    {ι : Type*} [DecidableEq ι]
-    (count : Finset ι → ℝ)
-    (p : ι → ℝ)
-    {δ : ℝ} (hδ : 0 ≤ δ)
-    (hempty : count ∅ = 1)
-    (hp : ∀ i, 0 ≤ p i ∧ p i ≤ 1)
-    (hstep :
-      ∀ s : Finset ι, s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ δ)
-    (s : Finset ι) :
-    (∏ e ∈ s, p e) - (s.card : ℝ) * δ ≤
-      count s := by
-  have habs :=
-    abs_finiteCount_sub_prod_le_card_mul
-      count p hδ hempty hp hstep s
-  exact
-    sub_le_iff_le_add.mpr
-      ((abs_le.mp habs).1 |>
-        fun h => by linarith)
 
-/-- If every main density is at least `α`, the finite count is bounded
-below by `α` to the number of edges minus the accumulated error. -/
-theorem pow_sub_card_mul_le_finiteCount
-    {ι : Type*} [DecidableEq ι]
-    (count : Finset ι → ℝ)
-    (p : ι → ℝ)
-    {α δ : ℝ} (hα : 0 ≤ α) (hδ : 0 ≤ δ)
-    (hempty : count ∅ = 1)
-    (hp : ∀ i, 0 ≤ p i ∧ p i ≤ 1)
-    (hpLower : ∀ i, α ≤ p i)
-    (hstep :
-      ∀ s : Finset ι, s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ δ)
-    (s : Finset ι) :
-    α ^ s.card - (s.card : ℝ) * δ ≤ count s := by
-  have hproduct :
-      α ^ s.card ≤ ∏ e ∈ s, p e := by
-    calc
-      α ^ s.card =
-          ∏ _e ∈ s, α := by simp
-      _ ≤ ∏ e ∈ s, p e := by
-        apply Finset.prod_le_prod
-        · intro e he
-          exact hα
-        · intro e he
-          exact hpLower e
-  exact le_trans
-    (sub_le_sub_right hproduct _)
-    (finiteCount_prod_sub_card_mul_le
-      count p hδ hempty hp hstep s)
 
-/-- Positive-count stopping criterion for the abstract edge recurrence. -/
-theorem finiteCount_pos_of_card_mul_lt_pow
-    {ι : Type*} [DecidableEq ι]
-    (count : Finset ι → ℝ)
-    (p : ι → ℝ)
-    {α δ : ℝ} (hα : 0 ≤ α) (hδ : 0 ≤ δ)
-    (hempty : count ∅ = 1)
-    (hp : ∀ i, 0 ≤ p i ∧ p i ≤ 1)
-    (hpLower : ∀ i, α ≤ p i)
-    (hstep :
-      ∀ s : Finset ι, s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ δ)
-    (s : Finset ι)
-    (hsmall : (s.card : ℝ) * δ < α ^ s.card) :
-    0 < count s := by
-  have hlower :=
-    pow_sub_card_mul_le_finiteCount
-      count p hα hδ hempty hp hpLower hstep s
-  linarith
 
 /-! ## Edge-dependent recurrence errors -/
 
-/-- Variable-error form of the finite multiplicative recurrence.  The
-error attached to a removed edge is charged exactly once. -/
-theorem abs_finiteCount_sub_prod_le_sum_error
-    {ι : Type*} [DecidableEq ι]
-    (count : Finset ι → ℝ)
-    (p error : ι → ℝ)
-    (herror : ∀ i, 0 ≤ error i)
-    (hempty : count ∅ = 1)
-    (hp : ∀ i, 0 ≤ p i ∧ p i ≤ 1)
-    (hstep :
-      ∀ s : Finset ι, s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ error e)
-    (s : Finset ι) :
-    |count s - ∏ e ∈ s, p e| ≤
-      ∑ e ∈ s, error e := by
-  refine Finset.strongInductionOn s ?_
-  intro s ih
-  by_cases hs : s = ∅
-  · subst s
-    simp [hempty]
-  · have hsne : s.Nonempty :=
-      Finset.nonempty_iff_ne_empty.mpr hs
-    obtain ⟨e, he, hrec⟩ := hstep s hsne
-    have herase : s.erase e ⊂ s :=
-      Finset.erase_ssubset he
-    have hind :
-        |count (s.erase e) -
-            ∏ f ∈ s.erase e, p f| ≤
-          ∑ f ∈ s.erase e, error f :=
-      ih (s.erase e) herase
-    have hpe0 : 0 ≤ p e := (hp e).1
-    have hpe1 : p e ≤ 1 := (hp e).2
-    have hsum0 :
-        0 ≤ ∑ f ∈ s.erase e, error f :=
-      Finset.sum_nonneg fun f _ => herror f
-    have hprod :
-        (∏ f ∈ s, p f) =
-          p e * ∏ f ∈ s.erase e, p f := by
-      exact
-        (Finset.mul_prod_erase s p he).symm
-    calc
-      |count s - ∏ f ∈ s, p f| =
-          |(count s - p e * count (s.erase e)) +
-            p e *
-              (count (s.erase e) -
-                ∏ f ∈ s.erase e, p f)| := by
-        rw [hprod]
-        congr 1
-        ring
-      _ ≤
-          |count s - p e * count (s.erase e)| +
-            |p e *
-              (count (s.erase e) -
-                ∏ f ∈ s.erase e, p f)| :=
-        abs_add_le _ _
-      _ =
-          |count s - p e * count (s.erase e)| +
-            p e *
-              |count (s.erase e) -
-                ∏ f ∈ s.erase e, p f| := by
-        rw [abs_mul, abs_of_nonneg hpe0]
-      _ ≤
-          error e +
-            p e * (∑ f ∈ s.erase e, error f) := by
-        exact add_le_add hrec
-          (mul_le_mul_of_nonneg_left hind hpe0)
-      _ ≤
-          error e + ∑ f ∈ s.erase e, error f := by
-        exact add_le_add le_rfl
-          (mul_le_of_le_one_left hsum0 hpe1)
-      _ = ∑ f ∈ s, error f := by
-        rw [← Finset.sum_erase_add s error he]
-        ring
 
-/-- One-sided variable-error form of the recurrence estimate. -/
-theorem finiteCount_prod_sub_sum_error_le
-    {ι : Type*} [DecidableEq ι]
-    (count : Finset ι → ℝ)
-    (p error : ι → ℝ)
-    (herror : ∀ i, 0 ≤ error i)
-    (hempty : count ∅ = 1)
-    (hp : ∀ i, 0 ≤ p i ∧ p i ≤ 1)
-    (hstep :
-      ∀ s : Finset ι, s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ error e)
-    (s : Finset ι) :
-    (∏ e ∈ s, p e) - (∑ e ∈ s, error e) ≤
-      count s := by
-  have habs :=
-    abs_finiteCount_sub_prod_le_sum_error
-      count p error herror hempty hp hstep s
-  exact
-    sub_le_iff_le_add.mpr
-      ((abs_le.mp habs).1 |>
-        fun h => by linarith)
 
-/-- Positive-count stopping criterion with one prescribed error per edge. -/
-theorem finiteCount_pos_of_sum_error_lt_prod
-    {ι : Type*} [DecidableEq ι]
-    (count : Finset ι → ℝ)
-    (p error : ι → ℝ)
-    (herror : ∀ i, 0 ≤ error i)
-    (hempty : count ∅ = 1)
-    (hp : ∀ i, 0 ≤ p i ∧ p i ≤ 1)
-    (hstep :
-      ∀ s : Finset ι, s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ error e)
-    (s : Finset ι)
-    (hsmall :
-      (∑ e ∈ s, error e) < ∏ e ∈ s, p e) :
-    0 < count s := by
-  have hlower :=
-    finiteCount_prod_sub_sum_error_le
-      count p error herror hempty hp hstep s
-  linarith
 
 end Wikipedia.SzemeredisTheorem
 
@@ -23313,252 +10226,20 @@ theorem boundary_rank_lt
   simp only [rank, boundary_lowerRank]
   omega
 
-/-- Restriction to the canonical positive boundary face is coordinate
-erasure, up to the definitional rank normalization in `boundary`. -/
-theorem orderedFaceTuple_boundary
-    {G : Type*} {k r : ℕ}
-    (e : PositiveOrderedFace k r)
-    (hpos : 0 < e.lowerRank.1)
-    (i : Fin (e.lowerRank.1 + 1))
-    (x : Fin k → G) :
-    orderedFaceTuple (e.boundary hpos i).face x =
-      (by
-        have hj :
-            (e.boundary hpos i).lowerRank.1 + 1 =
-              e.lowerRank.1 := by
-          simp only [boundary_lowerRank]
-          omega
-        exact hj ▸
-          eraseBoundaryCoordinate i
-            (orderedFaceTuple e.face x)) := by
-  rcases e with ⟨⟨n, hn⟩, face⟩
-  cases n with
-  | zero => simp at hpos
-  | succ n =>
-      rfl
 
 end PositiveOrderedFace
 
-/-- A positive face family contains every positive immediate boundary face
-of each of its members. -/
-def IsDownwardClosedPositiveFaces
-    {k r : ℕ}
-    (s : Finset (PositiveOrderedFace k r)) : Prop :=
-  ∀ (e : PositiveOrderedFace k r), e ∈ s →
-    ∀ (hpos : 0 < e.lowerRank.1)
-      (i : Fin (e.lowerRank.1 + 1)),
-      e.boundary hpos i ∈ s
 
-theorem downwardClosed_empty
-    {k r : ℕ} :
-    IsDownwardClosedPositiveFaces
-      (∅ : Finset (PositiveOrderedFace k r)) := by
-  intro e he
-  simp at he
 
-/-- The full family of positive ordered faces is downward closed. -/
-theorem downwardClosed_univ
-    {k r : ℕ} :
-    IsDownwardClosedPositiveFaces
-      (Finset.univ : Finset (PositiveOrderedFace k r)) := by
-  intro e _ hpos i
-  exact Finset.mem_univ _
 
-/-- Every nonempty finite positive-face family has a face of maximum rank. -/
-theorem exists_maxRank_mem
-    {k r : ℕ}
-    (s : Finset (PositiveOrderedFace k r))
-    (hs : s.Nonempty) :
-    ∃ e ∈ s, ∀ f ∈ s, f.rank ≤ e.rank := by
-  classical
-  induction s using Finset.induction with
-  | empty =>
-      exact (Finset.not_nonempty_empty hs).elim
-  | @insert a s ha ih =>
-      by_cases hs0 : s.Nonempty
-      · obtain ⟨e, he, hmax⟩ := ih hs0
-        by_cases hae : a.rank ≤ e.rank
-        · refine ⟨e, Finset.mem_insert_of_mem he, ?_⟩
-          intro f hf
-          rw [Finset.mem_insert] at hf
-          rcases hf with rfl | hf
-          · exact hae
-          · exact hmax f hf
-        · refine ⟨a, by simp, ?_⟩
-          intro f hf
-          rw [Finset.mem_insert] at hf
-          rcases hf with rfl | hf
-          · exact le_rfl
-          · exact le_trans (hmax f hf) (Nat.le_of_not_ge hae)
-      · have hsEmpty : s = ∅ :=
-          Finset.not_nonempty_iff_eq_empty.mp hs0
-        subst s
-        refine ⟨a, by simp, ?_⟩
-        intro f hf
-        have hfa : f = a := by simpa using hf
-        subst f
-        exact le_rfl
 
-/-- Erasing a maximum-rank face preserves immediate downward closure. -/
-theorem IsDownwardClosedPositiveFaces.erase_maxRank
-    {k r : ℕ}
-    {s : Finset (PositiveOrderedFace k r)}
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    {e : PositiveOrderedFace k r} (he : e ∈ s)
-    (hmax : ∀ f ∈ s, f.rank ≤ e.rank) :
-    IsDownwardClosedPositiveFaces (s.erase e) := by
-  intro f hf hpos i
-  have hfS : f ∈ s := Finset.mem_of_mem_erase hf
-  have hbS := hclosed f hfS hpos i
-  apply Finset.mem_erase.mpr
-  refine ⟨?_, hbS⟩
-  intro hbe
-  have hranklt := f.boundary_rank_lt hpos i
-  have hfle := hmax f hfS
-  subst e
-  omega
 
 /-! ## Missing coordinates for lower-or-equal rank faces -/
 
-/-- If `f` has rank at most `e` but is not `e`, then `f` omits a vertex
-coordinate of `e`. -/
-theorem exists_positiveFace_coordinate_not_mem_range
-    {k r : ℕ}
-    (e f : PositiveOrderedFace k r)
-    (hle : f.rank ≤ e.rank) (hne : f ≠ e) :
-    ∃ i : Fin (e.lowerRank.1 + 1),
-      e.face i ∉ Set.range f.face := by
-  classical
-  rcases e with ⟨ej, ef⟩
-  rcases f with ⟨fj, ff⟩
-  by_contra hnone
-  push Not at hnone
-  have hsubset :
-      Finset.univ.map ef.toEmbedding ⊆
-        Finset.univ.map ff.toEmbedding := by
-    intro v hv
-    obtain ⟨i, _hi, rfl⟩ := Finset.mem_map.mp hv
-    obtain ⟨j, hj⟩ := hnone i
-    exact Finset.mem_map.mpr
-      ⟨j, Finset.mem_univ _, hj⟩
-  have hreverseRank : ej.1 + 1 ≤ fj.1 + 1 := by
-    have hc :=
-      Finset.card_le_card hsubset
-    simpa [PositiveOrderedFace.rank] using hc
-  have hforwardRank : fj.1 + 1 ≤ ej.1 + 1 := by
-    simpa [PositiveOrderedFace.rank] using hle
-  have hlowerVal : ej.1 = fj.1 := by
-    omega
-  have hlower : ej = fj := Fin.ext hlowerVal
-  subst fj
-  have hsets :
-      Finset.univ.map ef.toEmbedding =
-        Finset.univ.map ff.toEmbedding := by
-    apply Finset.eq_of_subset_of_card_le hsubset
-    simp
-  have hrange : Set.range ef = Set.range ff := by
-    ext v
-    have hv := Finset.ext_iff.mp hsets v
-    simpa using hv
-  apply hne
-  congr
-  exact OrderEmbedding.range_inj.mp hrange.symm
 
-/-- Canonical missing coordinate for a distinct lower-or-equal rank face. -/
-noncomputable def positiveFaceMissingCoordinate
-    {k r : ℕ}
-    (e f : PositiveOrderedFace k r)
-    (hle : f.rank ≤ e.rank) (hne : f ≠ e) :
-    Fin (e.lowerRank.1 + 1) :=
-  Classical.choose
-    (exists_positiveFace_coordinate_not_mem_range
-      e f hle hne)
 
-theorem positiveFaceMissingCoordinate_not_mem_range
-    {k r : ℕ}
-    (e f : PositiveOrderedFace k r)
-    (hle : f.rank ≤ e.rank) (hne : f ≠ e) :
-    e.face (positiveFaceMissingCoordinate e f hle hne) ∉
-      Set.range f.face :=
-  Classical.choose_spec
-    (exists_positiveFace_coordinate_not_mem_range
-      e f hle hne)
 
-/-- Updating a coordinate of `e` does not change the tuple seen by any
-possibly lower-rank face `f` which omits that vertex. -/
-theorem orderedFaceTuple_split_update_eq_of_missing
-    {G : Type*} {k n m : ℕ}
-    (e : OrderedFace k n) (f : OrderedFace k m)
-    (i : Fin n)
-    (hmissing : e i ∉ Set.range f)
-    (a : G) (y : Fin n → G)
-    (z : OrderedFaceComplement e → G) :
-    orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm
-          (Function.update y i a, z)) =
-      orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm (y, z)) := by
-  funext t
-  by_cases hfe : f t ∈ Set.range e
-  · obtain ⟨q, hq⟩ := hfe
-    have hqi : q ≠ i := by
-      intro h
-      apply hmissing
-      exact ⟨t, (h ▸ hq).symm⟩
-    have hleft :=
-      congrFun
-        (orderedFaceTuple_splitOrderedFaceEquiv_symm
-          e (Function.update y i a) z) q
-    have hright :=
-      congrFun
-        (orderedFaceTuple_splitOrderedFaceEquiv_symm
-          e y z) q
-    change
-      ((splitOrderedFaceEquiv e).symm
-          (Function.update y i a, z)) (e q) =
-        Function.update y i a q at hleft
-    change
-      ((splitOrderedFaceEquiv e).symm (y, z)) (e q) =
-        y q at hright
-    change
-      ((splitOrderedFaceEquiv e).symm
-          (Function.update y i a, z)) (f t) =
-        ((splitOrderedFaceEquiv e).symm (y, z)) (f t)
-    rw [← hq, hleft, hright]
-    simp [hqi]
-  · let v : OrderedFaceComplement e := ⟨f t, hfe⟩
-    have hleft :=
-      congrFun
-        (orderedFaceComplementTuple_splitOrderedFaceEquiv_symm
-          e (Function.update y i a) z) v
-    have hright :=
-      congrFun
-        (orderedFaceComplementTuple_splitOrderedFaceEquiv_symm
-          e y z) v
-    exact hleft.trans hright.symm
 
-/-- Erasing and reinserting a missing coordinate does not change a face
-which omits that coordinate. -/
-theorem orderedFaceTuple_split_insertErased_eq_of_missing
-    {G : Type*} [DecidableEq G] {k j m : ℕ}
-    (e : OrderedFace k (j + 1)) (f : OrderedFace k m)
-    (i : Fin (j + 1))
-    (hmissing : e i ∉ Set.range f)
-    (a : G) (y : Fin (j + 1) → G)
-    (z : OrderedFaceComplement e → G) :
-    orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm
-          (Fin.insertNth i a
-            (eraseBoundaryCoordinate i y), z)) =
-      orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm (y, z)) := by
-  have hinsert :
-      Fin.insertNth i a (eraseBoundaryCoordinate i y) =
-        Function.update y i a := by
-    exact Fin.insertNth_removeNth i a y
-  rw [hinsert]
-  exact orderedFaceTuple_split_update_eq_of_missing
-    e f i hmissing a y z
 
 /-! ## Selected atom weights and counts -/
 
@@ -23625,37 +10306,8 @@ noncomputable def fullConfigurationCount
     (A : ClosedOrderedAtomConfiguration G k r C) : ℝ :=
   partialConfigurationCount A Finset.univ
 
-@[simp]
-theorem partialConfigurationWeight_empty
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (x : Fin k → G) :
-    partialConfigurationWeight A ∅ x = 1 := by
-  simp [partialConfigurationWeight]
 
-@[simp]
-theorem partialConfigurationCount_empty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C) :
-    partialConfigurationCount A ∅ = 1 := by
-  change mean (fun _x : Fin k → G => (1 : ℝ)) = 1
-  exact mean_const 1
 
-theorem partialConfigurationWeight_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r))
-    (x : Fin k → G) :
-    0 ≤ partialConfigurationWeight A s x := by
-  unfold partialConfigurationWeight
-  exact Finset.prod_nonneg fun e he =>
-    configurationFaceWeight_nonneg A e _
 
 theorem partialConfigurationWeight_le_one
     {G : Type*} [Fintype G] [DecidableEq G]
@@ -23674,181 +10326,11 @@ theorem partialConfigurationWeight_le_one
 
 /-! ## Freezing and grouping a maximum-rank remainder -/
 
-/-- Reconstructing an erased coordinate leaves a lower-or-equal rank face
-unchanged when that face omits the reconstructed vertex. -/
-theorem orderedFaceTuple_split_insertNth_erase_eq_of_missing
-    {G : Type*} [DecidableEq G] {k j m : ℕ}
-    (e : OrderedFace k (j + 1)) (f : OrderedFace k m)
-    (i : Fin (j + 1))
-    (hmissing : e i ∉ Set.range f)
-    (a : G) (y : Fin (j + 1) → G)
-    (z : OrderedFaceComplement e → G) :
-    orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm
-          (Fin.insertNth i a (eraseCoordinate i y), z)) =
-      orderedFaceTuple f
-        ((splitOrderedFaceEquiv e).symm (y, z)) := by
-  rw [insertNth_eraseCoordinate_eq_update]
-  exact orderedFaceTuple_split_update_eq_of_missing
-    e f i hmissing a y z
 
-/-- Totalized canonical missing coordinate for the grouped remainder.
-Only its value on members of `s.erase e` is used. -/
-noncomputable def configurationMissingCoordinate
-    {k r : ℕ}
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax : ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (f : PositiveOrderedFace k r) :
-    Fin (e.lowerRank.1 + 1) := by
-  classical
-  by_cases hf : f ∈ s.erase e
-  · exact positiveFaceMissingCoordinate e f
-      (hmax f hf) (Finset.mem_erase.mp hf).1
-  · exact 0
 
-theorem configurationMissingCoordinate_not_mem_range
-    {k r : ℕ}
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax : ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    {f : PositiveOrderedFace k r}
-    (hf : f ∈ s.erase e) :
-    e.face
-        (configurationMissingCoordinate s e hmax f) ∉
-      Set.range f.face := by
-  rw [configurationMissingCoordinate]
-  simp only [dif_pos hf]
-  exact positiveFaceMissingCoordinate_not_mem_range
-    e f (hmax f hf) (Finset.mem_erase.mp hf).1
 
-/-- Group the factors remaining after a maximum-rank face under canonical
-missing coordinates.  Once the outside variables are frozen this is a
-bounded boundary cut test on the selected face tuple. -/
-noncomputable def configurationRemainderCutTest
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax : ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (a : G)
-    (z : OrderedFaceComplement e.face → G) :
-    CutTestFamily G (e.lowerRank.1 + 1) :=
-  fun i y =>
-    ∏ f ∈ s.erase e,
-      if _hcoord :
-          configurationMissingCoordinate s e hmax f = i
-      then
-        configurationFaceWeight A f
-          (orderedFaceTuple f.face
-            ((splitOrderedFaceEquiv e.face).symm
-              (Fin.insertNth i a y, z)))
-      else 1
 
-/-- The grouped remainder cut test takes values in `[0,1]`. -/
-theorem configurationRemainderCutTest_bounded
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax : ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (a : G)
-    (z : OrderedFaceComplement e.face → G) :
-    IsBoundedCutTest
-      (configurationRemainderCutTest A s e hmax a z) := by
-  constructor
-  · intro i y
-    unfold configurationRemainderCutTest
-    apply Finset.prod_nonneg
-    intro f hf
-    split_ifs
-    · exact configurationFaceWeight_nonneg A f _
-    · positivity
-  · intro i y
-    unfold configurationRemainderCutTest
-    apply Finset.prod_le_one
-    · intro f hf
-      split_ifs
-      · exact configurationFaceWeight_nonneg A f _
-      · positivity
-    · intro f hf
-      split_ifs
-      · exact configurationFaceWeight_le_one A f _
-      · exact le_rfl
 
-/-- Evaluating the grouped cut product recovers the complete product of the
-remaining selected atom factors. -/
-theorem cutTestProduct_configurationRemainderCutTest
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax : ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (a : G)
-    (y : Fin (e.lowerRank.1 + 1) → G)
-    (z : OrderedFaceComplement e.face → G) :
-    cutTestProduct
-        (configurationRemainderCutTest A s e hmax a z) y =
-      partialConfigurationWeight A (s.erase e)
-        ((splitOrderedFaceEquiv e.face).symm (y, z)) := by
-  classical
-  unfold cutTestProduct configurationRemainderCutTest
-  rw [Finset.prod_comm]
-  unfold partialConfigurationWeight
-  apply Finset.prod_congr rfl
-  intro f hf
-  let i :=
-    configurationMissingCoordinate s e hmax f
-  have hmissing :
-      e.face i ∉ Set.range f.face :=
-    configurationMissingCoordinate_not_mem_range
-      s e hmax hf
-  calc
-    (∏ q : Fin (e.lowerRank.1 + 1),
-        if hcoord :
-            configurationMissingCoordinate s e hmax f = q
-        then
-          configurationFaceWeight A f
-            (orderedFaceTuple f.face
-              ((splitOrderedFaceEquiv e.face).symm
-                (Fin.insertNth q a
-                  (eraseCoordinate q y), z)))
-        else 1) =
-        (if hcoord :
-            configurationMissingCoordinate s e hmax f = i
-        then
-          configurationFaceWeight A f
-            (orderedFaceTuple f.face
-              ((splitOrderedFaceEquiv e.face).symm
-                (Fin.insertNth i a
-                  (eraseCoordinate i y), z)))
-        else 1) := by
-      apply Fintype.prod_eq_single i
-      intro q hqi
-      have hne :
-          configurationMissingCoordinate s e hmax f ≠ q := by
-        intro h
-        exact hqi h.symm
-      simp [hne]
-    _ =
-        configurationFaceWeight A f
-          (orderedFaceTuple f.face
-            ((splitOrderedFaceEquiv e.face).symm
-              (Fin.insertNth i a
-                (eraseCoordinate i y), z))) := by
-      simp [i]
-    _ =
-        configurationFaceWeight A f
-          (orderedFaceTuple f.face
-            ((splitOrderedFaceEquiv e.face).symm (y, z))) := by
-      rw [orderedFaceTuple_split_insertNth_erase_eq_of_missing
-        e.face f.face i hmissing a y z]
 
 /-! ## Coarse densities, defects, and boundary support -/
 
@@ -23861,131 +10343,15 @@ def positiveFaceLowerLayer
     OrderedFacePartitionSystem G k e.lowerRank.1 :=
   C.partition e.lowerRank.castSucc
 
-/-- Coarse conditional density of the selected fine atom at one face. -/
-noncomputable def configurationCoarseDensity
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r) : ℝ :=
-  orderedBoundaryStructured
-    (positiveFaceLowerLayer P.coarse e)
-    e.face
-    (partitionAtomIndicator
-      (P.fine.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face))
-    (orderedFaceTuple e.face A.witness)
 
-/-- Fine conditional density of the selected atom. -/
-noncomputable def configurationFineDensity
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) : ℝ :=
-  orderedBoundaryStructured
-    (positiveFaceLowerLayer P.fine e)
-    e.face
-    (partitionAtomIndicator
-      (P.fine.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face))
-    y
 
-/-- Fine conditional density minus the constant coarse density selected by
-the closed configuration. -/
-noncomputable def configurationDefect
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) : ℝ :=
-  configurationFineDensity P A e y -
-    configurationCoarseDensity P A e
 
-/-- Residual of the selected atom after conditioning on the fine boundary. -/
-noncomputable def configurationUniform
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) : ℝ :=
-  configurationFaceWeight A e y -
-    configurationFineDensity P A e y
 
-/-- Indicator of the canonical coarse boundary atom determined by the
-configuration witness. -/
-noncomputable def configurationBoundaryIndicator
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) : ℝ :=
-  partitionAtomIndicator
-    (orderedBoundaryPartition
-      (positiveFaceLowerLayer P.coarse e) e.face)
-    (orderedBoundaryAtomAt
-      (positiveFaceLowerLayer P.coarse e) e.face
-      (orderedFaceTuple e.face A.witness))
-    y
 
-theorem configurationCoarseDensity_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r) :
-    0 ≤ configurationCoarseDensity P A e := by
-  exact conditionalMean_nonneg _
-    (partitionAtomIndicator_nonneg _ _) _
 
-theorem configurationCoarseDensity_le_one
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r) :
-    configurationCoarseDensity P A e ≤ 1 := by
-  exact conditionalMean_le_one _
-    (partitionAtomIndicator_le_one _ _) _
 
-theorem configurationBoundaryIndicator_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    0 ≤ configurationBoundaryIndicator P A e y :=
-  partitionAtomIndicator_nonneg _ _ _
 
-theorem configurationBoundaryIndicator_le_one
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    configurationBoundaryIndicator P A e y ≤ 1 :=
-  partitionAtomIndicator_le_one _ _ _
 
-/-- Exact selected-edge decomposition with a constant coarse main term. -/
-theorem configurationFaceWeight_decompose
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    configurationFaceWeight A e y =
-      configurationCoarseDensity P A e +
-        configurationDefect P A e y +
-        configurationUniform P A e y := by
-  unfold configurationDefect configurationUniform
-  ring
 
 /-- A nonzero selected factor on an immediate positive boundary face puts
 the erased tuple in the corresponding coarse boundary atom. -/
@@ -24053,920 +10419,38 @@ theorem coarse_boundary_mem_of_boundary_weight_ne_zero
       simpa [f, j, positiveFaceLowerLayer,
         OrderedPartitionComplex.layer] using hcoarse'
 
-/-- On a downward-closed family, the remainder after removing a
-maximum-rank face is supported on that face's canonical coarse boundary
-atom. -/
-theorem configurationBoundaryIndicator_mul_remainder
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (x : Fin k → G) :
-    configurationBoundaryIndicator P A e
-          (orderedFaceTuple e.face x) *
-        partialConfigurationWeight A (s.erase e) x =
-      partialConfigurationWeight A (s.erase e) x := by
-  by_cases hrem :
-      partialConfigurationWeight A (s.erase e) x = 0
-  · rw [hrem, mul_zero]
-  · have hbaseMem :
-        orderedFaceTuple e.face x ∈
-          (orderedBoundaryAtomAt
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (orderedFaceTuple e.face A.witness)).1 := by
-      rw [mem_orderedBoundaryAtomAt_iff]
-      intro i
-      by_cases hzero : e.lowerRank.1 = 0
-      · have heq :
-            eraseBoundaryCoordinate i
-                (orderedFaceTuple e.face x) =
-              eraseBoundaryCoordinate i
-                (orderedFaceTuple e.face A.witness) := by
-          funext q
-          have hq : q.1 < 0 := by
-            simpa [hzero] using q.2
-          omega
-        rw [heq]
-        exact
-          (positiveFaceLowerLayer P.coarse e
-            (eraseBoundaryFace e.face i)).mem_part
-            (Finset.mem_univ _)
-      · have hpos : 0 < e.lowerRank.1 :=
-          Nat.pos_of_ne_zero hzero
-        let f := e.boundary hpos i
-        have hfS : f ∈ s :=
-          hclosed e he hpos i
-        have hfe : f ≠ e := by
-          intro h
-          have hlt := e.boundary_rank_lt hpos i
-          change e.boundary hpos i = e at h
-          rw [h] at hlt
-          exact (Nat.lt_irrefl _ hlt)
-        have hfErase : f ∈ s.erase e :=
-          Finset.mem_erase.mpr ⟨hfe, hfS⟩
-        have hfactor :
-            configurationFaceWeight A f
-                (orderedFaceTuple f.face x) ≠ 0 := by
-          have hprod :
-              (∏ g ∈ s.erase e,
-                configurationFaceWeight A g
-                  (orderedFaceTuple g.face x)) ≠ 0 := by
-            simpa [partialConfigurationWeight] using hrem
-          exact Finset.prod_ne_zero_iff.mp hprod f hfErase
-        exact coarse_boundary_mem_of_boundary_weight_ne_zero
-          P A e hpos i x hfactor
-    rw [configurationBoundaryIndicator,
-      partitionAtomIndicator_of_mem _ _ hbaseMem,
-      one_mul]
 
 /-! ## Selected-face contributions and exact decomposition -/
 
-/-- The contribution of a function on one selected face against all
-remaining configuration factors. -/
-noncomputable def configurationContribution
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (q : (Fin (e.lowerRank.1 + 1) → G) → ℝ) : ℝ :=
-  mean fun x : Fin k → G =>
-    q (orderedFaceTuple e.face x) *
-      partialConfigurationWeight A (s.erase e) x
 
-/-- Pulling out a selected factor leaves precisely the erased-family
-weight. -/
-theorem partialConfigurationWeight_eq_face_mul_erase
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (x : Fin k → G) :
-    partialConfigurationWeight A s x =
-      configurationFaceWeight A e
-          (orderedFaceTuple e.face x) *
-        partialConfigurationWeight A (s.erase e) x := by
-  unfold partialConfigurationWeight
-  exact
-    (Finset.mul_prod_erase s
-      (fun f =>
-        configurationFaceWeight A f
-          (orderedFaceTuple f.face x)) he).symm
 
-/-- The exact coarse/defect/uniform decomposition after selecting one
-face. -/
-theorem partialConfigurationCount_decompose
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r) (he : e ∈ s) :
-    partialConfigurationCount A s =
-      configurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e) +
-        configurationContribution A s e
-          (configurationDefect P A e) +
-        configurationContribution A s e
-          (configurationUniform P A e) := by
-  rw [partialConfigurationCount, partialConfigurationCount]
-  have hpoint :
-      partialConfigurationWeight A s =
-        fun x =>
-          configurationCoarseDensity P A e *
-              partialConfigurationWeight A (s.erase e) x +
-            configurationDefect P A e
-                (orderedFaceTuple e.face x) *
-              partialConfigurationWeight A (s.erase e) x +
-            configurationUniform P A e
-                (orderedFaceTuple e.face x) *
-              partialConfigurationWeight A (s.erase e) x := by
-    funext x
-    rw [partialConfigurationWeight_eq_face_mul_erase
-      A s e he x,
-      configurationFaceWeight_decompose P A e]
-    ring
-  rw [hpoint, mean_add, mean_add, mean_smul]
-  rfl
 
-/-- Full regularity at every rank specializes to the fine-boundary
-regularity state attached to a positive face and the selected fine atom. -/
-theorem configurationFace_isFaceCutRegular
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (e : PositiveOrderedFace k r) :
-    (⟨orderedBoundaryPartition
-        (positiveFaceLowerLayer P.fine e) e.face⟩ :
-      FaceRegularityState
-        (Fin (e.lowerRank.1 + 1) → G)).IsFaceCutRegular
-      (partitionAtomIndicator
-        (P.fine.partition e.lowerRank.succ e.face)
-        (A.atom e.lowerRank.succ e.face))
-      (ε e.lowerRank) := by
-  rw [positiveFaceLowerLayer]
-  exact
-    (hregular e.lowerRank).toBounded
-      e.face
-      (A.atom e.lowerRank.succ e.face)
 
-/-- Rank-scheduled configuration goodness specializes to any positive
-ordered face. -/
-theorem ClosedOrderedAtomConfiguration.IsGood.atPositiveFace
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    (e : PositiveOrderedFace k r) :
-    OrderedAtomIsGoodAtBoundary
-      (positiveFaceLowerLayer P.fine e)
-      (positiveFaceLowerLayer P.coarse e)
-      e.face
-      (P.fine.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face)
-      (orderedFaceTuple e.face A.witness)
-      (α e.rank) (β e.rank) := by
-  rcases e with ⟨⟨j, hj⟩, e⟩
-  exact hgood j hj e
 
 /-! ## Uniform contribution -/
 
-/-- After freezing the coordinates outside the selected face, the uniform
-contribution is exactly a fine-boundary cut correlation. -/
-theorem configurationContribution_uniform_eq_mean_faceCutCorrelation
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (a : G) :
-    configurationContribution A s e
-        (configurationUniform P A e) =
-      mean fun z : OrderedFaceComplement e.face → G =>
-        (⟨orderedBoundaryPartition
-            (positiveFaceLowerLayer P.fine e) e.face⟩ :
-          FaceRegularityState
-            (Fin (e.lowerRank.1 + 1) → G)).faceCutCorrelation
-          (partitionAtomIndicator
-            (P.fine.partition e.lowerRank.succ e.face)
-            (A.atom e.lowerRank.succ e.face))
-          (configurationRemainderCutTest
-            A s e hmax a z) := by
-  unfold configurationContribution
-  rw [mean_splitOrderedFace e.face, mean₂_comm]
-  unfold mean₂
-  apply congrArg mean
-  funext z
-  unfold FaceRegularityState.faceCutCorrelation
-  apply congrArg mean
-  funext y
-  rw [cutTestProduct_configurationRemainderCutTest
-    A s e hmax a y z]
-  simp only [orderedFaceTuple_splitOrderedFaceEquiv_symm]
-  rfl
 
-/-- Full preliminary regularity controls the uniform term in the
-selected-face recurrence. -/
-theorem abs_configurationContribution_uniform_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank) :
-    |configurationContribution A s e
-        (configurationUniform P A e)| ≤
-      ε e.lowerRank := by
-  rw [configurationContribution_uniform_eq_mean_faceCutCorrelation
-    P A s e hmax (Classical.choice inferInstance)]
-  let S :
-      FaceRegularityState
-        (Fin (e.lowerRank.1 + 1) → G) :=
-    ⟨orderedBoundaryPartition
-      (positiveFaceLowerLayer P.fine e) e.face⟩
-  let f :
-      (Fin (e.lowerRank.1 + 1) → G) → ℝ :=
-    partitionAtomIndicator
-      (P.fine.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face)
-  calc
-    |mean fun z : OrderedFaceComplement e.face → G =>
-        S.faceCutCorrelation f
-          (configurationRemainderCutTest A s e hmax
-            (Classical.choice inferInstance) z)| ≤
-        mean fun z : OrderedFaceComplement e.face → G =>
-          |S.faceCutCorrelation f
-            (configurationRemainderCutTest A s e hmax
-              (Classical.choice inferInstance) z)| :=
-      Finset.abs_expect_le Finset.univ _
-    _ ≤
-        mean fun _z : OrderedFaceComplement e.face → G =>
-          ε e.lowerRank := by
-      apply mean_mono
-      intro z
-      exact
-        configurationFace_isFaceCutRegular
-          P A ε hregular e
-          (configurationRemainderCutTest A s e hmax
-            (Classical.choice inferInstance) z)
-          (configurationRemainderCutTest_bounded
-            A s e hmax (Classical.choice inferInstance) z)
-    _ = ε e.lowerRank := mean_const _
 
 /-! ## Localized defect contribution -/
 
-/-- On the canonical coarse boundary atom, the defect with the frozen
-coarse density is the usual pointwise fine-minus-coarse boundary defect. -/
-theorem configurationDefect_mul_boundaryIndicator
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    configurationDefect P A e y *
-        configurationBoundaryIndicator P A e y =
-      orderedAtomBoundaryDefect
-          (positiveFaceLowerLayer P.fine e)
-          (positiveFaceLowerLayer P.coarse e)
-          e.face
-          (P.fine.partition e.lowerRank.succ e.face)
-          (A.atom e.lowerRank.succ e.face) y *
-        configurationBoundaryIndicator P A e y := by
-  let Q :=
-    orderedBoundaryPartition
-      (positiveFaceLowerLayer P.coarse e) e.face
-  let b : Q.parts :=
-    orderedBoundaryAtomAt
-      (positiveFaceLowerLayer P.coarse e) e.face
-      (orderedFaceTuple e.face A.witness)
-  let f :
-      (Fin (e.lowerRank.1 + 1) → G) → ℝ :=
-    partitionAtomIndicator
-      (P.fine.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face)
-  by_cases hy : y ∈ b.1
-  · have hcoarse :
-        conditionalMean Q f y =
-          conditionalMean Q f
-            (orderedFaceTuple e.face A.witness) := by
-      exact conditionalMean_eq_of_mem_part Q f hy
-    rw [configurationBoundaryIndicator,
-      partitionAtomIndicator_of_mem _ _ hy,
-      mul_one, mul_one]
-    change
-      conditionalMean
-            (orderedBoundaryPartition
-              (positiveFaceLowerLayer P.fine e) e.face)
-            f y -
-          conditionalMean Q f
-            (orderedFaceTuple e.face A.witness) =
-        conditionalMean
-            (orderedBoundaryPartition
-              (positiveFaceLowerLayer P.fine e) e.face)
-            f y -
-          conditionalMean Q f y
-    rw [hcoarse]
-  · rw [configurationBoundaryIndicator,
-      partitionAtomIndicator_of_not_mem _ _ hy,
-      mul_zero, mul_zero]
 
-/-- Squared localized configuration defect is the library's canonical
-localized atom-defect mass. -/
-theorem mean_sq_configurationDefect_mul_boundaryIndicator
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (e : PositiveOrderedFace k r) :
-    mean (fun y =>
-      (configurationDefect P A e y *
-        configurationBoundaryIndicator P A e y) ^ 2) =
-      orderedLocalizedAtomDefectSq
-        (positiveFaceLowerLayer P.fine e)
-        (positiveFaceLowerLayer P.coarse e)
-        e.face
-        (P.fine.partition e.lowerRank.succ e.face)
-        (A.atom e.lowerRank.succ e.face)
-        (orderedBoundaryAtomAt
-          (positiveFaceLowerLayer P.coarse e)
-          e.face
-          (orderedFaceTuple e.face A.witness)) := by
-  unfold orderedLocalizedAtomDefectSq
-  apply congrArg mean
-  funext y
-  rw [configurationDefect_mul_boundaryIndicator P A e y,
-    mul_pow]
-  rw [show
-    configurationBoundaryIndicator P A e y ^ 2 =
-      configurationBoundaryIndicator P A e y by
-        exact partitionAtomIndicator_sq _ _ _]
-  rfl
 
-/-- A boundary atom indicator has normalized mass at most one. -/
-theorem orderedBoundaryAtomMass_le_one
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k j : ℕ}
-    (coarse : OrderedFacePartitionSystem G k j)
-    (e : OrderedFace k (j + 1))
-    (b : (orderedBoundaryPartition coarse e).parts) :
-    orderedBoundaryAtomMass coarse e b ≤ 1 := by
-  unfold orderedBoundaryAtomMass
-  exact mean_le_of_le_const fun y =>
-    partitionAtomIndicator_le_one _ _ y
 
-/-- The squared remainder has normalized mean at most one. -/
-theorem mean_sq_partialConfigurationWeight_le_one
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r)) :
-    mean (fun x : Fin k → G =>
-      partialConfigurationWeight A s x ^ 2) ≤ 1 := by
-  apply mean_le_of_le_const
-  intro x
-  have h0 := partialConfigurationWeight_nonneg A s x
-  have h1 := partialConfigurationWeight_le_one A s x
-  nlinarith
 
-/-- Boundary support inserts the canonical atom indicator into the defect
-contribution without changing it. -/
-theorem configurationContribution_defect_eq_localized
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s) :
-    configurationContribution A s e
-        (configurationDefect P A e) =
-      mean fun x : Fin k → G =>
-        (configurationDefect P A e
-            (orderedFaceTuple e.face x) *
-          configurationBoundaryIndicator P A e
-            (orderedFaceTuple e.face x)) *
-        partialConfigurationWeight A (s.erase e) x := by
-  unfold configurationContribution
-  apply congrArg mean
-  funext x
-  rw [mul_assoc,
-    configurationBoundaryIndicator_mul_remainder
-      P A s hclosed e he x]
 
-/-- Goodness bounds the square of the selected defect contribution by its
-rank-dependent defect threshold. -/
-theorem configurationContribution_defect_sq_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hβ : 0 ≤ β e.rank) :
-    configurationContribution A s e
-        (configurationDefect P A e) ^ 2 ≤
-      β e.rank := by
-  let u : (Fin k → G) → ℝ :=
-    fun x =>
-      configurationDefect P A e
-          (orderedFaceTuple e.face x) *
-        configurationBoundaryIndicator P A e
-          (orderedFaceTuple e.face x)
-  let v : (Fin k → G) → ℝ :=
-    partialConfigurationWeight A (s.erase e)
-  have hlocal :
-      mean (fun x : Fin k → G => u x ^ 2) ≤
-        β e.rank := by
-    have hgoodLocal :=
-      (hgood.atPositiveFace P A α β e).localized_defect
-        (positiveFaceLowerLayer P.fine e)
-        (positiveFaceLowerLayer P.coarse e)
-        e.face
-        (P.fine.partition e.lowerRank.succ e.face)
-        (A.atom e.lowerRank.succ e.face)
-        (orderedFaceTuple e.face A.witness)
-        (α e.rank) (β e.rank)
-    have hmass :
-        orderedBoundaryAtomMass
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (orderedBoundaryAtomAt
-              (positiveFaceLowerLayer P.coarse e)
-              e.face
-              (orderedFaceTuple e.face A.witness)) ≤
-          1 :=
-      orderedBoundaryAtomMass_le_one _ _ _
-    calc
-      mean (fun x : Fin k → G => u x ^ 2) =
-          mean (fun y =>
-            (configurationDefect P A e y *
-              configurationBoundaryIndicator P A e y) ^ 2) := by
-        exact mean_comp_orderedFaceTuple e.face
-          (fun y =>
-            (configurationDefect P A e y *
-              configurationBoundaryIndicator P A e y) ^ 2)
-      _ =
-          orderedLocalizedAtomDefectSq
-            (positiveFaceLowerLayer P.fine e)
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (P.fine.partition e.lowerRank.succ e.face)
-            (A.atom e.lowerRank.succ e.face)
-            (orderedBoundaryAtomAt
-              (positiveFaceLowerLayer P.coarse e)
-              e.face
-              (orderedFaceTuple e.face A.witness)) :=
-        mean_sq_configurationDefect_mul_boundaryIndicator
-          P A e
-      _ ≤
-          β e.rank *
-            orderedBoundaryAtomMass
-              (positiveFaceLowerLayer P.coarse e)
-              e.face
-              (orderedBoundaryAtomAt
-                (positiveFaceLowerLayer P.coarse e)
-                e.face
-                (orderedFaceTuple e.face A.witness)) :=
-        hgoodLocal
-      _ ≤ β e.rank := by
-        exact mul_le_of_le_one_right hβ hmass
-  have hv0 :
-      0 ≤ mean (fun x : Fin k → G => v x ^ 2) :=
-    mean_nonneg fun x => sq_nonneg _
-  have hv1 :
-      mean (fun x : Fin k → G => v x ^ 2) ≤ 1 :=
-    mean_sq_partialConfigurationWeight_le_one
-      A (s.erase e)
-  calc
-    configurationContribution A s e
-        (configurationDefect P A e) ^ 2 =
-        mean (fun x : Fin k → G => u x * v x) ^ 2 := by
-      rw [configurationContribution_defect_eq_localized
-        P A s hclosed e he]
-    _ ≤
-        mean (fun x : Fin k → G => u x ^ 2) *
-          mean (fun x : Fin k → G => v x ^ 2) :=
-      mean_mul_sq_le_product u v
-    _ ≤
-        β e.rank *
-          mean (fun x : Fin k → G => v x ^ 2) :=
-      mul_le_mul_of_nonneg_right hlocal hv0
-    _ ≤ β e.rank :=
-      mul_le_of_le_one_right hβ hv1
 
-/-- If the scheduled defect threshold is below `δ²`, the absolute defect
-contribution is at most `δ`. -/
-theorem abs_configurationContribution_defect_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    {δ : ℝ} (hδ : 0 ≤ δ)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hβ0 : 0 ≤ β e.rank)
-    (hβδ : β e.rank ≤ δ ^ 2) :
-    |configurationContribution A s e
-        (configurationDefect P A e)| ≤ δ := by
-  have hsquare :
-      |configurationContribution A s e
-          (configurationDefect P A e)| ^ 2 ≤
-        δ ^ 2 := by
-    rw [sq_abs]
-    exact le_trans
-      (configurationContribution_defect_sq_le
-        P A α β hgood s hclosed e he hβ0)
-      hβδ
-  exact
-    (sq_le_sq₀
-      (abs_nonneg
-        (configurationContribution A s e
-          (configurationDefect P A e)))
-      hδ).mp hsquare
 
 /-! ## The one-face recurrence -/
 
-/-- At a maximum-rank face of a downward-closed family, the partial count
-satisfies the expected multiplicative recurrence, with one defect and one
-uniform error. -/
-theorem abs_partialConfigurationCount_sub_coarseDensity_mul_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    {δ : ℝ} (hδ : 0 ≤ δ)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (hβ0 : 0 ≤ β e.rank)
-    (hβδ : β e.rank ≤ δ ^ 2) :
-    |partialConfigurationCount A s -
-        configurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e)| ≤
-      δ + ε e.lowerRank := by
-  have hdefect :
-      |configurationContribution A s e
-        (configurationDefect P A e)| ≤ δ :=
-    abs_configurationContribution_defect_le
-      P A α β hgood hδ s hclosed e he hβ0 hβδ
-  have huniform :
-      |configurationContribution A s e
-        (configurationUniform P A e)| ≤
-          ε e.lowerRank :=
-    abs_configurationContribution_uniform_le
-      P A ε hregular s e hmax
-  rw [partialConfigurationCount_decompose
-    P A s e he]
-  calc
-    |configurationCoarseDensity P A e *
-            partialConfigurationCount A (s.erase e) +
-          configurationContribution A s e
-            (configurationDefect P A e) +
-          configurationContribution A s e
-            (configurationUniform P A e) -
-        configurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e)| =
-        |configurationContribution A s e
-            (configurationDefect P A e) +
-          configurationContribution A s e
-            (configurationUniform P A e)| := by
-      congr 1
-      ring
-    _ ≤
-        |configurationContribution A s e
-            (configurationDefect P A e)| +
-          |configurationContribution A s e
-            (configurationUniform P A e)| :=
-      abs_add_le _ _
-    _ ≤ δ + ε e.lowerRank :=
-      add_le_add hdefect huniform
 
-/-- Extend the genuine partial configuration count to all positive-face
-families.  Non-closed families use the exact product of coarse densities;
-this is only an induction device, and agrees with the genuine count on the
-full downward-closed family. -/
-noncomputable def extendedConfigurationCount
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (s : Finset (PositiveOrderedFace k r)) : ℝ := by
-  classical
-  exact
-    if IsDownwardClosedPositiveFaces s then
-      partialConfigurationCount A s
-    else
-      ∏ e ∈ s, configurationCoarseDensity P A e
 
-@[simp]
-theorem extendedConfigurationCount_empty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine) :
-    extendedConfigurationCount P A ∅ = 1 := by
-  rw [extendedConfigurationCount,
-    if_pos downwardClosed_empty,
-    partialConfigurationCount_empty]
 
-/-- On the full positive-face family, the extended count is the actual
-configuration count. -/
-theorem extendedConfigurationCount_univ
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine) :
-    extendedConfigurationCount P A Finset.univ =
-      fullConfigurationCount A := by
-  rw [extendedConfigurationCount,
-    if_pos downwardClosed_univ]
-  rfl
 
-/-- Goodness gives the required lower bound for every coarse main
-density. -/
-theorem configurationCoarseDensity_lower
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    (e : PositiveOrderedFace k r) :
-    α e.rank ≤ configurationCoarseDensity P A e :=
-  (hgood.atPositiveFace P A α β e).1
 
-/-- The totalized count satisfies a uniform recurrence on every nonempty
-face family.  Closed families use a maximum-rank analytic step; non-closed
-families use an exact coarse-product step. -/
-theorem extendedConfigurationCount_step
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    {η δ : ℝ} (hη : 0 ≤ η) (hδ : 0 ≤ δ)
-    (hε : ∀ j, ε j ≤ η)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ δ ^ 2)
-    (s : Finset (PositiveOrderedFace k r))
-    (hs : s.Nonempty) :
-    ∃ e ∈ s,
-      |extendedConfigurationCount P A s -
-          configurationCoarseDensity P A e *
-            extendedConfigurationCount P A (s.erase e)| ≤
-        η + δ := by
-  classical
-  by_cases hclosed : IsDownwardClosedPositiveFaces s
-  · obtain ⟨e, he, hmax⟩ :=
-      exists_maxRank_mem s hs
-    have hclosedErase :
-        IsDownwardClosedPositiveFaces (s.erase e) :=
-      hclosed.erase_maxRank he hmax
-    refine ⟨e, he, ?_⟩
-    rw [extendedConfigurationCount,
-      if_pos hclosed,
-      extendedConfigurationCount,
-      if_pos hclosedErase]
-    have hrec :=
-      abs_partialConfigurationCount_sub_coarseDensity_mul_le
-        P A α β hgood ε hregular hδ
-        s hclosed e he
-        (fun f hf => hmax f (Finset.mem_of_mem_erase hf))
-        (hβ0 e.rank) (hβδ e.rank)
-    have heps := hε e.lowerRank
-    linarith
-  · unfold IsDownwardClosedPositiveFaces at hclosed
-    push Not at hclosed
-    obtain ⟨f, hf, hpos, i, hboundary⟩ := hclosed
-    by_cases hrest : s.erase f = ∅
-    · have hsEq : s = {f} := by
-        rcases (Finset.erase_eq_empty_iff s f).mp hrest with
-          hsEmpty | hsSingleton
-        · exact (hs.ne_empty hsEmpty).elim
-        · exact hsSingleton
-      refine ⟨f, hf, ?_⟩
-      have hcountS :
-          extendedConfigurationCount P A s =
-            configurationCoarseDensity P A f := by
-        rw [extendedConfigurationCount, if_neg]
-        · simp [hsEq]
-        · intro h
-          exact hboundary (h f hf hpos i)
-      have hcountErase :
-          extendedConfigurationCount P A (s.erase f) = 1 := by
-        rw [hrest, extendedConfigurationCount_empty]
-      rw [hcountS, hcountErase, mul_one, sub_self, abs_zero]
-      exact add_nonneg hη hδ
-    · obtain ⟨e, heRest⟩ :
-          (s.erase f).Nonempty :=
-        Finset.nonempty_iff_ne_empty.mpr hrest
-      have heS : e ∈ s :=
-        Finset.mem_of_mem_erase heRest
-      have hef : e ≠ f :=
-        (Finset.mem_erase.mp heRest).1
-      have hfEraseE : f ∈ s.erase e :=
-        Finset.mem_erase.mpr ⟨hef.symm, hf⟩
-      have hclosedErase :
-          ¬IsDownwardClosedPositiveFaces (s.erase e) := by
-        intro h
-        have hb := h f hfEraseE hpos i
-        exact hboundary (Finset.mem_of_mem_erase hb)
-      refine ⟨e, heS, ?_⟩
-      have hcountS :
-          extendedConfigurationCount P A s =
-            ∏ g ∈ s,
-              configurationCoarseDensity P A g := by
-        rw [extendedConfigurationCount, if_neg]
-        intro h
-        exact hboundary (h f hf hpos i)
-      have hcountErase :
-          extendedConfigurationCount P A (s.erase e) =
-            ∏ g ∈ s.erase e,
-              configurationCoarseDensity P A g := by
-        rw [extendedConfigurationCount,
-          if_neg hclosedErase]
-      rw [hcountS, hcountErase]
-      have hprod :
-          configurationCoarseDensity P A e *
-              (∏ g ∈ s.erase e,
-                configurationCoarseDensity P A g) =
-            ∏ g ∈ s,
-              configurationCoarseDensity P A g :=
-        Finset.mul_prod_erase s
-          (configurationCoarseDensity P A) heS
-      rw [hprod, sub_self, abs_zero]
-      exact add_nonneg hη hδ
 
 /-! ## Quantitative full-count lower bound and positivity -/
 
-/-- A good closed fine-atom configuration has full count at least the
-product-density floor minus one uniform-plus-defect error per positive
-ordered face. -/
-theorem fullConfigurationCount_lower_bound
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    {ρ η δ : ℝ}
-    (hρ : 0 ≤ ρ) (hη : 0 ≤ η) (hδ : 0 ≤ δ)
-    (hα : ∀ n, ρ ≤ α n)
-    (hε : ∀ j, ε j ≤ η)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ δ ^ 2) :
-    ρ ^ Fintype.card (PositiveOrderedFace k r) -
-        (Fintype.card (PositiveOrderedFace k r) : ℝ) *
-          (η + δ) ≤
-      fullConfigurationCount A := by
-  let count :
-      Finset (PositiveOrderedFace k r) → ℝ :=
-    extendedConfigurationCount P A
-  let p : PositiveOrderedFace k r → ℝ :=
-    configurationCoarseDensity P A
-  have hempty : count ∅ = 1 :=
-    extendedConfigurationCount_empty P A
-  have hp : ∀ e, 0 ≤ p e ∧ p e ≤ 1 := by
-    intro e
-    exact
-      ⟨configurationCoarseDensity_nonneg P A e,
-        configurationCoarseDensity_le_one P A e⟩
-  have hpLower : ∀ e, ρ ≤ p e := by
-    intro e
-    exact le_trans
-      (hα e.rank)
-      (configurationCoarseDensity_lower
-        P A α β hgood e)
-  have hstep :
-      ∀ s : Finset (PositiveOrderedFace k r), s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤
-            η + δ := by
-    intro s hs
-    exact extendedConfigurationCount_step
-      P A α β hgood ε hregular
-      hη hδ hε hβ0 hβδ s hs
-  have hbound :=
-    pow_sub_card_mul_le_finiteCount
-      count p hρ (add_nonneg hη hδ)
-      hempty hp hpLower hstep
-      (Finset.univ :
-        Finset (PositiveOrderedFace k r))
-  rw [show count
-      (Finset.univ :
-        Finset (PositiveOrderedFace k r)) =
-        fullConfigurationCount A by
-      exact extendedConfigurationCount_univ P A] at hbound
-  simpa using hbound
 
-/-- **Positive configuration count.**  If the density floor to the number
-of positive ordered faces dominates the accumulated regularity and defect
-errors, then a good closed fine-atom configuration is realized by a
-positive proportion of full tuples. -/
-theorem fullConfigurationCount_pos
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.fine)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsGood P.fine P.coarse α β)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    {ρ η δ : ℝ}
-    (hρ : 0 ≤ ρ) (hη : 0 ≤ η) (hδ : 0 ≤ δ)
-    (hα : ∀ n, ρ ≤ α n)
-    (hε : ∀ j, ε j ≤ η)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ δ ^ 2)
-    (hsmall :
-      (Fintype.card (PositiveOrderedFace k r) : ℝ) *
-          (η + δ) <
-        ρ ^ Fintype.card (PositiveOrderedFace k r)) :
-    0 < fullConfigurationCount A := by
-  let count :
-      Finset (PositiveOrderedFace k r) → ℝ :=
-    extendedConfigurationCount P A
-  let p : PositiveOrderedFace k r → ℝ :=
-    configurationCoarseDensity P A
-  have hempty : count ∅ = 1 :=
-    extendedConfigurationCount_empty P A
-  have hp : ∀ e, 0 ≤ p e ∧ p e ≤ 1 := by
-    intro e
-    exact
-      ⟨configurationCoarseDensity_nonneg P A e,
-        configurationCoarseDensity_le_one P A e⟩
-  have hpLower : ∀ e, ρ ≤ p e := by
-    intro e
-    exact le_trans
-      (hα e.rank)
-      (configurationCoarseDensity_lower
-        P A α β hgood e)
-  have hstep :
-      ∀ s : Finset (PositiveOrderedFace k r), s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤
-            η + δ := by
-    intro s hs
-    exact extendedConfigurationCount_step
-      P A α β hgood ε hregular
-      hη hδ hε hβ0 hβδ s hs
-  have hpositive :=
-    finiteCount_pos_of_card_mul_lt_pow
-      count p hρ (add_nonneg hη hδ)
-      hempty hp hpLower hstep
-      (Finset.univ :
-        Finset (PositiveOrderedFace k r))
-      (by simpa using hsmall)
-  rw [show count
-      (Finset.univ :
-        Finset (PositiveOrderedFace k r)) =
-        fullConfigurationCount A by
-      exact extendedConfigurationCount_univ P A] at hpositive
-  exact hpositive
 
 end Wikipedia.SzemeredisTheorem
 
@@ -25082,45 +10566,9 @@ noncomputable def mixedConfigurationBoundaryIndicator
       (orderedFaceTuple e.face A.witness))
     y
 
-theorem mixedConfigurationCoarseDensity_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (e : PositiveOrderedFace k r) :
-    0 ≤ mixedConfigurationCoarseDensity P A e := by
-  exact conditionalMean_nonneg _
-    (partitionAtomIndicator_nonneg _ _) _
 
-theorem mixedConfigurationCoarseDensity_le_one
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (e : PositiveOrderedFace k r) :
-    mixedConfigurationCoarseDensity P A e ≤ 1 := by
-  exact conditionalMean_le_one _
-    (partitionAtomIndicator_le_one _ _) _
 
-theorem mixedConfigurationBoundaryIndicator_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    0 ≤ mixedConfigurationBoundaryIndicator P A e y :=
-  partitionAtomIndicator_nonneg _ _ _
 
-theorem mixedConfigurationBoundaryIndicator_le_one
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    mixedConfigurationBoundaryIndicator P A e y ≤ 1 :=
-  partitionAtomIndicator_le_one _ _ _
 
 /-- Exact three-term decomposition of a selected coarse atom. -/
 theorem mixedConfigurationFaceWeight_decompose
@@ -25163,62 +10611,7 @@ theorem coarse_boundary_mem_of_coarse_configuration_weight_ne_zero
     coarse_boundary_mem_of_boundary_weight_ne_zero
       P.coarseDiagonal A e hpos i x hweight
 
-/-- The remainder of a downward-closed coarse configuration is supported on
-the selected coarse boundary atom. -/
-theorem mixedConfigurationBoundaryIndicator_mul_remainder
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (x : Fin k → G) :
-    mixedConfigurationBoundaryIndicator P A e
-          (orderedFaceTuple e.face x) *
-        partialConfigurationWeight A (s.erase e) x =
-      partialConfigurationWeight A (s.erase e) x := by
-  simpa [mixedConfigurationBoundaryIndicator,
-    configurationBoundaryIndicator,
-    OrderedCoarseFineComplex.coarseDiagonal] using
-    (configurationBoundaryIndicator_mul_remainder
-      P.coarseDiagonal A s hclosed e he x)
 
-/-- Exact decomposition of a partial coarse-configuration count at one
-selected face. -/
-theorem partialConfigurationCount_mixed_decompose
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r) (he : e ∈ s) :
-    partialConfigurationCount A s =
-      mixedConfigurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e) +
-        configurationContribution A s e
-          (mixedConfigurationDefect P A e) +
-        configurationContribution A s e
-          (mixedConfigurationUniform P A e) := by
-  rw [partialConfigurationCount, partialConfigurationCount]
-  have hpoint :
-      partialConfigurationWeight A s =
-        fun x =>
-          mixedConfigurationCoarseDensity P A e *
-              partialConfigurationWeight A (s.erase e) x +
-            mixedConfigurationDefect P A e
-                (orderedFaceTuple e.face x) *
-              partialConfigurationWeight A (s.erase e) x +
-            mixedConfigurationUniform P A e
-                (orderedFaceTuple e.face x) *
-              partialConfigurationWeight A (s.erase e) x := by
-    funext x
-    rw [partialConfigurationWeight_eq_face_mul_erase
-      A s e he x,
-      mixedConfigurationFaceWeight_decompose P A e]
-    ring
-  rw [hpoint, mean_add, mean_add, mean_smul]
-  rfl
 
 /-! ## Mixed coarse-upper regularity and the uniform contribution -/
 
@@ -25235,25 +10628,6 @@ def IsFullyMixedPreliminaryOrderedRegular
       (P.coarse.partition j.succ)
       (τ j)
 
-/-- Mixed goodness specializes to a positive ordered face. -/
-theorem ClosedOrderedAtomConfiguration.IsMixedGood.atPositiveFace
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (e : PositiveOrderedFace k r) :
-    OrderedAtomIsGoodAtBoundary
-      (positiveFaceLowerLayer P.fine e)
-      (positiveFaceLowerLayer P.coarse e)
-      e.face
-      (P.coarse.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face)
-      (orderedFaceTuple e.face A.witness)
-      (α e.rank) (β e.rank) := by
-  rcases e with ⟨⟨j, hj⟩, e⟩
-  exact hgood j hj e
 
 /-- Mixed all-rank preliminary regularity specializes to the selected coarse
 upper atom at a positive face. -/
@@ -25280,146 +10654,9 @@ theorem mixedConfigurationFace_isFaceCutRegular
       e.face
       (A.atom e.lowerRank.succ e.face)
 
-/-- After freezing the outside coordinates, the mixed uniform contribution
-is a fine-boundary cut correlation of the selected coarse upper atom. -/
-theorem mixedConfigurationContribution_uniform_eq_mean_faceCutCorrelation
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (a : G) :
-    configurationContribution A s e
-        (mixedConfigurationUniform P A e) =
-      mean fun z : OrderedFaceComplement e.face → G =>
-        (⟨orderedBoundaryPartition
-            (positiveFaceLowerLayer P.fine e) e.face⟩ :
-          FaceRegularityState
-            (Fin (e.lowerRank.1 + 1) → G)).faceCutCorrelation
-          (partitionAtomIndicator
-            (P.coarse.partition e.lowerRank.succ e.face)
-            (A.atom e.lowerRank.succ e.face))
-          (configurationRemainderCutTest
-            A s e hmax a z) := by
-  unfold configurationContribution
-  rw [mean_splitOrderedFace e.face, mean₂_comm]
-  unfold mean₂
-  apply congrArg mean
-  funext z
-  unfold FaceRegularityState.faceCutCorrelation
-  apply congrArg mean
-  funext y
-  rw [cutTestProduct_configurationRemainderCutTest
-    A s e hmax a y z]
-  simp only [orderedFaceTuple_splitOrderedFaceEquiv_symm]
-  rfl
 
-/-- Mixed coarse-upper regularity bounds the uniform term by its scheduled
-rankwise tolerance. -/
-theorem abs_mixedConfigurationContribution_uniform_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (τ : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P τ)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank) :
-    |configurationContribution A s e
-        (mixedConfigurationUniform P A e)| ≤
-      τ e.lowerRank := by
-  rw [
-    mixedConfigurationContribution_uniform_eq_mean_faceCutCorrelation
-      P A s e hmax (Classical.choice inferInstance)]
-  let S :
-      FaceRegularityState
-        (Fin (e.lowerRank.1 + 1) → G) :=
-    ⟨orderedBoundaryPartition
-      (positiveFaceLowerLayer P.fine e) e.face⟩
-  let f :
-      (Fin (e.lowerRank.1 + 1) → G) → ℝ :=
-    partitionAtomIndicator
-      (P.coarse.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face)
-  calc
-    |mean fun z : OrderedFaceComplement e.face → G =>
-        S.faceCutCorrelation f
-          (configurationRemainderCutTest A s e hmax
-            (Classical.choice inferInstance) z)| ≤
-        mean fun z : OrderedFaceComplement e.face → G =>
-          |S.faceCutCorrelation f
-            (configurationRemainderCutTest A s e hmax
-              (Classical.choice inferInstance) z)| :=
-      Finset.abs_expect_le Finset.univ _
-    _ ≤
-        mean fun _z : OrderedFaceComplement e.face → G =>
-          τ e.lowerRank := by
-      apply mean_mono
-      intro z
-      exact
-        mixedConfigurationFace_isFaceCutRegular
-          P A τ hregular e
-          (configurationRemainderCutTest A s e hmax
-            (Classical.choice inferInstance) z)
-          (configurationRemainderCutTest_bounded
-            A s e hmax (Classical.choice inferInstance) z)
-    _ = τ e.lowerRank := mean_const _
 
-/-- Fine-upper regularity transfers to the mixed coarse-upper regularity
-needed by counting, with one fine-upper complexity factor. -/
-theorem isFullyMixedPreliminaryOrderedRegular_of_fine
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (M : Fin r → ℕ)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hcomplexity :
-      ∀ (j : Fin r) (e : OrderedFace k (j.1 + 1)),
-        FacePartition.complexity
-          (P.fine.partition j.succ e) ≤ M j) :
-    IsFullyMixedPreliminaryOrderedRegular P
-      (fun j => (M j : ℝ) * ε j) := by
-  intro j
-  exact P.preliminaryRegular_coarseUpper
-    ε hregular j (M j) (hε j) (hcomplexity j)
 
-/-- Fine regularity gives the explicit one-complexity-factor uniform error. -/
-theorem abs_mixedConfigurationContribution_uniform_le_of_fine
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (M : Fin r → ℕ)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hcomplexity :
-      ∀ (j : Fin r) (e : OrderedFace k (j.1 + 1)),
-        FacePartition.complexity
-          (P.fine.partition j.succ e) ≤ M j)
-    (s : Finset (PositiveOrderedFace k r))
-    (e : PositiveOrderedFace k r)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank) :
-    |configurationContribution A s e
-        (mixedConfigurationUniform P A e)| ≤
-      (M e.lowerRank : ℝ) * ε e.lowerRank := by
-  exact
-    abs_mixedConfigurationContribution_uniform_le
-      P A (fun j => (M j : ℝ) * ε j)
-      (isFullyMixedPreliminaryOrderedRegular_of_fine
-        P ε hregular M hε hcomplexity)
-      s e hmax
 
 /-! ## Localized mixed defect contribution -/
 
@@ -25480,652 +10717,28 @@ theorem mixedConfigurationDefect_mul_boundaryIndicator
       partitionAtomIndicator_of_not_mem _ _ hy,
       mul_zero, mul_zero]
 
-/-- The squared localized mixed defect is the canonical localized atom
-defect mass for the selected coarse upper atom. -/
-theorem mean_sq_mixedConfigurationDefect_mul_boundaryIndicator
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (e : PositiveOrderedFace k r) :
-    mean (fun y =>
-      (mixedConfigurationDefect P A e y *
-        mixedConfigurationBoundaryIndicator P A e y) ^ 2) =
-      orderedLocalizedAtomDefectSq
-        (positiveFaceLowerLayer P.fine e)
-        (positiveFaceLowerLayer P.coarse e)
-        e.face
-        (P.coarse.partition e.lowerRank.succ e.face)
-        (A.atom e.lowerRank.succ e.face)
-        (orderedBoundaryAtomAt
-          (positiveFaceLowerLayer P.coarse e)
-          e.face
-          (orderedFaceTuple e.face A.witness)) := by
-  unfold orderedLocalizedAtomDefectSq
-  apply congrArg mean
-  funext y
-  rw [mixedConfigurationDefect_mul_boundaryIndicator P A e y,
-    mul_pow]
-  rw [show
-    mixedConfigurationBoundaryIndicator P A e y ^ 2 =
-      mixedConfigurationBoundaryIndicator P A e y by
-        exact partitionAtomIndicator_sq _ _ _]
-  rfl
 
-/-- Boundary support inserts the canonical coarse atom indicator into the
-mixed defect contribution without changing it. -/
-theorem mixedConfigurationContribution_defect_eq_localized
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s) :
-    configurationContribution A s e
-        (mixedConfigurationDefect P A e) =
-      mean fun x : Fin k → G =>
-        (mixedConfigurationDefect P A e
-            (orderedFaceTuple e.face x) *
-          mixedConfigurationBoundaryIndicator P A e
-            (orderedFaceTuple e.face x)) *
-        partialConfigurationWeight A (s.erase e) x := by
-  unfold configurationContribution
-  apply congrArg mean
-  funext x
-  rw [mul_assoc,
-    mixedConfigurationBoundaryIndicator_mul_remainder
-      P A s hclosed e he x]
 
-/-- Mixed goodness bounds the square of the selected defect contribution by
-the scheduled rank-dependent threshold. -/
-theorem mixedConfigurationContribution_defect_sq_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hβ : 0 ≤ β e.rank) :
-    configurationContribution A s e
-        (mixedConfigurationDefect P A e) ^ 2 ≤
-      β e.rank := by
-  let u : (Fin k → G) → ℝ :=
-    fun x =>
-      mixedConfigurationDefect P A e
-          (orderedFaceTuple e.face x) *
-        mixedConfigurationBoundaryIndicator P A e
-          (orderedFaceTuple e.face x)
-  let v : (Fin k → G) → ℝ :=
-    partialConfigurationWeight A (s.erase e)
-  have hlocal :
-      mean (fun x : Fin k → G => u x ^ 2) ≤
-        β e.rank := by
-    have hgoodLocal :=
-      (hgood.atPositiveFace P A α β e).localized_defect
-        (positiveFaceLowerLayer P.fine e)
-        (positiveFaceLowerLayer P.coarse e)
-        e.face
-        (P.coarse.partition e.lowerRank.succ e.face)
-        (A.atom e.lowerRank.succ e.face)
-        (orderedFaceTuple e.face A.witness)
-        (α e.rank) (β e.rank)
-    have hmass :
-        orderedBoundaryAtomMass
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (orderedBoundaryAtomAt
-              (positiveFaceLowerLayer P.coarse e)
-              e.face
-              (orderedFaceTuple e.face A.witness)) ≤
-          1 :=
-      orderedBoundaryAtomMass_le_one _ _ _
-    calc
-      mean (fun x : Fin k → G => u x ^ 2) =
-          mean (fun y =>
-            (mixedConfigurationDefect P A e y *
-              mixedConfigurationBoundaryIndicator P A e y) ^ 2) := by
-        exact mean_comp_orderedFaceTuple e.face
-          (fun y =>
-            (mixedConfigurationDefect P A e y *
-              mixedConfigurationBoundaryIndicator P A e y) ^ 2)
-      _ =
-          orderedLocalizedAtomDefectSq
-            (positiveFaceLowerLayer P.fine e)
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (P.coarse.partition e.lowerRank.succ e.face)
-            (A.atom e.lowerRank.succ e.face)
-            (orderedBoundaryAtomAt
-              (positiveFaceLowerLayer P.coarse e)
-              e.face
-              (orderedFaceTuple e.face A.witness)) :=
-        mean_sq_mixedConfigurationDefect_mul_boundaryIndicator
-          P A e
-      _ ≤
-          β e.rank *
-            orderedBoundaryAtomMass
-              (positiveFaceLowerLayer P.coarse e)
-              e.face
-              (orderedBoundaryAtomAt
-                (positiveFaceLowerLayer P.coarse e)
-                e.face
-                (orderedFaceTuple e.face A.witness)) :=
-        hgoodLocal
-      _ ≤ β e.rank := by
-        exact mul_le_of_le_one_right hβ hmass
-  have hv0 :
-      0 ≤ mean (fun x : Fin k → G => v x ^ 2) :=
-    mean_nonneg fun x => sq_nonneg _
-  have hv1 :
-      mean (fun x : Fin k → G => v x ^ 2) ≤ 1 :=
-    mean_sq_partialConfigurationWeight_le_one
-      A (s.erase e)
-  calc
-    configurationContribution A s e
-        (mixedConfigurationDefect P A e) ^ 2 =
-        mean (fun x : Fin k → G => u x * v x) ^ 2 := by
-      rw [mixedConfigurationContribution_defect_eq_localized
-        P A s hclosed e he]
-    _ ≤
-        mean (fun x : Fin k → G => u x ^ 2) *
-          mean (fun x : Fin k → G => v x ^ 2) :=
-      mean_mul_sq_le_product u v
-    _ ≤
-        β e.rank *
-          mean (fun x : Fin k → G => v x ^ 2) :=
-      mul_le_mul_of_nonneg_right hlocal hv0
-    _ ≤ β e.rank :=
-      mul_le_of_le_one_right hβ hv1
 
-/-- If the mixed-goodness defect threshold is at most `δ²`, the absolute
-defect contribution is at most `δ`. -/
-theorem abs_mixedConfigurationContribution_defect_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    {δ : ℝ} (hδ : 0 ≤ δ)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hβ0 : 0 ≤ β e.rank)
-    (hβδ : β e.rank ≤ δ ^ 2) :
-    |configurationContribution A s e
-        (mixedConfigurationDefect P A e)| ≤ δ := by
-  have hsquare :
-      |configurationContribution A s e
-          (mixedConfigurationDefect P A e)| ^ 2 ≤
-        δ ^ 2 := by
-    rw [sq_abs]
-    exact le_trans
-      (mixedConfigurationContribution_defect_sq_le
-        P A α β hgood s hclosed e he hβ0)
-      hβδ
-  exact
-    (sq_le_sq₀
-      (abs_nonneg
-        (configurationContribution A s e
-          (mixedConfigurationDefect P A e)))
-      hδ).mp hsquare
 
 /-! ## One-face recurrence -/
 
-/-- At a maximum-rank face of a downward-closed family, the mixed coarse
-configuration count obeys the multiplicative recurrence with one defect and
-one coarse-upper uniform error. -/
-theorem abs_partialConfigurationCount_sub_mixedDensity_mul_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (τ : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P τ)
-    {δ : ℝ} (hδ : 0 ≤ δ)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (hβ0 : 0 ≤ β e.rank)
-    (hβδ : β e.rank ≤ δ ^ 2) :
-    |partialConfigurationCount A s -
-        mixedConfigurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e)| ≤
-      δ + τ e.lowerRank := by
-  have hdefect :
-      |configurationContribution A s e
-        (mixedConfigurationDefect P A e)| ≤ δ :=
-    abs_mixedConfigurationContribution_defect_le
-      P A α β hgood hδ s hclosed e he hβ0 hβδ
-  have huniform :
-      |configurationContribution A s e
-        (mixedConfigurationUniform P A e)| ≤
-          τ e.lowerRank :=
-    abs_mixedConfigurationContribution_uniform_le
-      P A τ hregular s e hmax
-  rw [partialConfigurationCount_mixed_decompose
-    P A s e he]
-  calc
-    |mixedConfigurationCoarseDensity P A e *
-            partialConfigurationCount A (s.erase e) +
-          configurationContribution A s e
-            (mixedConfigurationDefect P A e) +
-          configurationContribution A s e
-            (mixedConfigurationUniform P A e) -
-        mixedConfigurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e)| =
-        |configurationContribution A s e
-            (mixedConfigurationDefect P A e) +
-          configurationContribution A s e
-            (mixedConfigurationUniform P A e)| := by
-      congr 1
-      ring
-    _ ≤
-        |configurationContribution A s e
-            (mixedConfigurationDefect P A e)| +
-          |configurationContribution A s e
-            (mixedConfigurationUniform P A e)| :=
-      abs_add_le _ _
-    _ ≤ δ + τ e.lowerRank :=
-      add_le_add hdefect huniform
 
-/-- Fine regularity specializes the one-face recurrence with the explicit
-fine-upper complexity loss. -/
-theorem abs_partialConfigurationCount_sub_mixedDensity_mul_le_of_fine
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (M : Fin r → ℕ)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hcomplexity :
-      ∀ (j : Fin r) (e : OrderedFace k (j.1 + 1)),
-        FacePartition.complexity
-          (P.fine.partition j.succ e) ≤ M j)
-    {δ : ℝ} (hδ : 0 ≤ δ)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (hβ0 : 0 ≤ β e.rank)
-    (hβδ : β e.rank ≤ δ ^ 2) :
-    |partialConfigurationCount A s -
-        mixedConfigurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e)| ≤
-      δ + (M e.lowerRank : ℝ) * ε e.lowerRank := by
-  exact
-    abs_partialConfigurationCount_sub_mixedDensity_mul_le
-      P A α β hgood
-      (fun j => (M j : ℝ) * ε j)
-      (isFullyMixedPreliminaryOrderedRegular_of_fine
-        P ε hregular M hε hcomplexity)
-      hδ s hclosed e he hmax hβ0 hβδ
 
 /-! ## Rank-dependent totalized recurrence -/
 
-/-- Extend a partial coarse-configuration count to arbitrary face families.
-As in the fine-configuration argument, non-downward-closed families use the
-exact product of their mixed coarse densities only as an induction device. -/
-noncomputable def mixedExtendedConfigurationCount
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (s : Finset (PositiveOrderedFace k r)) : ℝ := by
-  classical
-  exact
-    if IsDownwardClosedPositiveFaces s then
-      partialConfigurationCount A s
-    else
-      ∏ e ∈ s, mixedConfigurationCoarseDensity P A e
 
-@[simp]
-theorem mixedExtendedConfigurationCount_empty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse) :
-    mixedExtendedConfigurationCount P A ∅ = 1 := by
-  rw [mixedExtendedConfigurationCount,
-    if_pos downwardClosed_empty,
-    partialConfigurationCount_empty]
 
-/-- On the full positive-face family, the totalized count is the genuine
-coarse-configuration count. -/
-theorem mixedExtendedConfigurationCount_univ
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse) :
-    mixedExtendedConfigurationCount P A Finset.univ =
-      fullConfigurationCount A := by
-  rw [mixedExtendedConfigurationCount,
-    if_pos downwardClosed_univ]
-  rfl
 
-/-- Mixed goodness lower-bounds every selected coarse main density. -/
-theorem mixedConfigurationCoarseDensity_lower
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (e : PositiveOrderedFace k r) :
-    α e.rank ≤ mixedConfigurationCoarseDensity P A e :=
-  (hgood.atPositiveFace P A α β e).1
 
-/-- The totalized mixed count has one prescribed analytic error per selected
-positive face.  Closed families remove a maximum-rank face; non-closed
-families use an exact product step. -/
-theorem mixedExtendedConfigurationCount_step_rankwise
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (τ : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P τ)
-    (δ : ℕ → ℝ)
-    (hτ : ∀ j, 0 ≤ τ j)
-    (hδ : ∀ n, 0 ≤ δ n)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ (δ n) ^ 2)
-    (s : Finset (PositiveOrderedFace k r))
-    (hs : s.Nonempty) :
-    ∃ e ∈ s,
-      |mixedExtendedConfigurationCount P A s -
-          mixedConfigurationCoarseDensity P A e *
-            mixedExtendedConfigurationCount P A (s.erase e)| ≤
-        δ e.rank + τ e.lowerRank := by
-  classical
-  by_cases hclosed : IsDownwardClosedPositiveFaces s
-  · obtain ⟨e, he, hmax⟩ :=
-      exists_maxRank_mem s hs
-    have hclosedErase :
-        IsDownwardClosedPositiveFaces (s.erase e) :=
-      hclosed.erase_maxRank he hmax
-    refine ⟨e, he, ?_⟩
-    rw [mixedExtendedConfigurationCount,
-      if_pos hclosed,
-      mixedExtendedConfigurationCount,
-      if_pos hclosedErase]
-    exact
-      abs_partialConfigurationCount_sub_mixedDensity_mul_le
-        P A α β hgood τ hregular (hδ e.rank)
-        s hclosed e he
-        (fun f hf => hmax f (Finset.mem_of_mem_erase hf))
-        (hβ0 e.rank) (hβδ e.rank)
-  · unfold IsDownwardClosedPositiveFaces at hclosed
-    push Not at hclosed
-    obtain ⟨f, hf, hpos, i, hboundary⟩ := hclosed
-    by_cases hrest : s.erase f = ∅
-    · have hsEq : s = {f} := by
-        rcases (Finset.erase_eq_empty_iff s f).mp hrest with
-          hsEmpty | hsSingleton
-        · exact (hs.ne_empty hsEmpty).elim
-        · exact hsSingleton
-      refine ⟨f, hf, ?_⟩
-      have hcountS :
-          mixedExtendedConfigurationCount P A s =
-            mixedConfigurationCoarseDensity P A f := by
-        rw [mixedExtendedConfigurationCount, if_neg]
-        · simp [hsEq]
-        · intro h
-          exact hboundary (h f hf hpos i)
-      have hcountErase :
-          mixedExtendedConfigurationCount P A (s.erase f) = 1 := by
-        rw [hrest, mixedExtendedConfigurationCount_empty]
-      rw [hcountS, hcountErase, mul_one, sub_self, abs_zero]
-      exact add_nonneg (hδ f.rank) (hτ f.lowerRank)
-    · obtain ⟨e, heRest⟩ :
-          (s.erase f).Nonempty :=
-        Finset.nonempty_iff_ne_empty.mpr hrest
-      have heS : e ∈ s :=
-        Finset.mem_of_mem_erase heRest
-      have hef : e ≠ f :=
-        (Finset.mem_erase.mp heRest).1
-      have hfEraseE : f ∈ s.erase e :=
-        Finset.mem_erase.mpr ⟨hef.symm, hf⟩
-      have hclosedErase :
-          ¬IsDownwardClosedPositiveFaces (s.erase e) := by
-        intro h
-        have hb := h f hfEraseE hpos i
-        exact hboundary (Finset.mem_of_mem_erase hb)
-      refine ⟨e, heS, ?_⟩
-      have hcountS :
-          mixedExtendedConfigurationCount P A s =
-            ∏ g ∈ s,
-              mixedConfigurationCoarseDensity P A g := by
-        rw [mixedExtendedConfigurationCount, if_neg]
-        intro h
-        exact hboundary (h f hf hpos i)
-      have hcountErase :
-          mixedExtendedConfigurationCount P A (s.erase e) =
-            ∏ g ∈ s.erase e,
-              mixedConfigurationCoarseDensity P A g := by
-        rw [mixedExtendedConfigurationCount,
-          if_neg hclosedErase]
-      rw [hcountS, hcountErase]
-      have hprod :
-          mixedConfigurationCoarseDensity P A e *
-              (∏ g ∈ s.erase e,
-                mixedConfigurationCoarseDensity P A g) =
-            ∏ g ∈ s,
-              mixedConfigurationCoarseDensity P A g :=
-        Finset.mul_prod_erase s
-          (mixedConfigurationCoarseDensity P A) heS
-      rw [hprod, sub_self, abs_zero]
-      exact add_nonneg (hδ e.rank) (hτ e.lowerRank)
 
 /-! ## Rankwise full-count lower bounds -/
 
-/-- A mixed-good coarse configuration has count at least the product of its
-rankwise density floors minus the sum of its facewise defect and
-coarse-upper uniform errors. -/
-theorem mixedFullConfigurationCount_lower_bound_rankwise
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (τ : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P τ)
-    (δ : ℕ → ℝ)
-    (hα : ∀ n, 0 ≤ α n)
-    (hτ : ∀ j, 0 ≤ τ j)
-    (hδ : ∀ n, 0 ≤ δ n)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ (δ n) ^ 2) :
-    (∏ e : PositiveOrderedFace k r, α e.rank) -
-        (∑ e : PositiveOrderedFace k r,
-          (δ e.rank + τ e.lowerRank)) ≤
-      fullConfigurationCount A := by
-  let count :
-      Finset (PositiveOrderedFace k r) → ℝ :=
-    mixedExtendedConfigurationCount P A
-  let p : PositiveOrderedFace k r → ℝ :=
-    mixedConfigurationCoarseDensity P A
-  let error : PositiveOrderedFace k r → ℝ :=
-    fun e => δ e.rank + τ e.lowerRank
-  have hempty : count ∅ = 1 :=
-    mixedExtendedConfigurationCount_empty P A
-  have hp : ∀ e, 0 ≤ p e ∧ p e ≤ 1 := by
-    intro e
-    exact
-      ⟨mixedConfigurationCoarseDensity_nonneg P A e,
-        mixedConfigurationCoarseDensity_le_one P A e⟩
-  have hpLower : ∀ e, α e.rank ≤ p e := by
-    intro e
-    exact mixedConfigurationCoarseDensity_lower
-      P A α β hgood e
-  have herror : ∀ e, 0 ≤ error e := by
-    intro e
-    exact add_nonneg (hδ e.rank) (hτ e.lowerRank)
-  have hstep :
-      ∀ s : Finset (PositiveOrderedFace k r), s.Nonempty →
-        ∃ e ∈ s,
-          |count s - p e * count (s.erase e)| ≤ error e := by
-    intro s hs
-    exact
-      mixedExtendedConfigurationCount_step_rankwise
-        P A α β hgood τ hregular δ hτ hδ hβ0 hβδ s hs
-  have hbound :=
-    finiteCount_prod_sub_sum_error_le
-      count p error herror hempty hp hstep
-      (Finset.univ :
-        Finset (PositiveOrderedFace k r))
-  have hproduct :
-      (∏ e : PositiveOrderedFace k r, α e.rank) ≤
-        ∏ e : PositiveOrderedFace k r, p e := by
-    apply Finset.prod_le_prod
-    · intro e _he
-      exact hα e.rank
-    · intro e _he
-      exact hpLower e
-  have hcountUniv :
-      count
-          (Finset.univ :
-            Finset (PositiveOrderedFace k r)) =
-        fullConfigurationCount A :=
-    mixedExtendedConfigurationCount_univ P A
-  rw [hcountUniv] at hbound
-  calc
-    (∏ e : PositiveOrderedFace k r, α e.rank) -
-          (∑ e : PositiveOrderedFace k r,
-            (δ e.rank + τ e.lowerRank)) ≤
-        (∏ e : PositiveOrderedFace k r, p e) -
-          (∑ e : PositiveOrderedFace k r, error e) := by
-      exact sub_le_sub hproduct (le_refl _)
-    _ ≤ fullConfigurationCount A := by
-      simpa [p, error] using hbound
 
-/-- Rankwise strict domination of all analytic errors gives a positive
-coarse-configuration count. -/
-theorem mixedFullConfigurationCount_pos_rankwise
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (τ : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P τ)
-    (δ : ℕ → ℝ)
-    (hα : ∀ n, 0 ≤ α n)
-    (hτ : ∀ j, 0 ≤ τ j)
-    (hδ : ∀ n, 0 ≤ δ n)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ (δ n) ^ 2)
-    (hsmall :
-      (∑ e : PositiveOrderedFace k r,
-          (δ e.rank + τ e.lowerRank)) <
-        ∏ e : PositiveOrderedFace k r, α e.rank) :
-    0 < fullConfigurationCount A := by
-  have hlower :=
-    mixedFullConfigurationCount_lower_bound_rankwise
-      P A α β hgood τ hregular δ
-      hα hτ hδ hβ0 hβδ
-  linarith
 
 /-! ## Fine-regular complexity corollaries -/
 
-/-- Fine preliminary regularity yields the rankwise coarse-configuration
-lower bound with exactly one fine-upper complexity factor in each uniform
-error. -/
-theorem mixedFullConfigurationCount_lower_bound_of_fine
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (M : Fin r → ℕ)
-    (hcomplexity :
-      ∀ (j : Fin r) (e : OrderedFace k (j.1 + 1)),
-        FacePartition.complexity
-          (P.fine.partition j.succ e) ≤ M j)
-    (δ : ℕ → ℝ)
-    (hα : ∀ n, 0 ≤ α n)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hδ : ∀ n, 0 ≤ δ n)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ (δ n) ^ 2) :
-    (∏ e : PositiveOrderedFace k r, α e.rank) -
-        (∑ e : PositiveOrderedFace k r,
-          (δ e.rank +
-            (M e.lowerRank : ℝ) * ε e.lowerRank)) ≤
-      fullConfigurationCount A := by
-  apply
-    mixedFullConfigurationCount_lower_bound_rankwise
-      P A α β hgood
-      (fun j => (M j : ℝ) * ε j)
-      (isFullyMixedPreliminaryOrderedRegular_of_fine
-        P ε hregular M hε hcomplexity)
-      δ hα
-  · intro j
-    exact mul_nonneg (Nat.cast_nonneg _) (hε j)
-  · exact hδ
-  · exact hβ0
-  · exact hβδ
 
-/-- Fine regularity plus the sharp rankwise strict inequality gives a
-positive coarse-configuration count. -/
-theorem mixedFullConfigurationCount_pos_of_fine
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (ε : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    (M : Fin r → ℕ)
-    (hcomplexity :
-      ∀ (j : Fin r) (e : OrderedFace k (j.1 + 1)),
-        FacePartition.complexity
-          (P.fine.partition j.succ e) ≤ M j)
-    (δ : ℕ → ℝ)
-    (hα : ∀ n, 0 ≤ α n)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hδ : ∀ n, 0 ≤ δ n)
-    (hβ0 : ∀ n, 0 ≤ β n)
-    (hβδ : ∀ n, β n ≤ (δ n) ^ 2)
-    (hsmall :
-      (∑ e : PositiveOrderedFace k r,
-          (δ e.rank +
-            (M e.lowerRank : ℝ) * ε e.lowerRank)) <
-        ∏ e : PositiveOrderedFace k r, α e.rank) :
-    0 < fullConfigurationCount A := by
-  have hlower :=
-    mixedFullConfigurationCount_lower_bound_of_fine
-      P A α β hgood ε hregular M hcomplexity δ
-      hα hε hδ hβ0 hβδ
-  linarith
 
 end Wikipedia.SzemeredisTheorem
 
@@ -26161,299 +10774,15 @@ namespace Wikipedia.SzemeredisTheorem
 
 /-! ## Idempotence of configuration indicators -/
 
-/-- A selected atom weight is idempotent. -/
-theorem configurationFaceWeight_sq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    configurationFaceWeight A e y ^ 2 =
-      configurationFaceWeight A e y := by
-  exact partitionAtomIndicator_sq _ _ _
 
-/-- A product of selected atom indicators is itself idempotent. -/
-theorem partialConfigurationWeight_sq
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r))
-    (x : Fin k → G) :
-    partialConfigurationWeight A s x ^ 2 =
-      partialConfigurationWeight A s x := by
-  classical
-  unfold partialConfigurationWeight
-  rw [← Finset.prod_pow]
-  apply Finset.prod_congr rfl
-  intro e he
-  exact configurationFaceWeight_sq A e _
 
-/-- The square mean of a partial configuration indicator is its partial
-configuration count. -/
-theorem mean_sq_partialConfigurationWeight_eq_count
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r)) :
-    mean (fun x : Fin k → G =>
-      partialConfigurationWeight A s x ^ 2) =
-      partialConfigurationCount A s := by
-  unfold partialConfigurationCount
-  apply congrArg mean
-  funext x
-  exact partialConfigurationWeight_sq A s x
 
-/-- Every partial configuration count is nonnegative. -/
-theorem partialConfigurationCount_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    (A : ClosedOrderedAtomConfiguration G k r C)
-    (s : Finset (PositiveOrderedFace k r)) :
-    0 ≤ partialConfigurationCount A s := by
-  unfold partialConfigurationCount
-  exact mean_nonneg
-    (partialConfigurationWeight_nonneg A s)
 
 /-! ## The mixed defect with its remaining-count factor -/
 
-/-- Mixed goodness controls the localized square of a selected coarse
-atom's boundary defect by `β`. -/
-theorem mean_sq_mixedConfigurationDefect_localized_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (e : PositiveOrderedFace k r)
-    (hβ : 0 ≤ β e.rank) :
-    mean (fun x : Fin k → G =>
-      (mixedConfigurationDefect P A e
-          (orderedFaceTuple e.face x) *
-        mixedConfigurationBoundaryIndicator P A e
-          (orderedFaceTuple e.face x)) ^ 2) ≤
-      β e.rank := by
-  have hgoodLocal :=
-    (hgood.atPositiveFace P A α β e).localized_defect
-      (positiveFaceLowerLayer P.fine e)
-      (positiveFaceLowerLayer P.coarse e)
-      e.face
-      (P.coarse.partition e.lowerRank.succ e.face)
-      (A.atom e.lowerRank.succ e.face)
-      (orderedFaceTuple e.face A.witness)
-      (α e.rank) (β e.rank)
-  have hmass :
-      orderedBoundaryAtomMass
-          (positiveFaceLowerLayer P.coarse e)
-          e.face
-          (orderedBoundaryAtomAt
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (orderedFaceTuple e.face A.witness)) ≤
-        1 :=
-    orderedBoundaryAtomMass_le_one _ _ _
-  calc
-    mean (fun x : Fin k → G =>
-        (mixedConfigurationDefect P A e
-            (orderedFaceTuple e.face x) *
-          mixedConfigurationBoundaryIndicator P A e
-            (orderedFaceTuple e.face x)) ^ 2) =
-        mean (fun y =>
-          (mixedConfigurationDefect P A e y *
-            mixedConfigurationBoundaryIndicator P A e y) ^ 2) := by
-      exact mean_comp_orderedFaceTuple e.face
-        (fun y =>
-          (mixedConfigurationDefect P A e y *
-            mixedConfigurationBoundaryIndicator P A e y) ^ 2)
-    _ =
-        orderedLocalizedAtomDefectSq
-          (positiveFaceLowerLayer P.fine e)
-          (positiveFaceLowerLayer P.coarse e)
-          e.face
-          (P.coarse.partition e.lowerRank.succ e.face)
-          (A.atom e.lowerRank.succ e.face)
-          (orderedBoundaryAtomAt
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (orderedFaceTuple e.face A.witness)) :=
-      mean_sq_mixedConfigurationDefect_mul_boundaryIndicator P A e
-    _ ≤
-        β e.rank *
-          orderedBoundaryAtomMass
-            (positiveFaceLowerLayer P.coarse e)
-            e.face
-            (orderedBoundaryAtomAt
-              (positiveFaceLowerLayer P.coarse e)
-              e.face
-              (orderedFaceTuple e.face A.witness)) :=
-      hgoodLocal
-    _ ≤ β e.rank :=
-      mul_le_of_le_one_right hβ hmass
 
-/-- Sharpened mixed defect estimate retaining the exact count of the
-remaining configuration. -/
-theorem mixedConfigurationContribution_defect_sq_le_mul_count
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hβ : 0 ≤ β e.rank) :
-    configurationContribution A s e
-        (mixedConfigurationDefect P A e) ^ 2 ≤
-      β e.rank *
-        partialConfigurationCount A (s.erase e) := by
-  let u : (Fin k → G) → ℝ :=
-    fun x =>
-      mixedConfigurationDefect P A e
-          (orderedFaceTuple e.face x) *
-        mixedConfigurationBoundaryIndicator P A e
-          (orderedFaceTuple e.face x)
-  let v : (Fin k → G) → ℝ :=
-    partialConfigurationWeight A (s.erase e)
-  have hu :
-      mean (fun x : Fin k → G => u x ^ 2) ≤
-        β e.rank :=
-    mean_sq_mixedConfigurationDefect_localized_le
-      P A α β hgood e hβ
-  have hv :
-      mean (fun x : Fin k → G => v x ^ 2) =
-        partialConfigurationCount A (s.erase e) :=
-    mean_sq_partialConfigurationWeight_eq_count
-      A (s.erase e)
-  have hv0 :
-      0 ≤ mean (fun x : Fin k → G => v x ^ 2) :=
-    mean_nonneg fun x => sq_nonneg _
-  calc
-    configurationContribution A s e
-        (mixedConfigurationDefect P A e) ^ 2 =
-        mean (fun x : Fin k → G => u x * v x) ^ 2 := by
-      rw [mixedConfigurationContribution_defect_eq_localized
-        P A s hclosed e he]
-    _ ≤
-        mean (fun x : Fin k → G => u x ^ 2) *
-          mean (fun x : Fin k → G => v x ^ 2) :=
-      mean_mul_sq_le_product u v
-    _ ≤
-        β e.rank *
-          mean (fun x : Fin k → G => v x ^ 2) :=
-      mul_le_mul_of_nonneg_right hu hv0
-    _ =
-        β e.rank *
-          partialConfigurationCount A (s.erase e) := by
-      rw [hv]
 
-/-- Square-root form of the configuration-weighted mixed defect estimate. -/
-theorem abs_mixedConfigurationContribution_defect_le_sqrt_mul_count
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hβ : 0 ≤ β e.rank) :
-    |configurationContribution A s e
-        (mixedConfigurationDefect P A e)| ≤
-      Real.sqrt
-        (β e.rank *
-          partialConfigurationCount A (s.erase e)) := by
-  have hcount :
-      0 ≤ partialConfigurationCount A (s.erase e) :=
-    partialConfigurationCount_nonneg A (s.erase e)
-  have hproduct :
-      0 ≤ β e.rank *
-        partialConfigurationCount A (s.erase e) :=
-    mul_nonneg hβ hcount
-  apply
-    (sq_le_sq₀
-      (abs_nonneg
-        (configurationContribution A s e
-          (mixedConfigurationDefect P A e)))
-      (Real.sqrt_nonneg _)).mp
-  rw [sq_abs, Real.sq_sqrt hproduct]
-  exact
-    mixedConfigurationContribution_defect_sq_le_mul_count
-      P A α β hgood s hclosed e he hβ
 
-/-- The one-face mixed recurrence with its defect error scaled by the
-already-counted remainder. -/
-theorem abs_partialConfigurationCount_sub_mixedDensity_mul_le_sqrt
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (α β : ℕ → ℝ)
-    (hgood : A.IsMixedGood P α β)
-    (τ : OrderedRegularityTolerance r)
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P τ)
-    (s : Finset (PositiveOrderedFace k r))
-    (hclosed : IsDownwardClosedPositiveFaces s)
-    (e : PositiveOrderedFace k r) (he : e ∈ s)
-    (hmax :
-      ∀ f ∈ s.erase e, f.rank ≤ e.rank)
-    (hβ : 0 ≤ β e.rank) :
-    |partialConfigurationCount A s -
-        mixedConfigurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e)| ≤
-      Real.sqrt
-          (β e.rank *
-            partialConfigurationCount A (s.erase e)) +
-        τ e.lowerRank := by
-  have hdefect :
-      |configurationContribution A s e
-        (mixedConfigurationDefect P A e)| ≤
-        Real.sqrt
-          (β e.rank *
-            partialConfigurationCount A (s.erase e)) :=
-    abs_mixedConfigurationContribution_defect_le_sqrt_mul_count
-      P A α β hgood s hclosed e he hβ
-  have huniform :
-      |configurationContribution A s e
-        (mixedConfigurationUniform P A e)| ≤
-          τ e.lowerRank :=
-    abs_mixedConfigurationContribution_uniform_le
-      P A τ hregular s e hmax
-  rw [partialConfigurationCount_mixed_decompose
-    P A s e he]
-  calc
-    |mixedConfigurationCoarseDensity P A e *
-            partialConfigurationCount A (s.erase e) +
-          configurationContribution A s e
-            (mixedConfigurationDefect P A e) +
-          configurationContribution A s e
-            (mixedConfigurationUniform P A e) -
-        mixedConfigurationCoarseDensity P A e *
-          partialConfigurationCount A (s.erase e)| =
-        |configurationContribution A s e
-            (mixedConfigurationDefect P A e) +
-          configurationContribution A s e
-            (mixedConfigurationUniform P A e)| := by
-      congr 1
-      ring
-    _ ≤
-        |configurationContribution A s e
-            (mixedConfigurationDefect P A e)| +
-          |configurationContribution A s e
-            (mixedConfigurationUniform P A e)| :=
-      abs_add_le _ _
-    _ ≤
-        Real.sqrt
-            (β e.rank *
-              partialConfigurationCount A (s.erase e)) +
-          τ e.lowerRank :=
-      add_le_add hdefect huniform
 
 end Wikipedia.SzemeredisTheorem
 
@@ -26592,28 +10921,7 @@ theorem positiveOrderedFaceOfEdge_edge
     (positiveOrderedFaceEdge_nonempty e)
     (positiveOrderedFaceEdge_card_le e)
 
-/-- Nonempty bundle edges of size at most `r`. -/
-abbrev PositiveOrderedBundleEdge (k r : ℕ) :=
-  {t : Finset (Fin k) // t.Nonempty ∧ t.card ≤ r}
 
-/-- Canonical equivalence between positive ordered faces and nonempty
-finite edges of size at most `r`. -/
-noncomputable def positiveOrderedFaceEdgeEquiv
-    (k r : ℕ) :
-    PositiveOrderedFace k r ≃
-      PositiveOrderedBundleEdge k r where
-  toFun e :=
-    ⟨positiveOrderedFaceEdge e,
-      positiveOrderedFaceEdge_nonempty e,
-      positiveOrderedFaceEdge_card_le e⟩
-  invFun t :=
-    positiveOrderedFaceOfEdge t.1 t.2.1 t.2.2
-  left_inv e :=
-    positiveOrderedFaceOfEdge_edge e
-  right_inv t := by
-    apply Subtype.ext
-    exact positiveOrderedFaceEdge_ofEdge
-      t.1 t.2.1 t.2.2
 
 /-! ## The complete initial bundle -/
 
@@ -26977,25 +11285,6 @@ theorem orderedConfigurationBaseDensity_positiveOrderedFaceEdge
   exact congrArg (mixedConfigurationCoarseDensity P A)
     (positiveOrderedFaceOfEdge_edge e)
 
-theorem orderedConfigurationBaseDensity_unitInterval
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse) :
-    ∀ t ∈ orderedConfigurationBaseEdges k r,
-      0 ≤ orderedConfigurationBaseDensity P A t ∧
-        orderedConfigurationBaseDensity P A t ≤ 1 := by
-  intro t ht
-  unfold orderedConfigurationBaseDensity
-  by_cases ht0 : t.Nonempty
-  · simp only [dif_pos ht0]
-    by_cases htr : t.card ≤ r
-    · simp only [dif_pos htr]
-      exact
-        ⟨mixedConfigurationCoarseDensity_nonneg P A _,
-          mixedConfigurationCoarseDensity_le_one P A _⟩
-    · simp [htr]
-  · simp [ht0]
 
 /-! ## Exact initial count and product identities -/
 
@@ -28802,29 +13091,7 @@ theorem hasOrderedConfigurationBundleFrozenUniformity_of_fullyMixed
 
 /-! ## Source-full certificate -/
 
-/-- Minimal source-full preliminary regularity package needed by the
-bundle uniformity step.  The first field is the existing all-rank analytic
-certificate.  The second is the combinatorial frozen-cut representation,
-so it does not ask the regularity selector to prove any new estimate. -/
-structure IsSourceFullBundlePreliminaryOrderedRegular
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (τ : ℝ) : Prop where
-  fullyMixed :
-    IsFullyMixedPreliminaryOrderedRegular P (fun _ => τ)
-  frozenCut :
-    HasOrderedConfigurationBundleFrozenCutRepresentation P A
 
-/-- The source-full package supplies the exact frozen-uniformity predicate
-consumed by the ordered-configuration bundle step. -/
-theorem IsSourceFullBundlePreliminaryOrderedRegular.frozenUniformity
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (τ : ℝ)
-    (h : IsSourceFullBundlePreliminaryOrderedRegular P A τ) :
-    HasOrderedConfigurationBundleFrozenUniformity P A τ :=
-  hasOrderedConfigurationBundleFrozenUniformity_of_fullyMixed
-    P A τ h.fullyMixed h.frozenCut
 
 end HypergraphBundle
 
@@ -29002,19 +13269,6 @@ noncomputable def frozenBundleMissingCoordinate
   (B.frozenOccurrenceOrderEquiv hg₀ hne).symm
     (B.frozenBundleMissingVertex hmax hne g)
 
-theorem frozenOccurrenceOrder_missingCoordinate_not_mem
-    {K : Type*} [Fintype K] [DecidableEq K]
-    (B : HypergraphBundle (Fin k) K
-      (orderedConfigurationBaseEdges k r))
-    {g₀ g : Finset K} (hg₀ : g₀ ∈ B.edges)
-    (hmax : ∀ f ∈ B.edges, f.card ≤ g₀.card)
-    (hne : g₀.Nonempty)
-    (hg : g ∈ B.edges.erase g₀) :
-    (B.frozenOccurrenceOrderEquiv hg₀ hne
-      (B.frozenBundleMissingCoordinate hg₀ hmax hne g)).1 ∉ g := by
-  unfold frozenBundleMissingCoordinate
-  rw [(B.frozenOccurrenceOrderEquiv hg₀ hne).apply_symm_apply]
-  exact B.frozenBundleMissingVertex_not_mem hmax hne hg
 
 /-! ## Reconstructing and grouping a frozen remainder -/
 
@@ -29382,14 +13636,6 @@ abbrev orderedFullLowerComplexRank
       exact e.lowerRank.2
     omega⟩
 
-@[simp]
-theorem orderedFullLowerComplexRank_val
-    {k r : ℕ}
-    (e : PositiveOrderedFace k r)
-    (d : ProperPositiveOrderedSubface e.lowerRank.1) :
-    (orderedFullLowerComplexRank e d).1 =
-      d.lowerRank.1 + 1 :=
-  rfl
 
 /-- A local proper subface, transported into the ambient labelled face. -/
 abbrev orderedFullLowerAmbientFace
@@ -29439,37 +13685,7 @@ noncomputable def orderedFullLowerPositivePartition
       Finset (ProperPositiveOrderedSubface e.lowerRank.1))
     (orderedFullLowerConstituentPartition C e)
 
-/-- The positive strict-subface join refines every constituent pullback. -/
-theorem orderedFullLowerPositivePartition_le_constituent
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (d : ProperPositiveOrderedSubface e.lowerRank.1) :
-    orderedFullLowerPositivePartition C e ≤
-      orderedFullLowerConstituentPartition C e d := by
-  exact FacePartition.joinFinset_le_of_mem
-    (orderedFullLowerConstituentPartition C e)
-    (Finset.mem_univ d)
 
-/-- Refining an ordered complex refines its positive strict-subface join. -/
-theorem orderedFullLowerPositivePartition_mono
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {fine coarse : OrderedPartitionComplex G k r}
-    (hfc : fine.Refines coarse)
-    (e : PositiveOrderedFace k r) :
-    orderedFullLowerPositivePartition fine e ≤
-      orderedFullLowerPositivePartition coarse e := by
-  apply FacePartition.le_joinFinset_iff.mpr
-  intro d _hd
-  exact le_trans
-    (orderedFullLowerPositivePartition_le_constituent fine e d)
-    (FacePartition.pullback_mono
-      (orderedFaceTuple d.face)
-      (hfc
-        (orderedFullLowerComplexRank e d)
-        (orderedFullLowerAmbientFace e d)))
 
 /-- The source-faithful full lower boundary.  We explicitly join the
 ordinary immediate boundary with the positive strict-subface join.  For
@@ -29500,40 +13716,7 @@ theorem orderedFullLowerBoundaryPartition_le_immediate
         (positiveFaceLowerLayer C e) e.face := by
   exact FacePartition.join_le_left _ _
 
-/-- The full lower boundary refines every positive proper-subface
-constituent. -/
-theorem orderedFullLowerBoundaryPartition_le_constituent
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (d : ProperPositiveOrderedSubface e.lowerRank.1) :
-    orderedFullLowerBoundaryPartition C e ≤
-      orderedFullLowerConstituentPartition C e d := by
-  exact le_trans
-    (FacePartition.join_le_right _ _)
-    (orderedFullLowerPositivePartition_le_constituent C e d)
 
-/-- Refining an ordered complex refines the induced full lower boundary. -/
-theorem orderedFullLowerBoundaryPartition_mono
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {fine coarse : OrderedPartitionComplex G k r}
-    (hfc : fine.Refines coarse)
-    (e : PositiveOrderedFace k r) :
-    orderedFullLowerBoundaryPartition fine e ≤
-      orderedFullLowerBoundaryPartition coarse e := by
-  apply FacePartition.le_join_iff.mpr
-  constructor
-  · exact le_trans
-      (orderedFullLowerBoundaryPartition_le_immediate fine e)
-      (orderedBoundaryPartition_mono
-        (fun f =>
-          hfc e.lowerRank.castSucc f)
-        e.face)
-  · exact le_trans
-      (FacePartition.join_le_right _ _)
-      (orderedFullLowerPositivePartition_mono hfc e)
 
 /-- Exact atom membership for the full lower boundary. -/
 theorem mem_orderedFullLowerBoundaryPartition_part_iff
@@ -29559,100 +13742,7 @@ theorem mem_orderedFullLowerBoundaryPartition_part_iff
     orderedFullLowerConstituentPartition,
     FacePartition.mem_part_pullback_iff_image_mem]
 
-/-- The same membership statement on full labelled ambient tuples. -/
-theorem orderedFaceTuple_mem_orderedFullLowerBoundaryPartition_part_iff
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x y : Fin k → G) :
-    orderedFaceTuple e.face y ∈
-        (orderedFullLowerBoundaryPartition C e).part
-          (orderedFaceTuple e.face x) ↔
-      orderedFaceTuple e.face y ∈
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer C e) e.face).part
-            (orderedFaceTuple e.face x) ∧
-        ∀ d : ProperPositiveOrderedSubface e.lowerRank.1,
-          orderedFaceTuple (orderedFullLowerAmbientFace e d) y ∈
-            (C.partition
-              (orderedFullLowerComplexRank e d)
-              (orderedFullLowerAmbientFace e d)).part
-              (orderedFaceTuple
-                (orderedFullLowerAmbientFace e d) x) := by
-  rw [mem_orderedFullLowerBoundaryPartition_part_iff]
-  constructor
-  · rintro ⟨hboundary, hsubfaces⟩
-    refine ⟨hboundary, ?_⟩
-    intro d
-    rw [orderedFaceTuple_orderedFullLowerAmbientFace e d y,
-      orderedFaceTuple_orderedFullLowerAmbientFace e d x]
-    exact hsubfaces d
-  · rintro ⟨hboundary, hsubfaces⟩
-    refine ⟨hboundary, ?_⟩
-    intro d
-    have hd := hsubfaces d
-    rw [orderedFaceTuple_orderedFullLowerAmbientFace e d y,
-      orderedFaceTuple_orderedFullLowerAmbientFace e d x] at hd
-    exact hd
 
-/-- The number of full-lower atoms is bounded by the product of the
-complexities of all genuine proper-subface partitions. -/
-theorem complexity_orderedFullLowerBoundaryPartition_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r) :
-    FacePartition.complexity
-        (orderedFullLowerBoundaryPartition C e) ≤
-      FacePartition.complexity
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer C e) e.face) *
-        ∏ d : ProperPositiveOrderedSubface e.lowerRank.1,
-          FacePartition.complexity
-            (C.partition
-              (orderedFullLowerComplexRank e d)
-              (orderedFullLowerAmbientFace e d)) := by
-  calc
-    FacePartition.complexity
-        (orderedFullLowerBoundaryPartition C e) ≤
-        FacePartition.complexity
-            (orderedBoundaryPartition
-              (positiveFaceLowerLayer C e) e.face) *
-          FacePartition.complexity
-            (orderedFullLowerPositivePartition C e) := by
-      exact FacePartition.complexity_join_le _ _
-    _ ≤
-        FacePartition.complexity
-            (orderedBoundaryPartition
-              (positiveFaceLowerLayer C e) e.face) *
-          ∏ d : ProperPositiveOrderedSubface e.lowerRank.1,
-            FacePartition.complexity
-              (orderedFullLowerConstituentPartition C e d) := by
-      exact Nat.mul_le_mul_left _
-        (FacePartition.complexity_joinFinset_le
-          (Finset.univ :
-            Finset (ProperPositiveOrderedSubface e.lowerRank.1))
-          (orderedFullLowerConstituentPartition C e))
-    _ ≤
-        FacePartition.complexity
-            (orderedBoundaryPartition
-              (positiveFaceLowerLayer C e) e.face) *
-          ∏ d : ProperPositiveOrderedSubface e.lowerRank.1,
-            FacePartition.complexity
-              (C.partition
-                (orderedFullLowerComplexRank e d)
-                (orderedFullLowerAmbientFace e d)) := by
-      apply Nat.mul_le_mul_left
-      apply Finset.prod_le_prod
-      · intro d _hd
-        exact Nat.zero_le _
-      · intro d _hd
-        exact FacePartition.complexity_pullback_le
-          (orderedFaceTuple d.face)
-          (C.partition
-            (orderedFullLowerComplexRank e d)
-            (orderedFullLowerAmbientFace e d))
 
 /-! ## Selected full-lower atoms and their weights -/
 
@@ -29666,16 +13756,6 @@ noncomputable def orderedFullLowerBoundaryAtomAt
     (orderedFullLowerBoundaryPartition C e).parts :=
   partitionAtomAt (orderedFullLowerBoundaryPartition C e) x
 
-@[simp]
-theorem orderedFullLowerBoundaryAtomAt_val
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x : Fin (e.lowerRank.1 + 1) → G) :
-    (orderedFullLowerBoundaryAtomAt C e x).1 =
-      (orderedFullLowerBoundaryPartition C e).part x :=
-  rfl
 
 /-- Indicator of the full-lower atom selected by `x`. -/
 noncomputable def orderedFullLowerBoundaryWeight
@@ -29689,54 +13769,8 @@ noncomputable def orderedFullLowerBoundaryWeight
     (orderedFullLowerBoundaryAtomAt C e x)
     y
 
-theorem orderedFullLowerBoundaryWeight_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x y : Fin (e.lowerRank.1 + 1) → G) :
-    0 ≤ orderedFullLowerBoundaryWeight C e x y :=
-  partitionAtomIndicator_nonneg _ _ _
 
-theorem orderedFullLowerBoundaryWeight_le_one
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x y : Fin (e.lowerRank.1 + 1) → G) :
-    orderedFullLowerBoundaryWeight C e x y ≤ 1 :=
-  partitionAtomIndicator_le_one _ _ _
 
-/-- The selected full-lower atom lies inside the selected immediate
-boundary atom. -/
-theorem orderedFullLowerBoundaryWeight_le_immediateWeight
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x y : Fin (e.lowerRank.1 + 1) → G) :
-    orderedFullLowerBoundaryWeight C e x y ≤
-      partitionAtomIndicator
-        (orderedBoundaryPartition
-          (positiveFaceLowerLayer C e) e.face)
-        (orderedBoundaryAtomAt
-          (positiveFaceLowerLayer C e) e.face x)
-        y := by
-  by_cases hy :
-      y ∈ (orderedFullLowerBoundaryPartition C e).part x
-  · have himmediate :
-        y ∈
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer C e) e.face).part x :=
-      FacePartition.part_subset_of_le
-        (orderedFullLowerBoundaryPartition_le_immediate C e)
-        x hy
-    rw [show orderedFullLowerBoundaryWeight C e x y = 1 by
-          exact partitionAtomIndicator_of_mem _ _ hy,
-      partitionAtomIndicator_of_mem _ _ himmediate]
-  · rw [show orderedFullLowerBoundaryWeight C e x y = 0 by
-          exact partitionAtomIndicator_of_not_mem _ _ hy]
-    exact partitionAtomIndicator_nonneg _ _ _
 
 @[simp]
 theorem orderedFullLowerBoundaryWeight_sq
@@ -29749,69 +13783,11 @@ theorem orderedFullLowerBoundaryWeight_sq
       orderedFullLowerBoundaryWeight C e x y :=
   partitionAtomIndicator_sq _ _ _
 
-@[simp]
-theorem orderedFullLowerBoundaryWeight_self
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x : Fin (e.lowerRank.1 + 1) → G) :
-    orderedFullLowerBoundaryWeight C e x x = 1 := by
-  apply partitionAtomIndicator_of_mem
-  exact
-    (orderedFullLowerBoundaryPartition C e).mem_part
-      (Finset.mem_univ x)
 
-/-- Support of the selected full-lower weight. -/
-theorem orderedFullLowerBoundaryWeight_eq_one_iff
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x y : Fin (e.lowerRank.1 + 1) → G) :
-    orderedFullLowerBoundaryWeight C e x y = 1 ↔
-      y ∈ (orderedFullLowerBoundaryPartition C e).part x := by
-  constructor
-  · intro h
-    by_contra hy
-    have hz :
-        orderedFullLowerBoundaryWeight C e x y = 0 :=
-      partitionAtomIndicator_of_not_mem _ _ hy
-    linarith
-  · intro hy
-    exact partitionAtomIndicator_of_mem _ _ hy
 
-/-- Support expanded into all genuine proper subfaces. -/
-theorem orderedFullLowerBoundaryWeight_eq_one_iff_all_subfaces
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (x y : Fin (e.lowerRank.1 + 1) → G) :
-    orderedFullLowerBoundaryWeight C e x y = 1 ↔
-      y ∈
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer C e) e.face).part x ∧
-        ∀ d : ProperPositiveOrderedSubface e.lowerRank.1,
-          orderedFaceTuple d.face y ∈
-            (C.partition
-              (orderedFullLowerComplexRank e d)
-              (orderedFullLowerAmbientFace e d)).part
-              (orderedFaceTuple d.face x) := by
-  rw [orderedFullLowerBoundaryWeight_eq_one_iff,
-    mem_orderedFullLowerBoundaryPartition_part_iff]
 
 /-! ## Source full-lower goodness -/
 
-/-- Conditional expectation on the full lower boundary. -/
-noncomputable def orderedFullLowerStructured
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (f : (Fin (e.lowerRank.1 + 1) → G) → ℝ) :
-    (Fin (e.lowerRank.1 + 1) → G) → ℝ :=
-  conditionalMean (orderedFullLowerBoundaryPartition C e) f
 
 /-- The source density term is the existing immediate-boundary coarse
 conditional density.  The full lower boundary is used to localize its
@@ -29860,19 +13836,6 @@ theorem sourceFullMixedBoundaryWeight_sq
       sourceFullMixedBoundaryWeight P A e y :=
   orderedFullLowerBoundaryWeight_sq _ _ _ _
 
-/-- Full-lower localization is supported inside the immediate coarse
-boundary indicator from the standard mixed decomposition. -/
-theorem sourceFullMixedBoundaryWeight_le_mixedConfigurationBoundaryIndicator
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    (e : PositiveOrderedFace k r)
-    (y : Fin (e.lowerRank.1 + 1) → G) :
-    sourceFullMixedBoundaryWeight P A e y ≤
-      mixedConfigurationBoundaryIndicator P A e y := by
-  exact orderedFullLowerBoundaryWeight_le_immediateWeight
-    P.coarse e (orderedFaceTuple e.face A.witness) y
 
 /-- Source mixed goodness at one positive face.  The first clause is the
 coarse density floor.  The second is the conditional square average of the
@@ -30086,12 +14049,6 @@ def ambientPositiveFaceOfProperSubface
       lt_trans d.lowerRank.2 e.lowerRank.2⟩
   face := orderedFullLowerAmbientFace e d
 
-@[simp]
-theorem ambientPositiveFaceOfProperSubface_rank
-    (e : PositiveOrderedFace k r)
-    (d : ProperPositiveOrderedSubface e.lowerRank.1) :
-    (ambientPositiveFaceOfProperSubface e d).rank = d.rank := by
-  rfl
 
 theorem ambientPositiveFaceOfProperSubface_edge_ssubset
     (e : PositiveOrderedFace k r)
@@ -30862,193 +14819,14 @@ open scoped BigOperators
 
 /-! ## The common density floor on base edges -/
 
-/-- Source-full goodness with constant floor `a` supplies the density
-lower bound required by the relative bundle-counting induction, including
-the neutral empty edge. -/
-theorem orderedConfigurationBaseDensity_ge_of_sourceFullMixedGood
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    {a t : ℝ} (ha_one : a ≤ 1)
-    (hgood :
-      A.IsSourceFullMixedGood P (fun _ => a) (fun _ => t ^ 2)) :
-    ∀ e ∈ orderedConfigurationBaseEdges k r,
-      a ≤ orderedConfigurationBaseDensity P A e := by
-  intro e he
-  by_cases he0 : e = ∅
-  · subst e
-    simpa using ha_one
-  · have hene : e.Nonempty :=
-      Finset.nonempty_iff_ne_empty.mpr he0
-    have her : e.card ≤ r :=
-      (mem_orderedConfigurationBaseEdges_iff e).1 he
-    have hdensity :=
-      (hgood (positiveOrderedFaceOfEdge e hene her)).1
-    simpa [sourceFullMixedCoarseDensity,
-      orderedConfigurationBaseDensity, hene, her] using hdensity
 
 /-! ## Relative counting for every closed pullback bundle -/
 
-/-- The source-full localized-defect certificate and the frozen-cut
-transport of preliminary regularity assemble into Tao's one-edge counting
-interface with the common squared error. -/
-theorem hasTaoBundleCountingStep_orderedConfiguration_of_sourceFull
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    {a t : ℝ}
-    (hgood :
-      A.IsSourceFullMixedGood P (fun _ => a) (fun _ => t ^ 2))
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P (fun _ => t ^ 2)) :
-    HasTaoBundleCountingStep
-      (H := orderedConfigurationBaseEdges k r)
-      (orderedConfigurationBaseWeight A)
-      (orderedConfigurationBaseDensity P A)
-      (fun _ => t ^ 2) (t ^ 2) := by
-  apply HypergraphBundle.hasTaoBundleCountingStep_orderedConfiguration
-      P A (fun _ => t ^ 2) (t ^ 2)
-  · intro d
-    exact sq_nonneg t
-  · exact sq_nonneg t
-  · exact
-      HypergraphBundle.hasOrderedConfigurationBundleLocalizedDefect_of_sourceFullMixedGood
-        P A (fun _ => a) (fun _ => t ^ 2) hgood
-  · exact
-      HypergraphBundle.hasOrderedConfigurationBundleFrozenUniformity_of_fullyMixed
-        P A (t ^ 2) hregular
-        (HypergraphBundle.hasOrderedConfigurationBundleFrozenCutRepresentation
-          P A)
 
-/-- Source-full mixed goodness and common-tolerance preliminary regularity
-give the concrete relative generalized-counting estimate on every closed
-bundle over the ordered-configuration base hypergraph. -/
-theorem abs_bundleCount_orderedConfiguration_sub_main_le_sourceFullEnvelope
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    {a t : ℝ} (ha : 0 < a) (ha_one : a ≤ 1)
-    (hgood :
-      A.IsSourceFullMixedGood P (fun _ => a) (fun _ => t ^ 2))
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P (fun _ => t ^ 2))
-    {K : Type} [Fintype K] [DecidableEq K]
-    (B : HypergraphBundle (Fin k) K
-      (orderedConfigurationBaseEdges k r))
-    (hclosed : B.IsClosedUnderInclusion) :
-    |B.bundleCount
-          (B.pullbackBaseEdgeWeight
-            (orderedConfigurationBaseWeight A)) -
-        B.bundleMainProduct
-          (orderedConfigurationBaseDensity P A)| ≤
-      bundleCommonEnvelopeError a t B.order B.edges.card *
-        B.bundleMainProduct
-          (orderedConfigurationBaseDensity P A) := by
-  have hstep :
-      HasTaoBundleCountingStep
-        (H := orderedConfigurationBaseEdges k r)
-        (orderedConfigurationBaseWeight A)
-        (orderedConfigurationBaseDensity P A)
-        (fun _ => t ^ 2) (t ^ 2) :=
-    hasTaoBundleCountingStep_orderedConfiguration_of_sourceFull
-      P A hgood hregular
-  have henvelope :
-      IsBundleCountingEnvelope
-        (fun _ => a) (fun _ => t ^ 2) (fun _ => a) (t ^ 2)
-        (bundleCommonEnvelopeError a t) :=
-    bundleCommonEnvelopeError_isEnvelope ha ha_one
-  exact
-    @abs_bundleCount_pullback_sub_bundleMainProduct_le_envelope
-      (Fin k) G inferInstance inferInstance
-      (orderedConfigurationBaseEdges k r) inferInstance
-      (orderedConfigurationBaseWeight A)
-      (orderedConfigurationBaseDensity P A)
-      (fun _ => a) (fun _ => t ^ 2) (fun _ => a) (t ^ 2)
-      (bundleCommonEnvelopeError a t)
-      (orderedConfigurationBaseWeight_unitInterval A)
-      (orderedConfigurationBaseWeight_idempotent A)
-      (orderedConfigurationBaseWeight_empty A)
-      (orderedConfigurationBaseDensity_empty P A)
-      (orderedConfigurationBaseDensity_ge_of_sourceFullMixedGood
-        P A ha_one hgood)
-      hstep henvelope K inferInstance inferInstance B hclosed
 
 /-! ## Initial bundle and positivity -/
 
-/-- The initial ordered-configuration count is at least the main-density
-product multiplied by one minus the concrete source-full envelope error. -/
-theorem one_sub_sourceFullEnvelope_mul_densityProduct_le_fullConfigurationCount
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    {a t : ℝ} (ha : 0 < a) (ha_one : a ≤ 1)
-    (hgood :
-      A.IsSourceFullMixedGood P (fun _ => a) (fun _ => t ^ 2))
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P (fun _ => t ^ 2)) :
-    (1 - bundleCommonEnvelopeError a t
-          (orderedConfigurationInitialBundle k r).order
-          (orderedConfigurationInitialBundle k r).edges.card) *
-        (∏ e : PositiveOrderedFace k r,
-          mixedConfigurationCoarseDensity P A e) ≤
-      fullConfigurationCount A := by
-  have hcount :=
-    abs_bundleCount_orderedConfiguration_sub_main_le_sourceFullEnvelope
-      P A ha ha_one hgood hregular
-      (orderedConfigurationInitialBundle k r)
-      (orderedConfigurationInitialBundle_closed k r)
-  rw [orderedConfigurationInitialBundle_bundleCount A,
-    orderedConfigurationInitialBundle_bundleMainProduct P A] at hcount
-  have hlower :
-      - (bundleCommonEnvelopeError a t
-          (orderedConfigurationInitialBundle k r).order
-          (orderedConfigurationInitialBundle k r).edges.card *
-            (∏ e : PositiveOrderedFace k r,
-              mixedConfigurationCoarseDensity P A e)) ≤
-        fullConfigurationCount A -
-          (∏ e : PositiveOrderedFace k r,
-            mixedConfigurationCoarseDensity P A e) :=
-    neg_le_of_abs_le hcount
-  linarith
 
-/-- If the concrete envelope error at the actual order and edge-cardinality
-of the initial bundle is below one half, the selected closed configuration
-has strictly positive normalized count. -/
-theorem fullConfigurationCount_pos_of_sourceFullEnvelope_lt_half
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (A : ClosedOrderedAtomConfiguration G k r P.coarse)
-    {a t : ℝ} (ha : 0 < a) (ha_one : a ≤ 1)
-    (hgood :
-      A.IsSourceFullMixedGood P (fun _ => a) (fun _ => t ^ 2))
-    (hregular :
-      IsFullyMixedPreliminaryOrderedRegular P (fun _ => t ^ 2))
-    (herror :
-      bundleCommonEnvelopeError a t
-          (orderedConfigurationInitialBundle k r).order
-          (orderedConfigurationInitialBundle k r).edges.card < 1 / 2) :
-    0 < fullConfigurationCount A := by
-  have hlower :=
-    one_sub_sourceFullEnvelope_mul_densityProduct_le_fullConfigurationCount
-      P A ha ha_one hgood hregular
-  have hdensity :
-      0 < ∏ e : PositiveOrderedFace k r,
-        mixedConfigurationCoarseDensity P A e := by
-    apply Finset.prod_pos
-    intro e _he
-    exact ha.trans_le (by
-      simpa [sourceFullMixedCoarseDensity] using (hgood e).1)
-  have hone :
-      0 < 1 - bundleCommonEnvelopeError a t
-          (orderedConfigurationInitialBundle k r).order
-          (orderedConfigurationInitialBundle k r).edges.card := by
-    linarith
-  exact (mul_pos hone hdensity).trans_le hlower
 
 end Wikipedia.SzemeredisTheorem
 
@@ -31088,721 +14866,50 @@ open scoped BigOperators
 
 /-! ## Bounded-test all-rank regularity -/
 
-/-- Every adjacent pair is regular against arbitrary `[0,1]`-valued
-boundary factors. -/
-def IsFullyPreliminaryOrderedBoundedRegular
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (ε : OrderedRegularityTolerance r) : Prop :=
-  ∀ j : Fin r,
-    IsPreliminaryOrderedBoundedRegular
-      (C.partition j.castSucc)
-      (C.partition j.succ)
-      (ε j)
 
-/-- Boolean all-rank preliminary regularity controls bounded boundary
-products with no loss. -/
-theorem IsFullyPreliminaryOrderedRegular.toBounded
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {C : OrderedPartitionComplex G k r}
-    {ε : OrderedRegularityTolerance r}
-    (h : IsFullyPreliminaryOrderedRegular C ε) :
-    IsFullyPreliminaryOrderedBoundedRegular C ε := by
-  intro j
-  exact (h j).toBounded
 
 /-! ## Canonical precomputed tower -/
 
-/-- Canonical choice of one all-rank fixed-budget certificate. -/
-noncomputable def chosenFullOrderedRegularityCertificate
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r)
-    (ε : OrderedRegularityTolerance r)
-    (budget : OrderedRegularityBudget r)
-    (hε : ∀ j, 0 ≤ ε j)
-    (hbudget :
-      IsOrderedRegularityBudget k r ε budget) :
-    FullOrderedRegularityCertificate C ε budget :=
-  Classical.choice
-    (exists_fullOrderedRegularityCertificate
-      C ε budget hε hbudget)
 
-/-- An infinite tower whose `n`th transition uses only the schedules
-`ε n` and `budget n`, both supplied before construction. -/
-noncomputable def strongFullOrderedRegularityTower
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n)) :
-    ℕ → OrderedPartitionComplex G k r
-  | 0 => initial
-  | n + 1 =>
-      (chosenFullOrderedRegularityCertificate
-        (strongFullOrderedRegularityTower
-          initial ε budget hε hbudget n)
-        (ε n) (budget n) (hε n) (hbudget n)).fine
 
-@[simp]
-theorem strongFullOrderedRegularityTower_zero
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n)) :
-    strongFullOrderedRegularityTower
-      initial ε budget hε hbudget 0 = initial :=
-  rfl
 
-@[simp]
-theorem strongFullOrderedRegularityTower_succ
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) :
-    strongFullOrderedRegularityTower
-        initial ε budget hε hbudget (n + 1) =
-      (chosenFullOrderedRegularityCertificate
-        (strongFullOrderedRegularityTower
-          initial ε budget hε hbudget n)
-        (ε n) (budget n) (hε n) (hbudget n)).fine :=
-  rfl
 
-/-- The actual stopping-time schedule chosen during transition `n`. -/
-noncomputable def strongFullOrderedRegularityStepSchedule
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) :
-    OrderedRegularityStepSchedule r :=
-  (chosenFullOrderedRegularityCertificate
-    (strongFullOrderedRegularityTower
-      initial ε budget hε hbudget n)
-    (ε n) (budget n) (hε n) (hbudget n)).steps
 
-/-- Every transition is a pointwise refinement. -/
-theorem strongFullOrderedRegularityTower_refines
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) :
-    (strongFullOrderedRegularityTower
-      initial ε budget hε hbudget (n + 1)).Refines
-    (strongFullOrderedRegularityTower
-      initial ε budget hε hbudget n) := by
-  rw [strongFullOrderedRegularityTower_succ]
-  exact
-    (chosenFullOrderedRegularityCertificate
-      (strongFullOrderedRegularityTower
-        initial ε budget hε hbudget n)
-      (ε n) (budget n) (hε n) (hbudget n)).refines
 
-/-- Transition `n` preserves the top layer exactly. -/
-theorem strongFullOrderedRegularityTower_topLayer_succ
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) :
-    (strongFullOrderedRegularityTower
-      initial ε budget hε hbudget (n + 1)).topLayer =
-    (strongFullOrderedRegularityTower
-      initial ε budget hε hbudget n).topLayer := by
-  rw [strongFullOrderedRegularityTower_succ]
-  exact
-    (chosenFullOrderedRegularityCertificate
-      (strongFullOrderedRegularityTower
-        initial ε budget hε hbudget n)
-      (ε n) (budget n) (hε n) (hbudget n)).topLayer_eq
 
-/-- Every tower stage has the same top layer as the initial complex. -/
-theorem strongFullOrderedRegularityTower_topLayer
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n)) :
-    ∀ n,
-      (strongFullOrderedRegularityTower
-        initial ε budget hε hbudget n).topLayer =
-      initial.topLayer := by
-  intro n
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-      rw [strongFullOrderedRegularityTower_topLayer_succ]
-      exact ih
 
-/-- The fine endpoint of transition `n` is all-rank regular at the
-precomputed tolerance `ε n`. -/
-theorem strongFullOrderedRegularityTower_regular
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) :
-    IsFullyPreliminaryOrderedRegular
-      (strongFullOrderedRegularityTower
-        initial ε budget hε hbudget (n + 1))
-      (ε n) := by
-  rw [strongFullOrderedRegularityTower_succ]
-  exact
-    (chosenFullOrderedRegularityCertificate
-      (strongFullOrderedRegularityTower
-        initial ε budget hε hbudget n)
-      (ε n) (budget n) (hε n) (hbudget n)).regular
 
-/-- The same endpoint is regular against all bounded boundary products. -/
-theorem strongFullOrderedRegularityTower_boundedRegular
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) :
-    IsFullyPreliminaryOrderedBoundedRegular
-      (strongFullOrderedRegularityTower
-        initial ε budget hε hbudget (n + 1))
-      (ε n) :=
-  (strongFullOrderedRegularityTower_regular
-    initial ε budget hε hbudget n).toBounded
 
-/-- The chosen stopping index at transition `n` is below its precomputed
-budget at every rank. -/
-theorem strongFullOrderedRegularityStepSchedule_lt
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) (j : Fin r) :
-    strongFullOrderedRegularityStepSchedule
-        initial ε budget hε hbudget n j <
-      budget n j :=
-  (chosenFullOrderedRegularityCertificate
-    (strongFullOrderedRegularityTower
-      initial ε budget hε hbudget n)
-    (ε n) (budget n) (hε n) (hbudget n)).steps_lt j
 
 /-! ## Recursive ambient-independent complexity bound -/
 
-/-- Precomputed multiplicative complexity factor through the first `n`
-tower transitions at rank `j`. -/
-def strongFullOrderedComplexityFactor
-    {r : ℕ}
-    (budget : ℕ → OrderedRegularityBudget r)
-    (j : Fin r) : ℕ → ℕ
-  | 0 => 1
-  | n + 1 =>
-      (2 ^ (j.1 + 1)) ^ (budget n j) *
-        strongFullOrderedComplexityFactor budget j n
 
-@[simp]
-theorem strongFullOrderedComplexityFactor_zero
-    {r : ℕ}
-    (budget : ℕ → OrderedRegularityBudget r)
-    (j : Fin r) :
-    strongFullOrderedComplexityFactor budget j 0 = 1 :=
-  rfl
 
-@[simp]
-theorem strongFullOrderedComplexityFactor_succ
-    {r : ℕ}
-    (budget : ℕ → OrderedRegularityBudget r)
-    (j : Fin r) (n : ℕ) :
-    strongFullOrderedComplexityFactor budget j (n + 1) =
-      (2 ^ (j.1 + 1)) ^ (budget n j) *
-        strongFullOrderedComplexityFactor budget j n :=
-  rfl
 
-/-- One tower transition obeys the scheduled, rather than merely the
-chosen, complexity multiplier. -/
-theorem complexity_strongFullOrderedRegularityTower_succ_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    (n : ℕ) (j : Fin r)
-    (e : OrderedFace k j.1) :
-    FacePartition.complexity
-        ((strongFullOrderedRegularityTower
-          initial ε budget hε hbudget (n + 1)).partition
-            j.castSucc e) ≤
-      (2 ^ (j.1 + 1)) ^ (budget n j) *
-        FacePartition.complexity
-          ((strongFullOrderedRegularityTower
-            initial ε budget hε hbudget n).partition
-              j.castSucc e) := by
-  let certificate :=
-    chosenFullOrderedRegularityCertificate
-      (strongFullOrderedRegularityTower
-        initial ε budget hε hbudget n)
-      (ε n) (budget n) (hε n) (hbudget n)
-  have hchosen := certificate.complexity j e
-  have hexponent :
-      (2 ^ (j.1 + 1)) ^ (certificate.steps j) ≤
-        (2 ^ (j.1 + 1)) ^ (budget n j) :=
-    Nat.pow_le_pow_right (by positivity)
-      (Nat.le_of_lt (certificate.steps_lt j))
-  rw [strongFullOrderedRegularityTower_succ]
-  exact hchosen.trans
-    (Nat.mul_le_mul_right _ hexponent)
 
-/-- Recursive complexity bound for every non-top layer of every tower
-stage. -/
-theorem complexity_strongFullOrderedRegularityTower_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n)) :
-    ∀ (n : ℕ) (j : Fin r)
-        (e : OrderedFace k j.1),
-      FacePartition.complexity
-          ((strongFullOrderedRegularityTower
-            initial ε budget hε hbudget n).partition
-              j.castSucc e) ≤
-        strongFullOrderedComplexityFactor
-            budget j n *
-          FacePartition.complexity
-            (initial.partition j.castSucc e) := by
-  intro n
-  induction n with
-  | zero =>
-      intro j e
-      simp
-  | succ n ih =>
-      intro j e
-      calc
-        FacePartition.complexity
-            ((strongFullOrderedRegularityTower
-              initial ε budget hε hbudget (n + 1)).partition
-                j.castSucc e) ≤
-            (2 ^ (j.1 + 1)) ^ (budget n j) *
-              FacePartition.complexity
-                ((strongFullOrderedRegularityTower
-                  initial ε budget hε hbudget n).partition
-                    j.castSucc e) :=
-          complexity_strongFullOrderedRegularityTower_succ_le
-            initial ε budget hε hbudget n j e
-        _ ≤
-            (2 ^ (j.1 + 1)) ^ (budget n j) *
-              (strongFullOrderedComplexityFactor
-                  budget j n *
-                FacePartition.complexity
-                  (initial.partition j.castSucc e)) :=
-          Nat.mul_le_mul_left _ (ih j e)
-        _ =
-            strongFullOrderedComplexityFactor
-                budget j (n + 1) *
-              FacePartition.complexity
-                (initial.partition j.castSucc e) := by
-          simp [Nat.mul_assoc]
 
 /-! ## Fixed-upper-family all-rank energy -/
 
-/-- Total atom-energy budget across all adjacent ranks. -/
-noncomputable def orderedAllRankAtomEnergyBudget
-    (k r : ℕ) : ℝ :=
-  ∑ j : Fin r,
-    (Fintype.card
-      (OrderedFace k (j.1 + 1)) : ℝ)
 
-/-- Observe every upper atom of one fixed target complex from the lower
-boundaries of another complex. -/
-noncomputable def orderedFixedTargetAtomEnergy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (lower target : OrderedPartitionComplex G k r) : ℝ :=
-  ∑ j : Fin r,
-    orderedLayerAtomEnergy
-      (lower.partition j.castSucc)
-      (target.partition j.succ)
 
-theorem orderedFixedTargetAtomEnergy_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (lower target : OrderedPartitionComplex G k r) :
-    0 ≤ orderedFixedTargetAtomEnergy lower target := by
-  unfold orderedFixedTargetAtomEnergy
-  exact Finset.sum_nonneg fun j _ =>
-    orderedLayerAtomEnergy_nonneg
-      (lower.partition j.castSucc)
-      (target.partition j.succ)
 
-theorem orderedFixedTargetAtomEnergy_le_budget
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (lower target : OrderedPartitionComplex G k r) :
-    orderedFixedTargetAtomEnergy lower target ≤
-      orderedAllRankAtomEnergyBudget k r := by
-  unfold orderedFixedTargetAtomEnergy
-    orderedAllRankAtomEnergyBudget
-  exact Finset.sum_le_sum fun j _ =>
-    orderedLayerAtomEnergy_le_card
-      (lower.partition j.castSucc)
-      (target.partition j.succ)
 
-/-- Refining all lower boundaries raises the energy of a fixed upper atom
-family. -/
-theorem orderedFixedTargetAtomEnergy_mono
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {fine coarse target :
-      OrderedPartitionComplex G k r}
-    (hfc : fine.Refines coarse) :
-    orderedFixedTargetAtomEnergy coarse target ≤
-      orderedFixedTargetAtomEnergy fine target := by
-  unfold orderedFixedTargetAtomEnergy
-  apply Finset.sum_le_sum
-  intro j _
-  exact orderedLayerAtomEnergy_mono
-    (fun e => hfc j.castSucc e)
-    (target.partition j.succ)
 
-/-- Adjacent energy increment with the upper atom family frozen at
-`target`. -/
-noncomputable def orderedFixedTargetAtomEnergyGap
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (target fine coarse :
-      OrderedPartitionComplex G k r) : ℝ :=
-  orderedFixedTargetAtomEnergy fine target -
-    orderedFixedTargetAtomEnergy coarse target
 
-theorem orderedFixedTargetAtomEnergyGap_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {target fine coarse :
-      OrderedPartitionComplex G k r}
-    (hfc : fine.Refines coarse) :
-    0 ≤ orderedFixedTargetAtomEnergyGap
-      target fine coarse :=
-  sub_nonneg.mpr
-    (orderedFixedTargetAtomEnergy_mono hfc)
 
-/-- Fixed-target adjacent-gap pigeonhole.  This is the exact all-rank
-energy argument: the target atom family does not change with the tower
-index. -/
-theorem exists_adjacent_fixedTargetAtomEnergyGap_le_div
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (tower : ℕ → OrderedPartitionComplex G k r)
-    (target : OrderedPartitionComplex G k r)
-    (hnested : ∀ n, (tower (n + 1)).Refines (tower n))
-    {m : ℕ} (hm : 0 < m) :
-    ∃ i : ℕ, i < m ∧
-      0 ≤ orderedFixedTargetAtomEnergyGap
-        target (tower (i + 1)) (tower i) ∧
-      orderedFixedTargetAtomEnergyGap
-          target (tower (i + 1)) (tower i) ≤
-        orderedAllRankAtomEnergyBudget k r /
-          (m : ℝ) := by
-  let E : ℕ → ℝ :=
-    fun n => orderedFixedTargetAtomEnergy
-      (tower n) target
-  have htel :
-      ∑ i ∈ Finset.range m,
-          (E (i + 1) - E i) =
-        E m - E 0 :=
-    Finset.sum_range_sub E m
-  have hsum :
-      ∑ i ∈ Finset.range m,
-          (E (i + 1) - E i) ≤
-        ∑ _i ∈ Finset.range m,
-          orderedAllRankAtomEnergyBudget k r /
-            (m : ℝ) := by
-    rw [htel]
-    calc
-      E m - E 0 ≤
-          orderedAllRankAtomEnergyBudget k r := by
-        have h0 :=
-          orderedFixedTargetAtomEnergy_nonneg
-            (tower 0) target
-        have hmBound :=
-          orderedFixedTargetAtomEnergy_le_budget
-            (tower m) target
-        dsimp only [E] at h0 hmBound ⊢
-        linarith
-      _ =
-          ∑ _i ∈ Finset.range m,
-            orderedAllRankAtomEnergyBudget k r /
-              (m : ℝ) := by
-        simp only [Finset.sum_const,
-          Finset.card_range, nsmul_eq_mul]
-        field_simp
-  obtain ⟨i, hi, hsmall⟩ :=
-    Finset.exists_le_of_sum_le
-      ⟨0, Finset.mem_range.mpr hm⟩ hsum
-  refine ⟨i, Finset.mem_range.mp hi, ?_, ?_⟩
-  · exact orderedFixedTargetAtomEnergyGap_nonneg
-      (hnested i)
-  · exact hsmall
 
-/-- Apply the fixed-target selector to the canonical precomputed tower.
-The selected fine endpoint retains its scheduled bounded-test regularity
-and its recursive ambient-independent complexity certificate. -/
-theorem exists_strongFullOrdered_fixedTarget_pair
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial target : OrderedPartitionComplex G k r)
-    (ε : ℕ → OrderedRegularityTolerance r)
-    (budget : ℕ → OrderedRegularityBudget r)
-    (hε : ∀ n j, 0 ≤ ε n j)
-    (hbudget :
-      ∀ n, IsOrderedRegularityBudget
-        k r (ε n) (budget n))
-    {m : ℕ} (hm : 0 < m) :
-    ∃ i : ℕ, i < m ∧
-      let coarse :=
-        strongFullOrderedRegularityTower
-          initial ε budget hε hbudget i
-      let fine :=
-        strongFullOrderedRegularityTower
-          initial ε budget hε hbudget (i + 1)
-      fine.Refines coarse ∧
-      IsFullyPreliminaryOrderedBoundedRegular
-        fine (ε i) ∧
-      0 ≤ orderedFixedTargetAtomEnergyGap
-        target fine coarse ∧
-      orderedFixedTargetAtomEnergyGap
-          target fine coarse ≤
-        orderedAllRankAtomEnergyBudget k r /
-          (m : ℝ) ∧
-      ∀ (j : Fin r) (e : OrderedFace k j.1),
-        FacePartition.complexity
-            (fine.partition j.castSucc e) ≤
-          strongFullOrderedComplexityFactor
-              budget j (i + 1) *
-            FacePartition.complexity
-              (initial.partition j.castSucc e) := by
-  let tower :=
-    strongFullOrderedRegularityTower
-      initial ε budget hε hbudget
-  obtain ⟨i, hi, hgap0, hgap⟩ :=
-    exists_adjacent_fixedTargetAtomEnergyGap_le_div
-      tower target
-      (strongFullOrderedRegularityTower_refines
-        initial ε budget hε hbudget)
-      hm
-  refine ⟨i, hi, ?_, ?_, hgap0, hgap, ?_⟩
-  · exact strongFullOrderedRegularityTower_refines
-      initial ε budget hε hbudget i
-  · exact strongFullOrderedRegularityTower_boundedRegular
-      initial ε budget hε hbudget i
-  · exact complexity_strongFullOrderedRegularityTower_le
-      initial ε budget hε hbudget (i + 1)
 
 /-! ## Moving-upper bridge and the exact loss -/
 
-/-- The tempting moving potential uses each complex as both lower observer
-and upper atom target. -/
-noncomputable def orderedMovingAtomEnergy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r) : ℝ :=
-  orderedFixedTargetAtomEnergy C C
 
-/-- Loss caused solely by replacing the coarse upper atoms by the fine
-upper atoms while keeping the coarse lower boundary fixed. -/
-noncomputable def orderedUpperRefinementAtomEnergyLoss
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r) : ℝ :=
-  orderedFixedTargetAtomEnergy coarse coarse -
-    orderedFixedTargetAtomEnergy coarse fine
 
-/-- The frozen-fine-upper energy gap packaged by a coarse/fine complex is
-exactly its fixed-target gap with target `fine`. -/
-theorem totalAtomEnergyGap_eq_fixedTarget
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) :
-    P.totalAtomEnergyGap =
-      orderedFixedTargetAtomEnergyGap
-        P.fine P.fine P.coarse := by
-  unfold OrderedCoarseFineComplex.totalAtomEnergyGap
-    OrderedCoarseFineComplex.layerAtomEnergyGap
-    orderedFixedTargetAtomEnergyGap
-    orderedFixedTargetAtomEnergy
-  rw [Finset.sum_sub_distrib]
 
-/-- Exact bridge identity.  The desired frozen-fine-upper gap is the
-adjacent increment of the moving potential plus an upper-refinement loss.
-The latter is absent only when the upper atom family is fixed. -/
-theorem totalAtomEnergyGap_eq_moving_sub_add_upperLoss
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) :
-    P.totalAtomEnergyGap =
-      orderedMovingAtomEnergy P.fine -
-        orderedMovingAtomEnergy P.coarse +
-      orderedUpperRefinementAtomEnergyLoss
-        P.fine P.coarse := by
-  rw [totalAtomEnergyGap_eq_fixedTarget]
-  unfold orderedFixedTargetAtomEnergyGap
-    orderedMovingAtomEnergy
-    orderedUpperRefinementAtomEnergyLoss
-  ring
 
-/-- The uncontrolled upper-refinement loss has the sharp universal
-all-rank atom-energy bound.  This bound is generally order one, so a small
-moving adjacent increment alone does not prove strong regularity. -/
-theorem orderedUpperRefinementAtomEnergyLoss_le_budget
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r) :
-    orderedUpperRefinementAtomEnergyLoss fine coarse ≤
-      orderedAllRankAtomEnergyBudget k r := by
-  have hleft :=
-    orderedFixedTargetAtomEnergy_le_budget
-      coarse coarse
-  have hright :=
-    orderedFixedTargetAtomEnergy_nonneg
-      coarse fine
-  unfold orderedUpperRefinementAtomEnergyLoss
-  linarith
 
-/-- Every partition of a nonempty finite space has at least one atom. -/
-theorem one_le_facePartition_complexity
-    {Ω : Type*} [Fintype Ω] [DecidableEq Ω] [Nonempty Ω]
-    (P : FacePartition Ω) :
-    1 ≤ FacePartition.complexity P := by
-  unfold FacePartition.complexity
-  exact Finset.card_pos.mpr
-    (P.parts_nonempty
-      Finset.univ_nonempty.ne_empty)
 
-/-- Sum of all upper-layer atom counts occurring in adjacent rank pairs. -/
-noncomputable def orderedAllRankUpperComplexity
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r) : ℝ :=
-  ∑ j : Fin r,
-    ∑ e : OrderedFace k (j.1 + 1),
-      (FacePartition.complexity
-        (C.partition j.succ e) : ℝ)
 
-/-- The sharp face-count energy budget is no larger than the explicit
-upper-atom complexity factor. -/
-theorem orderedAllRankAtomEnergyBudget_le_upperComplexity
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (C : OrderedPartitionComplex G k r) :
-    orderedAllRankAtomEnergyBudget k r ≤
-      orderedAllRankUpperComplexity C := by
-  unfold orderedAllRankAtomEnergyBudget
-    orderedAllRankUpperComplexity
-  apply Finset.sum_le_sum
-  intro j _
-  calc
-    (Fintype.card
-        (OrderedFace k (j.1 + 1)) : ℝ) =
-        ∑ _e : OrderedFace k (j.1 + 1),
-          (1 : ℝ) := by simp
-    _ ≤
-        ∑ e : OrderedFace k (j.1 + 1),
-          (FacePartition.complexity
-            (C.partition j.succ e) : ℝ) := by
-      apply Finset.sum_le_sum
-      intro e _
-      exact_mod_cast
-        one_le_facePartition_complexity
-          (C.partition j.succ e)
 
-/-- Complexity-form bridge bound.  It is weaker than the sharp face budget
-but displays the exact finite aggregation factor available from a
-precomputed tower complexity schedule. -/
-theorem orderedUpperRefinementAtomEnergyLoss_le_upperComplexity
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (fine coarse : OrderedPartitionComplex G k r) :
-    orderedUpperRefinementAtomEnergyLoss fine coarse ≤
-      orderedAllRankUpperComplexity fine :=
-  (orderedUpperRefinementAtomEnergyLoss_le_budget
-    fine coarse).trans
-      (orderedAllRankAtomEnergyBudget_le_upperComplexity
-        fine)
 
-/-- Consequently the naive moving-potential selector loses a whole
-all-rank energy budget when converted to the desired frozen-fine target. -/
-theorem totalAtomEnergyGap_le_moving_sub_add_budget
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) :
-    P.totalAtomEnergyGap ≤
-      orderedMovingAtomEnergy P.fine -
-        orderedMovingAtomEnergy P.coarse +
-      orderedAllRankAtomEnergyBudget k r := by
-  have hidentity :=
-    totalAtomEnergyGap_eq_moving_sub_add_upperLoss P
-  have hloss :
-      orderedUpperRefinementAtomEnergyLoss
-          P.fine P.coarse ≤
-        orderedAllRankAtomEnergyBudget k r :=
-    orderedUpperRefinementAtomEnergyLoss_le_budget
-      P.fine P.coarse
-  linarith
 
 end Wikipedia.SzemeredisTheorem
 
@@ -32339,953 +15446,31 @@ structure StrongOrderedComplexRegularityCertificate
 
 namespace StrongOrderedComplexRegularityCertificate
 
-/-- Package the selected complexes as an ordered coarse/fine pair. -/
-def toCoarseFine
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    OrderedCoarseFineComplex G k r where
-  coarse := R.coarse
-  fine := R.fine
-  refines := R.refines
 
-/-- Fine also refines the original input complex. -/
-theorem fine_refines_initial
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    R.fine.Refines initial :=
-  OrderedPartitionComplex.Refines.trans
-    R.refines R.coarse_refines_initial
 
-/-- Bernoulli reduction upgrades the selected fine complex to bounded-test
-regularity at every rank. -/
-theorem boundedRegular
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    IsFullyPreliminaryOrderedBoundedRegular R.fine
-      (selectedOrderedComplexTolerance ε R.index) :=
-  R.regular.toBounded
 
 end StrongOrderedComplexRegularityCertificate
 
 /-! ## Existence by downward rank induction -/
 
-/-- Top-down frozen-upper construction of strong ordered complex
-regularity. -/
-theorem StrongOrderedComplexRegularityCertificate.nonempty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : (j : Fin r) → ℕ → ℝ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ)
-    (hε : ∀ j n, 0 ≤ ε j n)
-    (hlong :
-      ∀ j n,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-          (budget j n : ℝ) * (ε j n) ^ 2)
-    (hlength : ∀ j, 0 < length j) :
-    Nonempty
-      (StrongOrderedComplexRegularityCertificate
-        G k r initial ε budget length) := by
-  induction r with
-  | zero =>
-      let index : Fin 0 → ℕ := fun j => Fin.elim0 j
-      refine ⟨{
-        index := index
-        coarse := initial
-        fine := initial
-        refines :=
-          OrderedPartitionComplex.Refines.refl initial
-        coarse_refines_initial :=
-          OrderedPartitionComplex.Refines.refl initial
-        coarse_topLayer_eq := rfl
-        fine_topLayer_eq := rfl
-        index_lt := ?_
-        regular := ?_
-        gap_nonneg := ?_
-        gap_le := ?_
-        coarse_complexity := ?_
-        fine_complexity := ?_ }⟩
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-  | succ r ih =>
-      let lowerInitial :
-          OrderedFacePartitionSystem G k r :=
-        initial.dropTop.topLayer
-      let upper :
-          OrderedFacePartitionSystem G k (r + 1) :=
-        initial.topLayer
-      have hεtop :
-          ∀ n, 0 ≤ ε (Fin.last r) n :=
-        fun n => hε (Fin.last r) n
-      have hlongTop :
-          ∀ n,
-            (Fintype.card
-              (OrderedFace k (r + 1)) : ℝ) <
-              (budget (Fin.last r) n : ℝ) *
-                (ε (Fin.last r) n) ^ 2 := by
-        intro n
-        have h := hlong (Fin.last r) n
-        change
-          (Fintype.card
-            (OrderedFace k (r + 1)) : ℝ) <
-            (budget (Fin.last r) n : ℝ) *
-              (ε (Fin.last r) n) ^ 2 at h
-        exact h
-      let topChoice :=
-        chosenFixedUpperLayerCoarseFine
-          lowerInitial upper
-          (ε (Fin.last r))
-          (budget (Fin.last r))
-          hεtop hlongTop
-          (length (Fin.last r))
-          (hlength (Fin.last r))
-      let prepared :
-          OrderedPartitionComplex G k r :=
-        initial.dropTop.withTopLayer topChoice.fine
-      let εlower : (j : Fin r) → ℕ → ℝ :=
-        fun j => ε j.castSucc
-      let budgetLower : (j : Fin r) → ℕ → ℕ :=
-        fun j => budget j.castSucc
-      let lengthLower : Fin r → ℕ :=
-        fun j => length j.castSucc
-      have hεlower :
-          ∀ j n, 0 ≤ εlower j n :=
-        fun j n => hε j.castSucc n
-      have hlongLower :
-          ∀ j n,
-            (Fintype.card
-              (OrderedFace k (j.1 + 1)) : ℝ) <
-              (budgetLower j n : ℝ) *
-                (εlower j n) ^ 2 :=
-        fun j n => hlong j.castSucc n
-      have hlengthLower :
-          ∀ j, 0 < lengthLower j :=
-        fun j => hlength j.castSucc
-      obtain ⟨lowerCertificate⟩ :=
-        ih prepared εlower budgetLower lengthLower
-          hεlower hlongLower hlengthLower
-      let coarsePrefix :
-          OrderedPartitionComplex G k r :=
-        lowerCertificate.coarse.withTopLayer
-          topChoice.coarse
-      let coarse :
-          OrderedPartitionComplex G k (r + 1) :=
-        coarsePrefix.appendTop upper
-      let fine :
-          OrderedPartitionComplex G k (r + 1) :=
-        lowerCertificate.fine.appendTop upper
-      let index : Fin (r + 1) → ℕ :=
-        fun j =>
-          Fin.lastCases topChoice.index
-            lowerCertificate.index j
-      have hlowerFineTop :
-          lowerCertificate.fine.topLayer =
-            topChoice.fine := by
-        calc
-          lowerCertificate.fine.topLayer =
-              prepared.topLayer :=
-            lowerCertificate.fine_topLayer_eq
-          _ = topChoice.fine :=
-            OrderedPartitionComplex.topLayer_withTopLayer
-              initial.dropTop topChoice.fine
-      have hlowerCoarseTop :
-          lowerCertificate.coarse.topLayer =
-            topChoice.fine := by
-        calc
-          lowerCertificate.coarse.topLayer =
-              prepared.topLayer :=
-            lowerCertificate.coarse_topLayer_eq
-          _ = topChoice.fine :=
-            OrderedPartitionComplex.topLayer_withTopLayer
-              initial.dropTop topChoice.fine
-      refine ⟨{
-        index := index
-        coarse := coarse
-        fine := fine
-        refines := ?_
-        coarse_refines_initial := ?_
-        coarse_topLayer_eq := ?_
-        fine_topLayer_eq := ?_
-        index_lt := ?_
-        regular := ?_
-        gap_nonneg := ?_
-        gap_le := ?_
-        coarse_complexity := ?_
-        fine_complexity := ?_ }⟩
-      · have hprefix :
-            lowerCertificate.fine.Refines
-              coarsePrefix := by
-          intro q e
-          cases q using Fin.lastCases with
-          | last =>
-              simp only [coarsePrefix,
-                OrderedPartitionComplex.withTopLayer,
-                Fin.lastCases_last]
-              change OrderedFace k r at e
-              have heq :
-                  lowerCertificate.fine.partition
-                      (Fin.last r) e =
-                    topChoice.fine e :=
-                congrFun hlowerFineTop e
-              rw [heq]
-              exact topChoice.refines e
-          | cast i =>
-              simp only [coarsePrefix,
-                OrderedPartitionComplex.withTopLayer,
-                Fin.lastCases_castSucc]
-              exact lowerCertificate.refines
-                i.castSucc e
-        exact OrderedPartitionComplex.appendTop_refines
-          hprefix
-          (OrderedFacePartitionRefines.refl upper)
-      · have hprefix :
-            coarsePrefix.Refines initial.dropTop := by
-          intro q e
-          cases q using Fin.lastCases with
-          | last =>
-              simp only [coarsePrefix,
-                OrderedPartitionComplex.withTopLayer,
-                Fin.lastCases_last]
-              change OrderedFace k r at e
-              exact topChoice.coarse_refines_initial e
-          | cast i =>
-              simp only [coarsePrefix,
-                OrderedPartitionComplex.withTopLayer,
-                Fin.lastCases_castSucc]
-              have h :=
-                lowerCertificate.coarse_refines_initial
-                  i.castSucc e
-              simpa only [prepared,
-                OrderedPartitionComplex.withTopLayer,
-                Fin.lastCases_castSucc,
-                OrderedPartitionComplex.dropTop] using h
-        have happend :=
-          OrderedPartitionComplex.appendTop_refines
-            hprefix
-            (OrderedFacePartitionRefines.refl upper)
-        simpa [coarse, upper] using happend
-      · simp [coarse, upper]
-      · simp [fine, upper]
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            simpa [index] using topChoice.index_lt
-        | cast i =>
-            simpa [index, lengthLower] using
-              lowerCertificate.index_lt i
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            simp only [fine,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.appendTop_partition_last,
-              Fin.succ_last,
-              selectedOrderedComplexTolerance,
-              index, Fin.lastCases_last]
-            change
-              @IsPreliminaryOrderedRegular
-                G _ _ k r
-                (lowerCertificate.fine.partition
-                  (Fin.last r))
-                upper
-                (ε (Fin.last r) topChoice.index)
-            have hregular := topChoice.fine_regular
-            rw [← hlowerFineTop] at hregular
-            exact hregular
-        | cast i =>
-            have hregular :=
-              lowerCertificate.regular i
-            simp only [fine,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              Fin.succ_castSucc,
-              selectedOrderedComplexTolerance,
-              index, Fin.lastCases_castSucc]
-            change
-              @IsPreliminaryOrderedRegular
-                G _ _ k i.1
-                (lowerCertificate.fine.partition
-                  i.castSucc)
-                (lowerCertificate.fine.partition i.succ)
-                (ε i.castSucc
-                  (lowerCertificate.index i))
-            exact hregular
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            have hgap := topChoice.gap_nonneg
-            simp only [fine, coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.appendTop_partition_last,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_last, Fin.succ_last]
-            change
-              0 ≤
-                orderedLayerAtomEnergy
-                    lowerCertificate.fine.topLayer upper -
-                  orderedLayerAtomEnergy
-                    topChoice.coarse upper
-            rw [hlowerFineTop]
-            exact hgap
-        | cast i =>
-            have hgap :=
-              lowerCertificate.gap_nonneg i
-            simp only [fine, coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              Fin.succ_castSucc]
-            convert hgap using 1
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            have hgap := topChoice.gap_le
-            simp only [fine, coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.appendTop_partition_last,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_last, Fin.succ_last]
-            change
-              orderedLayerAtomEnergy
-                    lowerCertificate.fine.topLayer upper -
-                  orderedLayerAtomEnergy
-                    topChoice.coarse upper ≤
-                (Fintype.card
-                  (OrderedFace k (r + 1)) : ℝ) /
-                    (length (Fin.last r) : ℝ)
-            rw [hlowerFineTop]
-            exact hgap
-        | cast i =>
-            have hgap :=
-              lowerCertificate.gap_le i
-            simp only [fine, coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              Fin.succ_castSucc, lengthLower]
-            convert hgap using 1 <;> rfl
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            intro e
-            have hcomplexity :=
-              topChoice.coarse_complexity e
-            simp only [coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_last,
-              index, Fin.lastCases_last]
-            change OrderedFace k r at e
-            change
-              FacePartition.complexity
-                    (topChoice.coarse e) ≤
-                fixedUpperLayerComplexityFactor
-                    r (budget (Fin.last r))
-                    topChoice.index *
-                  FacePartition.complexity
-                    (initial.partition
-                      (Fin.last r).castSucc e)
-            exact hcomplexity
-        | cast i =>
-            intro e
-            change OrderedFace k i.1 at e
-            have hcomplexity :=
-              lowerCertificate.coarse_complexity i e
-            simp only [coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              index, Fin.lastCases_castSucc]
-            change
-              FacePartition.complexity
-                  (lowerCertificate.coarse.partition
-                    i.castSucc e) ≤
-                fixedUpperLayerComplexityFactor
-                    i.1 (budget i.castSucc)
-                    (lowerCertificate.index i) *
-                  FacePartition.complexity
-                    (initial.partition
-                      i.castSucc.castSucc e)
-            simp only [budgetLower, prepared,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              OrderedPartitionComplex.dropTop] at hcomplexity
-            convert hcomplexity using 1
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            intro e
-            change OrderedFace k r at e
-            have hcomplexity :=
-              topChoice.fine_complexity e
-            simp only [fine,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              index, Fin.lastCases_last]
-            change
-              FacePartition.complexity
-                  (lowerCertificate.fine.partition
-                    (Fin.last r) e) ≤
-                fixedUpperLayerComplexityFactor
-                    r (budget (Fin.last r))
-                    (topChoice.index + 1) *
-                  FacePartition.complexity
-                    (initial.partition
-                      (Fin.last r).castSucc e)
-            have heq :
-                lowerCertificate.fine.partition
-                    (Fin.last r) e =
-                  topChoice.fine e :=
-              congrFun hlowerFineTop e
-            rw [heq]
-            exact hcomplexity
-        | cast i =>
-            intro e
-            change OrderedFace k i.1 at e
-            have hcomplexity :=
-              lowerCertificate.fine_complexity i e
-            simp only [fine,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              index, Fin.lastCases_castSucc]
-            change
-              FacePartition.complexity
-                  (lowerCertificate.fine.partition
-                    i.castSucc e) ≤
-                fixedUpperLayerComplexityFactor
-                    i.1 (budget i.castSucc)
-                    (lowerCertificate.index i + 1) *
-                  FacePartition.complexity
-                    (initial.partition
-                      i.castSucc.castSucc e)
-            simp only [budgetLower, prepared,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              OrderedPartitionComplex.dropTop] at hcomplexity
-            convert hcomplexity using 1
 
 /-! ## Quantitative consequences -/
 
 namespace StrongOrderedComplexRegularityCertificate
 
-/-- The selected rankwise gaps add up to a genuinely small
-frozen-fine-upper total gap. -/
-theorem totalAtomEnergyGap_le_sum_div
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    R.toCoarseFine.totalAtomEnergyGap ≤
-      ∑ j : Fin r,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) /
-            (length j : ℝ) := by
-  unfold OrderedCoarseFineComplex.totalAtomEnergyGap
-    OrderedCoarseFineComplex.layerAtomEnergyGap
-    toCoarseFine
-  exact Finset.sum_le_sum fun j _ => R.gap_le j
 
-/-- Nonnegativity of the selected total frozen-upper gap. -/
-theorem totalAtomEnergyGap_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    0 ≤ R.toCoarseFine.totalAtomEnergyGap :=
-  R.toCoarseFine.totalAtomEnergyGap_nonneg
 
-/-- At one rank, the local frozen-upper gaps below a fixed top face inject
-into the complete layer gap. -/
-theorem sum_faceAtomEnergyGap_trans_le_layer
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (e : OrderedFace k r) (j : Fin r) :
-    (∑ d : OrderedFace r (j.1 + 1),
-      R.toCoarseFine.faceAtomEnergyGap
-        j (d.trans e)) ≤
-      R.toCoarseFine.layerAtomEnergyGap j := by
-  classical
-  rw [R.toCoarseFine.layerAtomEnergyGap_eq_sum_face j]
-  let φ : OrderedFace r (j.1 + 1) →
-      OrderedFace k (j.1 + 1) :=
-    fun d => d.trans e
-  have hφ : Function.Injective φ := by
-    intro d₁ d₂ h
-    ext i
-    exact congrArg Fin.val
-      (e.injective
-        (congrArg
-          (fun f : OrderedFace k (j.1 + 1) => f i) h))
-  calc
-    (∑ d : OrderedFace r (j.1 + 1),
-        R.toCoarseFine.faceAtomEnergyGap j (φ d)) =
-        ∑ f ∈
-            (Finset.univ :
-              Finset (OrderedFace r (j.1 + 1))).image φ,
-          R.toCoarseFine.faceAtomEnergyGap j f := by
-      rw [Finset.sum_image hφ.injOn]
-    _ ≤
-        ∑ f : OrderedFace k (j.1 + 1),
-          R.toCoarseFine.faceAtomEnergyGap j f := by
-      exact
-        Finset.sum_le_sum_of_subset_of_nonneg
-          (Finset.subset_univ _)
-          (fun f _ _ =>
-            R.toCoarseFine.faceAtomEnergyGap_nonneg j f)
 
-/-- All local gaps occurring below one top face cost at most the single
-global frozen-upper gap. -/
-theorem sum_faceAtomEnergyGap_trans_le_total
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (e : OrderedFace k r) :
-    (∑ q : OrderedPositiveSubface r,
-      R.toCoarseFine.faceAtomEnergyGap
-        q.1 (q.2.trans e)) ≤
-      R.toCoarseFine.totalAtomEnergyGap := by
-  unfold OrderedCoarseFineComplex.totalAtomEnergyGap
-  let E :=
-    Equiv.psigmaEquivSigma
-      (fun j : Fin r => OrderedFace r (j.1 + 1))
-  calc
-    (∑ q : OrderedPositiveSubface r,
-        R.toCoarseFine.faceAtomEnergyGap
-          q.1 (q.2.trans e)) =
-        ∑ q : (Σ j : Fin r,
-          OrderedFace r (j.1 + 1)),
-          R.toCoarseFine.faceAtomEnergyGap
-            q.1 (q.2.trans e) := by
-      rw [← E.sum_comp
-        (fun q : (Σ j : Fin r,
-            OrderedFace r (j.1 + 1)) =>
-          R.toCoarseFine.faceAtomEnergyGap
-            q.1 (q.2.trans e))]
-      rfl
-    _ =
-        ∑ j : Fin r,
-          ∑ d : OrderedFace r (j.1 + 1),
-            R.toCoarseFine.faceAtomEnergyGap
-              j (d.trans e) := by
-      exact
-        Fintype.sum_sigma'
-          (fun (j : Fin r)
-            (d : OrderedFace r (j.1 + 1)) =>
-            R.toCoarseFine.faceAtomEnergyGap
-              j (d.trans e))
-    _ ≤
-        ∑ j : Fin r,
-          R.toCoarseFine.layerAtomEnergyGap j := by
-      exact Finset.sum_le_sum fun j _ =>
-        R.sum_faceAtomEnergyGap_trans_le_layer e j
 
-/-- The fine upper partitions occurring below one top face inject into the
-global all-rank upper-complexity sum. -/
-theorem sum_fineUpperComplexity_trans_le_allRankUpperComplexity
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (e : OrderedFace k r) :
-    (∑ q : OrderedPositiveSubface r,
-      (FacePartition.complexity
-        (R.fine.partition q.1.succ
-          (q.2.trans e)) : ℝ)) ≤
-      orderedAllRankUpperComplexity R.fine := by
-  classical
-  unfold orderedAllRankUpperComplexity
-  let E :=
-    Equiv.psigmaEquivSigma
-      (fun j : Fin r => OrderedFace r (j.1 + 1))
-  calc
-    (∑ q : OrderedPositiveSubface r,
-        (FacePartition.complexity
-          (R.fine.partition q.1.succ
-            (q.2.trans e)) : ℝ)) =
-        ∑ q : (Σ j : Fin r,
-          OrderedFace r (j.1 + 1)),
-          (FacePartition.complexity
-            (R.fine.partition q.1.succ
-              (q.2.trans e)) : ℝ) := by
-      rw [← E.sum_comp
-        (fun q : (Σ j : Fin r,
-            OrderedFace r (j.1 + 1)) =>
-          (FacePartition.complexity
-            (R.fine.partition q.1.succ
-              (q.2.trans e)) : ℝ))]
-      rfl
-    _ =
-        ∑ j : Fin r,
-          ∑ d : OrderedFace r (j.1 + 1),
-            (FacePartition.complexity
-              (R.fine.partition j.succ
-                (d.trans e)) : ℝ) := by
-      exact
-        Fintype.sum_sigma'
-          (fun (j : Fin r)
-            (d : OrderedFace r (j.1 + 1)) =>
-            (FacePartition.complexity
-              (R.fine.partition j.succ
-                (d.trans e)) : ℝ))
-    _ ≤
-        ∑ j : Fin r,
-          ∑ f : OrderedFace k (j.1 + 1),
-            (FacePartition.complexity
-              (R.fine.partition j.succ f) : ℝ) := by
-      apply Finset.sum_le_sum
-      intro j _hj
-      let φ : OrderedFace r (j.1 + 1) →
-          OrderedFace k (j.1 + 1) :=
-        fun d => d.trans e
-      have hφ : Function.Injective φ := by
-        intro d₁ d₂ h
-        ext i
-        exact congrArg Fin.val
-          (e.injective
-            (congrArg
-              (fun f : OrderedFace k (j.1 + 1) => f i) h))
-      calc
-        (∑ d : OrderedFace r (j.1 + 1),
-            (FacePartition.complexity
-              (R.fine.partition j.succ (φ d)) : ℝ)) =
-            ∑ f ∈
-                (Finset.univ :
-                  Finset (OrderedFace r
-                    (j.1 + 1))).image φ,
-              (FacePartition.complexity
-                (R.fine.partition j.succ f) : ℝ) := by
-          rw [Finset.sum_image hφ.injOn]
-        _ ≤
-            ∑ f : OrderedFace k (j.1 + 1),
-              (FacePartition.complexity
-                (R.fine.partition j.succ f) : ℝ) := by
-          exact
-            Finset.sum_le_sum_of_subset_of_nonneg
-              (Finset.subset_univ _)
-              (fun _ _ _ => Nat.cast_nonneg _)
 
-/-- Sharp constant-threshold cleaning estimate furnished by the strong
-pair.  The complexity contribution is local to the selected fine upper
-atoms, while all defect contributions below a top face are charged only
-once to the global frozen-upper gap. -/
-theorem faceDeletionDensity_badBase_constant_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse (fun _ => α) (fun _ => β)) e ≤
-      (∑ q : OrderedPositiveSubface r,
-        (FacePartition.complexity
-          (R.fine.partition q.1.succ
-            (q.2.trans e)) : ℝ)) * α +
-        R.toCoarseFine.totalAtomEnergyGap / β := by
-  let P := R.toCoarseFine
-  have hdeletion :
-      OrderedPattern.faceDeletionDensity
-          (orderedBadBaseDeletionFamily
-            R.fine R.coarse (fun _ => α) (fun _ => β)) e ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (R.fine.partition q.1.succ
-                (q.2.trans e)) : ℝ) * α +
-            P.faceAtomEnergyGap q.1 (q.2.trans e) / β) := by
-    convert
-      (faceDeletionDensity_orderedBadBaseDeletionFamily_le
-        R.refines (fun _ => α) (fun _ => β)
-        (fun _ => hα) (fun _ => hβ) e) using 1
-    rfl
-  calc
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse (fun _ => α) (fun _ => β)) e ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (R.fine.partition q.1.succ
-                (q.2.trans e)) : ℝ) * α +
-            P.faceAtomEnergyGap q.1 (q.2.trans e) / β) :=
-      hdeletion
-    _ =
-        (∑ q : OrderedPositiveSubface r,
-          (FacePartition.complexity
-            (R.fine.partition q.1.succ
-              (q.2.trans e)) : ℝ)) * α +
-          (∑ q : OrderedPositiveSubface r,
-            P.faceAtomEnergyGap q.1 (q.2.trans e)) / β := by
-      rw [Finset.sum_add_distrib, Finset.sum_mul,
-        Finset.sum_div]
-    _ ≤
-        (∑ q : OrderedPositiveSubface r,
-          (FacePartition.complexity
-            (R.fine.partition q.1.succ
-              (q.2.trans e)) : ℝ)) * α +
-          P.totalAtomEnergyGap / β := by
-      exact add_le_add (le_refl _)
-        (div_le_div_of_nonneg_right
-          (R.sum_faceAtomEnergyGap_trans_le_total e) hβ.le)
 
-/-- Fully explicit version of the preceding cleaning estimate: the energy
-term is replaced by the chosen reciprocal-timescale budget. -/
-theorem faceDeletionDensity_badBase_constant_le_sum_div
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse (fun _ => α) (fun _ => β)) e ≤
-      (∑ q : OrderedPositiveSubface r,
-        (FacePartition.complexity
-          (R.fine.partition q.1.succ
-            (q.2.trans e)) : ℝ)) * α +
-        (∑ j : Fin r,
-          (Fintype.card
-            (OrderedFace k (j.1 + 1)) : ℝ) /
-              (length j : ℝ)) / β := by
-  exact
-    (R.faceDeletionDensity_badBase_constant_le hα hβ e).trans
-      (add_le_add (le_refl _)
-        (div_le_div_of_nonneg_right
-          R.totalAtomEnergyGap_le_sum_div hβ.le))
 
-/-- Global-complexity form of the explicit deletion bound.  It is uniform
-in the top face and charges the frozen-upper energy gap only once. -/
-theorem faceDeletionDensity_badBase_constant_le_globalComplexity_sum_div
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse (fun _ => α) (fun _ => β)) e ≤
-      orderedAllRankUpperComplexity R.fine * α +
-        (∑ j : Fin r,
-          (Fintype.card
-            (OrderedFace k (j.1 + 1)) : ℝ) /
-              (length j : ℝ)) / β := by
-  exact
-    (R.faceDeletionDensity_badBase_constant_le_sum_div
-      hα hβ e).trans
-      (add_le_add
-        (mul_le_mul_of_nonneg_right
-          (R.sum_fineUpperComplexity_trans_le_allRankUpperComplexity
-            e)
-          hα)
-        (le_refl _))
 
-/-- If `M` bounds the selected fine upper partitions, the complete
-per-top-face deletion density has a closed numerical bound.  In particular,
-the energy term is not multiplied by the number of subfaces. -/
-theorem faceDeletionDensity_badBase_constant_of_complexity_le_sum_div
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r M : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (hcomplex :
-      ∀ (j : Fin r) (e : OrderedFace k (j.1 + 1)),
-        FacePartition.complexity
-          (R.fine.partition j.succ e) ≤ M)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse (fun _ => α) (fun _ => β)) e ≤
-      (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-          (M : ℝ) * α +
-        (∑ j : Fin r,
-          (Fintype.card
-            (OrderedFace k (j.1 + 1)) : ℝ) /
-              (length j : ℝ)) / β := by
-  have hsum :
-      (∑ q : OrderedPositiveSubface r,
-        (FacePartition.complexity
-          (R.fine.partition q.1.succ
-            (q.2.trans e)) : ℝ)) ≤
-        (Fintype.card
-          (OrderedPositiveSubface r) : ℝ) * (M : ℝ) := by
-    calc
-      (∑ q : OrderedPositiveSubface r,
-          (FacePartition.complexity
-            (R.fine.partition q.1.succ
-              (q.2.trans e)) : ℝ)) ≤
-          ∑ _q : OrderedPositiveSubface r,
-            (M : ℝ) := by
-        apply Finset.sum_le_sum
-        intro q _hq
-        exact_mod_cast hcomplex q.1 (q.2.trans e)
-      _ =
-          (Fintype.card
-            (OrderedPositiveSubface r) : ℝ) * (M : ℝ) := by
-        simp
-  exact
-    (R.faceDeletionDensity_badBase_constant_le_sum_div
-      hα hβ e).trans
-      (add_le_add
-        (mul_le_mul_of_nonneg_right hsum hα)
-        (le_refl _))
 
 end StrongOrderedComplexRegularityCertificate
 
-/-- Strong ordered complex regularity, packaged together with its explicit
-total frozen-fine-upper atom-energy estimate. -/
-theorem exists_strongOrderedComplexRegularity
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : (j : Fin r) → ℕ → ℝ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ)
-    (hε : ∀ j n, 0 ≤ ε j n)
-    (hlong :
-      ∀ j n,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-          (budget j n : ℝ) * (ε j n) ^ 2)
-    (hlength : ∀ j, 0 < length j) :
-    ∃ R : StrongOrderedComplexRegularityCertificate
-        G k r initial ε budget length,
-      R.toCoarseFine.totalAtomEnergyGap ≤
-        ∑ j : Fin r,
-          (Fintype.card
-            (OrderedFace k (j.1 + 1)) : ℝ) /
-              (length j : ℝ) := by
-  obtain ⟨R⟩ :=
-    StrongOrderedComplexRegularityCertificate.nonempty
-      initial ε budget length hε hlong hlength
-  exact ⟨R, R.totalAtomEnergyGap_le_sum_div⟩
 
-/-- A prescribed upper bound for the sum of reciprocal rank timescales
-immediately gives the desired total atom-energy tolerance. -/
-theorem exists_strongOrderedComplexRegularity_of_sum_div_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : (j : Fin r) → ℕ → ℝ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ)
-    (γ : ℝ)
-    (hε : ∀ j n, 0 ≤ ε j n)
-    (hlong :
-      ∀ j n,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-          (budget j n : ℝ) * (ε j n) ^ 2)
-    (hlength : ∀ j, 0 < length j)
-    (hγ :
-      (∑ j : Fin r,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) /
-            (length j : ℝ)) ≤ γ) :
-    ∃ R : StrongOrderedComplexRegularityCertificate
-        G k r initial ε budget length,
-      R.toCoarseFine.totalAtomEnergyGap ≤ γ := by
-  obtain ⟨R, hR⟩ :=
-    exists_strongOrderedComplexRegularity
-      initial ε budget length hε hlong hlength
-  exact ⟨R, hR.trans hγ⟩
 
-/-- Strict reciprocal-timescale control gives a strict total atom-energy
-gap, as required by threshold choices in cleaning arguments. -/
-theorem exists_strongOrderedComplexRegularity_of_sum_div_lt
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : (j : Fin r) → ℕ → ℝ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ)
-    (γ : ℝ)
-    (hε : ∀ j n, 0 ≤ ε j n)
-    (hlong :
-      ∀ j n,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-          (budget j n : ℝ) * (ε j n) ^ 2)
-    (hlength : ∀ j, 0 < length j)
-    (hγ :
-      (∑ j : Fin r,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) /
-            (length j : ℝ)) < γ) :
-    ∃ R : StrongOrderedComplexRegularityCertificate
-        G k r initial ε budget length,
-      R.toCoarseFine.totalAtomEnergyGap < γ := by
-  obtain ⟨R, hR⟩ :=
-    exists_strongOrderedComplexRegularity
-      initial ε budget length hε hlong hlength
-  exact ⟨R, hR.trans_lt hγ⟩
 
 end Wikipedia.SzemeredisTheorem
 
@@ -33398,504 +15583,26 @@ def toCoarseFine
   fine := R.fine
   refines := R.refines
 
-/-- The fine output also refines the original input complex. -/
-theorem fine_refines_initial
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : CoarseTargetOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    R.fine.Refines initial :=
-  OrderedPartitionComplex.Refines.trans
-    R.refines R.coarse_refines_initial
 
 end CoarseTargetOrderedComplexRegularityCertificate
 
 /-! ## Existence by downward rank induction -/
 
-/-- Top-down construction of a strong certificate whose upper target at
-every adjacent rank is the final coarse layer. -/
-theorem CoarseTargetOrderedComplexRegularityCertificate.nonempty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : (j : Fin r) → ℕ → ℝ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ)
-    (hε : ∀ j n, 0 ≤ ε j n)
-    (hlong :
-      ∀ j n,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-          (budget j n : ℝ) * (ε j n) ^ 2)
-    (hlength : ∀ j, 0 < length j) :
-    Nonempty
-      (CoarseTargetOrderedComplexRegularityCertificate
-        G k r initial ε budget length) := by
-  induction r with
-  | zero =>
-      let index : Fin 0 → ℕ := fun j => Fin.elim0 j
-      refine ⟨{
-        index := index
-        coarse := initial
-        fine := initial
-        refines :=
-          OrderedPartitionComplex.Refines.refl initial
-        coarse_refines_initial :=
-          OrderedPartitionComplex.Refines.refl initial
-        coarse_topLayer_eq := rfl
-        fine_topLayer_eq := rfl
-        index_lt := ?_
-        mixedRegular := ?_
-        gap_nonneg := ?_
-        gap_le := ?_
-        coarse_complexity := ?_
-        fine_complexity := ?_ }⟩
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-      · intro j
-        exact Fin.elim0 j
-  | succ r ih =>
-      let lowerInitial :
-          OrderedFacePartitionSystem G k r :=
-        initial.dropTop.topLayer
-      let upper :
-          OrderedFacePartitionSystem G k (r + 1) :=
-        initial.topLayer
-      have hεtop :
-          ∀ n, 0 ≤ ε (Fin.last r) n :=
-        fun n => hε (Fin.last r) n
-      have hlongTop :
-          ∀ n,
-            (Fintype.card
-              (OrderedFace k (r + 1)) : ℝ) <
-              (budget (Fin.last r) n : ℝ) *
-                (ε (Fin.last r) n) ^ 2 := by
-        intro n
-        have h := hlong (Fin.last r) n
-        change
-          (Fintype.card
-            (OrderedFace k (r + 1)) : ℝ) <
-            (budget (Fin.last r) n : ℝ) *
-              (ε (Fin.last r) n) ^ 2 at h
-        exact h
-      let topChoice :=
-        chosenFixedUpperLayerCoarseFine
-          lowerInitial upper
-          (ε (Fin.last r))
-          (budget (Fin.last r))
-          hεtop hlongTop
-          (length (Fin.last r))
-          (hlength (Fin.last r))
-      let prepared :
-          OrderedPartitionComplex G k r :=
-        initial.dropTop.withTopLayer topChoice.coarse
-      let εlower : (j : Fin r) → ℕ → ℝ :=
-        fun j => ε j.castSucc
-      let budgetLower : (j : Fin r) → ℕ → ℕ :=
-        fun j => budget j.castSucc
-      let lengthLower : Fin r → ℕ :=
-        fun j => length j.castSucc
-      have hεlower :
-          ∀ j n, 0 ≤ εlower j n :=
-        fun j n => hε j.castSucc n
-      have hlongLower :
-          ∀ j n,
-            (Fintype.card
-              (OrderedFace k (j.1 + 1)) : ℝ) <
-              (budgetLower j n : ℝ) *
-                (εlower j n) ^ 2 :=
-        fun j n => hlong j.castSucc n
-      have hlengthLower :
-          ∀ j, 0 < lengthLower j :=
-        fun j => hlength j.castSucc
-      obtain ⟨lowerCertificate⟩ :=
-        ih prepared εlower budgetLower lengthLower
-          hεlower hlongLower hlengthLower
-      let coarsePrefix :
-          OrderedPartitionComplex G k r :=
-        lowerCertificate.coarse
-      let finePrefix :
-          OrderedPartitionComplex G k r :=
-        lowerCertificate.fine.withTopLayer topChoice.fine
-      let coarse :
-          OrderedPartitionComplex G k (r + 1) :=
-        coarsePrefix.appendTop upper
-      let fine :
-          OrderedPartitionComplex G k (r + 1) :=
-        finePrefix.appendTop upper
-      let index : Fin (r + 1) → ℕ :=
-        fun j =>
-          Fin.lastCases topChoice.index
-            lowerCertificate.index j
-      have hlowerFineTop :
-          lowerCertificate.fine.topLayer =
-            topChoice.coarse := by
-        calc
-          lowerCertificate.fine.topLayer =
-              prepared.topLayer :=
-            lowerCertificate.fine_topLayer_eq
-          _ = topChoice.coarse :=
-            OrderedPartitionComplex.topLayer_withTopLayer
-              initial.dropTop topChoice.coarse
-      have hlowerCoarseTop :
-          lowerCertificate.coarse.topLayer =
-            topChoice.coarse := by
-        calc
-          lowerCertificate.coarse.topLayer =
-              prepared.topLayer :=
-            lowerCertificate.coarse_topLayer_eq
-          _ = topChoice.coarse :=
-            OrderedPartitionComplex.topLayer_withTopLayer
-              initial.dropTop topChoice.coarse
-      refine ⟨{
-        index := index
-        coarse := coarse
-        fine := fine
-        refines := ?_
-        coarse_refines_initial := ?_
-        coarse_topLayer_eq := ?_
-        fine_topLayer_eq := ?_
-        index_lt := ?_
-        mixedRegular := ?_
-        gap_nonneg := ?_
-        gap_le := ?_
-        coarse_complexity := ?_
-        fine_complexity := ?_ }⟩
-      · have hprefix :
-            finePrefix.Refines coarsePrefix := by
-          intro q e
-          cases q using Fin.lastCases with
-          | last =>
-              simp only [finePrefix, coarsePrefix,
-                OrderedPartitionComplex.withTopLayer,
-                Fin.lastCases_last]
-              change OrderedFace k r at e
-              have heq :
-                  lowerCertificate.coarse.partition
-                      (Fin.last r) e =
-                    topChoice.coarse e :=
-                congrFun hlowerCoarseTop e
-              rw [heq]
-              exact topChoice.refines e
-          | cast i =>
-              simp only [finePrefix, coarsePrefix,
-                OrderedPartitionComplex.withTopLayer,
-                Fin.lastCases_castSucc]
-              exact lowerCertificate.refines
-                i.castSucc e
-        exact OrderedPartitionComplex.appendTop_refines
-          hprefix
-          (OrderedFacePartitionRefines.refl upper)
-      · have hprepared :
-            prepared.Refines initial.dropTop := by
-          exact OrderedPartitionComplex.withTopLayer_refines
-            initial.dropTop topChoice.coarse
-            (by
-              simpa only [lowerInitial] using
-                topChoice.coarse_refines_initial)
-        have hprefix :
-            coarsePrefix.Refines initial.dropTop :=
-          OrderedPartitionComplex.Refines.trans
-            lowerCertificate.coarse_refines_initial
-            hprepared
-        have happend :=
-          OrderedPartitionComplex.appendTop_refines
-            hprefix
-            (OrderedFacePartitionRefines.refl upper)
-        simpa [coarse, coarsePrefix, upper] using happend
-      · simp [coarse, upper]
-      · simp [fine, upper]
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            simpa [index] using topChoice.index_lt
-        | cast i =>
-            simpa [index, lengthLower] using
-              lowerCertificate.index_lt i
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            simp only [fine, finePrefix, coarse,
-              coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.appendTop_partition_last,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_last, Fin.succ_last,
-              index, Fin.lastCases_last]
-            exact topChoice.fine_regular
-        | cast i =>
-            have hregular :=
-              lowerCertificate.mixedRegular i
-            simp only [fine, finePrefix, coarse,
-              coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc, Fin.succ_castSucc,
-              index, Fin.lastCases_castSucc]
-            change
-              @IsPreliminaryOrderedRegular
-                G _ _ k i.1
-                (lowerCertificate.fine.partition
-                  i.castSucc)
-                (lowerCertificate.coarse.partition
-                  i.succ)
-                (ε i.castSucc
-                  (lowerCertificate.index i))
-            exact hregular
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            have hgap := topChoice.gap_nonneg
-            simp only [fine, finePrefix, coarse,
-              coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.appendTop_partition_last,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_last, Fin.succ_last]
-            change
-              0 ≤
-                orderedLayerAtomEnergy
-                    topChoice.fine upper -
-                  orderedLayerAtomEnergy
-                    lowerCertificate.coarse.topLayer
-                    upper
-            rw [hlowerCoarseTop]
-            exact hgap
-        | cast i =>
-            have hgap :=
-              lowerCertificate.gap_nonneg i
-            simp only [fine, finePrefix, coarse,
-              coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc, Fin.succ_castSucc]
-            convert hgap using 1
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            have hgap := topChoice.gap_le
-            simp only [fine, finePrefix, coarse,
-              coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.appendTop_partition_last,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_last, Fin.succ_last]
-            change
-              orderedLayerAtomEnergy
-                    topChoice.fine upper -
-                  orderedLayerAtomEnergy
-                    lowerCertificate.coarse.topLayer
-                    upper ≤
-                (Fintype.card
-                  (OrderedFace k (r + 1)) : ℝ) /
-                    (length (Fin.last r) : ℝ)
-            rw [hlowerCoarseTop]
-            exact hgap
-        | cast i =>
-            have hgap :=
-              lowerCertificate.gap_le i
-            simp only [fine, finePrefix, coarse,
-              coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc, Fin.succ_castSucc,
-              lengthLower]
-            convert hgap using 1 <;> rfl
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            intro e
-            change OrderedFace k r at e
-            have hcomplexity :=
-              topChoice.coarse_complexity e
-            simp only [coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              index, Fin.lastCases_last]
-            change
-              FacePartition.complexity
-                  (lowerCertificate.coarse.partition
-                    (Fin.last r) e) ≤
-                fixedUpperLayerComplexityFactor
-                    r (budget (Fin.last r))
-                    topChoice.index *
-                  FacePartition.complexity
-                    (initial.partition
-                      (Fin.last r).castSucc e)
-            have heq :
-                lowerCertificate.coarse.partition
-                    (Fin.last r) e =
-                  topChoice.coarse e :=
-              congrFun hlowerCoarseTop e
-            rw [heq]
-            exact hcomplexity
-        | cast i =>
-            intro e
-            change OrderedFace k i.1 at e
-            have hcomplexity :=
-              lowerCertificate.coarse_complexity i e
-            simp only [coarse, coarsePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              index, Fin.lastCases_castSucc]
-            change
-              FacePartition.complexity
-                  (lowerCertificate.coarse.partition
-                    i.castSucc e) ≤
-                fixedUpperLayerComplexityFactor
-                    i.1 (budget i.castSucc)
-                    (lowerCertificate.index i) *
-                  FacePartition.complexity
-                    (initial.partition
-                      i.castSucc.castSucc e)
-            simp only [budgetLower, prepared,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              OrderedPartitionComplex.dropTop] at hcomplexity
-            convert hcomplexity using 1
-      · intro q
-        cases q using Fin.lastCases with
-        | last =>
-            intro e
-            change OrderedFace k r at e
-            have hcomplexity :=
-              topChoice.fine_complexity e
-            simp only [fine, finePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_last,
-              index, Fin.lastCases_last]
-            exact hcomplexity
-        | cast i =>
-            intro e
-            change OrderedFace k i.1 at e
-            have hcomplexity :=
-              lowerCertificate.fine_complexity i e
-            simp only [fine, finePrefix,
-              OrderedPartitionComplex.appendTop_partition_castSucc,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              index, Fin.lastCases_castSucc]
-            change
-              FacePartition.complexity
-                  (lowerCertificate.fine.partition
-                    i.castSucc e) ≤
-                fixedUpperLayerComplexityFactor
-                    i.1 (budget i.castSucc)
-                    (lowerCertificate.index i + 1) *
-                  FacePartition.complexity
-                    (initial.partition
-                      i.castSucc.castSucc e)
-            simp only [budgetLower, prepared,
-              OrderedPartitionComplex.withTopLayer,
-              Fin.lastCases_castSucc,
-              OrderedPartitionComplex.dropTop] at hcomplexity
-            convert hcomplexity using 1
 
 /-! ## Total coarse-target gap -/
 
 namespace OrderedCoarseFineComplex
 
-/-- Sum of the rankwise energy gaps obtained by freezing the coarse upper
-layer at every rank. -/
-noncomputable def totalCoarseUpperAtomEnergyGap
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) : ℝ :=
-  ∑ j : Fin r, P.coarseUpperLayerAtomEnergyGap j
 
-/-- The total coarse-upper gap of any coarse/fine complex is nonnegative. -/
-theorem totalCoarseUpperAtomEnergyGap_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r) :
-    0 ≤ P.totalCoarseUpperAtomEnergyGap := by
-  unfold totalCoarseUpperAtomEnergyGap
-  exact Finset.sum_nonneg fun j _ =>
-    sub_nonneg.mpr
-      (orderedLayerAtomEnergy_mono
-        (fun e => P.refines j.castSucc e)
-        (P.coarse.partition j.succ))
 
 end OrderedCoarseFineComplex
 
 namespace CoarseTargetOrderedComplexRegularityCertificate
 
-/-- The selected rankwise coarse-target gaps add up to the reciprocal
-length bound, with no upper-complexity conversion factor. -/
-theorem totalCoarseUpperAtomEnergyGap_le_sum_div
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : CoarseTargetOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    R.toCoarseFine.totalCoarseUpperAtomEnergyGap ≤
-      ∑ j : Fin r,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) /
-            (length j : ℝ) := by
-  unfold OrderedCoarseFineComplex.totalCoarseUpperAtomEnergyGap
-    OrderedCoarseFineComplex.coarseUpperLayerAtomEnergyGap
-    toCoarseFine
-  exact Finset.sum_le_sum fun j _ => R.gap_le j
 
-/-- Nonnegativity of the selected total coarse-target gap. -/
-theorem totalCoarseUpperAtomEnergyGap_nonneg
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : CoarseTargetOrderedComplexRegularityCertificate
-      G k r initial ε budget length) :
-    0 ≤ R.toCoarseFine.totalCoarseUpperAtomEnergyGap :=
-  R.toCoarseFine.totalCoarseUpperAtomEnergyGap_nonneg
 
 end CoarseTargetOrderedComplexRegularityCertificate
 
-/-- Existential form of coarse-target strong ordered regularity, including
-the total reciprocal energy-gap estimate. -/
-theorem exists_coarseTargetOrderedComplexRegularity
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (ε : (j : Fin r) → ℕ → ℝ)
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ)
-    (hε : ∀ j n, 0 ≤ ε j n)
-    (hlong :
-      ∀ j n,
-        (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-          (budget j n : ℝ) * (ε j n) ^ 2)
-    (hlength : ∀ j, 0 < length j) :
-    ∃ R : CoarseTargetOrderedComplexRegularityCertificate
-        G k r initial ε budget length,
-      R.toCoarseFine.totalCoarseUpperAtomEnergyGap ≤
-        ∑ j : Fin r,
-          (Fintype.card
-            (OrderedFace k (j.1 + 1)) : ℝ) /
-              (length j : ℝ) := by
-  obtain ⟨R⟩ :=
-    CoarseTargetOrderedComplexRegularityCertificate.nonempty
-      initial ε budget length hε hlong hlength
-  exact
-    ⟨R,
-      R.totalCoarseUpperAtomEnergyGap_le_sum_div⟩
 
 end Wikipedia.SzemeredisTheorem
 
@@ -34777,219 +16484,26 @@ noncomputable def orderedRemovalEnergyGapTarget
     (k r M : ℕ) (ξ : ℝ) : ℝ :=
   ξ * orderedRemovalDefectThreshold k r M ξ / 4
 
-/-- Constant rank schedule for low-density cleaning. -/
-noncomputable def orderedRemovalAlpha
-    (r M : ℕ) (ξ : ℝ) : ℕ → ℝ :=
-  fun _ => orderedRemovalDensityFloor r M ξ
 
-/-- Constant rank schedule for the good-atom defect threshold. -/
-noncomputable def orderedRemovalBeta
-    (k r M : ℕ) (ξ : ℝ) : ℕ → ℝ :=
-  fun _ => orderedRemovalDefectThreshold k r M ξ
 
-/-- Constant all-rank regularity tolerance required by counting. -/
-noncomputable def orderedRemovalTolerance
-    (k r M : ℕ) (ξ : ℝ) :
-    OrderedRegularityTolerance r :=
-  fun _ => orderedRemovalCountingError k r M ξ
 
-/-- Abstract sharp cleaning error. -/
-noncomputable def orderedRemovalDeletionError
-    (r M : ℕ) (α gap β : ℝ) : ℝ :=
-  (orderedRemovalComplexityCoefficient r M : ℝ) * α +
-    gap / β
 
-/-- Abstract lower bound supplied by the configuration-count recurrence. -/
-noncomputable def orderedRemovalConfigurationLowerBound
-    (k r : ℕ) (ρ η δ : ℝ) : ℝ :=
-  ρ ^ orderedRemovalConfigurationFaceCount k r -
-    (orderedRemovalConfigurationFaceCount k r : ℝ) *
-      (η + δ)
 
-theorem orderedRemovalDensityFloor_pos
-    {r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 < orderedRemovalDensityFloor r M ξ := by
-  unfold orderedRemovalDensityFloor
-  apply lt_min
-  · norm_num
-  · exact div_pos hξ
-      (mul_pos (by norm_num)
-        (by positivity))
 
-theorem orderedRemovalDensityFloor_nonneg
-    {r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 ≤ orderedRemovalDensityFloor r M ξ :=
-  (orderedRemovalDensityFloor_pos hξ).le
 
-theorem orderedRemovalDensityFloor_le_half
-    (r M : ℕ) (ξ : ℝ) :
-    orderedRemovalDensityFloor r M ξ ≤ 1 / 2 := by
-  unfold orderedRemovalDensityFloor
-  exact min_le_left _ _
 
-theorem orderedRemovalDensityFloor_le_fraction
-    (r M : ℕ) (ξ : ℝ) :
-    orderedRemovalDensityFloor r M ξ ≤
-      ξ /
-        (4 *
-          ((orderedRemovalComplexityCoefficient r M : ℝ) + 1)) := by
-  unfold orderedRemovalDensityFloor
-  exact min_le_right _ _
 
-theorem orderedRemovalCountingError_pos
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 < orderedRemovalCountingError k r M ξ := by
-  unfold orderedRemovalCountingError
-  exact div_pos
-    (pow_pos (orderedRemovalDensityFloor_pos hξ) _)
-    (mul_pos (by norm_num) (by positivity))
 
-theorem orderedRemovalCountingError_nonneg
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 ≤ orderedRemovalCountingError k r M ξ :=
-  (orderedRemovalCountingError_pos hξ).le
 
-theorem orderedRemovalDefectThreshold_pos
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 < orderedRemovalDefectThreshold k r M ξ := by
-  unfold orderedRemovalDefectThreshold
-  exact sq_pos_of_pos
-    (orderedRemovalCountingError_pos hξ)
 
-theorem orderedRemovalDefectThreshold_nonneg
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 ≤ orderedRemovalDefectThreshold k r M ξ :=
-  (orderedRemovalDefectThreshold_pos hξ).le
 
-theorem orderedRemovalEnergyGapTarget_pos
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 < orderedRemovalEnergyGapTarget k r M ξ := by
-  unfold orderedRemovalEnergyGapTarget
-  exact div_pos
-    (mul_pos hξ (orderedRemovalDefectThreshold_pos hξ))
-    (by norm_num)
 
 /-! ## Arithmetic margins -/
 
-/-- The low-density part of cleaning consumes at most one quarter of the
-requested removal allowance. -/
-theorem orderedRemoval_complexity_mul_densityFloor_le_quarter
-    {r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    (orderedRemovalComplexityCoefficient r M : ℝ) *
-        orderedRemovalDensityFloor r M ξ ≤
-      ξ / 4 := by
-  let C : ℝ :=
-    (orderedRemovalComplexityCoefficient r M : ℝ)
-  have hC : 0 ≤ C := by
-    exact Nat.cast_nonneg _
-  have hden : 0 < C + 1 := by positivity
-  have hfloor :
-      orderedRemovalDensityFloor r M ξ ≤
-        ξ / (4 * (C + 1)) := by
-    exact orderedRemovalDensityFloor_le_fraction r M ξ
-  calc
-    C * orderedRemovalDensityFloor r M ξ ≤
-        C * (ξ / (4 * (C + 1))) :=
-      mul_le_mul_of_nonneg_left hfloor hC
-    _ = (C / (C + 1)) * (ξ / 4) := by
-      field_simp
-    _ ≤ 1 * (ξ / 4) := by
-      apply mul_le_mul_of_nonneg_right
-      · exact (div_le_one hden).2 (by linarith)
-      · positivity
-    _ = ξ / 4 := one_mul _
 
-/-- The chosen frozen-upper gap contributes exactly one further quarter
-after division by the positive defect threshold. -/
-theorem orderedRemovalEnergyGapTarget_div_defectThreshold
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    orderedRemovalEnergyGapTarget k r M ξ /
-        orderedRemovalDefectThreshold k r M ξ =
-      ξ / 4 := by
-  unfold orderedRemovalEnergyGapTarget
-  have hβ :
-      orderedRemovalDefectThreshold k r M ξ ≠ 0 :=
-    (orderedRemovalDefectThreshold_pos hξ).ne'
-  field_simp
 
-/-- The explicit thresholds make the abstract sharp cleaning error no
-larger than the requested removal allowance. -/
-theorem orderedRemovalDeletionError_le
-    {k r M : ℕ} {ξ gap : ℝ}
-    (hξ : 0 < ξ)
-    (hgap :
-      gap ≤ orderedRemovalEnergyGapTarget k r M ξ) :
-    orderedRemovalDeletionError r M
-        (orderedRemovalDensityFloor r M ξ)
-        gap
-        (orderedRemovalDefectThreshold k r M ξ) ≤
-      ξ := by
-  unfold orderedRemovalDeletionError
-  have hβ :
-      0 < orderedRemovalDefectThreshold k r M ξ :=
-    orderedRemovalDefectThreshold_pos hξ
-  calc
-    (orderedRemovalComplexityCoefficient r M : ℝ) *
-          orderedRemovalDensityFloor r M ξ +
-        gap / orderedRemovalDefectThreshold k r M ξ ≤
-        ξ / 4 +
-          orderedRemovalEnergyGapTarget k r M ξ /
-            orderedRemovalDefectThreshold k r M ξ := by
-      exact add_le_add
-        (orderedRemoval_complexity_mul_densityFloor_le_quarter hξ)
-        (div_le_div_of_nonneg_right hgap hβ.le)
-    _ = ξ / 2 := by
-      rw [orderedRemovalEnergyGapTarget_div_defectThreshold hξ]
-      ring
-    _ ≤ ξ := by linarith
 
-/-- The recurrence error reserved for all positive faces is strictly below
-the product-density floor. -/
-theorem orderedRemoval_counting_margin
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    (orderedRemovalConfigurationFaceCount k r : ℝ) *
-        (orderedRemovalCountingError k r M ξ +
-          orderedRemovalCountingError k r M ξ) <
-      orderedRemovalDensityFloor r M ξ ^
-        orderedRemovalConfigurationFaceCount k r := by
-  let N : ℝ :=
-    (orderedRemovalConfigurationFaceCount k r : ℝ)
-  let p : ℝ :=
-    orderedRemovalDensityFloor r M ξ ^
-      orderedRemovalConfigurationFaceCount k r
-  have hN : 0 ≤ N := by
-    exact Nat.cast_nonneg _
-  have hp : 0 < p := by
-    exact pow_pos (orderedRemovalDensityFloor_pos hξ) _
-  have hden : 0 < 4 * (N + 1) := by positivity
-  have hcoeff :
-      (2 * N) / (4 * (N + 1)) < 1 := by
-    apply (div_lt_one hden).2
-    linarith
-  calc
-    N *
-        (orderedRemovalCountingError k r M ξ +
-          orderedRemovalCountingError k r M ξ) =
-        ((2 * N) / (4 * (N + 1))) * p := by
-      unfold orderedRemovalCountingError
-      dsimp only [N, p]
-      ring
-    _ < 1 * p :=
-      mul_lt_mul_of_pos_right hcoeff hp
-    _ = p := one_mul _
 
-theorem orderedRemovalConfigurationLowerBound_pos
-    {k r M : ℕ} {ξ : ℝ} (hξ : 0 < ξ) :
-    0 <
-      orderedRemovalConfigurationLowerBound k r
-        (orderedRemovalDensityFloor r M ξ)
-        (orderedRemovalCountingError k r M ξ)
-        (orderedRemovalCountingError k r M ξ) := by
-  unfold orderedRemovalConfigurationLowerBound
-  have hmargin :=
-    orderedRemoval_counting_margin
-      (k := k) (r := r) (M := M) hξ
-  linarith
 
 /-! ## Ambient-independent ceiling schedules -/
 
@@ -35002,18 +16516,7 @@ noncomputable def orderedRemovalRegularityBudget
         τ ^ 2) +
     1
 
-/-- Apply the ceiling budget independently at every rank and tower stage. -/
-noncomputable def orderedRemovalRegularityBudgetSchedule
-    (k r : ℕ)
-    (τ : (j : Fin r) → ℕ → ℝ) :
-    (j : Fin r) → ℕ → ℕ :=
-  fun j n => orderedRemovalRegularityBudget k j.1 (τ j n)
 
-theorem orderedRemovalRegularityBudget_pos
-    (k j : ℕ) (τ : ℝ) :
-    0 < orderedRemovalRegularityBudget k j τ := by
-  unfold orderedRemovalRegularityBudget
-  omega
 
 /-- The ceiling construction satisfies the strict energy-length
 hypothesis of one fixed-upper preliminary regularity pass. -/
@@ -35049,96 +16552,14 @@ theorem orderedRemovalRegularityBudget_spec
         norm_num
   exact (div_lt_iff₀ hsq).1 hquot
 
-theorem orderedRemovalRegularityBudgetSchedule_spec
-    {k r : ℕ}
-    {τ : (j : Fin r) → ℕ → ℝ}
-    (hτ : ∀ j n, 0 < τ j n) :
-    ∀ j n,
-      (Fintype.card
-        (OrderedFace k (j.1 + 1)) : ℝ) <
-        (orderedRemovalRegularityBudgetSchedule
-          k r τ j n : ℝ) * (τ j n) ^ 2 := by
-  intro j n
-  exact orderedRemovalRegularityBudget_spec (hτ j n)
 
-/-- A single common tower length large enough to make the sum of all
-rankwise reciprocal energy budgets smaller than `γ`. -/
-noncomputable def orderedRemovalEnergyTimescale
-    (k r : ℕ) (γ : ℝ) : ℕ :=
-  Nat.ceil (orderedAllRankAtomEnergyBudget k r / γ) + 1
 
-/-- Constant rank schedule using `orderedRemovalEnergyTimescale`. -/
-noncomputable def orderedRemovalEnergyLength
-    (k r : ℕ) (γ : ℝ) : Fin r → ℕ :=
-  fun _ => orderedRemovalEnergyTimescale k r γ
 
-theorem orderedRemovalEnergyTimescale_pos
-    (k r : ℕ) (γ : ℝ) :
-    0 < orderedRemovalEnergyTimescale k r γ := by
-  unfold orderedRemovalEnergyTimescale
-  omega
 
-theorem orderedRemovalEnergyLength_pos
-    (k r : ℕ) (γ : ℝ) :
-    ∀ j, 0 < orderedRemovalEnergyLength k r γ j := by
-  intro j
-  exact orderedRemovalEnergyTimescale_pos k r γ
 
-/-- The common ceiling timescale makes the complete reciprocal-timescale
-sum strictly smaller than its prescribed target. -/
-theorem orderedRemovalEnergyLength_sum_div_lt
-    {k r : ℕ} {γ : ℝ} (hγ : 0 < γ) :
-    (∑ j : Fin r,
-      (Fintype.card
-        (OrderedFace k (j.1 + 1)) : ℝ) /
-          (orderedRemovalEnergyLength k r γ j : ℝ)) <
-      γ := by
-  let B : ℝ := orderedAllRankAtomEnergyBudget k r
-  let L : ℕ := orderedRemovalEnergyTimescale k r γ
-  have hLNat : 0 < L :=
-    orderedRemovalEnergyTimescale_pos k r γ
-  have hLCast : (0 : ℝ) < (L : ℝ) := by
-    exact_mod_cast hLNat
-  have hquot : B / γ < (L : ℝ) := by
-    dsimp only [B, L]
-    unfold orderedRemovalEnergyTimescale
-    calc
-      orderedAllRankAtomEnergyBudget k r / γ ≤
-          (Nat.ceil
-            (orderedAllRankAtomEnergyBudget k r / γ) : ℝ) :=
-        Nat.le_ceil _
-      _ <
-          (Nat.ceil
-            (orderedAllRankAtomEnergyBudget k r / γ) : ℝ) + 1 := by
-        linarith
-      _ =
-          ((Nat.ceil
-              (orderedAllRankAtomEnergyBudget k r / γ) + 1 : ℕ) : ℝ) := by
-        norm_num
-  have hbudget : B < (L : ℝ) * γ :=
-    (div_lt_iff₀ hγ).1 hquot
-  unfold orderedRemovalEnergyLength
-  change
-    (∑ j : Fin r,
-      (Fintype.card
-        (OrderedFace k (j.1 + 1)) : ℝ) / (L : ℝ)) < γ
-  rw [← Finset.sum_div]
-  change B / (L : ℝ) < γ
-  apply (div_lt_iff₀ hLCast).2
-  simpa [mul_comm] using hbudget
 
 /-! ## A uniform complexity bound for the strong certificate -/
 
-/-- The explicit fixed-upper tower complexity factor grows monotonically
-with the number of stages. -/
-theorem fixedUpperLayerComplexityFactor_monotone
-    (j : ℕ) (budget : ℕ → ℕ) :
-    Monotone (fixedUpperLayerComplexityFactor j budget) := by
-  apply monotone_nat_of_le_succ
-  intro n
-  rw [fixedUpperLayerComplexityFactor]
-  exact Nat.le_mul_of_pos_left _
-    (pow_pos (by positivity) _)
 
 /-- A deliberately coarse uniform bound for every rank of the selected
 fine complex.  The sum dominates the factor at each non-top rank, while
@@ -35153,111 +16574,9 @@ def orderedRemovalFinePartitionComplexityBound
         fixedUpperLayerComplexityFactor
           j.1 (budget j) (length j))
 
-theorem fixedUpperLayerComplexityFactor_le_removalBoundFactor
-    {r : ℕ}
-    (budget : (j : Fin r) → ℕ → ℕ)
-    (length : Fin r → ℕ)
-    (j : Fin r) :
-    fixedUpperLayerComplexityFactor
-        j.1 (budget j) (length j) ≤
-      1 +
-        ∑ i : Fin r,
-          fixedUpperLayerComplexityFactor
-            i.1 (budget i) (length i) := by
-  have hsum :
-      fixedUpperLayerComplexityFactor
-          j.1 (budget j) (length j) ≤
-        ∑ i : Fin r,
-          fixedUpperLayerComplexityFactor
-            i.1 (budget i) (length i) := by
-    exact Finset.single_le_sum
-      (fun i _ => Nat.zero_le
-        (fixedUpperLayerComplexityFactor
-          i.1 (budget i) (length i)))
-      (Finset.mem_univ j)
-  omega
 
 namespace StrongOrderedComplexRegularityCertificate
 
-/-- The certificate's stage indices and recursive complexity estimates
-give one bound valid for every fine partition, including the unchanged top
-layer. -/
-theorem fine_complexity_le_removalBound
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r initialBound : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (hinitial :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (initial.partition j e) ≤ initialBound) :
-    ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-      FacePartition.complexity
-          (R.fine.partition j e) ≤
-        orderedRemovalFinePartitionComplexityBound
-          r initialBound budget length := by
-  intro j
-  cases j using Fin.lastCases with
-  | last =>
-      intro e
-      have htop := congrFun R.fine_topLayer_eq e
-      simp only [OrderedPartitionComplex.topLayer] at htop
-      rw [htop]
-      apply (hinitial (Fin.last r) e).trans
-      unfold orderedRemovalFinePartitionComplexityBound
-      exact Nat.le_mul_of_pos_right initialBound
-        (by positivity)
-  | cast i =>
-      intro e
-      have hcertificate := R.fine_complexity i e
-      have hindex :
-          R.index i + 1 ≤ length i :=
-        R.index_lt i
-      have hfactor :
-          fixedUpperLayerComplexityFactor
-              i.1 (budget i) (R.index i + 1) ≤
-            fixedUpperLayerComplexityFactor
-              i.1 (budget i) (length i) :=
-        fixedUpperLayerComplexityFactor_monotone
-          i.1 (budget i) hindex
-      have hfactorBound :
-          fixedUpperLayerComplexityFactor
-              i.1 (budget i) (length i) ≤
-            1 +
-              ∑ q : Fin r,
-                fixedUpperLayerComplexityFactor
-                  q.1 (budget q) (length q) :=
-        fixedUpperLayerComplexityFactor_le_removalBoundFactor
-          budget length i
-      calc
-        FacePartition.complexity
-            (R.fine.partition i.castSucc e) ≤
-            fixedUpperLayerComplexityFactor
-                i.1 (budget i) (R.index i + 1) *
-              FacePartition.complexity
-                (initial.partition i.castSucc e) :=
-          hcertificate
-        _ ≤
-            fixedUpperLayerComplexityFactor
-                i.1 (budget i) (R.index i + 1) *
-              initialBound :=
-          Nat.mul_le_mul_left _
-            (hinitial i.castSucc e)
-        _ ≤
-            fixedUpperLayerComplexityFactor
-                i.1 (budget i) (length i) *
-              initialBound :=
-          Nat.mul_le_mul_right initialBound hfactor
-        _ ≤
-            orderedRemovalFinePartitionComplexityBound
-              r initialBound budget length := by
-          unfold orderedRemovalFinePartitionComplexityBound
-          simpa [Nat.mul_comm] using
-            Nat.mul_le_mul_left initialBound hfactorBound
 
 end StrongOrderedComplexRegularityCertificate
 
@@ -35310,235 +16629,14 @@ noncomputable def orderedRemovalRankCountingError
   ∑ e : PositiveOrderedFace k r,
     (η e.lowerRank + δ e.rank)
 
-/-- Compact min/max-free numerical interface for a future rank-sensitive
-counting recurrence and a rank-sensitive strong selector. -/
-def IsRankSensitiveOrderedRemovalChoice
-    (k r : ℕ) (ξ : ℝ)
-    (complexity : Fin r → ℕ)
-    (α β : ℕ → ℝ)
-    (gap : Fin r → ℝ)
-    (η : Fin r → ℝ)
-    (δ : ℕ → ℝ) : Prop :=
-  orderedRemovalRankCleaningError
-      r complexity α gap β ≤ ξ ∧
-    orderedRemovalRankCountingError k r η δ <
-      orderedRemovalRankDensityProduct k r α
 
 /-! ## Bridge from a compatible strong certificate -/
 
-/-- The two explicit numerical obligations not supplied merely by the
-current strong-certificate type:
-
-1. its selected regularity tolerances fit below the counting scale derived
-   from the uniform fine-complexity bound;
-2. its reciprocal-timescale gap budget fits below the cleaning energy
-   target derived from the same bound.
-
-This is the precise compatibility target for a future diagonal or
-rank-sensitive selector. -/
-structure IsStrongOrderedRemovalCompatible
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r initialBound : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (ξ : ℝ) : Prop where
-  tolerance_le :
-    ∀ j : Fin r,
-      selectedOrderedComplexTolerance ε R.index j ≤
-        orderedRemovalCountingError k r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ
-  reciprocal_gap_le :
-    (∑ j : Fin r,
-      (Fintype.card
-        (OrderedFace k (j.1 + 1)) : ℝ) /
-          (length j : ℝ)) ≤
-      orderedRemovalEnergyGapTarget k r
-        (orderedRemovalFinePartitionComplexityBound
-          r initialBound budget length) ξ
 
 namespace StrongOrderedComplexRegularityCertificate
 
-/-- A compatible strong certificate makes every canonical bad-base
-deletion cheaper than the requested removal allowance. -/
-theorem faceDeletionDensity_badBase_le_removalAllowance
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r initialBound : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (hinitial :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (initial.partition j e) ≤ initialBound)
-    {ξ : ℝ} (hξ : 0 < ξ)
-    (hcompatible :
-      IsStrongOrderedRemovalCompatible
-        (initialBound := initialBound) R ξ)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse
-          (orderedRemovalAlpha r
-            (orderedRemovalFinePartitionComplexityBound
-              r initialBound budget length) ξ)
-          (orderedRemovalBeta k r
-            (orderedRemovalFinePartitionComplexityBound
-              r initialBound budget length) ξ)) e ≤
-      ξ := by
-  let M :=
-    orderedRemovalFinePartitionComplexityBound
-      r initialBound budget length
-  let gap : ℝ :=
-    ∑ j : Fin r,
-      (Fintype.card
-        (OrderedFace k (j.1 + 1)) : ℝ) /
-          (length j : ℝ)
-  change
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse
-          (fun _ => orderedRemovalDensityFloor r M ξ)
-          (fun _ =>
-            orderedRemovalDefectThreshold k r M ξ)) e ≤
-      ξ
-  have hdeletion :=
-    R.faceDeletionDensity_badBase_constant_of_complexity_le_sum_div
-      (M := M)
-      (α := orderedRemovalDensityFloor r M ξ)
-      (β := orderedRemovalDefectThreshold k r M ξ)
-      (fun j e =>
-        R.fine_complexity_le_removalBound
-          hinitial j.succ e)
-      (orderedRemovalDensityFloor_nonneg
-        (r := r) (M := M) hξ)
-      (orderedRemovalDefectThreshold_pos
-        (k := k) (r := r) (M := M) hξ)
-      e
-  calc
-    OrderedPattern.faceDeletionDensity
-        (orderedBadBaseDeletionFamily
-          R.fine R.coarse
-          (fun _ => orderedRemovalDensityFloor r M ξ)
-          (fun _ =>
-            orderedRemovalDefectThreshold k r M ξ)) e ≤
-        (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-            (M : ℝ) *
-            orderedRemovalDensityFloor r M ξ +
-          gap /
-            orderedRemovalDefectThreshold k r M ξ := by
-      simpa [M, gap] using hdeletion
-    _ =
-        orderedRemovalDeletionError r M
-          (orderedRemovalDensityFloor r M ξ)
-          gap
-          (orderedRemovalDefectThreshold k r M ξ) := by
-      unfold orderedRemovalDeletionError
-        orderedRemovalComplexityCoefficient
-        orderedRemovalTopSubfaceCount
-      push_cast
-      ring
-    _ ≤ ξ :=
-      orderedRemovalDeletionError_le hξ
-        hcompatible.reciprocal_gap_le
 
-/-- The explicit arithmetic lower bound is furnished by the current
-configuration-count recurrence whenever the selected tolerance satisfies
-the compatibility condition. -/
-theorem removalConfigurationLowerBound_le_fullConfigurationCount
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r initialBound : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (A : ClosedOrderedAtomConfiguration G k r R.fine)
-    {ξ : ℝ} (hξ : 0 < ξ)
-    (hcompatible :
-      IsStrongOrderedRemovalCompatible
-        (initialBound := initialBound) R ξ)
-    (hgood :
-      A.IsGood R.fine R.coarse
-        (orderedRemovalAlpha r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ)
-        (orderedRemovalBeta k r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ)) :
-    orderedRemovalConfigurationLowerBound k r
-        (orderedRemovalDensityFloor r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ)
-        (orderedRemovalCountingError k r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ)
-        (orderedRemovalCountingError k r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ) ≤
-      fullConfigurationCount A := by
-  let M :=
-    orderedRemovalFinePartitionComplexityBound
-      r initialBound budget length
-  unfold orderedRemovalConfigurationLowerBound
-    orderedRemovalConfigurationFaceCount
-  apply
-    fullConfigurationCount_lower_bound
-      R.toCoarseFine A
-      (orderedRemovalAlpha r M ξ)
-      (orderedRemovalBeta k r M ξ)
-      hgood
-      (selectedOrderedComplexTolerance ε R.index)
-      R.regular
-      (orderedRemovalDensityFloor_nonneg hξ)
-      (orderedRemovalCountingError_nonneg hξ)
-      (orderedRemovalCountingError_nonneg hξ)
-      (fun _ => le_rfl)
-      hcompatible.tolerance_le
-      (fun _ =>
-        orderedRemovalDefectThreshold_nonneg hξ)
-      (fun _ => le_rfl)
 
-/-- Every good closed configuration for a compatible certificate has
-strictly positive normalized count. -/
-theorem fullConfigurationCount_pos_of_removalParameters
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r initialBound : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {ε : (j : Fin r) → ℕ → ℝ}
-    {budget : (j : Fin r) → ℕ → ℕ}
-    {length : Fin r → ℕ}
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial ε budget length)
-    (A : ClosedOrderedAtomConfiguration G k r R.fine)
-    {ξ : ℝ} (hξ : 0 < ξ)
-    (hcompatible :
-      IsStrongOrderedRemovalCompatible
-        (initialBound := initialBound) R ξ)
-    (hgood :
-      A.IsGood R.fine R.coarse
-        (orderedRemovalAlpha r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ)
-        (orderedRemovalBeta k r
-          (orderedRemovalFinePartitionComplexityBound
-            r initialBound budget length) ξ)) :
-    0 < fullConfigurationCount A := by
-  exact
-    (orderedRemovalConfigurationLowerBound_pos
-      (k := k) (r := r)
-      (M := orderedRemovalFinePartitionComplexityBound
-        r initialBound budget length) hξ).trans_le
-      (R.removalConfigurationLowerBound_le_fullConfigurationCount
-        A hξ hcompatible hgood)
 
 end StrongOrderedComplexRegularityCertificate
 
@@ -35599,9 +16697,6 @@ theorem positive (F : NatGrowthFunction) (n : ℕ) :
   exact lt_of_lt_of_le (Nat.zero_lt_succ n)
     (F.above_diagonal n)
 
-theorem one_le (F : NatGrowthFunction) (n : ℕ) :
-    1 ≤ F n :=
-  F.positive n
 
 end NatGrowthFunction
 
@@ -35634,66 +16729,11 @@ noncomputable def growthRegularityComplexity
         growthRegularityComplexity
           k j initialBound F n
 
-/-- Stagewise reciprocal tolerance obtained from the triangular complexity
-sequence. -/
-noncomputable def growthRegularityTolerance
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    ℕ → ℝ :=
-  fun n =>
-    growthRegularityStepTolerance F
-      (growthRegularityComplexity
-        k j initialBound F n)
 
-/-- Stagewise ceiling budget obtained from the same triangular sequence. -/
-noncomputable def growthRegularityBudget
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    ℕ → ℕ :=
-  fun n =>
-    growthRegularityStepBudget k j F
-      (growthRegularityComplexity
-        k j initialBound F n)
 
-@[simp]
-theorem growthRegularityComplexity_zero
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    growthRegularityComplexity
-      k j initialBound F 0 = initialBound :=
-  rfl
 
-@[simp]
-theorem growthRegularityComplexity_succ
-    (k j initialBound n : ℕ) (F : NatGrowthFunction) :
-    growthRegularityComplexity
-        k j initialBound F (n + 1) =
-      (2 ^ (j + 1)) ^
-          growthRegularityBudget
-            k j initialBound F n *
-        growthRegularityComplexity
-          k j initialBound F n :=
-  rfl
 
-@[simp]
-theorem growthRegularityTolerance_eq
-    (k j initialBound n : ℕ) (F : NatGrowthFunction) :
-    growthRegularityTolerance
-        k j initialBound F n =
-      1 /
-        (F (growthRegularityComplexity
-          k j initialBound F n) : ℝ) :=
-  rfl
 
-@[simp]
-theorem growthRegularityBudget_eq
-    (k j initialBound n : ℕ) (F : NatGrowthFunction) :
-    growthRegularityBudget
-        k j initialBound F n =
-      Nat.ceil
-          ((Fintype.card
-              (OrderedFace k (j + 1)) : ℝ) /
-            (growthRegularityTolerance
-              k j initialBound F n) ^ 2) +
-        1 :=
-  rfl
 
 theorem growthRegularityStepTolerance_pos
     (F : NatGrowthFunction) (M : ℕ) :
@@ -35702,89 +16742,11 @@ theorem growthRegularityStepTolerance_pos
   exact one_div_pos.mpr
     (by exact_mod_cast F.positive M)
 
-theorem growthRegularityTolerance_pos
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    ∀ n,
-      0 <
-        growthRegularityTolerance
-          k j initialBound F n := by
-  intro n
-  exact growthRegularityStepTolerance_pos F
-    (growthRegularityComplexity
-      k j initialBound F n)
 
-theorem growthRegularityBudget_pos
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    ∀ n,
-      0 <
-        growthRegularityBudget
-          k j initialBound F n := by
-  intro n
-  exact orderedRemovalRegularityBudget_pos _ _ _
 
-/-- Every triangular ceiling budget is strictly long enough for the
-corresponding preliminary regularity pass. -/
-theorem growthRegularityBudget_spec
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    ∀ n,
-      (Fintype.card
-          (OrderedFace k (j + 1)) : ℝ) <
-        (growthRegularityBudget
-            k j initialBound F n : ℝ) *
-          (growthRegularityTolerance
-            k j initialBound F n) ^ 2 := by
-  intro n
-  exact orderedRemovalRegularityBudget_spec
-    (growthRegularityTolerance_pos
-      k j initialBound F n)
 
-/-- The triangular sequence is exactly the standard fixed-upper recursive
-complexity factor multiplied by the initial bound. -/
-theorem growthRegularityComplexity_eq_factor_mul
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    ∀ n,
-      growthRegularityComplexity
-          k j initialBound F n =
-        fixedUpperLayerComplexityFactor
-            j (growthRegularityBudget
-              k j initialBound F) n *
-          initialBound := by
-  intro n
-  induction n with
-  | zero =>
-      simp [fixedUpperLayerComplexityFactor]
-  | succ n ih =>
-      rw [growthRegularityComplexity_succ, ih]
-      simp [fixedUpperLayerComplexityFactor,
-        Nat.mul_assoc]
 
-theorem growthRegularityComplexity_pos
-    {k j initialBound : ℕ} (F : NatGrowthFunction)
-    (hinitial : 0 < initialBound) :
-    ∀ n,
-      0 <
-        growthRegularityComplexity
-          k j initialBound F n := by
-  intro n
-  induction n with
-  | zero =>
-      simpa using hinitial
-  | succ n ih =>
-      rw [growthRegularityComplexity_succ]
-      exact Nat.mul_pos
-        (pow_pos (by positivity) _)
-        ih
 
-theorem growthRegularityComplexity_monotone
-    (k j initialBound : ℕ) (F : NatGrowthFunction) :
-    Monotone
-      (growthRegularityComplexity
-        k j initialBound F) := by
-  apply monotone_nat_of_le_succ
-  intro n
-  rw [growthRegularityComplexity_succ]
-  exact Nat.le_mul_of_pos_left _
-    (pow_pos (by positivity) _)
 
 /-! ## A one-rank energy timescale -/
 
@@ -35846,125 +16808,7 @@ theorem orderedFace_card_div_growthRegularityLength_lt
 
 /-! ## Growth-function fixed-upper selection -/
 
-/-- Selected adjacent fixed-upper tower stages with their bounds rewritten
-in terms of the triangular growth-function complexity sequence. -/
-structure GrowthFunctionFixedUpperCertificate
-    (G : Type*) [Fintype G] [DecidableEq G]
-    (k j initialBound : ℕ)
-    (initial : OrderedFacePartitionSystem G k j)
-    (upper : OrderedFacePartitionSystem G k (j + 1))
-    (F : NatGrowthFunction) (γ : ℝ) where
-  index : ℕ
-  index_lt :
-    index < growthRegularityLength k j γ
-  coarse : OrderedFacePartitionSystem G k j
-  fine : OrderedFacePartitionSystem G k j
-  refines : OrderedFacePartitionRefines fine coarse
-  coarse_refines_initial :
-    OrderedFacePartitionRefines coarse initial
-  fine_regular :
-    IsPreliminaryOrderedRegular fine upper
-      (1 /
-        (F (growthRegularityComplexity
-          k j initialBound F index) : ℝ))
-  gap_nonneg :
-    0 ≤
-      orderedLayerAtomEnergy fine upper -
-        orderedLayerAtomEnergy coarse upper
-  gap_le :
-    orderedLayerAtomEnergy fine upper -
-        orderedLayerAtomEnergy coarse upper ≤ γ
-  coarse_complexity :
-    ∀ e,
-      FacePartition.complexity (coarse e) ≤
-        growthRegularityComplexity
-          k j initialBound F index
-  fine_complexity :
-    ∀ e,
-      FacePartition.complexity (fine e) ≤
-        growthRegularityComplexity
-          k j initialBound F (index + 1)
 
-/-- One-rank preliminary growth-function selector obtained from the
-fixed-upper coarse/fine tower. -/
-theorem GrowthFunctionFixedUpperCertificate.nonempty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k j initialBound : ℕ}
-    (initial : OrderedFacePartitionSystem G k j)
-    (upper : OrderedFacePartitionSystem G k (j + 1))
-    (F : NatGrowthFunction) {γ : ℝ} (hγ : 0 < γ)
-    (hinitial :
-      ∀ e,
-        FacePartition.complexity (initial e) ≤
-          initialBound) :
-    Nonempty
-      (GrowthFunctionFixedUpperCertificate
-        G k j initialBound initial upper F γ) := by
-  let τ : ℕ → ℝ :=
-    growthRegularityTolerance k j initialBound F
-  let B : ℕ → ℕ :=
-    growthRegularityBudget k j initialBound F
-  let L : ℕ :=
-    growthRegularityLength k j γ
-  obtain ⟨R⟩ :=
-    FixedUpperLayerCoarseFine.nonempty
-      initial upper τ B
-      (fun n =>
-        (growthRegularityTolerance_pos
-          k j initialBound F n).le)
-      (growthRegularityBudget_spec
-        k j initialBound F)
-      (growthRegularityLength_pos k j γ)
-  refine ⟨{
-    index := R.index
-    index_lt := R.index_lt
-    coarse := R.coarse
-    fine := R.fine
-    refines := R.refines
-    coarse_refines_initial :=
-      R.coarse_refines_initial
-    fine_regular := ?_
-    gap_nonneg := R.gap_nonneg
-    gap_le := ?_
-    coarse_complexity := ?_
-    fine_complexity := ?_ }⟩
-  · simpa [τ, growthRegularityTolerance_eq] using
-      R.fine_regular
-  · exact R.gap_le.trans
-      (orderedFace_card_div_growthRegularityLength_lt
-        hγ).le
-  · intro e
-    calc
-      FacePartition.complexity (R.coarse e) ≤
-          fixedUpperLayerComplexityFactor
-              j B R.index *
-            FacePartition.complexity (initial e) :=
-        R.coarse_complexity e
-      _ ≤
-          fixedUpperLayerComplexityFactor
-              j B R.index *
-            initialBound :=
-        Nat.mul_le_mul_left _ (hinitial e)
-      _ =
-          growthRegularityComplexity
-            k j initialBound F R.index := by
-        rw [growthRegularityComplexity_eq_factor_mul]
-  · intro e
-    calc
-      FacePartition.complexity (R.fine e) ≤
-          fixedUpperLayerComplexityFactor
-              j B (R.index + 1) *
-            FacePartition.complexity (initial e) :=
-        R.fine_complexity e
-      _ ≤
-          fixedUpperLayerComplexityFactor
-              j B (R.index + 1) *
-            initialBound :=
-        Nat.mul_le_mul_left _ (hinitial e)
-      _ =
-          growthRegularityComplexity
-            k j initialBound F (R.index + 1) := by
-        rw [growthRegularityComplexity_eq_factor_mul]
 
 end Wikipedia.SzemeredisTheorem
 
@@ -36034,16 +16878,6 @@ theorem growth_eq_upper
     F (H.level i.succ) = H.level i.castSucc :=
   (H.step_eq i).symm
 
-/-- One adjacent link of the displayed hierarchy
-`M_{i+1} ≤ F(M_{i+1}) ≤ M_i`. -/
-theorem lower_le_growth_le_upper
-    {F : NatGrowthFunction} {depth : ℕ}
-    (H : DescendingGrowthHierarchy F depth)
-    (i : Fin depth) :
-    H.level i.succ ≤ F (H.level i.succ) ∧
-      F (H.level i.succ) ≤ H.level i.castSucc := by
-  exact ⟨H.lower_le_growth i,
-    (H.growth_eq_upper i).le⟩
 
 /-- The hierarchy is antitone in its finite index: later/deeper scales are
 no larger than earlier scales. -/
@@ -36058,68 +16892,13 @@ theorem antitone
 
 end DescendingGrowthHierarchy
 
-/-- The canonical descending hierarchy with prescribed bottom scale,
-obtained by iterating `F` toward index zero. -/
-def canonicalDescendingGrowthHierarchy
-    (F : NatGrowthFunction) (depth bottom : ℕ) :
-    DescendingGrowthHierarchy F depth where
-  level q :=
-    (F.toFun ^[depth - q.1]) bottom
-  step_eq := by
-    intro i
-    have hexponent :
-        depth - i.castSucc.1 =
-          (depth - i.succ.1) + 1 := by
-      simp only [Fin.val_castSucc, Fin.val_succ]
-      omega
-    rw [hexponent]
-    exact Function.iterate_succ_apply'
-      F.toFun (depth - i.succ.1) bottom
 
-@[simp]
-theorem canonicalDescendingGrowthHierarchy_last
-    (F : NatGrowthFunction) (depth bottom : ℕ) :
-    (canonicalDescendingGrowthHierarchy
-      F depth bottom).level (Fin.last depth) =
-        bottom := by
-  simp [canonicalDescendingGrowthHierarchy]
 
-@[simp]
-theorem canonicalDescendingGrowthHierarchy_zero
-    (F : NatGrowthFunction) (depth bottom : ℕ) :
-    (canonicalDescendingGrowthHierarchy
-      F depth bottom).level 0 =
-        (F.toFun ^[depth]) bottom := by
-  simp [canonicalDescendingGrowthHierarchy]
 
 /-! ## Rankwise triangular schedules -/
 
-/-- Growth-function tolerance schedule at every non-top rank. -/
-noncomputable def growthComplexRegularityTolerance
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction) :
-    (j : Fin r) → ℕ → ℝ :=
-  fun j =>
-    growthRegularityTolerance
-      k j.1 (initialBound j.castSucc) F
 
-/-- Ceiling preliminary-regularity budget at every non-top rank. -/
-noncomputable def growthComplexRegularityBudget
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction) :
-    (j : Fin r) → ℕ → ℕ :=
-  fun j =>
-    growthRegularityBudget
-      k j.1 (initialBound j.castSucc) F
 
-/-- Rankwise energy-pigeonhole length associated to the target `γ j`. -/
-noncomputable def growthComplexRegularityLength
-    (k r : ℕ) (γ : Fin r → ℝ) :
-    Fin r → ℕ :=
-  fun j =>
-    growthRegularityLength k j.1 (γ j)
 
 /-- Selected coarse complexity bound at one non-top rank. -/
 noncomputable def selectedGrowthCoarseComplexityBound
@@ -36169,40 +16948,8 @@ noncomputable def selectedGrowthFineLayerComplexityBound
       selectedGrowthFineComplexityBound
         k r initialBound F index j)
 
-theorem growthComplexRegularityTolerance_pos
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction) :
-    ∀ j n,
-      0 <
-        growthComplexRegularityTolerance
-          k r initialBound F j n := by
-  intro j n
-  exact growthRegularityTolerance_pos
-    k j.1 (initialBound j.castSucc) F n
 
-theorem growthComplexRegularityBudget_spec
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction) :
-    ∀ j n,
-      (Fintype.card
-          (OrderedFace k (j.1 + 1)) : ℝ) <
-        (growthComplexRegularityBudget
-            k r initialBound F j n : ℝ) *
-          (growthComplexRegularityTolerance
-            k r initialBound F j n) ^ 2 := by
-  intro j n
-  exact growthRegularityBudget_spec
-    k j.1 (initialBound j.castSucc) F n
 
-theorem growthComplexRegularityLength_pos
-    (k r : ℕ) (γ : Fin r → ℝ) :
-    ∀ j,
-      0 <
-        growthComplexRegularityLength k r γ j := by
-  intro j
-  exact growthRegularityLength_pos k j.1 (γ j)
 
 /-! ## All-rank growth-function certificate -/
 
@@ -36267,229 +17014,13 @@ structure GrowthFunctionOrderedComplexRegularityCertificate
 
 namespace GrowthFunctionOrderedComplexRegularityCertificate
 
-/-- Each rank of an all-rank certificate is itself the one-rank
-growth-function certificate from `GrowthFunctionRegularity`, with the final
-fine layer immediately above it frozen as the upper target. -/
-def localCertificate
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound F γ)
-    (j : Fin r) :
-    GrowthFunctionFixedUpperCertificate
-      G k j.1 (initialBound j.castSucc)
-      (initial.partition j.castSucc)
-      (R.fine.partition j.succ)
-      F (γ j) where
-  index := R.index j
-  index_lt := R.index_lt j
-  coarse := R.coarse.partition j.castSucc
-  fine := R.fine.partition j.castSucc
-  refines := R.refines j.castSucc
-  coarse_refines_initial :=
-    R.coarse_refines_initial j.castSucc
-  fine_regular := by
-    simpa [selectedGrowthCoarseComplexityBound] using
-      R.regular j
-  gap_nonneg := R.gap_nonneg j
-  gap_le := R.gap_le j
-  coarse_complexity := by
-    intro e
-    have h := R.coarse_complexity j.castSucc e
-    simp only [selectedGrowthCoarseLayerComplexityBound,
-      selectedGrowthCoarseComplexityBound,
-      Fin.lastCases_castSucc] at h
-    convert h using 1
-  fine_complexity := by
-    intro e
-    have h := R.fine_complexity j.castSucc e
-    simp only [selectedGrowthFineLayerComplexityBound,
-      selectedGrowthFineComplexityBound,
-      Fin.lastCases_castSucc] at h
-    convert h using 1
 
-/-- Exact selected bound for the coarse upper layer adjacent to rank `j`.
-For the top adjacent rank this reduces to the unchanged initial top bound;
-otherwise it is the selected coarse bound at rank `j + 1`. -/
-theorem coarse_upper_complexity
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound F γ)
-    (j : Fin r) (e : OrderedFace k (j.1 + 1)) :
-    FacePartition.complexity
-        (R.coarse.partition j.succ e) ≤
-      selectedGrowthCoarseLayerComplexityBound
-        k r initialBound F R.index j.succ :=
-  R.coarse_complexity j.succ e
 
-/-- Fine-upper analogue of `coarse_upper_complexity`. -/
-theorem fine_upper_complexity
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound F γ)
-    (j : Fin r) (e : OrderedFace k (j.1 + 1)) :
-    FacePartition.complexity
-        (R.fine.partition j.succ e) ≤
-      selectedGrowthFineLayerComplexityBound
-        k r initialBound F R.index j.succ :=
-  R.fine_complexity j.succ e
 
 end GrowthFunctionOrderedComplexRegularityCertificate
 
 /-! ## Existence by the top-down fixed-upper composition -/
 
-/-- The one-rank growth-function selectors compose down all ranks.  This is
-the existing source-faithful frozen-fine-upper recursion, instantiated with
-the triangular schedules and with all bounds rewritten into their selected
-growth-function form. -/
-theorem GrowthFunctionOrderedComplexRegularityCertificate.nonempty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (initial : OrderedPartitionComplex G k r)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (γ : Fin r → ℝ)
-    (hγ : ∀ j, 0 < γ j)
-    (hinitial :
-      ∀ (q : Fin (r + 1)) (e : OrderedFace k q.1),
-        FacePartition.complexity
-          (initial.partition q e) ≤ initialBound q) :
-    Nonempty
-      (GrowthFunctionOrderedComplexRegularityCertificate
-        G k r initial initialBound F γ) := by
-  let τ : (j : Fin r) → ℕ → ℝ :=
-    growthComplexRegularityTolerance
-      k r initialBound F
-  let B : (j : Fin r) → ℕ → ℕ :=
-    growthComplexRegularityBudget
-      k r initialBound F
-  let L : Fin r → ℕ :=
-    growthComplexRegularityLength k r γ
-  obtain ⟨R⟩ :=
-    StrongOrderedComplexRegularityCertificate.nonempty
-      initial τ B L
-      (fun j n =>
-        (growthComplexRegularityTolerance_pos
-          k r initialBound F j n).le)
-      (growthComplexRegularityBudget_spec
-        k r initialBound F)
-      (growthComplexRegularityLength_pos k r γ)
-  refine ⟨{
-    index := R.index
-    coarse := R.coarse
-    fine := R.fine
-    refines := R.refines
-    coarse_refines_initial :=
-      R.coarse_refines_initial
-    coarse_topLayer_eq := R.coarse_topLayer_eq
-    fine_topLayer_eq := R.fine_topLayer_eq
-    index_lt := ?_
-    regular := ?_
-    gap_nonneg := R.gap_nonneg
-    gap_le := ?_
-    coarse_complexity := ?_
-    fine_complexity := ?_ }⟩
-  · intro j
-    simpa [L, growthComplexRegularityLength] using
-      R.index_lt j
-  · intro j
-    have hregular := R.regular j
-    simpa [τ, growthComplexRegularityTolerance,
-      selectedOrderedComplexTolerance,
-      selectedGrowthCoarseComplexityBound,
-      growthRegularityTolerance_eq] using hregular
-  · intro j
-    exact (R.gap_le j).trans
-      (by
-        simpa [L, growthComplexRegularityLength] using
-          (orderedFace_card_div_growthRegularityLength_lt
-            (hγ j)).le)
-  · intro q
-    cases q using Fin.lastCases with
-    | last =>
-        intro e
-        have htop := congrFun R.coarse_topLayer_eq e
-        simp only [OrderedPartitionComplex.topLayer] at htop
-        rw [htop]
-        simpa [selectedGrowthCoarseLayerComplexityBound] using
-          hinitial (Fin.last r) e
-    | cast i =>
-        intro e
-        have hcomplexity := R.coarse_complexity i e
-        calc
-          FacePartition.complexity
-              (R.coarse.partition i.castSucc e) ≤
-              fixedUpperLayerComplexityFactor
-                  i.1 (B i) (R.index i) *
-                FacePartition.complexity
-                  (initial.partition i.castSucc e) := by
-            simpa [B, growthComplexRegularityBudget] using
-              hcomplexity
-          _ ≤
-              fixedUpperLayerComplexityFactor
-                  i.1 (B i) (R.index i) *
-                initialBound i.castSucc :=
-            Nat.mul_le_mul_left _
-              (hinitial i.castSucc e)
-          _ =
-              selectedGrowthCoarseLayerComplexityBound
-                k r initialBound F R.index i.castSucc := by
-            simp only [
-              selectedGrowthCoarseLayerComplexityBound,
-              selectedGrowthCoarseComplexityBound,
-              Fin.lastCases_castSucc]
-            rw [growthRegularityComplexity_eq_factor_mul]
-            rfl
-  · intro q
-    cases q using Fin.lastCases with
-    | last =>
-        intro e
-        have htop := congrFun R.fine_topLayer_eq e
-        simp only [OrderedPartitionComplex.topLayer] at htop
-        rw [htop]
-        simpa [selectedGrowthFineLayerComplexityBound] using
-          hinitial (Fin.last r) e
-    | cast i =>
-        intro e
-        have hcomplexity := R.fine_complexity i e
-        calc
-          FacePartition.complexity
-              (R.fine.partition i.castSucc e) ≤
-              fixedUpperLayerComplexityFactor
-                  i.1 (B i) (R.index i + 1) *
-                FacePartition.complexity
-                  (initial.partition i.castSucc e) := by
-            simpa [B, growthComplexRegularityBudget] using
-              hcomplexity
-          _ ≤
-              fixedUpperLayerComplexityFactor
-                  i.1 (B i) (R.index i + 1) *
-                initialBound i.castSucc :=
-            Nat.mul_le_mul_left _
-              (hinitial i.castSucc e)
-          _ =
-              selectedGrowthFineLayerComplexityBound
-                k r initialBound F R.index i.castSucc := by
-            simp only [
-              selectedGrowthFineLayerComplexityBound,
-              selectedGrowthFineComplexityBound,
-              Fin.lastCases_castSucc]
-            rw [growthRegularityComplexity_eq_factor_mul]
-            rfl
 
 end Wikipedia.SzemeredisTheorem
 
@@ -36539,265 +17070,30 @@ namespace Wikipedia.SzemeredisTheorem
 
 /-! ## The one-step map and bounded envelopes -/
 
-/-- One triangular complexity step at rank `j`, using the reciprocal
-tolerance determined by `F` at the current complexity `M`. -/
-noncomputable def growthRegularityOneStep
-    (k j : ℕ) (F : NatGrowthFunction) (M : ℕ) : ℕ :=
-  (2 ^ (j + 1)) ^
-      growthRegularityStepBudget k j F M * M
 
-@[simp]
-theorem growthRegularityComplexity_succ_eq_oneStep
-    (k j initialBound n : ℕ) (F : NatGrowthFunction) :
-    growthRegularityComplexity
-        k j initialBound F (n + 1) =
-      growthRegularityOneStep k j F
-        (growthRegularityComplexity
-          k j initialBound F n) :=
-  rfl
 
-/-- Maximum of the rank-`j` one-step map on the interval `0, ..., M`.
-The recursive definition avoids needing any monotonicity theorem for the
-ceiling-containing one-step map itself. -/
-noncomputable def boundedGrowthRegularityOneStepMaximum
-    (k j : ℕ) (F : NatGrowthFunction) : ℕ → ℕ
-  | 0 => growthRegularityOneStep k j F 0
-  | M + 1 =>
-      max
-        (boundedGrowthRegularityOneStepMaximum k j F M)
-        (growthRegularityOneStep k j F (M + 1))
 
-theorem growthRegularityOneStep_le_boundedMaximum
-    (k j : ℕ) (F : NatGrowthFunction)
-    {m M : ℕ} (hm : m ≤ M) :
-    growthRegularityOneStep k j F m ≤
-      boundedGrowthRegularityOneStepMaximum k j F M := by
-  induction M generalizing m with
-  | zero =>
-      have hmzero : m = 0 := Nat.eq_zero_of_le_zero hm
-      subst m
-      rfl
-  | succ M ih =>
-      rw [boundedGrowthRegularityOneStepMaximum]
-      by_cases hlast : m = M + 1
-      · subst m
-        exact le_max_right _ _
-      · have hmM : m ≤ M := by omega
-        exact (ih hmM).trans (le_max_left _ _)
 
-theorem boundedGrowthRegularityOneStepMaximum_monotone
-    (k j : ℕ) (F : NatGrowthFunction) :
-    Monotone
-      (boundedGrowthRegularityOneStepMaximum k j F) := by
-  apply monotone_nat_of_le_succ
-  intro M
-  rw [boundedGrowthRegularityOneStepMaximum]
-  exact le_max_left _ _
 
-/-- Maximum of all bounded one-step envelopes at ranks
-`0, ..., r - 1`. -/
-noncomputable def finiteRankGrowthRegularityOneStepMaximum
-    (k : ℕ) (F : NatGrowthFunction) (M : ℕ) : ℕ → ℕ
-  | 0 => 0
-  | r + 1 =>
-      max
-        (finiteRankGrowthRegularityOneStepMaximum k F M r)
-        (boundedGrowthRegularityOneStepMaximum k r F M)
 
-theorem growthRegularityOneStep_le_finiteRankMaximum
-    (k : ℕ) (F : NatGrowthFunction)
-    {j r m M : ℕ} (hj : j < r) (hm : m ≤ M) :
-    growthRegularityOneStep k j F m ≤
-      finiteRankGrowthRegularityOneStepMaximum k F M r := by
-  induction r generalizing j with
-  | zero =>
-      omega
-  | succ r ih =>
-      rw [finiteRankGrowthRegularityOneStepMaximum]
-      by_cases hjlast : j = r
-      · subst j
-        exact
-          (growthRegularityOneStep_le_boundedMaximum
-            k r F hm).trans (le_max_right _ _)
-      · have hjr : j < r := by omega
-        exact (ih hjr).trans (le_max_left _ _)
 
-theorem finiteRankGrowthRegularityOneStepMaximum_monotone
-    (k r : ℕ) (F : NatGrowthFunction) :
-    Monotone
-      (fun M =>
-        finiteRankGrowthRegularityOneStepMaximum
-          k F M r) := by
-  intro a b hab
-  induction r with
-  | zero =>
-      simp [finiteRankGrowthRegularityOneStepMaximum]
-  | succ r ih =>
-      simp only [finiteRankGrowthRegularityOneStepMaximum]
-      exact max_le_max ih
-        (boundedGrowthRegularityOneStepMaximum_monotone
-          k r F hab)
 
 /-! ## One majorant stage -/
 
-/-- The next tower-dominating stage.  At input `M` it simultaneously
-dominates `M + 1`, the old value `F M`, and every rank-`j` one-step value
-at every input at most `M`, for `j < r`. -/
-noncomputable def towerDominatingGrowth
-    (k r : ℕ) (F : NatGrowthFunction) :
-    NatGrowthFunction where
-  toFun M :=
-    max (M + 1)
-      (max (F M)
-        (finiteRankGrowthRegularityOneStepMaximum
-          k F M r))
-  monotone' := by
-    intro a b hab
-    exact max_le_max
-      (Nat.add_le_add_right hab 1)
-      (max_le_max
-        (F.monotone hab)
-        (finiteRankGrowthRegularityOneStepMaximum_monotone
-          k r F hab))
-  above_diagonal := by
-    intro M
-    exact le_max_left _ _
 
-@[simp]
-theorem towerDominatingGrowth_apply
-    (k r : ℕ) (F : NatGrowthFunction) (M : ℕ) :
-    towerDominatingGrowth k r F M =
-      max (M + 1)
-        (max (F M)
-          (finiteRankGrowthRegularityOneStepMaximum
-            k F M r)) :=
-  rfl
 
-/-- A majorant stage pointwise dominates the preceding growth function. -/
-theorem le_towerDominatingGrowth
-    (k r : ℕ) (F : NatGrowthFunction) (M : ℕ) :
-    F M ≤ towerDominatingGrowth k r F M := by
-  rw [towerDominatingGrowth_apply]
-  exact (le_max_left _ _).trans (le_max_right _ _)
 
-/-- The stronger bounded-input version of pointwise domination. -/
-theorem growthFunction_le_towerDominatingGrowth_of_le
-    (k r : ℕ) (F : NatGrowthFunction)
-    {m M : ℕ} (hm : m ≤ M) :
-    F m ≤ towerDominatingGrowth k r F M := by
-  exact (F.monotone hm).trans
-    (le_towerDominatingGrowth k r F M)
 
-/-- A majorant stage dominates every relevant one-step map, uniformly for
-all inputs below the displayed argument. -/
-theorem growthRegularityOneStep_le_towerDominatingGrowth
-    (k r : ℕ) (F : NatGrowthFunction)
-    (j : Fin r) {m M : ℕ} (hm : m ≤ M) :
-    growthRegularityOneStep k j.1 F m ≤
-      towerDominatingGrowth k r F M := by
-  rw [towerDominatingGrowth_apply]
-  exact
-    (growthRegularityOneStep_le_finiteRankMaximum
-      k F j.isLt hm).trans
-      ((le_max_right _ _).trans (le_max_right _ _))
 
 /-! ## Iterated finite-stage closure -/
 
-/-- Iteration of the finite tower-majorant operation, starting from the
-requested growth function at stage zero. -/
-noncomputable def towerDominatingGrowthIteration
-    (k r : ℕ) (F : NatGrowthFunction) :
-    ℕ → NatGrowthFunction
-  | 0 => F
-  | stage + 1 =>
-      towerDominatingGrowth k r
-        (towerDominatingGrowthIteration k r F stage)
 
-@[simp]
-theorem towerDominatingGrowthIteration_zero
-    (k r : ℕ) (F : NatGrowthFunction) :
-    towerDominatingGrowthIteration k r F 0 = F :=
-  rfl
 
-@[simp]
-theorem towerDominatingGrowthIteration_succ
-    (k r : ℕ) (F : NatGrowthFunction) (stage : ℕ) :
-    towerDominatingGrowthIteration k r F (stage + 1) =
-      towerDominatingGrowth k r
-        (towerDominatingGrowthIteration k r F stage) :=
-  rfl
 
-/-- Every finite closure stage pointwise dominates the requested growth
-function. -/
-theorem le_towerDominatingGrowthIteration
-    (k r : ℕ) (F : NatGrowthFunction) :
-    ∀ stage M,
-      F M ≤ towerDominatingGrowthIteration k r F stage M := by
-  intro stage
-  induction stage with
-  | zero =>
-      intro M
-      exact le_rfl
-  | succ stage ih =>
-      intro M
-      exact (ih M).trans
-        (le_towerDominatingGrowth k r
-          (towerDominatingGrowthIteration k r F stage) M)
 
-/-- Consecutive closure stages are pointwise nested. -/
-theorem towerDominatingGrowthIteration_le_succ
-    (k r : ℕ) (F : NatGrowthFunction)
-    (stage M : ℕ) :
-    towerDominatingGrowthIteration k r F stage M ≤
-      towerDominatingGrowthIteration k r F (stage + 1) M := by
-  exact le_towerDominatingGrowth k r
-    (towerDominatingGrowthIteration k r F stage) M
 
-/-- The defining stage-shifted domination: the next closure stage
-dominates every one-step map formed using the current closure stage. -/
-theorem growthRegularityOneStep_le_nextGrowthIteration
-    (k r : ℕ) (F : NatGrowthFunction)
-    (stage : ℕ) (j : Fin r) {m M : ℕ} (hm : m ≤ M) :
-    growthRegularityOneStep k j.1
-        (towerDominatingGrowthIteration k r F stage) m ≤
-      towerDominatingGrowthIteration k r F (stage + 1) M := by
-  exact growthRegularityOneStep_le_towerDominatingGrowth
-    k r
-    (towerDominatingGrowthIteration k r F stage)
-    j hm
 
-/-- Exact coupling of the triangular schedule at stage `stage` to the
-growth function at stage `stage + 1`. -/
-theorem growthRegularityComplexity_succ_le_nextGrowthIteration
-    (k r initialBound : ℕ) (F : NatGrowthFunction)
-    (stage n : ℕ) (j : Fin r) :
-    growthRegularityComplexity
-        k j.1 initialBound
-          (towerDominatingGrowthIteration k r F stage)
-          (n + 1) ≤
-      towerDominatingGrowthIteration k r F (stage + 1)
-        (growthRegularityComplexity
-          k j.1 initialBound
-            (towerDominatingGrowthIteration k r F stage)
-            n) := by
-  rw [growthRegularityComplexity_succ_eq_oneStep]
-  exact growthRegularityOneStep_le_nextGrowthIteration
-    k r F stage j le_rfl
 
-/-- Passing to a finite closure stage can only decrease the reciprocal
-tolerance relative to the originally requested growth function. -/
-theorem towerDominatingGrowthIteration_reciprocal_le
-    (k r : ℕ) (F : NatGrowthFunction)
-    (stage M : ℕ) :
-    1 /
-        (towerDominatingGrowthIteration
-          k r F stage M : ℝ) ≤
-      1 / (F M : ℝ) := by
-  apply one_div_le_one_div_of_le
-  · exact_mod_cast F.positive M
-  · exact_mod_cast
-      le_towerDominatingGrowthIteration
-        k r F stage M
 
 /-! ## Finite maxima for simultaneous hierarchy bounds -/
 
@@ -36832,290 +17128,19 @@ theorem le_finiteMaximum :
 
 namespace GrowthFunctionOrderedComplexRegularityCertificate
 
-/-- At every independently selected rank, the fine triangular bound formed
-using stage `s` lies below stage `s + 1` applied to the selected coarse
-bound. -/
-theorem selectedFineComplexity_le_nextGrowthIteration
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (j : Fin r) :
-    selectedGrowthFineComplexityBound
-        k r initialBound
-          (towerDominatingGrowthIteration k r F stage)
-          R.index j ≤
-      towerDominatingGrowthIteration k r F (stage + 1)
-        (selectedGrowthCoarseComplexityBound
-          k r initialBound
-            (towerDominatingGrowthIteration k r F stage)
-            R.index j) := by
-  exact growthRegularityComplexity_succ_le_nextGrowthIteration
-    k r (initialBound j.castSucc) F stage (R.index j) j
 
-/-- A certificate constructed with a finite closure stage satisfies the
-weaker reciprocal tolerance requested from the original growth function,
-evaluated at the same selected coarse bounds. -/
-theorem regular_with_requestedGrowth
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ) :
-    IsFullyPreliminaryOrderedRegular R.fine
-      (fun j =>
-        1 /
-          (F (selectedGrowthCoarseComplexityBound
-            k r initialBound
-              (towerDominatingGrowthIteration k r F stage)
-              R.index j) : ℝ)) := by
-  intro j e a b
-  exact (R.regular j e a b).trans
-    (towerDominatingGrowthIteration_reciprocal_le
-      k r F stage
-      (selectedGrowthCoarseComplexityBound
-        k r initialBound
-          (towerDominatingGrowthIteration k r F stage)
-          R.index j))
 
-/-- The exact one-link descending hierarchy associated to a selected rank.
-Its lower level is the selected coarse bound and its upper level is the next
-majorant stage applied to that bound. -/
-noncomputable def selectedRankTowerHierarchy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (j : Fin r) :
-    DescendingGrowthHierarchy
-      (towerDominatingGrowthIteration k r F (stage + 1)) 1 :=
-  canonicalDescendingGrowthHierarchy
-    (towerDominatingGrowthIteration k r F (stage + 1)) 1
-    (selectedGrowthCoarseComplexityBound
-      k r initialBound
-        (towerDominatingGrowthIteration k r F stage)
-        R.index j)
 
-@[simp]
-theorem selectedRankTowerHierarchy_last
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (j : Fin r) :
-    (selectedRankTowerHierarchy R j).level (Fin.last 1) =
-      selectedGrowthCoarseComplexityBound
-        k r initialBound
-          (towerDominatingGrowthIteration k r F stage)
-          R.index j := by
-  exact canonicalDescendingGrowthHierarchy_last
-    (towerDominatingGrowthIteration k r F (stage + 1)) 1
-    (selectedGrowthCoarseComplexityBound
-      k r initialBound
-        (towerDominatingGrowthIteration k r F stage)
-        R.index j)
 
-@[simp]
-theorem selectedRankTowerHierarchy_zero
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (j : Fin r) :
-    (selectedRankTowerHierarchy R j).level 0 =
-      towerDominatingGrowthIteration k r F (stage + 1)
-        (selectedGrowthCoarseComplexityBound
-          k r initialBound
-            (towerDominatingGrowthIteration k r F stage)
-            R.index j) := by
-  simp [selectedRankTowerHierarchy]
 
-/-- Thus the selected fine bound is genuinely nested below the upper member
-of the associated descending hierarchy. -/
-theorem selectedFineComplexity_le_selectedRankTowerHierarchy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (j : Fin r) :
-    selectedGrowthFineComplexityBound
-        k r initialBound
-          (towerDominatingGrowthIteration k r F stage)
-          R.index j ≤
-      (selectedRankTowerHierarchy R j).level 0 := by
-  rw [selectedRankTowerHierarchy_zero]
-  exact R.selectedFineComplexity_le_nextGrowthIteration j
 
-/-- The actual selected fine partition at rank `j` obeys the same hierarchy
-upper bound, not merely its numerical triangular schedule. -/
-theorem finePartitionComplexity_le_selectedRankTowerHierarchy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (j : Fin r) (e : OrderedFace k j.1) :
-    FacePartition.complexity
-        (R.fine.partition j.castSucc e) ≤
-      (selectedRankTowerHierarchy R j).level 0 := by
-  exact
-    ((R.localCertificate j).fine_complexity e).trans
-      (R.selectedFineComplexity_le_selectedRankTowerHierarchy j)
 
 /-! ### One hierarchy containing all independently selected layers -/
 
-/-- A single numerical bound containing all selected fine-layer bounds,
-including the unchanged top layer. -/
-noncomputable def selectedFineLayerMaximum
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ) : ℕ :=
-  finiteMaximum (r + 1)
-    (selectedGrowthFineLayerComplexityBound
-      k r initialBound
-        (towerDominatingGrowthIteration k r F stage)
-        R.index)
 
-/-- A canonical depth-`r` descending hierarchy whose bottom already
-dominates every independently selected fine-layer bound.  This is coarse,
-but it is simultaneous and its adjacent growth equalities are exact. -/
-noncomputable def selectedAllRankTowerHierarchy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ) :
-    DescendingGrowthHierarchy
-      (towerDominatingGrowthIteration k r F (stage + 1)) r :=
-  canonicalDescendingGrowthHierarchy
-    (towerDominatingGrowthIteration k r F (stage + 1)) r
-    (selectedFineLayerMaximum R)
 
-@[simp]
-theorem selectedAllRankTowerHierarchy_last
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ) :
-    (selectedAllRankTowerHierarchy R).level (Fin.last r) =
-      selectedFineLayerMaximum R := by
-  exact canonicalDescendingGrowthHierarchy_last
-    (towerDominatingGrowthIteration k r F (stage + 1)) r
-    (selectedFineLayerMaximum R)
 
-/-- Every selected fine-layer numerical bound is nested below the
-correspondingly indexed member of the simultaneous hierarchy. -/
-theorem selectedFineLayerComplexity_le_allRankTowerHierarchy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (q : Fin (r + 1)) :
-    selectedGrowthFineLayerComplexityBound
-        k r initialBound
-          (towerDominatingGrowthIteration k r F stage)
-          R.index q ≤
-      (selectedAllRankTowerHierarchy R).level q := by
-  calc
-    selectedGrowthFineLayerComplexityBound
-          k r initialBound
-            (towerDominatingGrowthIteration k r F stage)
-            R.index q ≤
-        selectedFineLayerMaximum R := by
-          exact le_finiteMaximum _ q
-    _ =
-        (selectedAllRankTowerHierarchy R).level
-          (Fin.last r) := by
-          symm
-          exact selectedAllRankTowerHierarchy_last R
-    _ ≤
-        (selectedAllRankTowerHierarchy R).level q := by
-          exact (selectedAllRankTowerHierarchy R).antitone
-            (Fin.le_last q)
 
-/-- Consequently every actual partition in the selected fine complex is
-bounded by its corresponding level of one simultaneous exact hierarchy. -/
-theorem fineComplexity_le_allRankTowerHierarchy
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    {initial : OrderedPartitionComplex G k r}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {γ : Fin r → ℝ}
-    {stage : ℕ}
-    (R : GrowthFunctionOrderedComplexRegularityCertificate
-      G k r initial initialBound
-        (towerDominatingGrowthIteration k r F stage) γ)
-    (q : Fin (r + 1)) (e : OrderedFace k q.1) :
-    FacePartition.complexity
-        (R.fine.partition q e) ≤
-      (selectedAllRankTowerHierarchy R).level q := by
-  exact (R.fine_complexity q e).trans
-    (R.selectedFineLayerComplexity_le_allRankTowerHierarchy q)
 
 end GrowthFunctionOrderedComplexRegularityCertificate
 
@@ -37188,15 +17213,6 @@ theorem sourceFullCommonTolerance_pos
   exact one_div_pos.mpr
     (by exact_mod_cast F.positive (scale 0))
 
-theorem sourceFullRankGap_pos
-    {r : ℕ} (F : NatGrowthFunction)
-    (scale : Fin (r + 1) → ℕ)
-    (j : Fin r) :
-    0 < sourceFullRankGap F scale j := by
-  unfold sourceFullRankGap
-  exact one_div_pos.mpr
-    (sq_pos_of_pos
-      (by exact_mod_cast F.positive (scale j.succ)))
 
 /-! ## Numerical bounds selected by an adaptive landing -/
 
@@ -37332,101 +17348,6 @@ structure Certificate
           (regularity.coarse.partition q e) ≤
         scale q
 
-/-- Every source-full adaptive plan realizes an ordinary coarse-target
-certificate with the advertised source scale hierarchy. -/
-theorem certificate_nonempty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    {initialBound : Fin (r + 1) → ℕ}
-    {F : NatGrowthFunction}
-    {scaleFloor : ℕ}
-    (S : SourceFullCoarseTargetSchedule
-      k r initialBound F scaleFloor)
-    (initial : OrderedPartitionComplex G k r)
-    (hinitial :
-      ∀ (q : Fin (r + 1)) (e : OrderedFace k q.1),
-        FacePartition.complexity
-            (initial.partition q e) ≤
-          initialBound q) :
-    Nonempty
-      (Certificate k r initial initialBound F scaleFloor) := by
-  obtain ⟨P, R, hindex⟩ :=
-    S.schedule.exists_landing_certificate
-      initial S.schedule_admissible
-  refine ⟨{
-    tolerance := P.tolerance
-    budget := P.budget
-    length := P.length
-    regularity := R
-    scale := S.scale P
-    scaleFloor_le := S.scaleFloor_le P
-    scale_hierarchy := S.scale_hierarchy P
-    selected_tolerance_nonneg := ?_
-    selected_tolerance_le_common := ?_
-    rank_gap_le := ?_
-    coarse_complexity := ?_ }⟩
-  · intro j
-    simp only [selectedOrderedComplexTolerance]
-    rw [congrFun hindex j]
-    exact
-      P.tolerance_nonneg S.schedule_admissible
-        j (P.index j)
-  · intro j
-    simpa [selectedOrderedComplexTolerance, hindex] using
-      S.selected_tolerance_le_common P j
-  · intro j
-    have hgap := R.gap_le j
-    have hreciprocal := S.reciprocal_gap_le P j
-    change
-      orderedLayerAtomEnergy
-            (R.fine.partition j.castSucc)
-            (R.coarse.partition j.succ) -
-          orderedLayerAtomEnergy
-            (R.coarse.partition j.castSucc)
-            (R.coarse.partition j.succ) ≤
-        sourceFullRankGap F (S.scale P) j
-    exact hgap.trans hreciprocal
-  · intro q
-    cases q using Fin.lastCases with
-    | last =>
-        intro e
-        have htop := congrFun R.coarse_topLayer_eq e
-        simp only [OrderedPartitionComplex.topLayer] at htop
-        rw [htop]
-        calc
-          FacePartition.complexity
-                (initial.partition (Fin.last r) e) ≤
-              initialBound (Fin.last r) :=
-            hinitial (Fin.last r) e
-          _ =
-              adaptiveSelectedCoarseLayerBound
-                initialBound P (Fin.last r) := by
-            simp [adaptiveSelectedCoarseLayerBound]
-          _ ≤ S.scale P (Fin.last r) :=
-            S.selected_coarse_bound P (Fin.last r)
-    | cast j =>
-        intro e
-        calc
-          FacePartition.complexity
-                (R.coarse.partition j.castSucc e) ≤
-              fixedUpperLayerComplexityFactor
-                    j.1 (P.budget j) (P.index j) *
-                FacePartition.complexity
-                    (initial.partition j.castSucc e) := by
-            rw [← congrFun hindex j]
-            exact R.coarse_complexity j e
-          _ ≤
-              fixedUpperLayerComplexityFactor
-                    j.1 (P.budget j) (P.index j) *
-                initialBound j.castSucc :=
-            Nat.mul_le_mul_left _
-              (hinitial j.castSucc e)
-          _ =
-              adaptiveSelectedCoarseLayerBound
-                initialBound P j.castSucc := by
-            simp [adaptiveSelectedCoarseLayerBound]
-          _ ≤ S.scale P j.castSucc :=
-            S.selected_coarse_bound P j.castSucc
 
 /-! ## Rank-zero plan -/
 
@@ -37463,24 +17384,6 @@ def zero
       max scaleFloor (initialBound 0)
     exact le_max_right _ _
 
-/-- The rank-zero source-full certificate is therefore unconditional for
-every requested scale floor. -/
-theorem certificate_nonempty_zero
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    (k : ℕ)
-    (initial : OrderedPartitionComplex G k 0)
-    (initialBound : Fin 1 → ℕ)
-    (F : NatGrowthFunction)
-    (scaleFloor : ℕ)
-    (hinitial :
-      ∀ (q : Fin 1) (e : OrderedFace k q.1),
-        FacePartition.complexity
-            (initial.partition q e) ≤
-          initialBound q) :
-    Nonempty
-      (Certificate k 0 initial initialBound F scaleFloor) :=
-  (zero k initialBound F scaleFloor).certificate_nonempty
-    initial hinitial
 
 /-! ## A genuine top-down successor constructor -/
 
@@ -37505,26 +17408,6 @@ def nodeScale
       Fin.lastCases topScale
         (lowerScale chosen lower)
 
-@[simp]
-theorem nodeScale_node
-    {k r length : ℕ}
-    {tolerance : ℕ → ℝ}
-    {budget : ℕ → ℕ}
-    {next : Fin length → AdaptiveCoarseTargetSchedule k r}
-    (topScale : ℕ)
-    (lowerScale :
-      ∀ i : Fin length,
-        (next i).Landing → Fin (r + 1) → ℕ)
-    (chosen : Fin length)
-    (lower : (next chosen).Landing) :
-    nodeScale (tolerance := tolerance) (budget := budget)
-        topScale lowerScale
-        (AdaptiveCoarseTargetSchedule.Landing.node
-          (tolerance := tolerance) (budget := budget)
-          chosen lower) =
-      Fin.lastCases topScale
-        (lowerScale chosen lower) :=
-  rfl
 
 @[simp]
 theorem nodeScale_node_last
@@ -37912,37 +17795,7 @@ noncomputable def sourceFullStageBudget
     (sourceFullStageTolerance
       initialBound F topScale lowerBuilder n)
 
-@[simp]
-theorem sourceFullStageFactor_zero
-    {k r : ℕ}
-    (initialBound : Fin (r + 2) → ℕ)
-    (F : NatGrowthFunction)
-    (topScale : ℕ)
-    (lowerBuilder :
-      (bound : Fin (r + 1) → ℕ) →
-        Bounded k r bound F (F topScale)) :
-    sourceFullStageFactor
-      initialBound F topScale lowerBuilder 0 = 1 :=
-  rfl
 
-@[simp]
-theorem sourceFullStageFactor_succ
-    {k r : ℕ}
-    (initialBound : Fin (r + 2) → ℕ)
-    (F : NatGrowthFunction)
-    (topScale : ℕ)
-    (lowerBuilder :
-      (bound : Fin (r + 1) → ℕ) →
-        Bounded k r bound F (F topScale))
-    (n : ℕ) :
-    sourceFullStageFactor
-        initialBound F topScale lowerBuilder (n + 1) =
-      (2 ^ (r + 1)) ^
-          sourceFullStageBudget
-            initialBound F topScale lowerBuilder n *
-        sourceFullStageFactor
-          initialBound F topScale lowerBuilder n :=
-  rfl
 
 /-- The explicitly accumulated stage factor is exactly the standard
 fixed-upper tower factor for the recursively chosen budget stream. -/
@@ -38195,42 +18048,7 @@ theorem bounded_nonempty
               (le_finiteMaximum
                 (fun i => (next i).ceiling) chosen)
 
-/-- Tao's finite faster-growth induction supplies a source-full plan for
-every natural growth function, every initial layerwise bound, and every
-requested deepest-scale floor. -/
-theorem nonempty
-    (k r : ℕ)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (scaleFloor : ℕ) :
-    Nonempty
-      (SourceFullCoarseTargetSchedule
-        k r initialBound F scaleFloor) := by
-  obtain ⟨S⟩ :=
-    bounded_nonempty
-      k r initialBound F scaleFloor
-  exact ⟨S.plan⟩
 
-/-- End-to-end source-full coarse-target regularity, with the numerical
-plan constructed internally by the finite faster-growth induction. -/
-theorem certificate_nonempty_full
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    (k r : ℕ)
-    (initial : OrderedPartitionComplex G k r)
-    (initialBound : Fin (r + 1) → ℕ)
-    (F : NatGrowthFunction)
-    (scaleFloor : ℕ)
-    (hinitial :
-      ∀ (q : Fin (r + 1)) (e : OrderedFace k q.1),
-        FacePartition.complexity
-            (initial.partition q e) ≤
-          initialBound q) :
-    Nonempty
-      (Certificate
-        k r initial initialBound F scaleFloor) := by
-  obtain ⟨S⟩ :=
-    nonempty k r initialBound F scaleFloor
-  exact S.certificate_nonempty initial hinitial
 
 end SourceFullCoarseTargetSchedule
 
@@ -38682,46 +18500,6 @@ theorem mul_mean_indicator_sourceFullLargeDefectBaseSupport_le
       (P.sourceFullAtomDefectSq_nonneg e upper a)
       hβ
 
-/-- The same Markov loss charged to the existing immediate-boundary
-aggregate atom-energy increment.  This coarse bound is convenient when a
-single selected atom is considered; the sharper own-atom sum below retains
-the individual square masses until after summation. -/
-theorem mul_mean_indicator_sourceFullLargeDefectBaseSupport_le_atomEnergy_sub
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (e : PositiveOrderedFace k r)
-    (upper : FacePartition (Fin (e.lowerRank.1 + 1) → G))
-    (a : upper.parts)
-    {β : ℝ} (hβ : 0 ≤ β) :
-    β * mean (finsetIndicator
-        (P.sourceFullLargeDefectBaseSupport e upper a β)) ≤
-      orderedAtomEnergy
-          (positiveFaceLowerLayer P.fine e) e.face upper -
-        orderedAtomEnergy
-          (positiveFaceLowerLayer P.coarse e) e.face upper := by
-  refine
-    (P.mul_mean_indicator_sourceFullLargeDefectBaseSupport_le
-      e upper a hβ).trans ?_
-  change
-    mean
-        (atomBoundaryDefectSq
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer P.fine e) e.face)
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer P.coarse e) e.face)
-          upper a) ≤
-      partitionAtomEnergy
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer P.fine e) e.face) upper -
-        partitionAtomEnergy
-          (orderedBoundaryPartition
-            (positiveFaceLowerLayer P.coarse e) e.face) upper
-  exact
-    mean_atomBoundaryDefectSq_le_atomEnergy_sub
-      (orderedBoundaryPartition_mono
-        (fun f => P.refines e.lowerRank.castSucc f) e.face)
-      upper a
 
 /-- Divided form of the source-full Markov estimate. -/
 theorem mean_indicator_sourceFullLargeDefectBaseSupport_le
@@ -39412,19 +19190,7 @@ def topPositiveOrderedFace
   lowerRank := Fin.last n
   face := e
 
-@[simp]
-theorem topPositiveOrderedFace_rank
-    {k n : ℕ} (e : OrderedFace k (n + 1)) :
-    (topPositiveOrderedFace e).rank = n + 1 := by
-  rfl
 
-@[simp]
-theorem topPositiveOrderedFace_lowerRank_succ
-    {k n : ℕ} (e : OrderedFace k (n + 1)) :
-    (topPositiveOrderedFace e).lowerRank.succ =
-      Fin.last (n + 1) := by
-  apply Fin.ext
-  rfl
 
 /-- If a full tuple is not an occurrence, then the full selected
 configuration weight of an occurring closed configuration vanishes on that
@@ -39508,92 +19274,7 @@ theorem fullConfigurationCount_le_patternCount
 
 /-! ## The cover contradiction -/
 
-/-- If every good configuration has count at least `c`, then a pattern of
-count below `c` is covered by the canonical bad-base deletion family. -/
-theorem orderedBadBaseDeletionFamily_isCover_of_good_count
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k n : ℕ} (hrk : n + 1 ≤ k)
-    (H : OrderedPattern G k (n + 1))
-    (P : OrderedCoarseFineComplex G k (n + 1))
-    (hinitial :
-      P.fine.Refines (orderedPatternInitialComplex H))
-    (α β : ℕ → ℝ) (c : ℝ)
-    (hcount : H.toWeighted.patternCount < c)
-    (hgoodCount :
-      ∀ A : ClosedOrderedAtomConfiguration
-          G k (n + 1) P.fine,
-        A.IsGood P.fine P.coarse α β →
-          c ≤ fullConfigurationCount A) :
-    H.IsCover
-      (orderedBadBaseDeletionFamily
-        P.fine P.coarse α β) := by
-  intro x hx
-  by_contra hsurvives
-  push Not at hsurvives
-  let A :
-      ClosedOrderedAtomConfiguration
-        G k (n + 1) P.fine :=
-    ClosedOrderedAtomConfiguration.ofTuple P.fine x
-  have hgood :
-      A.IsGood P.fine P.coarse α β := by
-    exact
-      ClosedOrderedAtomConfiguration.isGood_of_avoids_topBadBaseDeletion
-        hrk P.fine P.coarse x α β hsurvives
-  have hcA : c ≤ fullConfigurationCount A :=
-    hgoodCount A hgood
-  have htop :
-      OrderedFacePartitionRefines P.fine.topLayer
-        (orderedPatternTopPartition H) :=
-    orderedPatternTopPartition_refines_of_complex_refines_initial
-      H hinitial
-  have hAH :
-      fullConfigurationCount A ≤
-        H.toWeighted.patternCount := by
-    exact fullConfigurationCount_le_patternCount
-      H htop A ((H.mem_occurrenceFinset x).1 hx)
-  linarith
 
-/-- Concrete cover theorem obtained from the quantitative configuration
-counting lower bound. -/
-theorem orderedBadBaseDeletionFamily_isCover
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k n : ℕ} (hrk : n + 1 ≤ k)
-    (H : OrderedPattern G k (n + 1))
-    (P : OrderedCoarseFineComplex G k (n + 1))
-    (hinitial :
-      P.fine.Refines (orderedPatternInitialComplex H))
-    (α β : ℕ → ℝ)
-    (ε : OrderedRegularityTolerance (n + 1))
-    (hregular :
-      IsFullyPreliminaryOrderedRegular P.fine ε)
-    {ρ η δ : ℝ}
-    (hρ : 0 ≤ ρ) (hη : 0 ≤ η) (hδ : 0 ≤ δ)
-    (hα : ∀ m, ρ ≤ α m)
-    (hε : ∀ j, ε j ≤ η)
-    (hβ0 : ∀ m, 0 ≤ β m)
-    (hβδ : ∀ m, β m ≤ δ ^ 2)
-    (hcount :
-      H.toWeighted.patternCount <
-        ρ ^ Fintype.card
-            (PositiveOrderedFace k (n + 1)) -
-          (Fintype.card
-              (PositiveOrderedFace k (n + 1)) : ℝ) *
-            (η + δ)) :
-    H.IsCover
-      (orderedBadBaseDeletionFamily
-        P.fine P.coarse α β) := by
-  apply orderedBadBaseDeletionFamily_isCover_of_good_count
-    hrk H P hinitial α β
-    (ρ ^ Fintype.card
-        (PositiveOrderedFace k (n + 1)) -
-      (Fintype.card
-          (PositiveOrderedFace k (n + 1)) : ℝ) *
-        (η + δ))
-    hcount
-  intro A hgood
-  exact fullConfigurationCount_lower_bound
-    P A α β hgood ε hregular
-    hρ hη hδ hα hε hβ0 hβδ
 
 end Wikipedia.SzemeredisTheorem
 
@@ -39754,135 +19435,7 @@ theorem faceDeletionDensity_sourceFullBadBaseDeletionFamily_le
     P.mean_indicator_sourceFullTopBadBaseDeletion_le
       e α β hα hβ
 
-/-- The same normalized cost expressed through the fine upper complexity and
-the ordinary fine-upper face atom-energy gap. -/
-theorem faceDeletionDensity_sourceFullBadBaseDeletionFamily_le_fineGap
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (α β : ℕ → ℝ)
-    (hα : ∀ j, 0 ≤ α (j + 1))
-    (hβ : ∀ j, 0 < β (j + 1))
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (P.sourceFullBadBaseDeletionFamily α β) e ≤
-      ∑ q : OrderedPositiveSubface r,
-        ((FacePartition.complexity
-            (P.coarse.partition q.1.succ
-              (q.2.trans e)) : ℝ) *
-            α (q.1.1 + 1) +
-          ((FacePartition.complexity
-              (P.fine.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-            P.faceAtomEnergyGap q.1 (q.2.trans e)) /
-            β (q.1.1 + 1)) := by
-  calc
-    OrderedPattern.faceDeletionDensity
-        (P.sourceFullBadBaseDeletionFamily α β) e ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.coarse.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-              α (q.1.1 + 1) +
-            P.coarseUpperFaceAtomEnergyGap
-                q.1 (q.2.trans e) /
-              β (q.1.1 + 1)) :=
-      P.faceDeletionDensity_sourceFullBadBaseDeletionFamily_le
-        α β hα hβ e
-    _ ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.coarse.partition q.1.succ
-                (q.2.trans e)) : ℝ) *
-              α (q.1.1 + 1) +
-            ((FacePartition.complexity
-                (P.fine.partition q.1.succ
-                  (q.2.trans e)) : ℝ) *
-              P.faceAtomEnergyGap q.1 (q.2.trans e)) /
-              β (q.1.1 + 1)) := by
-      apply Finset.sum_le_sum
-      intro q _hq
-      exact add_le_add
-        (le_refl _)
-        (div_le_div_of_nonneg_right
-          (P.coarseUpperFaceAtomEnergyGap_le
-            q.1 (q.2.trans e))
-          (hβ q.1.1).le)
 
-/-- Constant-threshold deletion bound using uniform coarse/fine complexity
-bounds and the total ordinary atom-energy increment. -/
-theorem faceDeletionDensity_sourceFullBadBaseDeletionFamily_constant_le
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r coarseBound fineBound : ℕ}
-    (P : OrderedCoarseFineComplex G k r)
-    (hcoarse :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (P.coarse.partition j e) ≤ coarseBound)
-    (hfine :
-      ∀ (j : Fin (r + 1)) (e : OrderedFace k j.1),
-        FacePartition.complexity
-          (P.fine.partition j e) ≤ fineBound)
-    {α β : ℝ} (hα : 0 ≤ α) (hβ : 0 < β)
-    (e : OrderedFace k r) :
-    OrderedPattern.faceDeletionDensity
-        (P.sourceFullBadBaseDeletionFamily
-          (fun _ => α) (fun _ => β)) e ≤
-      (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-        ((coarseBound : ℝ) * α +
-          (fineBound : ℝ) * P.totalAtomEnergyGap / β) := by
-  calc
-    OrderedPattern.faceDeletionDensity
-        (P.sourceFullBadBaseDeletionFamily
-          (fun _ => α) (fun _ => β)) e ≤
-        ∑ q : OrderedPositiveSubface r,
-          ((FacePartition.complexity
-              (P.coarse.partition q.1.succ
-                (q.2.trans e)) : ℝ) * α +
-            ((FacePartition.complexity
-                (P.fine.partition q.1.succ
-                  (q.2.trans e)) : ℝ) *
-              P.faceAtomEnergyGap q.1 (q.2.trans e)) / β) := by
-      exact
-        P.faceDeletionDensity_sourceFullBadBaseDeletionFamily_le_fineGap
-          (fun _ => α) (fun _ => β)
-          (fun _ => hα) (fun _ => hβ) e
-    _ ≤
-        ∑ _q : OrderedPositiveSubface r,
-          ((coarseBound : ℝ) * α +
-            (fineBound : ℝ) * P.totalAtomEnergyGap / β) := by
-      apply Finset.sum_le_sum
-      intro q _hq
-      apply add_le_add
-      · exact mul_le_mul_of_nonneg_right
-          (Nat.cast_le.mpr
-            (hcoarse q.1.succ (q.2.trans e)))
-          hα
-      · apply div_le_div_of_nonneg_right _ hβ.le
-        calc
-          (FacePartition.complexity
-                (P.fine.partition q.1.succ
-                  (q.2.trans e)) : ℝ) *
-              P.faceAtomEnergyGap q.1 (q.2.trans e) ≤
-              (fineBound : ℝ) *
-                P.faceAtomEnergyGap q.1 (q.2.trans e) :=
-            mul_le_mul_of_nonneg_right
-              (Nat.cast_le.mpr
-                (hfine q.1.succ (q.2.trans e)))
-              (P.faceAtomEnergyGap_nonneg
-                q.1 (q.2.trans e))
-          _ ≤
-              (fineBound : ℝ) * P.totalAtomEnergyGap :=
-            mul_le_mul_of_nonneg_left
-              (P.faceAtomEnergyGap_le_total
-                q.1 (q.2.trans e))
-              (Nat.cast_nonneg fineBound)
-    _ =
-        (Fintype.card (OrderedPositiveSubface r) : ℝ) *
-          ((coarseBound : ℝ) * α +
-            (fineBound : ℝ) * P.totalAtomEnergyGap / β) := by
-      simp only [Finset.sum_const, Finset.card_univ,
-        nsmul_eq_mul]
 
 end OrderedCoarseFineComplex
 
@@ -40709,111 +20262,15 @@ structure OrderedRemovalSchedule
         (orderedRemovalFinePartitionComplexityBound
           r initialBound budget length) ξ
 
-/-- Existence of one compatible schedule for every positive removal
-allowance. -/
-def HasOrderedRemovalSchedules
-    (k r initialBound : ℕ) : Prop :=
-  ∀ ξ : ℝ, 0 < ξ →
-    Nonempty (OrderedRemovalSchedule k r initialBound ξ)
 
 namespace OrderedRemovalSchedule
 
-/-- Any certificate selected from a compatible schedule satisfies the
-certificate-level compatibility predicate. -/
-theorem certificateCompatible
-    {G : Type*} [Fintype G] [DecidableEq G]
-    {k r initialBound : ℕ} {ξ : ℝ}
-    {initial : OrderedPartitionComplex G k r}
-    (S : OrderedRemovalSchedule k r initialBound ξ)
-    (R : StrongOrderedComplexRegularityCertificate
-      G k r initial S.tolerance S.budget S.length) :
-    IsStrongOrderedRemovalCompatible
-      (initialBound := initialBound) R ξ where
-  tolerance_le j :=
-    S.tolerance_le j (R.index j)
-  reciprocal_gap_le :=
-    S.reciprocal_gap_le
 
-/-- A compatible schedule supplies a strong regularity certificate over
-every ambient finite type and every initial complex. -/
-theorem certificate_nonempty
-    {G : Type*} [Fintype G] [DecidableEq G] [Nonempty G]
-    {k r initialBound : ℕ} {ξ : ℝ}
-    (S : OrderedRemovalSchedule k r initialBound ξ)
-    (initial : OrderedPartitionComplex G k r) :
-    Nonempty
-      (StrongOrderedComplexRegularityCertificate
-        G k r initial S.tolerance S.budget S.length) := by
-  exact StrongOrderedComplexRegularityCertificate.nonempty
-    initial S.tolerance S.budget S.length
-    (fun j n => (S.tolerance_pos j n).le)
-    S.budget_spec S.length_pos
 
 end OrderedRemovalSchedule
 
 /-! ## Conditional uniform ordered removal -/
 
-/-- Compatible ambient-independent schedules at successor rank imply the
-uniform ordered-pattern removal theorem. -/
-theorem hasUniformOrderedPatternRemoval_succ_of_schedules
-    (k n : ℕ) (hrank : n + 1 ≤ k)
-    (hschedules :
-      HasOrderedRemovalSchedules k (n + 1) 2) :
-    HasUniformOrderedPatternRemoval k (n + 1) := by
-  intro ξ hξ
-  let S : OrderedRemovalSchedule k (n + 1) 2 ξ :=
-    Classical.choice (hschedules ξ hξ)
-  let M : ℕ :=
-    orderedRemovalFinePartitionComplexityBound
-      (n + 1) 2 S.budget S.length
-  let c : ℝ :=
-    orderedRemovalConfigurationLowerBound k (n + 1)
-      (orderedRemovalDensityFloor (n + 1) M ξ)
-      (orderedRemovalCountingError k (n + 1) M ξ)
-      (orderedRemovalCountingError k (n + 1) M ξ)
-  have hc : 0 < c := by
-    exact orderedRemovalConfigurationLowerBound_pos
-      (k := k) (r := n + 1) (M := M) hξ
-  refine ⟨c, hc, ?_⟩
-  intro G instFintype instDecidableEq instNonempty H hcount
-  let initial : OrderedPartitionComplex G k (n + 1) :=
-    orderedPatternInitialComplex H
-  obtain ⟨R⟩ := S.certificate_nonempty initial
-  let P : OrderedCoarseFineComplex G k (n + 1) :=
-    R.toCoarseFine
-  let α : ℕ → ℝ :=
-    orderedRemovalAlpha (n + 1) M ξ
-  let β : ℕ → ℝ :=
-    orderedRemovalBeta k (n + 1) M ξ
-  let D : OrderedPattern.DeletionFamily
-      (G := G) k (n + 1) :=
-    orderedBadBaseDeletionFamily R.fine R.coarse α β
-  have hinitial :
-      R.fine.Refines (orderedPatternInitialComplex H) := by
-    exact R.fine_refines_initial
-  have hcompatible :
-      IsStrongOrderedRemovalCompatible
-        (initialBound := 2) R ξ :=
-    S.certificateCompatible R
-  have hcover : H.IsCover D := by
-    apply orderedBadBaseDeletionFamily_isCover
-      hrank H P hinitial α β
-      (selectedOrderedComplexTolerance S.tolerance R.index)
-      R.regular
-      (orderedRemovalDensityFloor_nonneg hξ)
-      (orderedRemovalCountingError_nonneg hξ)
-      (orderedRemovalCountingError_nonneg hξ)
-      (fun _ => le_rfl)
-      hcompatible.tolerance_le
-      (fun _ => orderedRemovalDefectThreshold_nonneg hξ)
-      (fun _ => le_rfl)
-    simpa [c, M, orderedRemovalConfigurationLowerBound,
-      orderedRemovalConfigurationFaceCount] using hcount
-  refine ⟨D, hcover, ?_⟩
-  intro e
-  exact R.faceDeletionDensity_badBase_le_removalAllowance
-    (complexity_orderedPatternInitialComplex_le_two H)
-    hξ hcompatible e
 
 end Wikipedia.SzemeredisTheorem
 
@@ -41750,27 +21207,7 @@ lemma encVertex_lt {N : ℕ} (hN : N ≥ 1) {f : ℕ} (hf : f < 4)
   unfold encVertex
   interval_cases f <;> linarith [Int.toNat_of_nonneg hi]
 
-/-- `encVertex` is injective in `(f, i)`. -/
-lemma encVertex_injective {N : ℕ} (hN : N ≥ 1) {f₁ f₂ : ℕ}
-    (hf₁ : f₁ < 4) (hf₂ : f₂ < 4) {i₁ i₂ : ℤ}
-    (hi₁ : 0 ≤ i₁ + ↑N) (hi₁' : i₁ + ↑N < 3 * ↑N)
-    (hi₂ : 0 ≤ i₂ + ↑N) (hi₂' : i₂ + ↑N < 3 * ↑N)
-    (h : encVertex N f₁ i₁ = encVertex N f₂ i₂) :
-    f₁ = f₂ ∧ i₁ = i₂ := by
-  unfold encVertex at h
-  interval_cases f₁ <;> interval_cases f₂ <;> norm_num at h ⊢
-  all_goals omega
 
-/-- For a point `(a,b,c) ∈ [N]³`, each plane index `i` satisfies
-`0 ≤ i + N` and `i + N < 3N`. -/
-lemma planeIndex_bounds {N : ℕ} {a b c : ℤ}
-    (ha : 0 ≤ a ∧ a < ↑N) (hb : 0 ≤ b ∧ b < ↑N)
-    (hc : 0 ≤ c ∧ c < ↑N) :
-    (0 ≤ c + ↑N ∧ c + ↑N < 3 * ↑N) ∧
-    (0 ≤ (-a + c) + ↑N ∧ (-a + c) + ↑N < 3 * ↑N) ∧
-    (0 ≤ (-b + c) + ↑N ∧ (-b + c) + ↑N < 3 * ↑N) ∧
-    (0 ≤ (a + b - c) + ↑N ∧ (a + b - c) + ↑N < 3 * ↑N) := by
-  omega
 
 /-! ## §6. Edge Properties -/
 
@@ -41797,28 +21234,6 @@ lemma edge_card_three {N : ℕ} (hN : N ≥ 1) {a b c : ℤ}
     vertexOf_injective hN ha hb hc
   simp +decide [h_distinct.eq_iff]
 
-/-- Each edge from a point in `[N]³` is a subset of the vertex set. -/
-lemma edge_sub_vertexSet {N : ℕ} (hN : N ≥ 1) {a b c : ℤ}
-    (ha : 0 ≤ a ∧ a < ↑N) (hb : 0 ≤ b ∧ b < ↑N)
-    (hc : 0 ≤ c ∧ c < ↑N) :
-    ∀ e ∈ pointEdges N a b c, e ⊆ vertexSet N := by
-  intro e he x hx
-  obtain ⟨ix, hix⟩ :
-      ∃ ix ∈ ({0, 1, 2, 3} : Finset (Fin 4)),
-        x = vertexOf N a b c ix := by
-    unfold pointEdges at he
-    aesop
-  obtain ⟨_, rfl⟩ := hix
-  fin_cases ix
-  · change encVertex N 0 c ∈ vertexSet N
-    exact Finset.mem_range.mpr
-      (encVertex_lt hN (by decide) (by linarith) (by linarith))
-  · exact Finset.mem_range.mpr
-      (encVertex_lt hN (by decide) (by linarith) (by linarith))
-  · exact Finset.mem_range.mpr
-      (encVertex_lt hN (by norm_num) (by linarith) (by linarith))
-  · exact Finset.mem_range.mpr
-      (encVertex_lt hN (by norm_num) (by linarith) (by linarith))
 
 /-- Every edge in `E` has card 3 and is a subset of `V`. -/
 lemma edgeSet_valid {N : ℕ} (hN : N ≥ 1)
@@ -42014,13 +21429,6 @@ lemma pointClique_sub_vertexSet {N : ℕ} (_hN : N ≥ 1) {a b c : ℤ}
   · exact encVertex_lt _hN (by decide) (by linarith) (by linarith)
   · exact encVertex_lt _hN (by decide) (by linarith) (by linarith)
 
-/-- Given an edge from families {0,1,2} with encoded vertices, recover the
-intersection point. -/
-lemma recover_point_012 {N : ℕ} (_hN : N ≥ 1) {a b c : ℤ}
-    (_ha : 0 ≤ a ∧ a < ↑N) (_hb : 0 ≤ b ∧ b < ↑N)
-    (_hc : 0 ≤ c ∧ c < ↑N) :
-    vertexOf N a b c 3 = encVertex N 3 (a + b - c) := by
-  simp [vertexOf]
 
 /-- Extract the generating point from an edge. -/
 lemma edge_from_point {N : ℕ} {S : Finset (ℤ × ℤ × ℤ)}
