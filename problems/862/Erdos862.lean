@@ -1,3 +1,5 @@
+import Mathlib
+
 /-
 
 This is a Lean formalization of a solution to Erdős Problem 862.
@@ -14,11 +16,6 @@ Harmonic).  The final theorem statement was written by Aristotle.
 
 Some results were taken from Kevin Barreto's proof for Erdős Problem
 43 (but they were proven by Aristotle also).
-
-The proof assumes a consequence of the Prime Number Theorem as an
-axiom ("no multiplicative gaps").  That statement was taken directly
-from the PrimeNumberTheoremAnd project.
-
 
 The proof is verified by Lean.  The following version numbers were
 used:
@@ -42,8 +39,6 @@ Key results include:
 
 In `eventually_lower_bound`, we avoid issues with `liminf` in `Real` for potentially unbounded sequences. The main theorem and corollaries follow from this bound.
 -/
-
-import Mathlib
 
 set_option linter.style.commandStart false
 set_option linter.style.header false
