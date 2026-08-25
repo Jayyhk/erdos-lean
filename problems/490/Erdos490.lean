@@ -10,7 +10,7 @@ namespace Erdos490
 # Problem Description
 
 Erdős Problem 490. `erdos_490` is proved unconditionally here: the four explicit Dusart
-estimates previously assumed in this repository as the axioms `dusart_chebyshev`,
+estimates previously assumed in this repository as `dusart_chebyshev`,
 `dusart_mertens_product`, `dusart_pi_lower` and `dusart_pi_upper` are no longer needed.
 
 The original argument is due to Endre Szemerédi; the formalisation is by plby
@@ -36,13 +36,7 @@ did, so it no longer closes those goals; the statements proved are unchanged. Th
 
 section
 
-
-/-! Basic definitions and elementary lemmas for Erdős problem 490.
-Extracted from the existing formalization; no custom analytic axioms are imported. -/
-
-
 noncomputable section
-
 
 /-- Primes up to x -/
 def primesUpTo (x : ℝ) : Finset ℕ :=
@@ -13551,24 +13545,10 @@ Formal authors of the original formalization:
 - Aristotle
 - Wouter van Doorn
 
-Axiom-free analytic replacement and rectangle-counting proof: Codex.
-
 URLs for the original argument and formalization:
 - https://www.erdosproblems.com/forum/thread/490#post-6497
 - https://github.com/Woett/Lean-files/blob/main/ErdosProblem490.lean
 -/
-
-
-/-!
-# Erdős problem 490, with constant 60 and no additional axioms
-
-The proof uses an elementary factorial estimate for the Chebyshev function,
-the proved Mertens product theorem, a weighted deletion argument, and disjoint
-quotient rectangles. Dyadic layers and a kernel-checked finite Euler-product
-certificate give an asymptotic constant below 60. No explicit Dusart estimates
-are assumed. See the submodules for the analytic and numerical details.
--/
-
 
 /-- If n is large enough, then every n-admissible pair satisfies
     |A|·|B| < 60 · n²/log n. -/
@@ -13585,7 +13565,6 @@ theorem erdos_490 :
   exact ⟨N₀, fun n hn A B hA hB hinj => hN₀ n hn A B ⟨hA, hB, hinj⟩⟩
 
 end
-
 
 #print axioms erdos_490
 -- 'Erdos490.erdos_490' depends on axioms: [propext, Classical.choice, Quot.sound]
