@@ -1,8 +1,6 @@
 # erdos-lean
 
-A collection of Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
-
-Each proof is self-contained. Every `ErdosN.lean` file's only import is `import Mathlib`, with no cross-references to other files in the repository. Additionally, some proofs depend on extra axioms declared in the proof itself, or on mechanisms that expand Lean's trusted base. The table below shows the state of each problem and any axioms or trust extensions it relies on (state definitions live in [schema/problems.schema.json](schema/problems.schema.json)). Original sources are recorded in the `sources` field of [data/problems.yaml](data/problems.yaml).
+A collection of self-contained single-file Lean proofs for problems from [erdosproblems.com](https://www.erdosproblems.com).
 
 For problem `N`, `problems/N/` contains:
 
