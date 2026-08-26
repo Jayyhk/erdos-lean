@@ -23,9 +23,9 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 199 `complete`
+- 200 `complete`
 - 1 `trust_extended`
-- 10 `axiomatic`
+- 9 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -234,7 +234,7 @@ lake build
 | [1136](https://www.erdosproblems.com/1136) | `complete` | [problems/1136/](problems/1136/) | |
 | [1138](https://www.erdosproblems.com/1138) | `complete` | [problems/1138/](problems/1138/) | |
 | [1141](https://www.erdosproblems.com/1141) | `complete` | [problems/1141/](problems/1141/) | |
-| [1148](https://www.erdosproblems.com/1148) | `axiomatic` | [problems/1148/](problems/1148/) | assumes an immediate consequence of Theorem 2.3 of [Einsiedler–Lindenstrauss–Michel–Venkatesh](https://jayyhk.github.io/papers/einsiedler-lindenstrauss-michel-venkatesh2012.pdf) (`theorem_2_3`) |
+| [1148](https://www.erdosproblems.com/1148) | `complete` | [problems/1148/](problems/1148/) | |
 | [1190](https://www.erdosproblems.com/1190) | `complete` | [problems/1190/](problems/1190/) | |
 | [1193](https://www.erdosproblems.com/1193) | `complete` | [problems/1193/](problems/1193/) | |
 | [1196](https://www.erdosproblems.com/1196) | `complete` | [problems/1196/](problems/1196/) | |
