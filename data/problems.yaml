@@ -1526,14 +1526,14 @@
   proof:
     path: "problems/750/"
     theorem: "Erdos750.erdos_750"
-    state: "axiomatic"
-    last_update: "2026-07-23"
-    lean_toolchain: "leanprover/lean4:v4.28.0"
-    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    extra_axioms: ["Erdos750.stiebitz_lower_bound"]
+    state: "complete"
+    last_update: "2026-08-26"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/750#post-6255"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P750/Proof_v4.28.lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos750.lean"
 - number: "751"
   proof:
     path: "problems/751/"
