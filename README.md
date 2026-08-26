@@ -23,8 +23,8 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 197 `complete`
-- 2 `trust_extended`
+- 198 `complete`
+- 1 `trust_extended`
 - 11 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -71,7 +71,7 @@ lake build
 | [224](https://www.erdosproblems.com/224) | `complete` | [problems/224/](problems/224/) | |
 | [226](https://www.erdosproblems.com/226) | `complete` | [problems/226/](problems/226/) | |
 | [229](https://www.erdosproblems.com/229) | `complete` | [problems/229/](problems/229/) | |
-| [231](https://www.erdosproblems.com/231) | `trust_extended` | [problems/231/](problems/231/) | uses `native_decide` |
+| [231](https://www.erdosproblems.com/231) | `complete` | [problems/231/](problems/231/) | |
 | [237](https://www.erdosproblems.com/237) | `axiomatic` | [problems/237/](problems/237/) | assumes an intermediate result on page 7 in the proof of Theorem 1.1 of [Maynard](https://jayyhk.github.io/papers/maynard2015.pdf) (`maynard_prime_tuples`) |
 | [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
 | [258](https://www.erdosproblems.com/258) | `axiomatic` | [problems/258/](problems/258/) | assumes Theorem 1.1 of [Tao–Teräväinen](https://jayyhk.github.io/papers/tao-teravainen2025.pdf) (`tao_teravainen`) |

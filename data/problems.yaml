@@ -462,14 +462,15 @@
   proof:
     path: "problems/231/"
     theorem: "Erdos231.erdos_231"
-    state: "trust_extended"
-    last_update: "2026-05-26"
-    lean_toolchain: "leanprover/lean4:v4.28.0"
-    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    trust_extensions: ["uses_native_decide"]
+    state: "complete"
+    last_update: "2026-08-26"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/231#post-6376"
       - "https://gist.github.com/LorenzoLuccioli/d9854d75aa8494921cbb50c465a9b9dd#file-erdos231-lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos231.lean"
+      - "https://github.com/AxiomMath/erdos-public/blob/main/Erdos/Erdos231/solution.lean"
 - number: "237"
   proof:
     path: "problems/237/"
@@ -1442,6 +1443,7 @@
       - "https://www.erdosproblems.com/forum/thread/694#post-6202"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P694/Proof.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos694.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "696"
   proof:
     path: "problems/696/"
@@ -2262,6 +2264,7 @@
       - "https://github.com/yuta0x89/ErdosProblems/blob/main/Erdos1141.lean"
       - "https://github.com/Woett/Lean-files/blob/main/MertensThird.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos1141.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "1148"
   proof:
     path: "problems/1148/"
