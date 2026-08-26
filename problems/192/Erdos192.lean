@@ -2,18 +2,45 @@ import Mathlib
 
 namespace Erdos192
 
-/-!
-# Standalone proof of Erdős Problem 192
+/-
+# Problem Description
 
-Standalone file generated from the KE92 paper workspace. It intentionally
-duplicates the shared Keränen proof chain so this file can be posted or copied
-without importing the KE92 folder.
+Erdős Problem 192. Let `A = {a₁, a₂, …} ⊂ ℝ^d` be an infinite sequence such that
+`aᵢ₊₁ - aᵢ` is a positive unit vector, i.e. of the form `(0,0,…,1,0,…,0)`. For which `d`
+must `A` contain a three-term arithmetic progression? `erdos_192` answers this: exactly
+for `d ≤ 3`.
+
+`erdos_192` is proved here without `native_decide`: the finite Keränen obligations are
+kernel checked using prefix-count, streaming and bitset certificates, so the proof depends
+on Lean's standard foundations alone rather than on `Lean.ofReduceBool` and
+`Lean.trustCompiler`.
+
+`erdos_192` is also restated in the geometric form the problem is posed in, over positive
+unit walks in `ℝ^d`. The word form this repository previously used — for which `d` is
+every infinite string over `d` letters forced to contain an abelian square, equivalently a
+Parikh three-term progression — is retained as `erdos_problem_192_classification`, and
+`geometric_classification_iff_words` connects the two. erdosproblems.com describes that
+equivalence explicitly: `A` is read as a string over `d` letters recording which step is
+taken at each point.
+
+The formalisation is by plby (github.com/plby/lean-proofs),
+`src/latest/ErdosProblems/Erdos192.lean`, adapting the construction and parts of the
+infrastructure from Lorenzo Luccioli's Aristotle formalisation
+(github.com/LorenzoLuccioli/KE92ErdosProblems).
+
+Flattened single-file vendoring of the 22-module import closure, in dependency order, with
+project-internal imports removed so that `Mathlib` is the only import, each module wrapped
+in its own `section` with any end-of-file scopes closed explicitly. `Erdos192` is the only
+namespace used upstream, and it is stripped from the modules that carry it since the whole
+file is wrapped in it once, and `erdos_192` is moved to the end so that it is the final
+declaration. Declarations not reachable from `erdos_192` are dropped, so everything here
+is inside its trust base; attribute-tagged lemmas and instances are kept regardless, since
+they can be used implicitly. No mathematical content is changed.
 -/
 
-/-!
-## Source: `PaperCoreDefs.lean`
--/
+/-! ### Upstream module `ErdosProblems/Erdos192/Core.lean` -/
 
+section
 /-!
 # KE92 shared definitions and basic lemmas
 
@@ -21,7 +48,7 @@ Definitions and foundational lemmas for the Keränen 1992 formalization.
 Separated from `KE92.lean` so that bounded verification files can
 -/
 
-set_option maxHeartbeats 800000
+
 
 /-! ### Finite-word abelian-square-free definitions -/
 
@@ -35,10 +62,16 @@ def FinAbelianSquareFree {n : ℕ} (w : List (Fin n)) : Prop :=
   ∀ i l : ℕ, l > 0 → i + 2 * l ≤ w.length →
     ¬ (w.drop i |>.take l).Perm (w.drop (i + l) |>.take l)
 
-/-! ### Parikh walk and 3-term APs -/
+
+def hasAbelianSquareAt (word : List Nat) (i l : Nat) : Bool :=
+  if l == 0 then false
+  else if i + 2 * l > word.length then false
+  else (word.drop i |>.take l).isPerm (word.drop (i + l) |>.take l)
+
 
 def parikhCount {k : ℕ} (f : ℕ → Fin k) (n : ℕ) (c : Fin k) : ℕ :=
   ((Finset.range n).filter (fun j => f j = c)).card
+
 
 def hasParikhAP {k : ℕ} (f : ℕ → Fin k) : Prop :=
   ∃ a b c : ℕ, a < b ∧ b < c ∧
@@ -48,6 +81,7 @@ def parikhAPFree {k : ℕ} (f : ℕ → Fin k) : Prop :=
   ¬ hasParikhAP f
 
 /-! ### Key equivalence: abelian-square-free ↔ Parikh-AP-free -/
+
 
 theorem parikhCount_block {k : ℕ} (f : ℕ → Fin k) (s l : ℕ) (c : Fin k) :
     ((infBlock f s l).filter (· = c)).length =
@@ -85,7 +119,7 @@ theorem infAbelianSquareFree_iff_parikhAPFree {k : ℕ} (f : ℕ → Fin k) :
       have h_count_eq : ((infBlock f i l).filter (· = c)).length = ((infBlock f (i + l) l).filter (· = c)).length := by
         exact h.filter _ |> List.Perm.length_eq;
       rw [ parikhCount_block, parikhCount_block ] at * ; ring_nf at * ; aesop;
-    refine' fun h => h ⟨ i, i + l, i + 2 * l, _, _, _ ⟩ <;> simp_all +decide [ two_mul ];
+    refine' fun h => h ⟨ i, i + l, i + 2 * l, _, _, _ ⟩ <;> simp_all +decide [ two_mul, add_assoc ];
     intro c; specialize h_counts c; rw [ tsub_eq_iff_eq_add_of_le ] at h_counts;
     · linarith [ Nat.sub_add_cancel ( show parikhCount f ( i + ( l + l ) ) c ≥ parikhCount f ( i + l ) c from by exact Finset.card_mono <| by intros x hx; exact Finset.mem_filter.mpr ⟨ Finset.mem_range.mpr <| by linarith [ Finset.mem_range.mp <| Finset.mem_filter.mp hx |>.1 ], by aesop ⟩ ) ];
     · exact Finset.card_mono <| Finset.filter_subset_filter _ <| Finset.range_mono <| Nat.le_add_right _ _
@@ -156,7 +190,7 @@ def keranenIterate : ℕ → List (Fin 4)
   | n + 1 => applyKeranenG (keranenIterate n)
 
 theorem keranenG_length (c : Fin 4) : (keranenG c).length = 85 := by
-  fin_cases c <;> native_decide
+  fin_cases c <;> decide
 
 theorem applyKeranenG_length (w : List (Fin 4)) :
     (applyKeranenG w).length = 85 * w.length := by
@@ -171,155 +205,12 @@ theorem keranenIterate_length (n : ℕ) : (keranenIterate n).length = 85 ^ n := 
   | zero => simp [keranenIterate]
   | succ n ih => simp only [keranenIterate, applyKeranenG_length, ih, pow_succ]; ring
 
-theorem isFinASF_sound (w : List (Fin 4)) (h : isFinASF w = true) :
-    FinAbelianSquareFree w := by
-  intro i l hl hlen hperm
-  have key : hasAbelianSquareAtFin w i l = true := by
-    unfold hasAbelianSquareAtFin
-    have h1 : (l == 0) = false := by simp; omega
-    have h2 : (i + 2 * l > w.length) = false := by simp; omega
-    simp [h1, h2, List.isPerm_iff, hperm]
-  have hfalse : isFinASF w = false := by
-    unfold isFinASF
-    simp only [Bool.eq_false_iff, Bool.not_not_eq]
-    rw [List.any_eq_true]
-    exact ⟨i, List.mem_range.mpr (by omega), by
-      rw [List.any_eq_true]
-      exact ⟨l - 1, List.mem_range.mpr (by omega), by
-        show hasAbelianSquareAtFin w i (l - 1 + 1) = true
-        rw [Nat.sub_add_cancel hl]; exact key⟩⟩
-  simp_all
 
 theorem singleton_finASF (c : Fin 4) : FinAbelianSquareFree [c] := by
   intro i l hl hlen; simp at hlen; omega
 
-theorem isFinASF_complete (w : List (Fin 4)) (hw : FinAbelianSquareFree w) :
-    isFinASF w = true := by
-  contrapose! hw;
-  unfold isFinASF at hw;
-  simp_all +decide [ List.any_eq_true ];
-  obtain ⟨ i, hi, j, hj, h ⟩ := hw;
-  unfold hasAbelianSquareAtFin at h;
-  simp_all +decide [ List.isPerm_iff ];
-  exact fun H => H i ( j + 1 ) ( Nat.succ_pos _ ) h.1 h.2
-/-!
-## Source: `KeranenBounded.lean`
--/
-
-/-!
-# Bounded computational verification of Keränen's morphism preservation (K = 4)
-
-Proves by `native_decide` that Keränen's 85-uniform morphism preserves
-abelian-square-freeness for all abelian-square-free words of length ≤ 4.
-
-This covers all potential abelian squares of half-length ≤ 127 in morphism images.
-
-## Role in the proof chain
-
-Combined with `finASF_subword` (localization) and the block-bound finite reduction,
-this is part of the chain proving `keranenG_preserves_ASF`.
-
-The K = 5 verification (covering half-length ≤ 170) is split into separate files
-`KeranenBounded5a.lean` through `KeranenBounded5d.lean`, each handling one starting
-letter. Together they verify all 1024 length-5 words.
--/
-
-set_option maxHeartbeats 4000000
-/-- Morphism preservation verified for all words of length 4 by `native_decide`.
-For every word `[a,b,c,d]` over `{0,1,2,3}` that is abelian-square-free,
-its morphism image `g([a,b,c,d])` (of length 340) is also abelian-square-free. -/
-theorem morphism_check_4 :
-    ∀ a b c d : Fin 4, isFinASF [a, b, c, d] = true →
-    isFinASF (applyKeranenG [a, b, c, d]) = true := by
-  native_decide
-/-!
-## Source: `KeranenBounded5a.lean`
--/
-
-/-! # Morphism preservation for length-5 words starting with letter 0 -/
-
-set_option maxHeartbeats 4000000
-/-- Morphism preservation for length-5 words starting with letter 0.
-Verified by `native_decide` over all 4⁴ = 256 inputs. -/
-theorem morphism_check_5a :
-    ∀ b c d e : Fin 4,
-    isFinASF [(0 : Fin 4), b, c, d, e] = true →
-    isFinASF (applyKeranenG [(0 : Fin 4), b, c, d, e]) = true := by
-  native_decide
-/-!
-## Source: `KeranenBounded5b.lean`
--/
-
-/-! # Morphism preservation for length-5 words starting with letter 1 -/
-
-set_option maxHeartbeats 4000000
-/-- Morphism preservation for length-5 words starting with letter 1.
-Verified by `native_decide` over all 4⁴ = 256 inputs. -/
-theorem morphism_check_5b :
-    ∀ b c d e : Fin 4,
-    isFinASF [(1 : Fin 4), b, c, d, e] = true →
-    isFinASF (applyKeranenG [(1 : Fin 4), b, c, d, e]) = true := by
-  native_decide
-/-!
-## Source: `KeranenBounded5c.lean`
--/
-
-/-! # Morphism preservation for length-5 words starting with letter 2 -/
-
-set_option maxHeartbeats 4000000
-/-- Morphism preservation for length-5 words starting with letter 2.
-Verified by `native_decide` over all 4⁴ = 256 inputs. -/
-theorem morphism_check_5c :
-    ∀ b c d e : Fin 4,
-    isFinASF [(2 : Fin 4), b, c, d, e] = true →
-    isFinASF (applyKeranenG [(2 : Fin 4), b, c, d, e]) = true := by
-  native_decide
-/-!
-## Source: `KeranenBounded5d.lean`
--/
-
-/-! # Morphism preservation for length-5 words starting with letter 3 -/
-
-set_option maxHeartbeats 4000000
-/-- Morphism preservation for length-5 words starting with letter 3.
-Verified by `native_decide` over all 4⁴ = 256 inputs. -/
-theorem morphism_check_5d :
-    ∀ b c d e : Fin 4,
-    isFinASF [(3 : Fin 4), b, c, d, e] = true →
-    isFinASF (applyKeranenG [(3 : Fin 4), b, c, d, e]) = true := by
-  native_decide
-/-!
-## Source: `BlockBound.lean`
--/
-
-/-!
-# Block bound: computational helpers (base file)
-
-Core definitions and the spanning-6/delta-zero checks.
-Spanning-7, spanning-8, Parikh norm bound, and 3-letter bound
-are in separate files to manage native_decide compilation time.
--/
-
-set_option maxHeartbeats 8000000
-/-! ### Spanning-6 abelian square check -/
-
-def hasSpanning6AS (w : List (Fin 4)) : Bool :=
-  let gw := applyKeranenG w
-  (List.range 85).any fun i =>
-    let lMin := (426 - i + 1) / 2
-    let lMax := (510 - i) / 2
-    (List.range (lMax - lMin + 1)).any fun k =>
-      let ll := lMin + k
-      (gw.drop i |>.take ll).isPerm (gw.drop (i + ll) |>.take ll)
-
-/-- No ASF word of length 6 has a spanning-6 abelian square in its morphism image. -/
-theorem no_spanning6_abelianSquare :
-    ∀ a b c d e f : Fin 4,
-      isFinASF [a, b, c, d, e, f] = true →
-      hasSpanning6AS [a, b, c, d, e, f] = false := by native_decide
-
-/-! ### δ = 0 impossibility -/
-
+end
+section
 def cumParikhCount (a : Fin 4) (k : Nat) (c : Fin 4) : Nat :=
   ((keranenG a).take k).count c
 
@@ -331,9 +222,6 @@ def boundaryDelta (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
   sliceParikhCount wb s 85 c + sliceParikhCount we 0 t c
   - sliceParikhCount wa r 85 c - sliceParikhCount wb 0 s c
 
-/-! ### Parikh norm bound definitions -/
-
-/-- Product of adjugate of M^T with delta vector. -/
 def adjMTtimesDelta (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
   let d : Fin 4 → Int := boundaryDelta wa wb we r s
   match c with
@@ -341,62 +229,7 @@ def adjMTtimesDelta (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
   | 1 => (-2316) * d 0 + (-701) * d 1 + (-531) * d 2 + 4059 * d 3
   | 2 => 4059 * d 0 + (-2316) * d 1 + (-701) * d 2 + (-531) * d 3
   | 3 => (-531) * d 0 + 4059 * d 1 + (-2316) * d 2 + (-701) * d 3
-/-!
-## Source: `BlockBoundParikh.lean`
--/
 
-/-! # Parikh norm bound and 3-letter ASF bound -/
-
-set_option maxHeartbeats 8000000
-/-- Decidable ASF check for `Fin 3` words. -/
-def isFinASF3 (word : List (Fin 3)) : Bool :=
-  !(List.range word.length |>.any fun i =>
-    List.range word.length |>.any fun l =>
-      let l := l + 1
-      if i + 2 * l > word.length then false
-      else (word.drop i |>.take l).isPerm (word.drop (i + l) |>.take l))
-
-/-- **3-letter ASF bound.** No ASF word on 3 letters has length ≥ 8. -/
-theorem max_asf_3letters :
-    ∀ a b c d e f g h : Fin 3,
-      isFinASF3 [a, b, c, d, e, f, g, h] = false := by native_decide
-/-!
-## Source: `BlockBoundParikhBridge.lean`
--/
-
-/-!
-# Parikh bridge infrastructure for the spanning abelian square elimination
-
-This file contains the Parikh-matrix bridge infrastructure for proving that
-ASF words of length m ≥ 14 have no spanning abelian square in their
-Keränen morphism image.
-
-## Overview
-
-A *spanning* abelian square in g(w) at offset r with half-length L means:
-- The AS covers all m = w.length blocks: (r + 2L - 1)/85 + 1 = m
-- The two halves have the same Parikh vector (letter counts)
-
-The midpoint falls in block k = (r + L) / 85 with offset s = (r + L) % 85.
-The boundary letters are wa = w[0], wb = w[k], we = w[m-1].
-
-The Parikh equality of the two halves yields the matrix equation:
-  M · v = δ(wa, wb, we, r, s)
-where v is the inner block Parikh defect and M is the 4×4 Parikh matrix
-of the morphism.
-
-## Computationally verified properties
-
-1. `parikh_norm_bound` (in BlockBoundParikh.lean): ‖v‖₁ ≤ 3
-2. `parikh_v_sum_zero_norm_le2`: For Σv = 0 and ‖v‖₁ ≤ 2, v ∈ {e_X − e_Y : X,Y ∈ {wa,wb,we}}
-3. `parikh_v_norm1_is_wb`: For |Σv| = 1 and ‖v‖₁ = 1, v = Σv · e_{wb}
-4. The ‖v‖₁ = 3 case (even m only, 40 patterns) requires deeper analysis.
--/
-
-set_option maxHeartbeats 8000000
-/-! ### Computational verification of v-pattern structure -/
-
-/-- Helper: compute v from boundary configuration -/
 def parikhSolutionVec (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
   adjMTtimesDelta wa wb we r s c / 43435
 
@@ -406,43 +239,539 @@ def hasParikhSolution (wa wb we : Fin 4) (r s : Nat) : Bool :=
   adjMTtimesDelta wa wb we r s 1 % 43435 = 0 &&
   adjMTtimesDelta wa wb we r s 2 % 43435 = 0 &&
   adjMTtimesDelta wa wb we r s 3 % 43435 = 0
-/-!
-## Source: `BlockBoundParikhFormal.lean`
--/
 
-/-!
-# Formal Parikh bridge infrastructure
+def vGivesSomeAS (wa wb we : Fin 4) (v : Fin 4 → Int) : Bool :=
+  ((List.finRange 4).all fun c => (if c = wa then (1:Int) else 0) - (if c = wb then 1 else 0) + v c == 0) ||
+  ((List.finRange 4).all fun c => v c + (if c = wb then (1:Int) else 0) - (if c = we then 1 else 0) == 0) ||
+  ((List.finRange 4).all fun c => v c - (if c = wb then (1:Int) else 0) == 0) ||
+  ((List.finRange 4).all fun c => v c + (if c = wb then (1:Int) else 0) == 0) ||
+  ((List.finRange 4).all fun c => (if c = wa then (1:Int) else 0) - (if c = wb then 1 else 0) - (if c = we then 1 else 0) + v c == 0) ||
+  ((List.finRange 4).all fun c => (if c = wa then (1:Int) else 0) + (if c = wb then 1 else 0) + v c - (if c = we then 1 else 0) == 0)
 
-Proved infrastructure for the spanning abelian square elimination:
-- v-pattern classification for ‖v‖₁ = 3 (completing the Parikh v analysis)
-- Block take decomposition (key list identity for the Parikh bridge)
-- Count slice decomposition (Parikh of g(w) slices)
-- Spanning Perm → hasSpanningAS = true (direction needed for contradiction)
+end
 
-## Remaining source lemma
 
-The full Parikh bridge (spanning AS → AS in w → contradiction with ASF)
-requires the **block-decomposition count identity**, which connects the Perm
-condition on g(w) halves to the inner Parikh defect of w via the matrix
-equation M^T v = δ_actual. This identity involves:
+/-! ### Upstream module `ErdosProblems/Erdos192/PrefixData.lean` -/
 
-1. Expressing count(c, g(w).take(n)) via `applyKeranenG_take_blocks` (DONE).
-2. Relating the Perm equality to the inner block-letter counts (requires
-   careful treatment of the t = r+2L−85(m−1) boundary offset, especially
-   the t = 85 edge case where the code's `boundaryDelta` uses t_code = 0).
-3. Applying the v-pattern classification (DONE for all ‖v‖₁ ≤ 3).
-4. Algebraically constructing the AS in w from the classified v pattern.
+section
+def prefixData : Array (Array (Array Nat)) :=
+  #[
+    #[
+      #[0, 0, 0, 0],
+      #[1, 0, 0, 0],
+      #[1, 1, 0, 0],
+      #[1, 1, 1, 0],
+      #[2, 1, 1, 0],
+      #[2, 1, 2, 0],
+      #[2, 1, 2, 1],
+      #[2, 1, 3, 1],
+      #[2, 2, 3, 1],
+      #[2, 2, 4, 1],
+      #[2, 2, 4, 2],
+      #[2, 2, 5, 2],
+      #[3, 2, 5, 2],
+      #[3, 2, 5, 3],
+      #[3, 2, 6, 3],
+      #[3, 2, 6, 4],
+      #[3, 3, 6, 4],
+      #[3, 3, 6, 5],
+      #[4, 3, 6, 5],
+      #[4, 4, 6, 5],
+      #[5, 4, 6, 5],
+      #[5, 4, 7, 5],
+      #[6, 4, 7, 5],
+      #[6, 5, 7, 5],
+      #[7, 5, 7, 5],
+      #[7, 5, 7, 6],
+      #[7, 6, 7, 6],
+      #[8, 6, 7, 6],
+      #[8, 7, 7, 6],
+      #[8, 7, 8, 6],
+      #[8, 8, 8, 6],
+      #[8, 8, 8, 7],
+      #[8, 9, 8, 7],
+      #[8, 9, 9, 7],
+      #[8, 10, 9, 7],
+      #[9, 10, 9, 7],
+      #[9, 10, 10, 7],
+      #[9, 11, 10, 7],
+      #[9, 11, 11, 7],
+      #[9, 11, 11, 8],
+      #[9, 11, 12, 8],
+      #[10, 11, 12, 8],
+      #[10, 11, 13, 8],
+      #[10, 12, 13, 8],
+      #[11, 12, 13, 8],
+      #[11, 13, 13, 8],
+      #[11, 13, 13, 9],
+      #[12, 13, 13, 9],
+      #[12, 14, 13, 9],
+      #[13, 14, 13, 9],
+      #[13, 14, 14, 9],
+      #[14, 14, 14, 9],
+      #[14, 14, 14, 10],
+      #[14, 14, 15, 10],
+      #[14, 15, 15, 10],
+      #[14, 15, 16, 10],
+      #[14, 15, 16, 11],
+      #[14, 15, 17, 11],
+      #[15, 15, 17, 11],
+      #[15, 15, 18, 11],
+      #[15, 15, 18, 12],
+      #[15, 16, 18, 12],
+      #[15, 16, 19, 12],
+      #[15, 17, 19, 12],
+      #[16, 17, 19, 12],
+      #[16, 17, 20, 12],
+      #[16, 18, 20, 12],
+      #[16, 18, 21, 12],
+      #[16, 18, 21, 13],
+      #[16, 18, 22, 13],
+      #[17, 18, 22, 13],
+      #[17, 18, 23, 13],
+      #[17, 18, 23, 14],
+      #[17, 18, 24, 14],
+      #[17, 19, 24, 14],
+      #[17, 19, 24, 15],
+      #[17, 19, 25, 15],
+      #[17, 19, 25, 16],
+      #[18, 19, 25, 16],
+      #[18, 19, 25, 17],
+      #[18, 20, 25, 17],
+      #[18, 20, 25, 18],
+      #[18, 20, 26, 18],
+      #[18, 21, 26, 18],
+      #[18, 21, 27, 18],
+      #[19, 21, 27, 18]
+    ],
+    #[
+      #[0, 0, 0, 0],
+      #[0, 1, 0, 0],
+      #[0, 1, 1, 0],
+      #[0, 1, 1, 1],
+      #[0, 2, 1, 1],
+      #[0, 2, 1, 2],
+      #[1, 2, 1, 2],
+      #[1, 2, 1, 3],
+      #[1, 2, 2, 3],
+      #[1, 2, 2, 4],
+      #[2, 2, 2, 4],
+      #[2, 2, 2, 5],
+      #[2, 3, 2, 5],
+      #[3, 3, 2, 5],
+      #[3, 3, 2, 6],
+      #[4, 3, 2, 6],
+      #[4, 3, 3, 6],
+      #[5, 3, 3, 6],
+      #[5, 4, 3, 6],
+      #[5, 4, 4, 6],
+      #[5, 5, 4, 6],
+      #[5, 5, 4, 7],
+      #[5, 6, 4, 7],
+      #[5, 6, 5, 7],
+      #[5, 7, 5, 7],
+      #[6, 7, 5, 7],
+      #[6, 7, 6, 7],
+      #[6, 8, 6, 7],
+      #[6, 8, 7, 7],
+      #[6, 8, 7, 8],
+      #[6, 8, 8, 8],
+      #[7, 8, 8, 8],
+      #[7, 8, 9, 8],
+      #[7, 8, 9, 9],
+      #[7, 8, 10, 9],
+      #[7, 9, 10, 9],
+      #[7, 9, 10, 10],
+      #[7, 9, 11, 10],
+      #[7, 9, 11, 11],
+      #[8, 9, 11, 11],
+      #[8, 9, 11, 12],
+      #[8, 10, 11, 12],
+      #[8, 10, 11, 13],
+      #[8, 10, 12, 13],
+      #[8, 11, 12, 13],
+      #[8, 11, 13, 13],
+      #[9, 11, 13, 13],
+      #[9, 12, 13, 13],
+      #[9, 12, 14, 13],
+      #[9, 13, 14, 13],
+      #[9, 13, 14, 14],
+      #[9, 14, 14, 14],
+      #[10, 14, 14, 14],
+      #[10, 14, 14, 15],
+      #[10, 14, 15, 15],
+      #[10, 14, 15, 16],
+      #[11, 14, 15, 16],
+      #[11, 14, 15, 17],
+      #[11, 15, 15, 17],
+      #[11, 15, 15, 18],
+      #[12, 15, 15, 18],
+      #[12, 15, 16, 18],
+      #[12, 15, 16, 19],
+      #[12, 15, 17, 19],
+      #[12, 16, 17, 19],
+      #[12, 16, 17, 20],
+      #[12, 16, 18, 20],
+      #[12, 16, 18, 21],
+      #[13, 16, 18, 21],
+      #[13, 16, 18, 22],
+      #[13, 17, 18, 22],
+      #[13, 17, 18, 23],
+      #[14, 17, 18, 23],
+      #[14, 17, 18, 24],
+      #[14, 17, 19, 24],
+      #[15, 17, 19, 24],
+      #[15, 17, 19, 25],
+      #[16, 17, 19, 25],
+      #[16, 18, 19, 25],
+      #[17, 18, 19, 25],
+      #[17, 18, 20, 25],
+      #[18, 18, 20, 25],
+      #[18, 18, 20, 26],
+      #[18, 18, 21, 26],
+      #[18, 18, 21, 27],
+      #[18, 19, 21, 27]
+    ],
+    #[
+      #[0, 0, 0, 0],
+      #[0, 0, 1, 0],
+      #[0, 0, 1, 1],
+      #[1, 0, 1, 1],
+      #[1, 0, 2, 1],
+      #[2, 0, 2, 1],
+      #[2, 1, 2, 1],
+      #[3, 1, 2, 1],
+      #[3, 1, 2, 2],
+      #[4, 1, 2, 2],
+      #[4, 2, 2, 2],
+      #[5, 2, 2, 2],
+      #[5, 2, 3, 2],
+      #[5, 3, 3, 2],
+      #[6, 3, 3, 2],
+      #[6, 4, 3, 2],
+      #[6, 4, 3, 3],
+      #[6, 5, 3, 3],
+      #[6, 5, 4, 3],
+      #[6, 5, 4, 4],
+      #[6, 5, 5, 4],
+      #[7, 5, 5, 4],
+      #[7, 5, 6, 4],
+      #[7, 5, 6, 5],
+      #[7, 5, 7, 5],
+      #[7, 6, 7, 5],
+      #[7, 6, 7, 6],
+      #[7, 6, 8, 6],
+      #[7, 6, 8, 7],
+      #[8, 6, 8, 7],
+      #[8, 6, 8, 8],
+      #[8, 7, 8, 8],
+      #[8, 7, 8, 9],
+      #[9, 7, 8, 9],
+      #[9, 7, 8, 10],
+      #[9, 7, 9, 10],
+      #[10, 7, 9, 10],
+      #[10, 7, 9, 11],
+      #[11, 7, 9, 11],
+      #[11, 8, 9, 11],
+      #[12, 8, 9, 11],
+      #[12, 8, 10, 11],
+      #[13, 8, 10, 11],
+      #[13, 8, 10, 12],
+      #[13, 8, 11, 12],
+      #[13, 8, 11, 13],
+      #[13, 9, 11, 13],
+      #[13, 9, 12, 13],
+      #[13, 9, 12, 14],
+      #[13, 9, 13, 14],
+      #[14, 9, 13, 14],
+      #[14, 9, 14, 14],
+      #[14, 10, 14, 14],
+      #[15, 10, 14, 14],
+      #[15, 10, 14, 15],
+      #[16, 10, 14, 15],
+      #[16, 11, 14, 15],
+      #[17, 11, 14, 15],
+      #[17, 11, 15, 15],
+      #[18, 11, 15, 15],
+      #[18, 12, 15, 15],
+      #[18, 12, 15, 16],
+      #[19, 12, 15, 16],
+      #[19, 12, 15, 17],
+      #[19, 12, 16, 17],
+      #[20, 12, 16, 17],
+      #[20, 12, 16, 18],
+      #[21, 12, 16, 18],
+      #[21, 13, 16, 18],
+      #[22, 13, 16, 18],
+      #[22, 13, 17, 18],
+      #[23, 13, 17, 18],
+      #[23, 14, 17, 18],
+      #[24, 14, 17, 18],
+      #[24, 14, 17, 19],
+      #[24, 15, 17, 19],
+      #[25, 15, 17, 19],
+      #[25, 16, 17, 19],
+      #[25, 16, 18, 19],
+      #[25, 17, 18, 19],
+      #[25, 17, 18, 20],
+      #[25, 18, 18, 20],
+      #[26, 18, 18, 20],
+      #[26, 18, 18, 21],
+      #[27, 18, 18, 21],
+      #[27, 18, 19, 21]
+    ],
+    #[
+      #[0, 0, 0, 0],
+      #[0, 0, 0, 1],
+      #[1, 0, 0, 1],
+      #[1, 1, 0, 1],
+      #[1, 1, 0, 2],
+      #[1, 2, 0, 2],
+      #[1, 2, 1, 2],
+      #[1, 3, 1, 2],
+      #[2, 3, 1, 2],
+      #[2, 4, 1, 2],
+      #[2, 4, 2, 2],
+      #[2, 5, 2, 2],
+      #[2, 5, 2, 3],
+      #[2, 5, 3, 3],
+      #[2, 6, 3, 3],
+      #[2, 6, 4, 3],
+      #[3, 6, 4, 3],
+      #[3, 6, 5, 3],
+      #[3, 6, 5, 4],
+      #[4, 6, 5, 4],
+      #[4, 6, 5, 5],
+      #[4, 7, 5, 5],
+      #[4, 7, 5, 6],
+      #[5, 7, 5, 6],
+      #[5, 7, 5, 7],
+      #[5, 7, 6, 7],
+      #[6, 7, 6, 7],
+      #[6, 7, 6, 8],
+      #[7, 7, 6, 8],
+      #[7, 8, 6, 8],
+      #[8, 8, 6, 8],
+      #[8, 8, 7, 8],
+      #[9, 8, 7, 8],
+      #[9, 9, 7, 8],
+      #[10, 9, 7, 8],
+      #[10, 9, 7, 9],
+      #[10, 10, 7, 9],
+      #[11, 10, 7, 9],
+      #[11, 11, 7, 9],
+      #[11, 11, 8, 9],
+      #[11, 12, 8, 9],
+      #[11, 12, 8, 10],
+      #[11, 13, 8, 10],
+      #[12, 13, 8, 10],
+      #[12, 13, 8, 11],
+      #[13, 13, 8, 11],
+      #[13, 13, 9, 11],
+      #[13, 13, 9, 12],
+      #[14, 13, 9, 12],
+      #[14, 13, 9, 13],
+      #[14, 14, 9, 13],
+      #[14, 14, 9, 14],
+      #[14, 14, 10, 14],
+      #[14, 15, 10, 14],
+      #[15, 15, 10, 14],
+      #[15, 16, 10, 14],
+      #[15, 16, 11, 14],
+      #[15, 17, 11, 14],
+      #[15, 17, 11, 15],
+      #[15, 18, 11, 15],
+      #[15, 18, 12, 15],
+      #[16, 18, 12, 15],
+      #[16, 19, 12, 15],
+      #[17, 19, 12, 15],
+      #[17, 19, 12, 16],
+      #[17, 20, 12, 16],
+      #[18, 20, 12, 16],
+      #[18, 21, 12, 16],
+      #[18, 21, 13, 16],
+      #[18, 22, 13, 16],
+      #[18, 22, 13, 17],
+      #[18, 23, 13, 17],
+      #[18, 23, 14, 17],
+      #[18, 24, 14, 17],
+      #[19, 24, 14, 17],
+      #[19, 24, 15, 17],
+      #[19, 25, 15, 17],
+      #[19, 25, 16, 17],
+      #[19, 25, 16, 18],
+      #[19, 25, 17, 18],
+      #[20, 25, 17, 18],
+      #[20, 25, 18, 18],
+      #[20, 26, 18, 18],
+      #[21, 26, 18, 18],
+      #[21, 27, 18, 18],
+      #[21, 27, 18, 19]
+    ]
+  ]
 
-The t = 85 edge case has been computationally verified to NOT produce the
-problematic v patterns (confirmed by `checkT85Issue` in interactive mode),
-so the full bridge argument is mathematically sound.
--/
+def fastPrefix (a : Fin 4) (k : Nat) (c : Fin 4) : Nat :=
+  ((prefixData[a.val]!).getD k #[]).getD c.val 0
 
-set_option maxHeartbeats 8000000
-/-! ### Block take decomposition -/
+theorem prefixData_correct : ∀ a : Fin 4, ∀ k : Fin 86, ∀ c : Fin 4,
+    fastPrefix a k.val c = cumParikhCount a k.val c := by decide +kernel
 
-/-- Key block decomposition: taking 85k+s from g(w) splits into
-    complete blocks g(w.take k) and a partial block g(w[k]).take(s). -/
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/PackedData.lean` -/
+
+section
+def packedData : Array (Array Nat) :=
+  #[
+    #[0, 1, 257, 65793, 65794, 131330, 16908546, 16974082, 16974338, 17039874, 33817090, 33882626, 33882627, 50659843, 50725379, 67502595, 67502851, 84280067, 84280068, 84280324, 84280325, 84345861, 84345862, 84346118, 84346119, 101123335, 101123591, 101123592, 101123848, 101189384, 101189640, 117966856, 117967112, 118032648, 118032904, 118032905, 118098441, 118098697, 118164233, 134941449, 135006985, 135006986, 135072522, 135072778, 135072779, 135073035, 151850251, 151850252, 151850508, 151850509, 151916045, 151916046, 168693262, 168758798, 168759054, 168824590, 185601806, 185667342, 185667343, 185732879, 202510095, 202510351, 202575887, 202576143, 202576144, 202641680, 202641936, 202707472, 219484688, 219550224, 219550225, 219615761, 236392977, 236458513, 236458769, 253235985, 253301521, 270078737, 270078738, 286855954, 286856210, 303633426, 303698962, 303699218, 303764754, 303764755],
+    #[0, 256, 65792, 16843008, 16843264, 33620480, 33620481, 50397697, 50463233, 67240449, 67240450, 84017666, 84017922, 84017923, 100795139, 100795140, 100860676, 100860677, 100860933, 100926469, 100926725, 117703941, 117704197, 117769733, 117769989, 117769990, 117835526, 117835782, 117901318, 134678534, 134744070, 134744071, 134809607, 151586823, 151652359, 151652615, 168429831, 168495367, 185272583, 185272584, 202049800, 202050056, 218827272, 218892808, 218893064, 218958600, 218958601, 218958857, 219024393, 219024649, 235801865, 235802121, 235802122, 252579338, 252644874, 269422090, 269422091, 286199307, 286199563, 302976779, 302976780, 303042316, 319819532, 319885068, 319885324, 336662540, 336728076, 353505292, 353505293, 370282509, 370282765, 387059981, 387059982, 403837198, 403902734, 403902735, 420679951, 420679952, 420680208, 420680209, 420745745, 420745746, 437522962, 437588498, 454365714, 454365970],
+    #[0, 65536, 16842752, 16842753, 16908289, 16908290, 16908546, 16908547, 33685763, 33685764, 33686020, 33686021, 33751557, 33751813, 33751814, 33752070, 50529286, 50529542, 50595078, 67372294, 67437830, 67437831, 67503367, 84280583, 84346119, 84346375, 101123591, 101189127, 117966343, 117966344, 134743560, 134743816, 151521032, 151521033, 168298249, 168363785, 168363786, 185141002, 185141003, 185141259, 185141260, 185206796, 185206797, 201984013, 202049549, 218826765, 218827021, 218892557, 235669773, 235735309, 235735310, 235800846, 235801102, 235801103, 252578319, 252578320, 252578576, 252578577, 252644113, 252644114, 252644370, 269421586, 269421587, 286198803, 286264339, 286264340, 303041556, 303041557, 303041813, 303041814, 303107350, 303107351, 303107607, 303107608, 319884824, 319885080, 319885081, 319885337, 319950873, 319951129, 336728345, 336728601, 336728602, 353505818, 353505819, 353571355],
+    #[0, 16777216, 16777217, 16777473, 33554689, 33554945, 33620481, 33620737, 33620738, 33620994, 33686530, 33686786, 50464002, 50529538, 50529794, 50595330, 50595331, 50660867, 67438083, 67438084, 84215300, 84215556, 100992772, 100992773, 117769989, 117835525, 117835526, 134612742, 134612743, 134612999, 134613000, 134678536, 134678537, 134678793, 134678794, 151456010, 151456266, 151456267, 151456523, 151522059, 151522315, 168299531, 168299787, 168299788, 185077004, 185077005, 185142541, 201919757, 201919758, 218696974, 218697230, 235474446, 235539982, 235540238, 235540239, 235540495, 235606031, 235606287, 252383503, 252383759, 252449295, 252449296, 252449552, 252449553, 269226769, 269227025, 269227026, 269227282, 269292818, 269293074, 286070290, 286070546, 286136082, 286136338, 286136339, 286201875, 286202131, 286267667, 303044883, 303110419, 303110420, 303175956, 303176212, 303176213, 303176469, 319953685]
+  ]
+
+def packedPrefix (a : Fin 4) (n : Nat) : Nat := (packedData[a.val]!).getD n 0
+
+theorem packedPrefix_correct : ∀ a : Fin 4, ∀ n : Fin 86,
+  packedPrefix a n.val = fastPrefix a n.val 0 + 256 * fastPrefix a n.val 1 +
+    65536 * fastPrefix a n.val 2 + 16777216 * fastPrefix a n.val 3 := by decide +kernel
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/ListAPCheck.lean` -/
+
+section
+/-- Scan possible midpoints once, moving the endpoint twice per iteration. -/
+def halfChecks (x : Nat) : List Nat → List Nat → Bool
+  | m :: ms, e :: es => (x + e != 2 * m) && halfChecks x ms (es.drop 1)
+  | _, _ => true
+
+def allChecks : List Nat → Bool
+  | [] => true
+  | x :: xs => halfChecks x xs (xs.drop 1) && allChecks xs
+
+theorem halfChecks_sound (x : Nat) (ms es : List Nat) (h : halfChecks x ms es = true)
+    (k : Nat) (hk : k < ms.length) (he : 2 * k < es.length) :
+    x + es[2 * k] ≠ 2 * ms[k] := by
+  induction ms generalizing es k with
+  | nil => simp at hk
+  | cons m ms ih =>
+    cases es with
+    | nil => simp at he
+    | cons e es =>
+      simp only [halfChecks, Bool.and_eq_true, bne_iff_ne] at h
+      cases k with
+      | zero => simpa using h.1
+      | succ k =>
+        have hk' : k < ms.length := by simpa using hk
+        have he' : 2 * k < (es.drop 1).length := by simp at he ⊢; omega
+        have hs := ih (es.drop 1) h.2 k hk' he'
+        simp only [show 2 * (k + 1) = (1 + 2 * k) + 1 by omega,
+          List.getElem_cons_succ]
+        simpa only [List.getElem_drop] using hs
+
+theorem allChecks_sound (p : List Nat) (h : allChecks p = true) (i l : Nat)
+    (hl : 0 < l) (hend : i + 2 * l < p.length) :
+    p[i] + p[i + 2 * l] ≠ 2 * p[i + l] := by
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hl)
+  induction p generalizing i with
+  | nil => simp at hend
+  | cons x xs ih =>
+    simp only [allChecks, Bool.and_eq_true] at h
+    cases i with
+    | zero =>
+      have hm : k < xs.length := by simp at hend; omega
+      have he : 2 * k < (xs.drop 1).length := by simp at hend ⊢; omega
+      have hs := halfChecks_sound x xs (xs.drop 1) h.1 k hm he
+      simp only [Nat.zero_add, List.getElem_cons_zero,
+        show 2 * (k + 1) = (1 + 2 * k) + 1 by omega, List.getElem_cons_succ]
+      simpa only [List.getElem_drop] using hs
+    | succ i =>
+      have he : i + 2 * (k + 1) < xs.length := by simp at hend; omega
+      simpa only [Nat.succ_add, List.getElem_cons_succ] using ih h.2 i he
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/ShortCheck.lean` -/
+
+section
+def pairPrefix (a b : Fin 4) (n : Nat) (c : Fin 4) : Nat :=
+  if n ≤ 85 then fastPrefix a n c else fastPrefix a 85 c + fastPrefix b (n - 85) c
+
+def packedPairPrefix (a b : Fin 4) (n : Nat) : Nat :=
+  if n ≤ 85 then packedPrefix a n else packedPrefix a 85 + packedPrefix b (n - 85)
+
+def pairPrefixList (a b : Fin 4) : List Nat :=
+  (List.range 171).map (packedPairPrefix a b)
+
+def pairsCheck : Bool :=
+  (List.finRange 4).all fun a =>
+  (List.finRange 4).all fun b => a == b || allChecks (pairPrefixList a b)
+
+theorem pairsCheck_true : pairsCheck = true := by decide +kernel
+
+theorem pairPrefix_eq (a b : Fin 4) (n : Nat) (hn : n ≤ 170) (c : Fin 4) :
+    pairPrefix a b n c = ((applyKeranenG [a, b]).take n).count c := by
+  simp only [applyKeranenG, List.flatMap_cons, List.flatMap_nil, List.append_nil]
+  unfold pairPrefix
+  split_ifs with h
+  · rw [prefixData_correct a ⟨n, by omega⟩ c]
+    rw [List.take_append_of_le_length (by simpa [keranenG_length] using h)]
+    rfl
+  · rw [prefixData_correct a ⟨85, by decide⟩ c,
+      prefixData_correct b ⟨n - 85, by omega⟩ c]
+    simp only [cumParikhCount, List.take_append, keranenG_length, List.count_append]
+    rw [List.take_of_length_le (l := keranenG a) (by rw [keranenG_length]),
+      List.take_of_length_le (l := keranenG a) (by rw [keranenG_length]; omega)]
+
+theorem count_prefix_square {w : List (Fin 4)} (i l : Nat)
+    (h : (w.drop i |>.take l).Perm (w.drop (i + l) |>.take l)) (c : Fin 4) :
+    (w.take i).count c + (w.take (i + 2 * l)).count c =
+      2 * (w.take (i + l)).count c := by
+  have hc := h.count_eq c
+  rw [show i + 2 * l = (i + l) + l by omega, List.take_add, List.count_append,
+    List.take_add, List.count_append]
+  omega
+
+theorem packedPairPrefix_eq (a b : Fin 4) (n : Nat) (hn : n ≤ 170) :
+    packedPairPrefix a b n = pairPrefix a b n 0 + 256 * pairPrefix a b n 1 +
+      65536 * pairPrefix a b n 2 + 16777216 * pairPrefix a b n 3 := by
+  unfold packedPairPrefix pairPrefix
+  split_ifs with h
+  · exact packedPrefix_correct a ⟨n, by omega⟩
+  · rw [packedPrefix_correct a ⟨85, by decide⟩, packedPrefix_correct b ⟨n - 85, by omega⟩]
+    ring
+
+theorem keranen_pair_asf (a b : Fin 4) (hab : a ≠ b) :
+    FinAbelianSquareFree (applyKeranenG [a, b]) := by
+  have h := pairsCheck_true
+  simp only [pairsCheck, List.all_eq_true, List.mem_finRange, true_implies,
+    Bool.or_eq_true, beq_iff_eq] at h
+  have h := (h a b).resolve_left hab
+  intro i l hl hlen hp
+  have hlen' : i + 2 * l ≤ 170 := by simpa [applyKeranenG_length] using hlen
+  have hend : i + 2 * l < (pairPrefixList a b).length := by
+    simp only [pairPrefixList, List.length_map, List.length_range]; omega
+  have hs := allChecks_sound (pairPrefixList a b) h i l hl hend
+  simp only [pairPrefixList, List.getElem_map, List.getElem_range] at hs
+  rw [packedPairPrefix_eq a b i (by omega),
+    packedPairPrefix_eq a b (i + 2 * l) (by omega),
+    packedPairPrefix_eq a b (i + l) (by omega)] at hs
+  have hc (c : Fin 4) : pairPrefix a b i c + pairPrefix a b (i + 2 * l) c =
+      2 * pairPrefix a b (i + l) c := by
+    rw [pairPrefix_eq a b i (by omega), pairPrefix_eq a b (i + 2 * l) (by omega),
+      pairPrefix_eq a b (i + l) (by omega)]
+    exact count_prefix_square i l hp c
+  exact hs (by have := hc 0; have := hc 1; have := hc 2; have := hc 3; omega)
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/BlockDecomposition.lean` -/
+
+section
 theorem applyKeranenG_take_blocks (w : List (Fin 4)) (k s : ℕ)
     (hk : k < w.length) (hs : s ≤ 85) :
     (applyKeranenG w).take (85 * k + s) =
@@ -451,7 +780,7 @@ theorem applyKeranenG_take_blocks (w : List (Fin 4)) (k s : ℕ)
   · rcases w with ( _ | ⟨ x, _ | ⟨ y, w ⟩ ⟩ ) <;> simp_all +decide [ applyKeranenG ]
     · contradiction
     · exact Or.inr ( by rw [ keranenG_length ] ; linarith )
-  · rcases w with ( _ | ⟨ a, _ | ⟨ b, w ⟩ ⟩ ) <;> simp_all +decide [ Nat.mul_succ,]
+  · rcases w with ( _ | ⟨ a, _ | ⟨ b, w ⟩ ⟩ ) <;> simp_all +decide [ Nat.mul_succ, List.take_append_of_le_length ]
     · contradiction
     · contradiction
     · simp_all +decide [ applyKeranenG ]
@@ -459,17 +788,9 @@ theorem applyKeranenG_take_blocks (w : List (Fin 4)) (k s : ℕ)
       · simp +arith +decide [ List.take_append, keranenG_length ]
       · grind
       · grind
-/-!
-## Source: `BlockBoundSpanning.lean`
--/
 
-/-!
-# Spanning abelian square elimination for m ≥ 14
--/
-
-set_option maxHeartbeats 8000000
-/-! ### Basic lemmas -/
-
+end
+section
 theorem count_flatMap_sum {α β : Type*} [DecidableEq β]
     (l : List α) (f : α → List β) (b : β) :
     (l.flatMap f).count b = (l.map (fun a => (f a).count b)).sum := by
@@ -479,22 +800,20 @@ theorem applyKeranenG_append (l1 l2 : List (Fin 4)) :
     applyKeranenG (l1 ++ l2) = applyKeranenG l1 ++ applyKeranenG l2 := by
   simp [applyKeranenG, List.flatMap_append]
 
-/-! ### Count decomposition lemmas -/
+/-! ### List splitting -/
 
-/-
-Count of g(w.take k) = g(w[0]).count + g(inner_left).count, for k ≥ 1.
--/
+
 theorem count_take_split_head (w : List (Fin 4)) (k : ℕ) (c : Fin 4)
     (hk : 1 ≤ k) (hkw : k ≤ w.length) :
     (applyKeranenG (w.take k)).count c =
     (keranenG (w.get ⟨0, by omega⟩)).count c +
     (applyKeranenG (w.drop 1 |>.take (k - 1))).count c := by
-  generalize_proofs at *;
-  rcases k with ( _ | k );
-  · contradiction;
-  · rcases w with ( _ | ⟨ x, _ | ⟨ y, w ⟩ ⟩ ) <;> simp_all +decide;
-    · native_decide +revert;
-    · unfold applyKeranenG; aesop;
+  cases w with
+  | nil => simp at hkw; omega
+  | cons a w =>
+    cases k with
+    | zero => omega
+    | succ k => simp [applyKeranenG, List.count_append]
 
 /-
 Count of g(w.take (m-1)) splits as g(w[0]) + g(inner_left) + g(w[k]) + g(inner_right).
@@ -534,32 +853,7 @@ def adjRow (row : Fin 4) (v : Fin 4 → Int) : Int :=
 theorem adj_times_M :
     ∀ c d : Fin 4,
       adjRow c (fun j => (parikhM j d : Int)) =
-      43435 * (if c = d then 1 else 0) := by native_decide
-
-/-! ### v-pattern classification -/
-
-def vGivesSomeAS (wa wb we : Fin 4) (v : Fin 4 → Int) : Bool :=
-  ((List.finRange 4).all fun c => (if c = wa then (1:Int) else 0) - (if c = wb then 1 else 0) + v c == 0) ||
-  ((List.finRange 4).all fun c => v c + (if c = wb then (1:Int) else 0) - (if c = we then 1 else 0) == 0) ||
-  ((List.finRange 4).all fun c => v c - (if c = wb then (1:Int) else 0) == 0) ||
-  ((List.finRange 4).all fun c => v c + (if c = wb then (1:Int) else 0) == 0) ||
-  ((List.finRange 4).all fun c => (if c = wa then (1:Int) else 0) - (if c = wb then 1 else 0) - (if c = we then 1 else 0) + v c == 0) ||
-  ((List.finRange 4).all fun c => (if c = wa then (1:Int) else 0) + (if c = wb then 1 else 0) + v c - (if c = we then 1 else 0) == 0)
-
-theorem v_pattern_gives_AS_normal :
-    ∀ wa wb we : Fin 4, ∀ r s : Fin 85,
-      hasParikhSolution wa wb we r.val s.val = true →
-      vGivesSomeAS wa wb we (parikhSolutionVec wa wb we r.val s.val) = true := by
-  native_decide
-
-theorem v_pattern_gives_AS_t85 :
-    ∀ wa wb we : Fin 4, ∀ r s : Fin 85,
-      hasParikhSolution wa wb we r.val s.val = true →
-      (2 * s.val + 85 * 1000 - r.val) % 85 = 0 →
-      vGivesSomeAS wa wb we
-        (fun c => parikhSolutionVec wa wb we r.val s.val c +
-          if c = we then 1 else 0) = true := by
-  native_decide
+      43435 * (if c = d then 1 else 0) := by decide +kernel
 
 /-! ### Map sum regrouping -/
 
@@ -578,7 +872,7 @@ theorem map_sum_eq_weighted_count (l : List (Fin 4)) (f : Fin 4 → ℕ) :
 Core inner count identity: the Parikh bridge equation.
 -/
 theorem inner_count_bridge (w : List (Fin 4)) (r L : ℕ) (c : Fin 4)
-    (hm_ge : w.length ≥ 7) (hL : L > 0) (hr : r < 85)
+    (hm_ge : w.length ≥ 3) (hL : L > 0) (hr : r < 85)
     (hlen : r + 2 * L ≤ 85 * w.length)
     (hspan : (r + 2 * L - 1) / 85 + 1 = w.length)
     (hperm : ((applyKeranenG w).drop r |>.take L).Perm
@@ -634,7 +928,7 @@ theorem inner_count_bridge (w : List (Fin 4)) (r L : ℕ) (c : Fin 4)
         have h_eq : (applyKeranenG w).take r = (keranenG (w.get ⟨0, by
           linarith⟩)).take r := by
           all_goals generalize_proofs at *;
-          convert applyKeranenG_take_blocks w 0 r _ _ using 1 <;> norm_num [ hr.le ]
+          convert applyKeranenG_take_blocks w 0 r (by omega) hr.le using 1 <;> simp [applyKeranenG]
         generalize_proofs at *;
         rw [h_eq]
       generalize_proofs at *;
@@ -655,10 +949,10 @@ theorem inner_count_bridge (w : List (Fin 4)) (r L : ℕ) (c : Fin 4)
     unfold boundaryDelta;
     unfold sliceParikhCount;
     unfold cumParikhCount;
-    split_ifs <;> simp_all +decide
-    · rw [ show ( 2 * ( ( r + L ) % 85 ) + 85000 - r ) % 85 = 0 from ?_ ] ; norm_num ; (first | ring1 | ring_nf);
+    split_ifs <;> simp_all +decide [ List.take_of_length_le ];
+    · rw [ show ( 2 * ( ( r + L ) % 85 ) + 85000 - r ) % 85 = 0 from ?_ ] ; norm_num ; ring;
       · rw [ show List.take 85 ( keranenG w[0] ) = keranenG w[0] from ?_, show List.take 85 ( keranenG w[w.length - 1] ) = keranenG w[w.length - 1] from ?_ ] at * <;> norm_num at *;
-        · rw [ show List.take 85 ( keranenG w[(r + L) / 85] ) = keranenG w[(r + L) / 85] from ?_ ] at *
+        · rw [ show List.take 85 ( keranenG w[(r + L) / 85] ) = keranenG w[(r + L) / 85] from ?_ ] at * ; norm_num at *;
           · grind;
           · rw [ List.take_of_length_le ] ; norm_num [ keranenG_length ];
         · exact le_of_eq ( keranenG_length _ );
@@ -721,23 +1015,385 @@ theorem adjRow_add (d : Fin 4) (f g : Fin 4 → Int) :
 theorem adjRow_ite_parikhM (d we : Fin 4) :
     adjRow d (fun c => (parikhM c we : Int)) = 43435 * if d = we then 1 else 0 := by
   exact adj_times_M d we
-/-!
-## Source: `BlockBoundSpanningChain.lean`
--/
 
-/-!
-# Algebraic chain: inner defect → vGivesSomeAS → False
--/
+end
 
-set_option maxHeartbeats 8000000
+
+/-! ### Upstream module `ErdosProblems/Erdos192/ScalarData.lean` -/
+
+section
+def scalarData : Array (Array Int) :=
+  #[
+    #[0, -701, -1232, 2827, 2126, 6185, 3869, 7928, 7397, 11456, 9140, 13199, 12498, 10182, 14241, 11925, 11394, 9078, 8377, 7846, 7145, 11204, 10503, 9972, 9271, 6955, 6424, 5723, 5192, 9251, 8720, 6404, 5873, 9932, 9401, 8700, 12759, 12228, 16287, 13971, 18030, 17329, 21388, 20857, 20156, 19625, 17309, 16608, 16077, 15376, 19435, 18734, 16418, 20477, 19946, 24005, 21689, 25748, 25047, 29106, 26790, 26259, 30318, 29787, 29086, 33145, 32614, 36673, 34357, 38416, 37715, 41774, 39458, 43517, 42986, 40670, 44729, 42413, 41712, 39396, 38865, 36549, 40608, 40077, 44136, 43435],
+    #[0, -531, 3528, 1212, 681, -1635, -2336, -4652, -593, -2909, -3610, -5926, -6457, -7158, -9474, -10175, -6116, -6817, -7348, -3289, -3820, -6136, -6667, -2608, -3139, -3840, 219, -312, 3747, 1431, 5490, 4789, 8848, 6532, 10591, 10060, 7744, 11803, 9487, 8786, 6470, 5939, 3623, 7682, 7151, 11210, 10509, 9978, 14037, 13506, 11190, 10659, 9958, 7642, 11701, 9385, 8684, 6368, 5837, 3521, 2820, 6879, 4563, 8622, 8091, 5775, 9834, 7518, 6817, 4501, 3970, 1654, 953, -1363, 2696, 1995, -321, -1022, -1553, -2254, 1805, 1104, -1212, 2847, 531, 0],
+    #[0, 4059, 1743, 1042, 5101, 4400, 3869, 3168, 852, 151, -380, -1081, 2978, 2447, 1746, 1215, -1101, -1632, 2427, 111, 4170, 3469, 7528, 5212, 9271, 8740, 6424, 10483, 8167, 7466, 5150, 4619, 2303, 1602, -714, 3345, 2644, 328, -373, -904, -1605, 2454, 1753, -563, 3496, 1180, 649, 4708, 2392, 6451, 5750, 9809, 9278, 8577, 6261, 5560, 5029, 4328, 8387, 7686, 7155, 4839, 4138, 1822, 5881, 5180, 2864, 2163, 1632, 931, 4990, 4289, 3758, 3057, 741, 210, -491, -1022, 3037, 2506, 190, -341, -1042, -3358, -4059, 0],
+    #[0, -2316, -3017, -3548, -5864, -6395, -2336, -2867, -3568, -4099, -40, -571, -2887, 1172, 641, 4700, 3999, 8058, 5742, 5041, 2725, 2194, -122, -823, -3139, 920, 219, -2097, -2798, -3329, -4030, 29, -672, -1203, -1904, -4220, -4751, -5452, -5983, -1924, -2455, -4771, -5302, -6003, -8319, -9020, -4961, -7277, -7978, -10294, -10825, -13141, -9082, -9613, -10314, -10845, -6786, -7317, -9633, -10164, -6105, -6806, -7337, -8038, -10354, -10885, -11586, -12117, -8058, -8589, -10905, -11436, -7377, -7908, -8609, -4550, -5081, -1022, -3338, 721, 20, 4079, 3548, 2847, 2316, 0]
+  ]
+
+def scalarPrefix (a : Fin 4) (k : Nat) : Int := (scalarData[a.val]!).getD k 0
+
+theorem scalarData_correct : ∀ a : Fin 4, ∀ k : Fin 86,
+    scalarPrefix a k.val = -701 * (fastPrefix a k.val 0 : Int) -
+      531 * fastPrefix a k.val 1 + 4059 * fastPrefix a k.val 2 -
+      2316 * fastPrefix a k.val 3 := by decide +kernel
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/BoundaryFast.lean` -/
+
+section
+def fastDelta (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
+  (fastPrefix wb 85 c : Int) - fastPrefix wb s c +
+  fastPrefix we ((2 * s + 85000 - r) % 85) c - fastPrefix we 0 c -
+  ((fastPrefix wa 85 c : Int) - fastPrefix wa r c) -
+  ((fastPrefix wb s c : Int) - fastPrefix wb 0 c)
+
+def fastAdj (wa wb we : Fin 4) (r s : Nat) (c : Fin 4) : Int :=
+  let d := fastDelta wa wb we r s
+  match c with
+  | 0 => -701 * d 0 + (-531) * d 1 + 4059 * d 2 + (-2316) * d 3
+  | 1 => (-2316) * d 0 + (-701) * d 1 + (-531) * d 2 + 4059 * d 3
+  | 2 => 4059 * d 0 + (-2316) * d 1 + (-701) * d 2 + (-531) * d 3
+  | 3 => (-531) * d 0 + 4059 * d 1 + (-2316) * d 2 + (-701) * d 3
+
+theorem fastDelta_eq (wa wb we : Fin 4) (r s : Fin 85) (c : Fin 4) :
+    fastDelta wa wb we r.val s.val c = boundaryDelta wa wb we r.val s.val c := by
+  unfold fastDelta boundaryDelta sliceParikhCount
+  simp only [prefixData_correct wa ⟨85, by decide⟩ c,
+    prefixData_correct wb ⟨85, by decide⟩ c,
+    prefixData_correct wb ⟨s.val, by omega⟩ c,
+    prefixData_correct wa ⟨r.val, by omega⟩ c,
+    prefixData_correct wb ⟨0, by decide⟩ c,
+    prefixData_correct we ⟨0, by decide⟩ c,
+    prefixData_correct we ⟨(2 * s.val + 85000 - r.val) % 85, by omega⟩ c]
+  ring
+
+theorem fastAdj_eq (wa wb we : Fin 4) (r s : Fin 85) (c : Fin 4) :
+    fastAdj wa wb we r.val s.val c = adjMTtimesDelta wa wb we r.val s.val c := by
+  fin_cases c <;> simp only [fastAdj, adjMTtimesDelta, fastDelta_eq]
+
+def scalarDelta (wa wb we : Fin 4) (r s : Nat) : Int :=
+  scalarPrefix wb 85 - scalarPrefix wa 85 + scalarPrefix wa r +
+    scalarPrefix we ((2 * s + 85000 - r) % 85) - 2 * scalarPrefix wb s
+
+theorem scalarDelta_eq (wa wb we : Fin 4) (r s : Fin 85) :
+    scalarDelta wa wb we r.val s.val = fastAdj wa wb we r.val s.val 0 := by
+  unfold scalarDelta
+  rw [scalarData_correct wb ⟨85, by decide⟩, scalarData_correct wa ⟨85, by decide⟩,
+    scalarData_correct wa ⟨r.val, by omega⟩,
+    scalarData_correct we ⟨(2 * s.val + 85000 - r.val) % 85, by omega⟩,
+    scalarData_correct wb ⟨s.val, by omega⟩]
+  have hz : ∀ a c : Fin 4, fastPrefix a 0 c = 0 := by decide +kernel
+  simp only [fastAdj, fastDelta, hz, Nat.cast_zero, sub_zero]
+  ring
+
+def boundaryCheck (wa wb we : Fin 4) (r s : Fin 85) : Bool :=
+  let a := fastAdj wa wb we r.val s.val
+  if scalarDelta wa wb we r.val s.val % 43435 != 0 then true else
+    let v := fun c => a c / 43435
+    vGivesSomeAS wa wb we v &&
+      (if (2 * s.val + 85000 - r.val) % 85 == 0 then
+        vGivesSomeAS wa wb we (fun c => v c + if c = we then 1 else 0)
+       else true)
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/Bitset.lean` -/
+
+section
+def bitset : List Nat → Nat
+  | [] => 0
+  | x :: xs => (1 <<< x) ||| bitset xs
+
+theorem testBit_bitset (xs : List Nat) (i : Nat) :
+    (bitset xs).testBit i = true ↔ i ∈ xs := by
+  induction xs with
+  | nil => simp [bitset]
+  | cons x xs ih =>
+    simp only [bitset, Nat.testBit_or, Bool.or_eq_true, List.mem_cons]
+    rw [Nat.one_shiftLeft, Nat.testBit_two_pow, decide_eq_true_eq, ih]
+    simp [eq_comm]
+
+def rotateMask (m bits q : Nat) : Nat :=
+  ((bits <<< q) ||| (bits >>> (m - q))) % (2 ^ m)
+
+theorem rotateMask_contains (m bits q i : Nat) (hm : 0 < m) (hq : q < m)
+    (hi : i < m) (h : bits.testBit i = true) :
+    (rotateMask m bits q).testBit ((i + q) % m) = true := by
+  unfold rotateMask
+  simp only [Nat.testBit_mod_two_pow, Nat.testBit_or, Bool.and_eq_true,
+    decide_eq_true_eq]
+  refine ⟨Nat.mod_lt _ hm, ?_⟩
+  rw [Bool.or_eq_true]
+  by_cases hlt : i + q < m
+  · left
+    rw [Nat.mod_eq_of_lt hlt, Nat.testBit_shiftLeft]
+    simp [h]
+  · right
+    rw [Nat.testBit_shiftRight]
+    have hmod : (i + q) % m = i + q - m := by
+      rw [Nat.mod_eq_sub_mod (by omega), Nat.mod_eq_of_lt (by omega)]
+    rw [hmod, show m - q + (i + q - m) = i by omega]
+    exact h
+
+theorem mask_intersection_mem (left right : Nat) (xs : List Nat) (i : Nat)
+    (h : left &&& right = bitset xs) (hl : left.testBit i = true)
+    (hr : right.testBit i = true) : i ∈ xs := by
+  apply (testBit_bitset xs i).mp
+  rw [← h, Nat.testBit_and, hl, hr]
+  rfl
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/BoundaryMaskData.lean` -/
+
+section
+def positiveMasks : Array Nat :=
+  #[0x4000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000004000000000000000000000000000000008000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000040000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000001000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000080000800000000000000000000000000100000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100001000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000100000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000001,
+    0x80400000000000000000000000000000000000000000000000000010000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000080000000000000000000000000000000000001000000000000000000000000000000000000000000000004000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000800000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000008000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000800008000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000001000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000080000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000040000400000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000004000000000000000000000000100000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000004000000000400000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000008000000000000002000000000000000000000000000000000000000000000000000000000000000000000010000000000000004000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000020000000000000008000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000008000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000008000000000000000000000000000000800000000000000000000001020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000001000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000020000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000001000000000000000000000000001000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000001,
+    0x4000000040800000000000000000000000000100000000000000000100000000000000000000000000000000000002000000000000000000000000000000000000000000000008000000000000000000000000000020000200000000040000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000200000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000010000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000010000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000004000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000100000004000000000002000000000000000002000000000400000000000000000000000000000000000008000000000000000000000000000000010000000000000000000000800000000000000000000000000000000000000000000000000000100000000000000000100000000020000000000000000000000000000040000000400000000000000000008000000000000000000000000000000000000000000000020000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000002000000000000000000000000000000200000000000000000000000000000000000000000001000000000000000000000000000200002000000000000004000000000000000000000000000100000000000000000000000000000000000000000000000000000010000000000000000000000000000000000400000000000040800008000000010000000000000000000000800000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000002048000000000000000000000000001000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000010000000000000000000000000000000000400000000000000000000000000080000000000000000001000000000000000000000000000200000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000040000400000000080000000008000000000000000000000000001,
+    0x8000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000080000000000000000000000000000000000001000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800008000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000080000800000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000100001000000000000000000000000000000004000000000000000000000000000001000000000000000000000000000000000000000000000004020000000000000000000000000000000000000000000000000000800008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000001000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000100001000000000000000000000000000000000000000000000004000000000000000000000000000004000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000001000010000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000400004000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000200000000000000200002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000400004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000200002000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000400000000040000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000002000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000020100001]
+
+def negativeMasks : Array Nat :=
+  #[0x200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000800008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000080000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000800000000000000000000000000100001000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000080000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000002000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000010000000000000000000000000000000020000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+    0x10000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000080000000000000000000000000080000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000004000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000080000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004080000000000000000000000100000000000000000000000000000010000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000010000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000010000000000000004000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000020000000000000008000000000000000000000000000000000000000000000000000000000000000000000040000000000000010000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000200000000020000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000800000000000000000000000020000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000200002000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000001000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000080000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000010000100000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000010000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000100000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000020000000000000000000000000000000000000000000000080000000000000000000000000000000000001000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000008000000000000000000000000000000000000000000000000000201000000000000000000000000000000000000000000000000000000000000000000000000000001,
+    0x10000000001000000000200002000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000400000000000000000000000000080000000000000000001000000000000000000000000000200000000000000000000000000000000008000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000080000000000000000000000000012040000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000100000000000000000000008000000010000102000000000000200000000000000000000000000000000008000000000000000000000000000000000000000000000000000000800000000000000000000000000020000000000000040000400000000000000000000000000080000000000000000000000000000000000000000000400000000000000000000000000000040000008000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000004000000000000000000000000000000000000000000000010000000000000000000200000002000000000000000000000000000004000000000800000000000000000800000000000000000000000000000000000000000000000000000100000000000000000000008000000000000000000000000000000010000000000000000000000000000000000000200000000040000000000000000040000000000020000000800000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000020000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000008000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000008000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000400000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200002000000000400004000000000000000000000000000010000000000000000000000000000000000000000000000040000000000000000000000000000000000000800000000000000000800000000000000000000000000102000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+    0x804000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000040000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200002000000000200002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000040000400000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000200000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000040000400000000000000400000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000020000200000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000008000080000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000020000000000000000000000000000020000000000000000000000000000000000000000000000080000800000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000080000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000100000000000000000000000000000000000000000000000000004020000000000000000000000000000000000000000000000080000000000000000000000000000020000000000000000000000000000000080000800000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000100001000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000010000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000080000000000000000000000000000000000001000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000010000000001]
+
+def boundaryCandidates : Array (Array (List Nat)) :=
+  #[
+    #[[0, 1, 3, 17, 68, 82, 84], [1], [2], [3], [4, 23, 24, 69, 70], [5], [6, 22, 75], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22], [23], [24], [25], [26], [27], [28], [29], [30], [31], [32], [33], [34], [35], [36], [37], [38], [39], [40], [41], [42], [43], [44], [45], [46], [47], [48], [49], [50], [51], [52], [53], [54], [55], [56], [57], [58], [59], [60], [61], [62], [63], [64], [65], [66], [67], [68], [69], [70], [71], [72], [73], [74], [75], [76], [77], [11, 14, 57, 60, 78], [79], [80], [81], [82], [83], [84]],
+    #[[0], [], [], [4, 5], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [44, 45, 51, 52], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [72], [], [77, 78, 79], [72], [], [81], [], [], [], []],
+    #[[0], [77, 80], [], [], [69, 73], [], [6], [9], [], [], [], [], [], [], [], [], [], [], [], [], [10, 17], [14, 15], [], [21], [24], [9], [26], [], [], [], [35, 37, 39, 41], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [70], [73, 74], [77], [], [], [], [], [], [83], []],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [61], [45, 47, 48, 56], [], [53, 64], [], [65, 66, 67], [57], [62], [], [], [67, 70], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [51], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [68, 74], [], [75, 76, 77], [], [1, 3], [2], [], [], [], []],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [10, 63], [], [4, 5, 6, 7, 12, 65, 70, 71, 72, 73], [1, 15, 64, 78], [], []],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [5], [12, 20, 21, 23], [], [8, 19], [], [9, 10, 11], [21], [18], [], [], [16, 19], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [69], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [76, 82], [], [77, 78, 79], [], [70, 72], [73], [], [], [], []],
+    #[[0], [], [8], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [75], [74], [74], [71], [], [5, 76], [79]],
+    #[[0], [77], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [75, 76, 77], [], [], [76], [], [4, 5], [], [12]],
+    #[[0, 1, 3, 17, 68, 82, 84], [10, 77], [], [], [14, 15, 78, 79], [], [6, 22, 75], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [24], [], [26], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [83], [2, 81]],
+    #[[0], [10], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77, 78, 79], [], [], [84], [], [74, 75], [], [71]],
+    #[[0], [7, 10], [], [], [20, 24], [], [6], [5], [], [], [], [], [], [], [], [], [], [], [], [], [23, 30], [27, 28], [], [25], [24], [41], [26], [], [], [], [19, 21, 23, 25], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [80], [78, 79], [77], [], [], [], [], [], [83], []],
+    #[[0], [8, 9, 10, 11], [16], [34], [13], [45, 48], [], [], [], [], [], [], [], [], [], [], [], [], [], [4], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [34, 35], [], [], [], [], [], [75, 76, 77], [], [], [], [], [], [], [78, 80]],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [], [8, 16, 67, 75]],
+    #[[0], [76, 77, 78, 79], [73], [57], [80], [47, 50], [], [], [], [], [], [], [], [], [], [], [], [], [], [34], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [22, 23], [], [], [], [], [], [77, 78, 79], [], [], [], [], [], [], [3, 5]],
+    #[[0], [], [81], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [81], [84], [1], [6], [], [5, 76], [4]],
+    #[[0], [], [], [1, 2], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [10, 11, 17, 18], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [78], [], [75, 76, 77], [84], [], [79], [], [], [], []],
+    #[[0], [], [], [1, 2], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [10, 11, 17, 18], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [78], [], [75, 76, 77], [84], [], [79], [], [], [], []],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [], [8, 16, 67, 75]],
+    #[[0], [76, 77, 78, 79], [73], [57], [80], [47, 50], [], [], [], [], [], [], [], [], [], [], [], [], [], [34], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [22, 23], [], [], [], [], [], [77, 78, 79], [], [], [], [], [], [], [3, 5]],
+    #[[0], [], [81], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [81], [84], [1], [6], [], [5, 76], [4]],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [61], [45, 47, 48, 56], [], [53, 64], [], [65, 66, 67], [57], [62], [], [], [67, 70], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [51], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [68, 74], [], [75, 76, 77], [], [1, 3], [2], [], [], [], []],
+    #[[0, 1, 3, 17, 68, 82, 84], [1], [2], [3], [4, 23, 24, 69, 70], [5], [6, 22, 75], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22], [23], [24], [25], [26], [27], [28], [29], [30], [31], [32], [33], [34], [35], [36], [37], [38], [39], [40], [41], [42], [43], [44], [45], [46], [47], [48], [49], [50], [51], [52], [53], [54], [55], [56], [57], [58], [59], [60], [61], [62], [63], [64], [65], [66], [67], [68], [69], [70], [71], [72], [73], [74], [75], [76], [77], [11, 14, 57, 60, 78], [79], [80], [81], [82], [83], [84]],
+    #[[0], [], [], [4, 5], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [44, 45, 51, 52], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [72], [], [77, 78, 79], [72], [], [81], [], [], [], []],
+    #[[0], [77, 80], [], [], [69, 73], [], [6], [9], [], [], [], [], [], [], [], [], [], [], [], [], [10, 17], [14, 15], [], [21], [24], [9], [26], [], [], [], [35, 37, 39, 41], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [70], [73, 74], [77], [], [], [], [], [], [83], []],
+    #[[0], [77], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [75, 76, 77], [], [], [76], [], [4, 5], [], [12]],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [10, 63], [], [4, 5, 6, 7, 12, 65, 70, 71, 72, 73], [1, 15, 64, 78], [], []],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [5], [12, 20, 21, 23], [], [8, 19], [], [9, 10, 11], [21], [18], [], [], [16, 19], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [69], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [76, 82], [], [77, 78, 79], [], [70, 72], [73], [], [], [], []],
+    #[[0], [], [8], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [75], [74], [74], [71], [], [5, 76], [79]],
+    #[[0], [8, 9, 10, 11], [16], [34], [13], [45, 48], [], [], [], [], [], [], [], [], [], [], [], [], [], [4], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [34, 35], [], [], [], [], [], [75, 76, 77], [], [], [], [], [], [], [78, 80]],
+    #[[0, 1, 3, 17, 68, 82, 84], [10, 77], [], [], [14, 15, 78, 79], [], [6, 22, 75], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [24], [], [26], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [83], [2, 81]],
+    #[[0], [10], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77, 78, 79], [], [], [84], [], [74, 75], [], [71]],
+    #[[0], [7, 10], [], [], [20, 24], [], [6], [5], [], [], [], [], [], [], [], [], [], [], [], [], [23, 30], [27, 28], [], [25], [24], [41], [26], [], [], [], [19, 21, 23, 25], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [80], [78, 79], [77], [], [], [], [], [], [83], []],
+    #[[0], [7, 10], [], [], [20, 24], [], [6], [5], [], [], [], [], [], [], [], [], [], [], [], [], [23, 30], [27, 28], [], [25], [24], [41], [26], [], [], [], [19, 21, 23, 25], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [80], [78, 79], [77], [], [], [], [], [], [83], []],
+    #[[0], [8, 9, 10, 11], [16], [34], [13], [45, 48], [], [], [], [], [], [], [], [], [], [], [], [], [], [4], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [34, 35], [], [], [], [], [], [75, 76, 77], [], [], [], [], [], [], [78, 80]],
+    #[[0, 1, 3, 17, 68, 82, 84], [10, 77], [], [], [14, 15, 78, 79], [], [6, 22, 75], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [24], [], [26], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [83], [2, 81]],
+    #[[0], [10], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77, 78, 79], [], [], [84], [], [74, 75], [], [71]],
+    #[[0], [], [81], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [81], [84], [1], [6], [], [5, 76], [4]],
+    #[[0], [], [], [1, 2], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [10, 11, 17, 18], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [78], [], [75, 76, 77], [84], [], [79], [], [], [], []],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [], [8, 16, 67, 75]],
+    #[[0], [76, 77, 78, 79], [73], [57], [80], [47, 50], [], [], [], [], [], [], [], [], [], [], [], [], [], [34], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [22, 23], [], [], [], [], [], [77, 78, 79], [], [], [], [], [], [], [3, 5]],
+    #[[0], [77, 80], [], [], [69, 73], [], [6], [9], [], [], [], [], [], [], [], [], [], [], [], [], [10, 17], [14, 15], [], [21], [24], [9], [26], [], [], [], [35, 37, 39, 41], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [70], [73, 74], [77], [], [], [], [], [], [83], []],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [61], [45, 47, 48, 56], [], [53, 64], [], [65, 66, 67], [57], [62], [], [], [67, 70], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [51], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [68, 74], [], [75, 76, 77], [], [1, 3], [2], [], [], [], []],
+    #[[0, 1, 3, 17, 68, 82, 84], [1], [2], [3], [4, 23, 24, 69, 70], [5], [6, 22, 75], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22], [23], [24], [25], [26], [27], [28], [29], [30], [31], [32], [33], [34], [35], [36], [37], [38], [39], [40], [41], [42], [43], [44], [45], [46], [47], [48], [49], [50], [51], [52], [53], [54], [55], [56], [57], [58], [59], [60], [61], [62], [63], [64], [65], [66], [67], [68], [69], [70], [71], [72], [73], [74], [75], [76], [77], [11, 14, 57, 60, 78], [79], [80], [81], [82], [83], [84]],
+    #[[0], [], [], [4, 5], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [44, 45, 51, 52], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [72], [], [77, 78, 79], [72], [], [81], [], [], [], []],
+    #[[0], [], [8], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [75], [74], [74], [71], [], [5, 76], [79]],
+    #[[0], [77], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [75, 76, 77], [], [], [76], [], [4, 5], [], [12]],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [10, 63], [], [4, 5, 6, 7, 12, 65, 70, 71, 72, 73], [1, 15, 64, 78], [], []],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [5], [12, 20, 21, 23], [], [8, 19], [], [9, 10, 11], [21], [18], [], [], [16, 19], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [69], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [76, 82], [], [77, 78, 79], [], [70, 72], [73], [], [], [], []],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [5], [12, 20, 21, 23], [], [8, 19], [], [9, 10, 11], [21], [18], [], [], [16, 19], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [69], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [76, 82], [], [77, 78, 79], [], [70, 72], [73], [], [], [], []],
+    #[[0], [], [8], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [75], [74], [74], [71], [], [5, 76], [79]],
+    #[[0], [77], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [75, 76, 77], [], [], [76], [], [4, 5], [], [12]],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [10, 63], [], [4, 5, 6, 7, 12, 65, 70, 71, 72, 73], [1, 15, 64, 78], [], []],
+    #[[0], [10], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77, 78, 79], [], [], [84], [], [74, 75], [], [71]],
+    #[[0], [7, 10], [], [], [20, 24], [], [6], [5], [], [], [], [], [], [], [], [], [], [], [], [], [23, 30], [27, 28], [], [25], [24], [41], [26], [], [], [], [19, 21, 23, 25], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [80], [78, 79], [77], [], [], [], [], [], [83], []],
+    #[[0], [8, 9, 10, 11], [16], [34], [13], [45, 48], [], [], [], [], [], [], [], [], [], [], [], [], [], [4], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [34, 35], [], [], [], [], [], [75, 76, 77], [], [], [], [], [], [], [78, 80]],
+    #[[0, 1, 3, 17, 68, 82, 84], [10, 77], [], [], [14, 15, 78, 79], [], [6, 22, 75], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [24], [], [26], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [83], [2, 81]],
+    #[[0], [76, 77, 78, 79], [73], [57], [80], [47, 50], [], [], [], [], [], [], [], [], [], [], [], [], [], [34], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [22, 23], [], [], [], [], [], [77, 78, 79], [], [], [], [], [], [], [3, 5]],
+    #[[0], [], [81], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [81], [84], [1], [6], [], [5, 76], [4]],
+    #[[0], [], [], [1, 2], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [10, 11, 17, 18], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [78], [], [75, 76, 77], [84], [], [79], [], [], [], []],
+    #[[0, 1, 3, 17, 68, 82, 84], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [77], [], [], [], [], [], [], [8, 16, 67, 75]],
+    #[[0], [], [], [4, 5], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [44, 45, 51, 52], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [72], [], [77, 78, 79], [72], [], [81], [], [], [], []],
+    #[[0], [77, 80], [], [], [69, 73], [], [6], [9], [], [], [], [], [], [], [], [], [], [], [], [], [10, 17], [14, 15], [], [21], [24], [9], [26], [], [], [], [35, 37, 39, 41], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [70], [73, 74], [77], [], [], [], [], [], [83], []],
+    #[[0], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [61], [45, 47, 48, 56], [], [53, 64], [], [65, 66, 67], [57], [62], [], [], [67, 70], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [51], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [68, 74], [], [75, 76, 77], [], [1, 3], [2], [], [], [], []],
+    #[[0, 1, 3, 17, 68, 82, 84], [1], [2], [3], [4, 23, 24, 69, 70], [5], [6, 22, 75], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22], [23], [24], [25], [26], [27], [28], [29], [30], [31], [32], [33], [34], [35], [36], [37], [38], [39], [40], [41], [42], [43], [44], [45], [46], [47], [48], [49], [50], [51], [52], [53], [54], [55], [56], [57], [58], [59], [60], [61], [62], [63], [64], [65], [66], [67], [68], [69], [70], [71], [72], [73], [74], [75], [76], [77], [11, 14, 57, 60, 78], [79], [80], [81], [82], [83], [84]]
+  ]
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/BoundaryMaskCertificate.lean` -/
+
+section
+def residue (a : Fin 4) (r : Nat) : Nat := (scalarPrefix a r % 43435).toNat
+
+def negativeResidue (a : Fin 4) (r : Nat) : Nat := (-scalarPrefix a r % 43435).toNat
+
+def midpointResidue (a : Fin 4) (r : Nat) : Nat := (2 * scalarPrefix a r % 43435).toNat
+
+def candidates (a b e : Fin 4) (s : Nat) : List Nat :=
+  (boundaryCandidates[a.val * 16 + b.val * 4 + e.val]!).getD s []
+
+def maskCheck (a b e : Fin 4) (s : Fin 85) : Bool :=
+  (positiveMasks[a.val]! &&&
+    rotateMask 43435 negativeMasks[e.val]! (midpointResidue b s.val)) ==
+      bitset ((candidates a b e s.val).map (residue a))
+
+def candidateCheck (a b e : Fin 4) (s : Fin 85) : Bool :=
+  (candidates a b e s.val).all fun r =>
+    if h : r < 85 then boundaryCheck a b e ⟨r, h⟩ s else false
+
+def masksCertificate : Bool :=
+  (List.finRange 4).all fun a =>
+  (List.finRange 4).all fun b =>
+  (List.finRange 4).all fun e =>
+  (List.finRange 85).all fun s => maskCheck a b e s && candidateCheck a b e s
+
+theorem masksCertificate_true : masksCertificate = true := by decide +kernel
+
+theorem masksContainPrefixes : ∀ a : Fin 4, ∀ r : Fin 85,
+    positiveMasks[a.val]!.testBit (residue a r.val) = true ∧
+    negativeMasks[a.val]!.testBit (negativeResidue a r.val) = true := by decide +kernel
+
+theorem scalarPrefix_mod85 : ∀ a : Fin 4, ∀ r : Fin 85,
+    scalarPrefix a r.val % 85 = (64 * (r.val : Int)) % 85 := by decide +kernel
+
+theorem scalarPrefix_full : ∀ a : Fin 4, scalarPrefix a 85 % 43435 = 0 := by
+  decide +kernel
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/BoundaryMasks.lean` -/
+
+section
+
+theorem residue_injective (a : Fin 4) (r t : Fin 85)
+    (h : residue a r.val = residue a t.val) : r = t := by
+  have hr := scalarPrefix_mod85 a r
+  have ht := scalarPrefix_mod85 a t
+  unfold residue at h
+  have hn1 := Int.emod_nonneg (scalarPrefix a r.val) (by decide : (43435 : Int) ≠ 0)
+  have hn2 := Int.emod_nonneg (scalarPrefix a t.val) (by decide : (43435 : Int) ≠ 0)
+  have heq : scalarPrefix a r.val % 43435 = scalarPrefix a t.val % 43435 := by omega
+  have heq' := congrArg (fun z : Int => z % 85) heq
+  rw [Int.emod_emod_of_dvd _ (by decide : (85 : Int) ∣ 43435),
+    Int.emod_emod_of_dvd _ (by decide : (85 : Int) ∣ 43435), hr, ht] at heq'
+  apply Fin.ext
+  omega
+
+theorem modular_balance (A B x y z : Int)
+    (hA : A % 43435 = 0) (hB : B % 43435 = 0)
+    (h : (B - A + x + z - 2 * y) % 43435 = 0) :
+    ((-z % 43435).toNat + (2 * y % 43435).toNat) % 43435 = (x % 43435).toNat := by
+  have hAB : (B - A) % 43435 = 0 := by rw [Int.sub_emod, hA, hB]; rfl
+  rw [show B - A + x + z - 2 * y = (B - A) + (x + z - 2 * y) by ring,
+    Int.add_emod, hAB, Int.zero_add, Int.emod_emod] at h
+  have heq : x % 43435 = (-z + 2 * y) % 43435 := by
+    rw [Int.emod_eq_emod_iff_emod_sub_eq_zero]
+    convert h using 1 <;> congr 1 <;> ring
+  have hn1 := Int.emod_nonneg (-z) (by decide : (43435 : Int) ≠ 0)
+  have hn2 := Int.emod_nonneg (2 * y) (by decide : (43435 : Int) ≠ 0)
+  have hn3 := Int.emod_nonneg x (by decide : (43435 : Int) ≠ 0)
+  apply Int.ofNat_inj.mp
+  simp only [Int.natCast_emod, Int.natCast_add, Int.toNat_of_nonneg hn1,
+    Int.toNat_of_nonneg hn2, Int.toNat_of_nonneg hn3]
+  change (-z % 43435 + (2 * y) % 43435) % 43435 = x % 43435
+  rw [← Int.add_emod]
+  exact heq.symm
+
+theorem scalarDelta_residues (a b e : Fin 4) (r s : Fin 85)
+    (h : scalarDelta a b e r.val s.val % 43435 = 0) :
+    (negativeResidue e ((2 * s.val + 85000 - r.val) % 85) +
+      midpointResidue b s.val) % 43435 = residue a r.val :=
+  modular_balance _ _ _ _ _ (scalarPrefix_full a) (scalarPrefix_full b) h
+
+theorem boundaryCheck_verified (a b e : Fin 4) (r s : Fin 85) :
+    boundaryCheck a b e r s = true := by
+  by_cases h : scalarDelta a b e r.val s.val % 43435 = 0
+  · have hcert := masksCertificate_true
+    simp only [masksCertificate, List.all_eq_true, List.mem_finRange,
+      true_implies, Bool.and_eq_true] at hcert
+    obtain ⟨hm, hc⟩ := hcert a b e s
+    have ht : (2 * s.val + 85000 - r.val) % 85 < 85 := Nat.mod_lt _ (by decide)
+    have hp := (masksContainPrefixes a r).1
+    have he := (masksContainPrefixes e ⟨_, ht⟩).2
+    have hq : midpointResidue b s.val < 43435 := by
+      unfold midpointResidue
+      have := Int.emod_lt_of_pos (2 * scalarPrefix b s.val) (by decide : (0 : Int) < 43435)
+      omega
+    have he' := rotateMask_contains 43435 negativeMasks[e.val]! (midpointResidue b s.val)
+      (negativeResidue e ((2 * s.val + 85000 - r.val) % 85)) (by decide) hq (by
+        unfold negativeResidue
+        have := Int.emod_lt_of_pos (-scalarPrefix e ((2 * s.val + 85000 - r.val) % 85))
+          (by decide : (0 : Int) < 43435)
+        omega) he
+    rw [scalarDelta_residues a b e r s h] at he'
+    have hmem := mask_intersection_mem _ _ _ _ (beq_iff_eq.mp hm) hp he'
+    obtain ⟨r', hr', heq⟩ := List.mem_map.mp hmem
+    have hc' := List.all_eq_true.mp hc r' hr'
+    split at hc'
+    next hrlt =>
+      have hr := residue_injective a ⟨r', hrlt⟩ r heq
+      simpa only [hr] using hc'
+    next hrlt => exact Bool.noConfusion hc'
+  · simp [boundaryCheck, h]
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/BoundaryCheck.lean` -/
+
+section
+theorem v_pattern_gives_AS_normal (wa wb we : Fin 4) (r s : Fin 85)
+    (h : hasParikhSolution wa wb we r.val s.val = true) :
+    vGivesSomeAS wa wb we (parikhSolutionVec wa wb we r.val s.val) = true := by
+  have hv := boundaryCheck_verified wa wb we r s
+  simp only [hasParikhSolution, Bool.and_eq_true, decide_eq_true_eq] at h
+  simp only [boundaryCheck, scalarDelta_eq, fastAdj_eq, h.1.1.1,
+    bne_self_eq_false, Bool.false_eq_true, ↓reduceIte, Bool.and_eq_true] at hv
+  exact hv.1
+
+theorem v_pattern_gives_AS_t85 (wa wb we : Fin 4) (r s : Fin 85)
+    (h : hasParikhSolution wa wb we r.val s.val = true)
+    (ht : (2 * s.val + 85000 - r.val) % 85 = 0) :
+    vGivesSomeAS wa wb we (fun c => parikhSolutionVec wa wb we r.val s.val c +
+      if c = we then 1 else 0) = true := by
+  have hv := boundaryCheck_verified wa wb we r s
+  simp only [hasParikhSolution, Bool.and_eq_true, decide_eq_true_eq] at h
+  simp only [boundaryCheck, scalarDelta_eq, fastAdj_eq, h.1.1.1,
+    bne_self_eq_false, Bool.false_eq_true, ↓reduceIte, Bool.and_eq_true,
+    ht, beq_self_eq_true] at hv
+  exact hv.2
+
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/Spanning.lean` -/
+
+section
 theorem inner_defect_gives_AS (w : List (Fin 4))
-    (hm_ge : w.length ≥ 7) (r L : ℕ) (hL : L > 0) (hr : r < 85)
+    (hm_ge : w.length ≥ 3) (r L : ℕ) (hL : L > 0) (hr : r < 85)
     (hlen : r + 2 * L ≤ 85 * w.length)
     (hspan : (r + 2 * L - 1) / 85 + 1 = w.length)
     (hperm : ((applyKeranenG w).drop r |>.take L).Perm
              ((applyKeranenG w).drop (r + L) |>.take L)) :
     let k := (r + L) / 85
+    let s := (r + L) % 85
     let m := w.length
+    let t := r + 2 * L - 85 * (m - 1)
     let wa := w.get ⟨0, by omega⟩
     let wb := w.get ⟨k, by omega⟩
     let we := w.get ⟨m - 1, by omega⟩
@@ -777,23 +1433,23 @@ theorem inner_defect_gives_AS (w : List (Fin 4))
     · ext c; specialize ‹∀ a : Fin 4, 43435 * ( ↑ ( List.count a ( List.take ( ( r + L ) / 85 - 1 ) w.tail ) ) - ↑ ( List.count a ( List.take ( w.length - 2 - ( r + L ) / 85 ) ( List.drop ( ( r + L ) / 85 + 1 ) w ) ) ) ) = adjRow a ( boundaryDelta w[0] w[( r + L ) / 85] w[w.length - 1] r ( ( r + L ) % 85 ) ) + if a = w[w.length - 1] then 43435 else 0› c; simp_all +decide [ parikhSolutionVec ] ;
       rw [ adjMTtimesDelta_eq_adjRow ];
       split_ifs at * <;> omega;
-    · convert h_adj_solve 0 using 1;
-    · convert h_adj_solve 1 using 1;
-    · convert h_adj_solve 2 using 1;
-    · convert h_adj_solve 3 using 1;
+    · simpa only [adjMTtimesDelta_eq_adjRow] using h_adj_solve 0;
+    · simpa only [adjMTtimesDelta_eq_adjRow] using h_adj_solve 1;
+    · simpa only [adjMTtimesDelta_eq_adjRow] using h_adj_solve 2;
+    · simpa only [adjMTtimesDelta_eq_adjRow] using h_adj_solve 3;
   · convert v_pattern_gives_AS_normal w[0] w[(r + L) / 85] w[w.length - 1] ⟨r, hr⟩ ⟨(r + L) % 85, Nat.mod_lt _ (by decide)⟩ _ using 1;
     · unfold parikhSolutionVec; simp +decide [ *, adjMTtimesDelta_eq_adjRow ] ;
       congr! 2;
       exact Eq.symm ( Int.ediv_eq_of_eq_mul_left ( by decide ) ( by linarith [ ‹∀ a : Fin 4, 43435 * ( ↑ ( List.count a ( List.take ( ( r + L ) / 85 - 1 ) w.tail ) ) - ↑ ( List.count a ( List.take ( w.length - 2 - ( r + L ) / 85 ) ( List.drop ( ( r + L ) / 85 + 1 ) w ) ) ) ) = adjRow a ( boundaryDelta w[0] w[( r + L ) / 85] w[w.length - 1] r ( ( r + L ) % 85 ) ) › ‹_› ] ) );
-    · unfold hasParikhSolution; simp +decide
+    · unfold hasParikhSolution; simp +decide [ h_adj_solve ] ;
       exact ⟨ ⟨ ⟨ h_adj_solve 0, h_adj_solve 1 ⟩, h_adj_solve 2 ⟩, h_adj_solve 3 ⟩
 
 /-! ### List counting helpers -/
 
 theorem sum_count_eq_length (l : List (Fin 4)) :
     (l.count 0 : Int) + l.count 1 + l.count 2 + l.count 3 = l.length := by
-  induction l <;> simp +decide [ * ] ; (first | ring1 | ring_nf);
-  rename_i k hk ih; fin_cases k <;> simp +decide at ih ⊢ <;> linarith;
+  induction l <;> simp +decide [ * ] ; ring;
+  rename_i k hk ih; fin_cases k <;> simp +decide [ List.count_cons ] at ih ⊢ <;> linarith;
 
 private theorem indicator_sum_fin4 (a : Fin 4) :
     (if (0:Fin 4) = a then (1:Int) else 0) + (if 1 = a then 1 else 0) +
@@ -812,7 +1468,7 @@ private theorem case1_false (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
   specialize hw 0 k hk1 (by linarith);
   contrapose! hw;
   rw [ List.perm_iff_count ];
-  intro c; specialize h c; rcases k with ( _ | k ) <;> simp_all +decide
+  intro c; specialize h c; rcases k with ( _ | k ) <;> simp_all +decide [ List.take_succ_cons ] ;
   rcases w with ( _ | ⟨ x, _ | ⟨ y, w ⟩ ⟩ ) <;> simp_all +decide [ List.take_succ_cons ];
   · cases hm;
   · rw [ List.drop_eq_getElem_cons ];
@@ -884,7 +1540,7 @@ private theorem case5_false (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
   · rcases w with ( _ | ⟨ x, _ | ⟨ y, w ⟩ ⟩ ) <;> simp_all +decide [ Nat.mul_succ ];
     · cases hm;
     · rw [ List.drop_eq_getElem_cons ];
-      rw [ List.take_cons ] ; norm_num [ List.count_cons ] ; (first | ring1 | ring_nf);
+      rw [ List.take_cons ] ; norm_num [ List.count_cons ] ; ring;
       all_goals norm_num [ add_comm 1, List.take_add_one ] at *;
       grind +splitImp;
       grind +splitImp
@@ -928,7 +1584,7 @@ private theorem vGivesSomeAS_cases (wa wb we : Fin 4) (v : Fin 4 → Int)
   · right; right; right; right; right; exact fun c => by linarith [h c]
 
 theorem no_spanning_large (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
-    (hm : w.length ≥ 7)
+    (hm : w.length ≥ 3)
     (r L : ℕ) (hL : L > 0) (hr : r < 85)
     (hlen : r + 2 * L ≤ (applyKeranenG w).length)
     (hspan : (r + 2 * L - 1) / 85 + 1 = w.length)
@@ -1019,27 +1675,13 @@ theorem no_spanning_large (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
     have hirk : w.length - 2 - k = k := by omega
     exact case6_false w hw k hk1 hkm hmeq (fun c => by
       have := hc6 c; simp only [ir, hirk] at this; linarith)
-/-!
-## Source: `BlockBoundBridge.lean`
--/
 
-/-!
-# Block bound bridge lemmas
+end
 
-Connecting the List.Perm abelian-square hypothesis in `g(w)` to the
-Boolean spanning checks, via explicit localization and Perm → sameParikh4.
 
-## Performance note (2025-05)
+/-! ### Upstream module `ErdosProblems/Erdos192/Localization.lean` -/
 
-The algebraic Parikh-matrix analysis (`no_spanning_large`) now handles all
-spanning lengths ≥ 7, replacing the 100+ brute-force `native_decide` files
-that previously covered lengths 7–13 individually. Only the length-6
-spanning check remains as a single fast `native_decide`.
--/
-
-set_option maxHeartbeats 4000000
-/-! ### Explicit localization -/
-
+section
 theorem abelianSquare_localize_explicit (w : List (Fin 4))
     (i L : ℕ) (hL : L > 0)
     (hlen : i + 2 * L ≤ (applyKeranenG w).length)
@@ -1094,297 +1736,66 @@ theorem localized_block_span (w : List (Fin 4)) (i L : ℕ) (_hL : L > 0)
 /-
 No ASF word of length 6 has a spanning Perm-based abelian square.
 -/
-theorem no_spanning6_perm (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
-    (hw_len : w.length = 6)
-    (r L : ℕ) (hL : L > 0) (hr : r < 85)
-    (hlen : r + 2 * L ≤ (applyKeranenG w).length)
-    (hspan : (r + 2 * L - 1) / 85 + 1 = 6)
-    (hperm : ((applyKeranenG w).drop r |>.take L).Perm
-             ((applyKeranenG w).drop (r + L) |>.take L)) :
-    False := by
-  obtain ⟨a, b, c, d, e, f, rfl⟩ : ∃ a b c d e f : Fin 4, w = [a, b, c, d, e, f] := by
-    rcases w with ( _ | ⟨ a, _ | ⟨ b, _ | ⟨ c, _ | ⟨ d, _ | ⟨ e, _ | ⟨ f, _ | w ⟩ ⟩ ⟩ ⟩ ⟩ ⟩ ) <;> simp_all +arith +decide;
-  have h_spanning : hasSpanning6AS [a, b, c, d, e, f] = true := by
-    unfold hasSpanning6AS; simp_all +decide [ List.isPerm_iff ] ;
-    refine' ⟨ r, hr, L - ( ( 426 - r + 1 ) / 2 ), _, _ ⟩ <;> norm_num at *;
-    · omega;
-    · lia;
-  exact absurd h_spanning ( by simpa using no_spanning6_abelianSquare a b c d e f ( isFinASF_complete _ hw ) )
 
-/-! ### Main inductive block bound -/
+end
 
-/-- **Block bound by well-founded induction.**
-For any ASF word `w`, an abelian square in `g(w)` spans at most 5 blocks.
 
-Proved by strong induction on `w.length`:
-- If `m < w.length`: extract subword `w'` of length `m`, apply IH.
-- If `m = w.length ≤ 5`: trivial.
-- If `m = w.length = 6`: contradiction via spanning-6 check (single `native_decide`).
-- If `m = w.length ≥ 7`: contradiction via algebraic Parikh-matrix bridge. -/
-theorem abelianSquare_block_bound_inductive :
-    ∀ (w : List (Fin 4)), FinAbelianSquareFree w →
-    ∀ (i L : ℕ), L > 0 → i + 2 * L ≤ (applyKeranenG w).length →
-    ((applyKeranenG w).drop i |>.take L).Perm
-      ((applyKeranenG w).drop (i + L) |>.take L) →
-    (i + 2 * L - 1) / 85 - i / 85 + 1 ≤ 5 := by
-  -- Reformulate with explicit length parameter for strong induction
-  suffices h : ∀ n, ∀ w : List (Fin 4), w.length ≤ n →
-    FinAbelianSquareFree w →
-    ∀ i L, L > 0 → i + 2 * L ≤ (applyKeranenG w).length →
-    ((applyKeranenG w).drop i |>.take L).Perm
-      ((applyKeranenG w).drop (i + L) |>.take L) →
-    (i + 2 * L - 1) / 85 - i / 85 + 1 ≤ 5
-    from fun w hw i L hL hlen hperm => h w.length w le_rfl hw i L hL hlen hperm
-  intro n
-  induction n using Nat.strongRecOn with
-  | ind n ih =>
-    intro w hw_le hw i L hL hlen hperm
-    set m := (i + 2 * L - 1) / 85 - i / 85 + 1 with hm_def
-    set a := i / 85 with ha_def
-    set r := i % 85 with hr_def
-    -- m ≤ w.length
-    have ham : a + m ≤ w.length := by
-      rw [applyKeranenG_length] at hlen; omega
-    -- If m ≤ 5: done
-    by_contra hm_gt
-    push_neg at hm_gt
-    -- hm_gt : 6 ≤ m
-    -- Extract localization
-    set w' := w.drop a |>.take m with hw'_def
-    have hw' : FinAbelianSquareFree w' := finASF_subword w hw a m ham
-    obtain ⟨hlen', hperm'⟩ := abelianSquare_localize_explicit w i L hL hlen hperm
-    have hspan : (r + 2 * L - 1) / 85 + 1 = m := localized_block_span w i L hL hlen
-    have hw'_len : w'.length = m := by
-      simp [hw'_def, List.length_take, List.length_drop]; omega
-    have hr_lt : r < 85 := Nat.mod_lt i (by omega)
-    -- Case split: m < w.length or m = w.length
-    by_cases hm_lt : m < w.length
-    · -- m < w.length: apply IH to w' (which has length m < w.length ≤ n)
-      have hm_lt_n : m < n := by omega
-      have ih_result := ih m hm_lt_n w' (by omega) hw' r L hL hlen' hperm'
-      -- ih_result : (r + 2*L - 1)/85 - r/85 + 1 ≤ 5
-      -- Since r < 85: r/85 = 0
-      have hr_div : r / 85 = 0 := by omega
-      -- So (r+2L-1)/85 + 1 ≤ 5, i.e., m ≤ 5
-      omega
-    · -- m = w.length (spanning case)
-      push_neg at hm_lt
-      have hm_eq : m = w.length := by omega
-      -- a = 0 (since a + m ≤ w.length and m = w.length)
-      have ha_zero : a = 0 := by omega
-      -- w' = w
-      have hw'_eq_w : w' = w := by
-        simp only [hw'_def, ha_zero]
-        simp only [List.drop_zero]
-        exact List.take_of_length_le (by omega)
-      -- Simplify using i/85 = 0
-      have hi85 : i / 85 = 0 := by omega
-      simp only [hi85, Nat.sub_zero, List.drop_zero,
-        List.take_of_length_le (by omega : w.length ≤ (i + 2 * L - 1) / 85 + 1)] at hlen' hperm'
-      -- Case split: m = 6 or m ≥ 7
-      rcases Nat.lt_or_ge m 7 with hm6 | hm7
-      · -- m = 6: spanning-6 check
-        exact no_spanning6_perm w hw (by omega) r L hL hr_lt hlen' (by omega) hperm'
-      · -- m ≥ 7: algebraic Parikh-matrix bridge
-        exact no_spanning_large w hw (by omega) r L hL hr_lt hlen' (by omega) hperm'
-/-!
-## Source: `KE92.lean`
--/
+/-! ### Upstream module `ErdosProblems/Erdos192/Morphism.lean` -/
 
-/-!
-# KE92 — Keränen 1992 paper formalization
+section
+theorem morphism_preserves_le2 (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
+    (hlen : w.length ≤ 2) : FinAbelianSquareFree (applyKeranenG w) := by
+  cases w with
+  | nil => intro i l hl h; simp [applyKeranenG] at h; omega
+  | cons a w =>
+    cases w with
+    | nil =>
+      have hab : a ≠ a + 1 := by fin_cases a <;> decide
+      have h := finASF_prefix (applyKeranenG [a, a + 1]) (keranen_pair_asf a (a + 1) hab)
+        85 (by simp [applyKeranenG_length])
+      simpa [applyKeranenG, List.take_append, keranenG_length,
+        List.take_of_length_le (le_of_eq (keranenG_length a))] using h
+    | cons b w =>
+      cases w with
+      | nil =>
+        apply keranen_pair_asf a b
+        intro hab
+        subst b
+        exact hw 0 1 (by decide) (by simp) (List.Perm.refl [a])
+      | cons c w => simp at hlen
 
-Common infrastructure for the Keränen 1992 paper workspace.  This file
-re-exports every definition and helper lemma needed by the downstream
-Erdős problem files (`Erdos231.lean`, `Erdos192.lean`).
-
-## Dependency structure
-
-- `PaperCoreDefs.lean` — shared definitions and basic lemmas (abelian-square-free,
-  Parikh walk, 3-AP, Keränen morphism, boolean ASF check, subword lemmas).
-- `KeranenBounded.lean`, `KeranenBounded5a–d.lean` — bounded verification by
-  `native_decide` (morphism preservation for words of length ≤ 5).
-- `BlockBound*.lean`, `BlockBoundBridge*.lean`, `BlockBoundSpanning*.lean` —
-  Parikh-matrix finite reduction (any abelian square in the morphism image
-  spans ≤ 5 letter-blocks).
-
-## Main results proved here
-
-- `morphism_preserves_le5` — the morphism image of any ASF word of length ≤ 5
-  is abelian-square-free.
-- `keranenG_preserves_ASF` — Keränen's morphism preserves abelian-square-freeness.
-- `exists_finASF_all_lengths` — for every `n`, there exists a length-`n` ASF word
-  on four letters.
-- `exists_inf_abelianSquareFree_four` — there exists an infinite ASF word on four
-  letters.
--/
-
-set_option maxHeartbeats 4000000
-/-! ### Bounded verification for small lengths -/
-
-/-- Morphism preservation for length 1. -/
-theorem morphism_check_1 :
-    ∀ a : Fin 4, isFinASF [a] = true →
-    isFinASF (applyKeranenG [a]) = true := by native_decide
-
-/-- Morphism preservation for length 2. -/
-theorem morphism_check_2 :
-    ∀ a b : Fin 4, isFinASF [a, b] = true →
-    isFinASF (applyKeranenG [a, b]) = true := by native_decide
-
-/-- Morphism preservation for length 3. -/
-theorem morphism_check_3 :
-    ∀ a b c : Fin 4, isFinASF [a, b, c] = true →
-    isFinASF (applyKeranenG [a, b, c]) = true := by native_decide
-
-/-- Combined: for any ASF word of length ≤ 5, the morphism image is ASF. -/
-theorem morphism_preserves_le5 (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
-    (hlen : w.length ≤ 5) : FinAbelianSquareFree (applyKeranenG w) := by
-  obtain ⟨a, b, c, d, e, hw_eq⟩ :
-      ∃ a b c d e : Fin 4,
-        w = [a, b, c, d, e] ∨ w = [a, b, c, d] ∨ w = [a, b, c] ∨
-        w = [a, b] ∨ w = [a] ∨ w = [] := by
-    rcases w with (_ | ⟨a, _ | ⟨b, _ | ⟨c, _ | ⟨d, _ | ⟨e, _ | w⟩⟩⟩⟩⟩) <;>
-      simp_all +decide
-    linarith
-  rcases hw_eq with rfl | rfl | rfl | rfl | rfl | rfl <;>
-    (have := isFinASF_complete _ hw; simp_all +decide only [isFinASF_sound])
-  · fin_cases a <;> simp_all +decide only
-    · exact isFinASF_sound _ (morphism_check_5a b c d e this)
-    · exact isFinASF_sound _ (morphism_check_5b _ _ _ _ this)
-    · exact isFinASF_sound _ (morphism_check_5c _ _ _ _ this)
-    · exact isFinASF_sound _ (morphism_check_5d _ _ _ _ this)
-  · exact isFinASF_sound _ (morphism_check_4 a b c d this)
-  · exact isFinASF_sound _ (morphism_check_3 a b c this)
-  · exact isFinASF_sound _ (morphism_check_2 a b this)
-  · exact isFinASF_sound _ (morphism_check_1 a this)
-
-/-! ### Abelian-square localization in uniform morphism images -/
-
-/-- Length of `g(w.take n)` when `n ≤ w.length`. -/
-private lemma applyKeranenG_take_length (w : List (Fin 4)) (n : ℕ) (hn : n ≤ w.length) :
-    (applyKeranenG (w.take n)).length = 85 * n := by
-  rw [applyKeranenG_length, List.length_take, Nat.min_eq_left hn]
-
-/-- Abelian square localization for Keränen's uniform morphism.
-
-If `applyKeranenG w` has an abelian square at position `(i, L)`, then
-`applyKeranenG w'` is not abelian-square-free, where `w'` is the subword
-`w.drop a |>.take m` with `a = i / 85` and `m = (i+2L−1)/85 − a + 1`. -/
-private lemma abelianSquare_flatMap_localize (w : List (Fin 4))
-    (i L : ℕ) (hL : L > 0)
-    (hlen : i + 2 * L ≤ (applyKeranenG w).length)
-    (hperm : ((applyKeranenG w).drop i |>.take L).Perm
-             ((applyKeranenG w).drop (i + L) |>.take L)) :
-    ¬FinAbelianSquareFree
-      (applyKeranenG (w.drop (i / 85) |>.take ((i + 2 * L - 1) / 85 - i / 85 + 1))) := by
-  contrapose! hperm
-  set a := i / 85
-  set r := i % 85
-  set m := (i + 2 * L - 1) / 85 - a + 1
-  have ha : a ≤ w.length := by rw [applyKeranenG_length] at hlen; omega
-  have hm : a + m ≤ w.length := by rw [applyKeranenG_length] at hlen; omega
-  have hr : r + 2 * L ≤ 85 * m := by omega
-  have h_split :
-      applyKeranenG w =
-        applyKeranenG (w.take a) ++ applyKeranenG (w.drop a |>.take m) ++
-          applyKeranenG (w.drop (a + m)) := by
-    have h_split : w = w.take a ++ (w.drop a |>.take m) ++ w.drop (a + m) := by
-      simp +arith +decide
-    unfold applyKeranenG
-    simp +decide
-    conv_lhs => rw [h_split, List.flatMap_append, List.flatMap_append]
-    rw [List.append_assoc]
-  have h_simplify :
-      List.take L (List.drop i (applyKeranenG w)) =
-        List.take L (List.drop r (applyKeranenG (w.drop a |>.take m))) ∧
-      List.take L (List.drop (i + L) (applyKeranenG w)) =
-        List.take L (List.drop (r + L) (applyKeranenG (w.drop a |>.take m))) := by
-    have h1 :
-        List.drop i (applyKeranenG w) =
-          List.drop r
-            (applyKeranenG (w.drop a |>.take m) ++ applyKeranenG (w.drop (a + m))) ∧
-        List.drop (i + L) (applyKeranenG w) =
-          List.drop (r + L)
-            (applyKeranenG (w.drop a |>.take m) ++ applyKeranenG (w.drop (a + m))) := by
-      have h2 :
-          List.drop i (applyKeranenG w) =
-            List.drop (i - 85 * a) (List.drop (85 * a) (applyKeranenG w)) ∧
-          List.drop (i + L) (applyKeranenG w) =
-            List.drop (i + L - 85 * a) (List.drop (85 * a) (applyKeranenG w)) := by
-        simp +decide [List.drop_drop]
-        lia
-      rw [h2.1, h2.2, h_split]
-      simp +decide [List.drop_append, applyKeranenG_take_length _ _ ha]
-      have hir : i - 85 * a = r := by
-        have hmod : r + 85 * a = i := by
-          simpa [a, r] using Nat.mod_add_div i 85
-        omega
-      have hiLr : i + L - 85 * a = r + L := by
-        have hmod : r + 85 * a = i := by
-          simpa [a, r] using Nat.mod_add_div i 85
-        omega
-      simp +decide [hir, hiLr]
-    simp_all +decide [List.drop_append, applyKeranenG_length]
-    omega
-  simp_all +decide [FinAbelianSquareFree]
-  convert hperm r L hL _ using 1
-  rw [applyKeranenG_length]
-  simp +arith +decide [*]
-  exact le_trans (by linarith)
-    (Nat.mul_le_mul_left _
-      (le_min (Nat.le_refl _) (Nat.le_sub_of_add_le (by linarith))))
-
-/-! ### Block bound (Parikh-matrix finite reduction) -/
-
-/-- **Block bound** (Keränen's Parikh-matrix analysis).
-
-For any ASF word `w`, an abelian square in `applyKeranenG w` at position
-`(i, L)` spans at most 5 letter-blocks. -/
-private lemma abelianSquare_block_bound (w : List (Fin 4)) (hw : FinAbelianSquareFree w)
-    (i L : ℕ) (hL : L > 0)
-    (hlen : i + 2 * L ≤ (applyKeranenG w).length)
-    (hperm : ((applyKeranenG w).drop i |>.take L).Perm
-             ((applyKeranenG w).drop (i + L) |>.take L)) :
-    (i + 2 * L - 1) / 85 - i / 85 + 1 ≤ 5 :=
-  abelianSquare_block_bound_inductive w hw i L hL hlen hperm
-
-/-! ### Main theorem -/
-
-/-- **Keränen's morphism preserves abelian-square-freeness.**
-
-Proved by:
-1. **Localization** (`abelianSquare_flatMap_localize`): any abelian square in
-   `g(w)` at `(i, L)` gives a non-ASF witness in `g(w')` where `w'` is a
-   subword of `w`.
-2. **Block bound** (`abelianSquare_block_bound`): the subword has `≤ 5`
-   letters.
-3. **Bounded verification** (`morphism_preserves_le5`): `g(w')` is ASF for
-   all ASF `w'` with `|w'| ≤ 5`.
-
-This yields a contradiction. -/
+/-- Any square spanning at least three blocks descends to the preimage;
+the remaining one- and two-block cases are checked by a streaming certificate. -/
 theorem keranenG_preserves_ASF (w : List (Fin 4)) (hw : FinAbelianSquareFree w) :
     FinAbelianSquareFree (applyKeranenG w) := by
   intro i L hL hlen hperm
-  set a := i / 85
-  set m := (i + 2 * L - 1) / 85 - a + 1
-  set w' := w.drop a |>.take m
+  let a := i / 85
+  let m := (i + 2 * L - 1) / 85 - a + 1
+  let r := i % 85
+  let w' := w.drop a |>.take m
   have ham : a + m ≤ w.length := by
     rw [applyKeranenG_length] at hlen
-    have : i + 2 * L - 1 < 85 * w.length := by omega
-    have : (i + 2 * L - 1) / 85 < w.length := Nat.div_lt_of_lt_mul this
+    dsimp [a, m]
     omega
-  have hw'_asf : FinAbelianSquareFree w' := finASF_subword w hw a m ham
-  have hw'_len : w'.length ≤ 5 := by
-    have := abelianSquare_block_bound w hw i L hL hlen hperm
+  have hw' : FinAbelianSquareFree w' := finASF_subword w hw a m ham
+  have hwlen : w'.length = m := by
     simp only [w', List.length_take, List.length_drop]
     omega
-  have hgw'_asf : FinAbelianSquareFree (applyKeranenG w') :=
-    morphism_preserves_le5 w' hw'_asf hw'_len
-  exact absurd hgw'_asf (abelianSquare_flatMap_localize w i L hL hlen hperm)
+  obtain ⟨hlen', hperm'⟩ := abelianSquare_localize_explicit w i L hL hlen hperm
+  have hspan : (r + 2 * L - 1) / 85 + 1 = w'.length := by
+    rw [hwlen]
+    exact localized_block_span w i L hL hlen
+  by_cases hm : m ≤ 2
+  · exact morphism_preserves_le2 w' hw' (by omega) r L hL hlen' hperm'
+  · exact no_spanning_large w' hw' (by omega) r L hL
+      (Nat.mod_lt _ (by decide)) hlen' hspan hperm'
 
-/-! ### Downstream theorems -/
+end
 
+
+/-! ### Upstream module `ErdosProblems/Erdos192/Infinite.lean` -/
+
+section
 private theorem keranenIterate_ASF (n : ℕ) : FinAbelianSquareFree (keranenIterate n) := by
   induction n with
   | zero => exact singleton_finASF 0
@@ -1414,7 +1825,7 @@ theorem exists_inf_from_all_lengths
         ∀ p : List (Fin 4), extendable p → ∃ c : Fin 4, extendable (p ++ [c]) := by
       intro p hp
       by_contra h_contra
-      push_neg at h_contra
+      push Not at h_contra
       have h_finite :
           ∀ c : Fin 4, ∃ m : ℕ, ∀ w : List (Fin 4),
             w.length = p.length + 1 + m → FinAbelianSquareFree w →
@@ -1470,12 +1881,8 @@ theorem exists_inf_from_all_lengths
       · exact fun m => by
           obtain ⟨w, hw₁, hw₂⟩ := hall m
           exact ⟨w, by simpa using hw₁, hw₂, by simp +decide⟩
-      · convert hc _ ih using 1
-        refine' List.ext_get _ _ <;> simp +decide [← hf]
-        intro i hi₁ hi₂
-        rcases i with (_ | i) <;> simp +decide [List.getElem_append, List.getElem_ofFn]
-        · rintro rfl; rfl
-        · grind +qlia
+      · rw [List.ofFn_succ_last]
+        simpa only [Fin.val_castSucc, Fin.val_last, ← hf n] using hc _ ih
     intro m
     obtain ⟨w, hw₁, hw₂, hw₃⟩ := h_extendable m 0
     grind
@@ -1485,47 +1892,33 @@ theorem exists_inf_from_all_lengths
   simp_all +decide [FinAbelianSquareFree]
   contrapose! hf
   refine ⟨i + 2 * l, i, l, hl, by linarith, ?_⟩
-  convert h using 1
-  all_goals refine List.ext_get ?_ ?_ <;> simp +decide [infBlock] <;> omega
+  convert h using 1 <;> (refine List.ext_get ?_ ?_ <;> simp +decide [infBlock] <;> omega)
 
 /-- **Keränen 1992, Theorem 1.** There exists an infinite abelian-square-free
 word over a four-letter alphabet. -/
 theorem exists_inf_abelianSquareFree_four :
     ∃ f : ℕ → Fin 4, InfAbelianSquareFree f :=
   exists_inf_from_all_lengths exists_finASF_all_lengths
-/-!
-## Source: `Erdos192.lean`
--/
 
-/-!
-# Erdős Problem 192 — Walks avoiding 3-term arithmetic progressions
+end
 
-## Connection to abelian squares
 
-Given a word `f : ℕ → Fin k`, the **Parikh walk** is the sequence `V(n) ∈ ℕ^k` where
-`V(n)_c` counts occurrences of letter `c` among `f(0), …, f(n−1)`. Each step of the
-walk is a standard basis vector `e_{f(n)}` ("positive unit step").
+/-! ### Upstream module `ErdosProblems/Erdos192/Ternary.lean` -/
 
-Three positions `a < b < c` satisfy `V(a) + V(c) = 2 · V(b)` (a **3-term AP** in the
-walk) if and only if `f` contains an abelian square at position `a` with half-length
-`b − a`. Therefore, the Parikh walk is 3-AP-free if and only if `f` is
-abelian-square-free.
+section
+def isFinASF3 (word : List (Fin 3)) : Bool :=
+  !(List.range word.length |>.any fun i =>
+    List.range word.length |>.any fun l =>
+      let l := l + 1
+      if i + 2 * l > word.length then false
+      else (word.drop i |>.take l).isPerm (word.drop (i + l) |>.take l))
 
-## Main results
+/-- **3-letter ASF bound.** No ASF word on 3 letters has length ≥ 8. -/
+theorem max_asf_3letters :
+    ∀ a b c d e f g h : Fin 3,
+      isFinASF3 [a, b, c, d, e, f, g, h] = false := by decide +kernel
 
-* `KE92.erdos_problem_192` — There exists an infinite walk in `ℕ^4` with positive
-  unit steps whose sequence of visited positions contains no 3-term AP.
-* `KE92.erdos_192` — Full classification: every infinite
-  positive-unit-step walk in `ℤ^d` (d ≤ 3) contains a 3-term AP, while `d ≥ 4`
-  admits AP-free walks.
--/
-/-! ### Classification helpers -/
-
-/-
-Completeness of `isFinASF3`: every abelian-square-free word over `Fin 3`
-satisfies `isFinASF3 w = true`.
--/
-private theorem isFinASF3_complete (w : List (Fin 3)) (hw : FinAbelianSquareFree w) :
+theorem isFinASF3_complete (w : List (Fin 3)) (hw : FinAbelianSquareFree w) :
     isFinASF3 w = true := by
   unfold isFinASF3;
   simp +zetaDelta at *;
@@ -1533,13 +1926,12 @@ private theorem isFinASF3_complete (w : List (Fin 3)) (hw : FinAbelianSquareFree
   exact fun h => h i ( j + 1 ) ( Nat.succ_pos _ ) hij ( by simpa [ List.isPerm_iff ] using hw )
 
 /-
-Infinite abelian-square-freeness is preserved under composition with
-an injection.
+`infBlock` of `e ∘ f` is the map of `infBlock` of `f`.
 -/
-private theorem inf_asf_comp_inj {α β : Type*} [DecidableEq α] [DecidableEq β]
+theorem inf_asf_comp_inj {α β : Type*} [DecidableEq α] [DecidableEq β]
     (f : ℕ → α) (e : α → β) (he : Function.Injective e)
     (hf : InfAbelianSquareFree f) : InfAbelianSquareFree (e ∘ f) := by
-  intro i l hl; specialize hf i l hl; simp_all +decide
+  intro i l hl; specialize hf i l hl; simp_all +decide [ InfAbelianSquareFree, List.map_eq_map_iff ] ;
   contrapose! hf;
   rw [ ← List.map_perm_map_iff he ];
   unfold infBlock at *; aesop;
@@ -1548,7 +1940,7 @@ private theorem inf_asf_comp_inj {α β : Type*} [DecidableEq α] [DecidableEq �
 No infinite word over `Fin 3` is abelian-square-free.
 Proof: by `max_asf_3letters`, every length-8 prefix has an abelian square.
 -/
-private theorem no_inf_asf_three (f : ℕ → Fin 3) : ¬InfAbelianSquareFree f := by
+theorem no_inf_asf_three (f : ℕ → Fin 3) : ¬InfAbelianSquareFree f := by
   intro hf
   have h8 : FinAbelianSquareFree (infBlock f 0 8) := by
     -- For any i, l, if the two blocks of length l starting at i and i+l are permutations, then they are also permutations of the infinite word.
@@ -1557,7 +1949,7 @@ private theorem no_inf_asf_three (f : ℕ → Fin 3) : ¬InfAbelianSquareFree f 
     contrapose! this
     simp_all +decide [ infBlock ];
     convert this using 1;
-    · refine' List.ext_get _ _ <;> simp +arith +decide
+    · refine' List.ext_get _ _ <;> simp +arith +decide [ List.get ];
       omega;
     · refine' List.ext_get _ _ <;> simp +arith +decide;
       omega;
@@ -1568,51 +1960,170 @@ private theorem no_inf_asf_three (f : ℕ → Fin 3) : ¬InfAbelianSquareFree f 
 /-
 For `d ≤ 3`, every infinite word over `Fin d` has a Parikh AP.
 -/
-private theorem hasParikhAP_of_le_three {d : ℕ} (hd : d ≤ 3) (f : ℕ → Fin d) :
+theorem hasParikhAP_of_le_three {d : ℕ} (hd : d ≤ 3) (f : ℕ → Fin d) :
     hasParikhAP f := by
   -- Let `e := Fin.castLE hd : Fin d → Fin 3`. This is injective (Fin.castLE_injective).
   set e : Fin d → Fin 3 := fun x => Fin.castLE hd x
   have he_inj : Function.Injective e := by
-    exact fun x y h => Fin.ext <| by simpa [ Fin.ext_iff ] using h;
+    exact Fin.castLE_injective hd;
   -- If `InfAbelianSquareFree f`, then by `inf_asf_comp_inj`, `InfAbelianSquareFree (e ∘ f)`.
   by_cases h_inf_asf : InfAbelianSquareFree f;
   · exact False.elim <| no_inf_asf_three ( e ∘ f ) <| inf_asf_comp_inj f e he_inj h_inf_asf;
   · exact Classical.not_not.1 fun h => h_inf_asf <| by simpa [ h ] using infAbelianSquareFree_iff_parikhAPFree f |>.2 h;
 
-/-
-For `d ≥ 4`, there exists an infinite parikhAPFree word over `Fin d`.
--/
-private theorem exists_parikhAPFree_of_ge_four {d : ℕ} (hd : 4 ≤ d) :
+end
+
+
+/-! ### Upstream module `ErdosProblems/Erdos192/Geometry.lean` -/
+
+section
+/-- Positive standard-coordinate unit steps in real coordinate space. -/
+def PositiveUnitWalk {d : ℕ} (p : ℕ → Fin d → ℝ) : Prop :=
+  ∀ n, ∃ i : Fin d, ∀ j, p (n + 1) j = p n j + if j = i then 1 else 0
+
+/-- A nontrivial arithmetic progression, with its times in increasing order. -/
+def HasWalkAP {d : ℕ} (p : ℕ → Fin d → ℝ) : Prop :=
+  ∃ a b c : ℕ, a < b ∧ b < c ∧ ∀ j, p a j + p c j = 2 * p b j
+
+/-- The real Parikh walk with an arbitrary starting point. -/
+def realWalk {d : ℕ} (x : Fin d → ℝ) (f : ℕ → Fin d) (n : ℕ) (j : Fin d) : ℝ :=
+  x j + parikhCount f n j
+
+theorem parikhCount_succ {d : ℕ} (f : ℕ → Fin d) (n : ℕ) (j : Fin d) :
+    parikhCount f (n + 1) j = parikhCount f n j + if j = f n then 1 else 0 := by
+  by_cases h : j = f n
+  · subst j
+    simp [parikhCount, Finset.range_add_one, Finset.filter_insert]
+  · simp [parikhCount, Finset.range_add_one, Finset.filter_insert, h, Ne.symm h]
+
+theorem realWalk_positive {d : ℕ} (x : Fin d → ℝ) (f : ℕ → Fin d) :
+    PositiveUnitWalk (realWalk x f) := by
+  intro n
+  refine ⟨f n, ?_⟩
+  intro j
+  simp only [realWalk, parikhCount_succ, Nat.cast_add]
+  split_ifs <;> simp <;> ring
+
+theorem positiveUnitWalk_representation {d : ℕ} (p : ℕ → Fin d → ℝ)
+    (hp : PositiveUnitWalk p) : ∃ f : ℕ → Fin d, p = realWalk (p 0) f := by
+  classical
+  choose f hf using hp
+  refine ⟨f, funext fun n => funext fun j => ?_⟩
+  induction n with
+  | zero => simp [realWalk, parikhCount]
+  | succ n ih =>
+    rw [hf n j, ih]
+    simp only [realWalk, parikhCount_succ, Nat.cast_add]
+    split_ifs <;> simp <;> ring
+
+theorem realWalk_hasAP_iff {d : ℕ} (x : Fin d → ℝ) (f : ℕ → Fin d) :
+    HasWalkAP (realWalk x f) ↔ hasParikhAP f := by
+  unfold HasWalkAP hasParikhAP
+  constructor
+  · rintro ⟨a, b, c, hab, hbc, h⟩
+    refine ⟨a, b, c, hab, hbc, fun j => ?_⟩
+    have hj := h j
+    simp only [realWalk] at hj
+    have : (parikhCount f a j : ℝ) + parikhCount f c j = 2 * parikhCount f b j := by
+      linarith
+    exact_mod_cast this
+  · rintro ⟨a, b, c, hab, hbc, h⟩
+    refine ⟨a, b, c, hab, hbc, fun j => ?_⟩
+    have hj : (parikhCount f a j : ℝ) + parikhCount f c j = 2 * parikhCount f b j :=
+      by exact_mod_cast h j
+    simp only [realWalk]
+    linarith
+
+theorem geometric_classification_iff_words (d : ℕ) :
+    (∀ p : ℕ → Fin d → ℝ, PositiveUnitWalk p → HasWalkAP p) ↔
+      (∀ f : ℕ → Fin d, hasParikhAP f) := by
+  constructor
+  · intro h f
+    exact (realWalk_hasAP_iff 0 f).mp (h _ (realWalk_positive 0 f))
+  · intro h p hp
+    obtain ⟨f, hf⟩ := positiveUnitWalk_representation p hp
+    rw [hf]
+    exact (realWalk_hasAP_iff _ f).mpr (h f)
+
+theorem sum_parikhCount {d : ℕ} (f : ℕ → Fin d) (n : ℕ) :
+    (∑ j : Fin d, parikhCount f n j) = n := by
+  induction n with
+  | zero => simp [parikhCount]
+  | succ n ih => simp [parikhCount_succ, Finset.sum_add_distrib, ih]
+
+theorem sum_realWalk {d : ℕ} (x : Fin d → ℝ) (f : ℕ → Fin d) (n : ℕ) :
+    (∑ j, realWalk x f n j) = (∑ j, x j) + n := by
+  simp only [realWalk, Finset.sum_add_distrib]
+  congr 1
+  exact_mod_cast sum_parikhCount f n
+
+theorem realWalk_injective {d : ℕ} (x : Fin d → ℝ) (f : ℕ → Fin d) :
+    Function.Injective (realWalk x f) := by
+  intro a b h
+  have hs := congrArg (fun v : Fin d → ℝ => ∑ j, v j) h
+  rw [sum_realWalk, sum_realWalk] at hs
+  exact_mod_cast (add_left_cancel hs)
+
+/-- The visited set contains three distinct points in arithmetic progression.
+Only the first two need be required distinct: the equation forces the third. -/
+def ContainsThreeTermAP {d : ℕ} (p : ℕ → Fin d → ℝ) : Prop :=
+  ∃ x y z : Fin d → ℝ, x ∈ Set.range p ∧ y ∈ Set.range p ∧ z ∈ Set.range p ∧
+    x ≠ y ∧ ∀ j, x j + z j = 2 * y j
+
+theorem realWalk_setAP_iff {d : ℕ} (x : Fin d → ℝ) (f : ℕ → Fin d) :
+    ContainsThreeTermAP (realWalk x f) ↔ HasWalkAP (realWalk x f) := by
+  constructor
+  · rintro ⟨_, _, _, ⟨a, rfl⟩, ⟨b, rfl⟩, ⟨c, rfl⟩, hne, h⟩
+    have hs := Finset.sum_congr (s₁ := Finset.univ) rfl (fun j _ => h j)
+    simp only [Finset.sum_add_distrib, ← Finset.mul_sum, sum_realWalk] at hs
+    have hn : (a : ℝ) + c = 2 * b := by linarith
+    have hn' : a + c = 2 * b := by exact_mod_cast hn
+    have hab : a ≠ b := fun hab => hne (congrArg (realWalk x f) hab)
+    by_cases ht : a < b
+    · exact ⟨a, b, c, ht, by omega, h⟩
+    · exact ⟨c, b, a, by omega, by omega, fun j => by rw [add_comm]; exact h j⟩
+  · rintro ⟨a, b, c, hab, hbc, h⟩
+    exact ⟨_, _, _, ⟨a, rfl⟩, ⟨b, rfl⟩, ⟨c, rfl⟩,
+      fun heq => (Nat.ne_of_lt hab) (realWalk_injective x f heq), h⟩
+
+theorem positiveUnitWalk_setAP_iff {d : ℕ} (p : ℕ → Fin d → ℝ)
+    (hp : PositiveUnitWalk p) : ContainsThreeTermAP p ↔ HasWalkAP p := by
+  obtain ⟨f, hf⟩ := positiveUnitWalk_representation p hp
+  rw [hf]
+  exact realWalk_setAP_iff _ f
+
+end
+
+section
+
+theorem exists_parikhAPFree_of_ge_four {d : ℕ} (hd : 4 ≤ d) :
     ∃ f : ℕ → Fin d, parikhAPFree f := by
-  -- From exists_inf_abelianSquareFree_four, get f : ℕ → Fin 4 with InfAbelianSquareFree f.
-  obtain ⟨f, hf⟩ := exists_inf_abelianSquareFree_four;
-  use fun n => Fin.castLE hd (f n);
-  exact infAbelianSquareFree_iff_parikhAPFree _ |>.1 ( inf_asf_comp_inj f ( Fin.castLE hd ) ( Fin.castLE_injective _ ) hf )
+  obtain ⟨f, hf⟩ := exists_inf_abelianSquareFree_four
+  exact ⟨fun n => Fin.castLE hd (f n),
+    (infAbelianSquareFree_iff_parikhAPFree _).mp
+      (inf_asf_comp_inj f (Fin.castLE hd) (Fin.castLE_injective hd) hf)⟩
 
-/-- **Erdős Problem 192 — Full classification.**
-
-An infinite walk in `ℤ^d` with positive unit steps has all its visited positions
-free of 3-term arithmetic progressions if and only if `d ≥ 4`.
-
-Equivalently, `(∀ f, hasParikhAP f) ↔ d ≤ 3`:
-* **`d ≤ 3`**: every infinite word over a ≤ 3-letter alphabet contains an abelian
-  square (no length-8 word over 3 letters is abelian-square-free), so every
-  positive-unit-step walk in dimensions ≤ 3 has a 3-term AP.
-* **`d ≥ 4`**: Keränen's 85-uniform morphism produces an infinite
-  abelian-square-free word over 4 letters, giving a walk in `ℤ^4` (and hence
-  in `ℤ^d` for all `d ≥ 4`) with no 3-term AP. -/
-theorem erdos_192 (d : ℕ) :
+theorem erdos_problem_192_classification (d : ℕ) :
     (∀ f : ℕ → Fin d, hasParikhAP f) ↔ d ≤ 3 := by
   constructor
   · intro h
     by_contra hd
-    push_neg at hd
     obtain ⟨f, hf⟩ := exists_parikhAPFree_of_ge_four (by omega : 4 ≤ d)
     exact hf (h f)
-  · intro hd f
-    exact hasParikhAP_of_le_three hd f
+  · exact fun hd f => hasParikhAP_of_le_three hd f
+
+/-- Every positive unit walk has a nontrivial progression in its visited set
+exactly in dimensions at most three. At dimension zero there are no such walks. -/
+theorem erdos_192 (d : ℕ) :
+    (∀ p : ℕ → Fin d → ℝ, PositiveUnitWalk p →
+      ∃ x y z : Fin d → ℝ, x ∈ Set.range p ∧ y ∈ Set.range p ∧ z ∈ Set.range p ∧
+        x ≠ y ∧ ∀ j, x j + z j = 2 * y j) ↔ d ≤ 3 := by
+  rw [← erdos_problem_192_classification d, ← geometric_classification_iff_words d]
+  exact forall_congr' fun p => imp_congr_right fun hp => positiveUnitWalk_setAP_iff p hp
+
+end
 
 #print axioms erdos_192
--- 'Erdos192.erdos_192' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Lean.trustCompiler, Quot.sound]
+-- 'Erdos192.erdos_192' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos192
