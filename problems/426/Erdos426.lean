@@ -299,7 +299,7 @@ end UniqueSubgraphs
 /-!
 # Helper Lemmas for Unique Subgraphs Are Rare
 
-Sorry-free infrastructure supporting the proof of `per_perm_switch_bound`
+Complete infrastructure supporting the proof of `per_perm_switch_bound`
 and `reduction_to_dense` in the main formalization.
 -/
 

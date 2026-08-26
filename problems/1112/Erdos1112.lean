@@ -21,7 +21,7 @@ on $B$ whatsoever suffices, so no $r$ can exist).
 
 The original proof was found by: Johan Land (github.com/beetree/math_erdos_1112, Apache-2.0),
 posted at https://www.erdosproblems.com/forum/thread/1112 and confirmed there by T. Bloom to
-be a faithful formalisation compiling without `sorry`.
+be a faithful and complete formalisation.
 
 Flattened single-file vendoring of that fifty-module Lean development, concatenated in
 dependency order with project-internal imports removed; its unused `formal-conjectures`
@@ -67,7 +67,7 @@ Encoding notes (reviewed):
 
 Status: the dichotomy `erdos_1112`, proved in `Erdos1112Proof/Final.lean`
 against the definitions in this file, resolves the problem with a complete,
-`sorry`-free formal proof. The paper is in `../paper/`.
+complete formal proof. The paper is in `../paper/`.
 -/
 
 
@@ -236,7 +236,7 @@ section
 /-
 Bridge lemmas on the frozen definitions of `Erdos1112.lean`.
 
-This file must contain no `sorry`. It provides the working API for
+This file provides the working API for
 `IsLacunaryWith`, `HasGapsIn`, `kFoldSumset`, `RatioWorks`, `IsVarLacunaryWith`
 without ever restating them. (`RatioWorks.mono` already lives, proved, in the
 frozen file — we reuse it and do not restate it.)

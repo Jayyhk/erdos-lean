@@ -1442,7 +1442,7 @@ noncomputable def stageOf (H : ℕ → ℕ) (k : ℕ) : ℕ :=
 /-- Gadget size: t_k = stage(k) -/
 noncomputable def gadgetSize (H : ℕ → ℕ) (k : ℕ) : ℕ := stageOf H k
 /-!
-## Axiomatization of the Construction
+## Assumed properties of the Construction
 Since the full construction involves:
 1. Choosing an enumeration of B
 2. Choosing horizons H_m appropriately

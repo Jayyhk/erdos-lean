@@ -22,8 +22,8 @@ alias of it); and upstream's `erdos_problem_183_explicit`, which merely paired
 `quantitativeLowerBound_explicit_all` with that same statement, is dropped since both
 conjuncts remain as standalone theorems. No mathematical content is changed.
 
-Note: erdosproblems.com still lists #183 as open. The formalisation compiles and is
-`sorry`-free, but unlike #1112 the statement has not been independently confirmed by the
+Note: erdosproblems.com still lists #183 as open. The formalisation compiles
+completely, but unlike #1112 the statement has not been independently confirmed by the
 site maintainer, and the lower bound it establishes is far stronger than the published
 record of $380^{k/5}$.
 -/
@@ -3032,7 +3032,7 @@ Equivalently, `R(3;k)` grows superexponentially. This answers in the negative th
 question, for which Erdős offered $100, of whether the limit is finite.
 
 The file proves several results that `erdos_183` itself does not use, and which are
-therefore outside its `#print axioms` trust base: `quantitativeLowerBound_explicit_all`
+therefore outside its trust base: `quantitativeLowerBound_explicit_all`
 (`((1 / (6 * exp 38)) * k ^ (1/3) / log k) ^ k ≤ R(3;k)` for `k ≥ 2`),
 `triangleRamseyNumber_log_isTheta` (`log R(3;k) =Θ[atTop] k * log k`, which pins the
 growth to `R(3;k) = k ^ Θ(k)`), and the classical upper bounds

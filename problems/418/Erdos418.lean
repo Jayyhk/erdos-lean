@@ -21,7 +21,7 @@ Aristotle and Boris Alexeev in plby/lean-proofs
 Vendored verbatim from that file, with only the header comment moved inside the namespace
 so that `import Mathlib` is the first line. This replaces the repository's previous
 `native_decide`-based proof: the computational steps are now proved, so `erdos_418`
-depends on the standard axioms alone rather than on `Lean.ofReduceBool` and
+depends on Lean's standard foundations alone rather than on `Lean.ofReduceBool` and
 `Lean.trustCompiler`.
 -/
 

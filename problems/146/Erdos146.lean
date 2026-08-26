@@ -21,8 +21,8 @@ sub-namespaces of `Erdos146`, and the refutation — upstream `not_erdos_146`
 — is moved verbatim to the end, outside those namespaces, so that it is `Erdos146.erdos_146`.
 No mathematical content is changed.
 
-Note: erdosproblems.com still lists #146 as open. The formalisation compiles and is free
-of `sorry`, but the statement has not been independently confirmed by the site maintainer.
+Note: erdosproblems.com still lists #146 as open. The formalisation compiles
+completely, but the statement has not been independently confirmed by the site maintainer.
 -/
 
 

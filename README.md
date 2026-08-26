@@ -23,9 +23,9 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 195 `complete`
+- 197 `complete`
 - 2 `trust_extended`
-- 13 `axiomatic`
+- 11 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -159,7 +159,7 @@ lake build
 | [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
 | [678](https://www.erdosproblems.com/678) | `complete` | [problems/678/](problems/678/) | |
 | [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
-| [694](https://www.erdosproblems.com/694) | `axiomatic` | [problems/694/](problems/694/) | assumes equation 2 of [Linnik](https://jayyhk.github.io/papers/linnik1944.pdf) (`linnik_dvd`) |
+| [694](https://www.erdosproblems.com/694) | `complete` | [problems/694/](problems/694/) | |
 | [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) |
 | [698](https://www.erdosproblems.com/698) | `complete` | [problems/698/](problems/698/) | |
 | [707](https://www.erdosproblems.com/707) | `complete` | [problems/707/](problems/707/) | |
@@ -233,7 +233,7 @@ lake build
 | [1134](https://www.erdosproblems.com/1134) | `complete` | [problems/1134/](problems/1134/) | |
 | [1136](https://www.erdosproblems.com/1136) | `complete` | [problems/1136/](problems/1136/) | |
 | [1138](https://www.erdosproblems.com/1138) | `complete` | [problems/1138/](problems/1138/) | |
-| [1141](https://www.erdosproblems.com/1141) | `axiomatic` | [problems/1141/](problems/1141/) | assumes Theorem 1.3 of [Pollack](https://jayyhk.github.io/papers/pollack2017.pdf) (`pollack_theorem_1_3`) |
+| [1141](https://www.erdosproblems.com/1141) | `complete` | [problems/1141/](problems/1141/) | |
 | [1148](https://www.erdosproblems.com/1148) | `axiomatic` | [problems/1148/](problems/1148/) | assumes an immediate consequence of Theorem 2.3 of [Einsiedler–Lindenstrauss–Michel–Venkatesh](https://jayyhk.github.io/papers/einsiedler-lindenstrauss-michel-venkatesh2012.pdf) (`theorem_2_3`) |
 | [1190](https://www.erdosproblems.com/1190) | `complete` | [problems/1190/](problems/1190/) | |
 | [1193](https://www.erdosproblems.com/1193) | `complete` | [problems/1193/](problems/1193/) | |

@@ -10,10 +10,6 @@ import Mathlib
 
 namespace Erdos42
 
-/-! =============================================================
-    Section from: Erdos/P42/Common.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — shared finite-combinatorial primitives.
 
@@ -48,10 +44,6 @@ def CliqueInCayley {p : ℕ} (T C : Finset (ZMod p)) : Prop :=
 def AvoidsNonzeroDiff {α : Type*} [DecidableEq α] [Zero α] [Sub α]
     (A B : Finset α) : Prop :=
   ∀ d ∈ DiffFinset A A, d ∈ DiffFinset B B → d = 0
-
-/-! =============================================================
-    Section from: Erdos/P42/Sidon.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — Sidon predicates and the elementary cardinality / difference
@@ -212,10 +204,6 @@ lemma zero_mem_diffFinset_self {A : Finset ℤ} (hA : A.Nonempty) :
     (0 : ℤ) ∈ DiffFinset A A := by
   obtain ⟨a, ha⟩ := hA
   exact mem_diffFinset.mpr ⟨a, ha, a, ha, by ring⟩
-
-/-! =============================================================
-    Section from: Erdos/P42/FiniteFourier.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — finite-Fourier predicates used in the routes.
@@ -428,10 +416,6 @@ lemma normalizedDftCoeff_neg_eq_of_symmetric
           ring
     _ = ∑ x ∈ T, ZMod.stdAddChar (-(x * r)) :=
           (sum_stdAddChar_neg_mul_eq_sum_pos_mul_of_symmetric hT r).symm
-
-/-! =============================================================
-    Section from: Erdos/P42/FiniteReduction.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — shared finite-reduction machinery.
@@ -1419,10 +1403,6 @@ theorem exists_large_intersection_cyclicInterval
       simpa [fiber] using hs
     exact (Nat.le_of_lt hs').trans hfiber_le
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Counterexample.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — compact-Cayley counterexample sequence.
 
@@ -1565,10 +1545,6 @@ theorem exists_cayleyCounterSeq_of_not_compactCayleyCliqueStatementExplicit
   }, trivial⟩
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/CliqueEndpoint.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — internal finite lemmas for the compact-Cayley theorem.
@@ -1927,10 +1903,6 @@ lemma cliqueKernelDensity_re_pos_iff_exists_clique
   exact cliqueTupleDensity_re_pos_iff_exists_clique hT0
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/SpectralCutNorm.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — compact-Cayley route, Lemma 2.5 finite spectral layer.
@@ -2463,10 +2435,6 @@ theorem cayleyCutBound_of_spectralBound
   exact norm_cayleyCutFunctional_le_spectral a φ ψ hM hMnonneg hφ hψ
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/CountingConvergence.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — finite density target for compact-Cayley counting convergence.
@@ -3451,10 +3419,6 @@ theorem exists_clique_of_spectral_density_transfer_sq
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Subseq.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — compact-Cayley counterexample subsequences.
 
@@ -3525,10 +3489,6 @@ lemma CayleyCounterSeq.subseq_tendsto_eps_zero
   exact S.eps_tendsto_zero.comp hφ.tendsto_atTop
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/FourierExtraction.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — generic finite Fourier extraction primitives.
@@ -3782,10 +3742,6 @@ theorem FourierSeq.exists_labelFreq_for_largeSpectrum
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/ExtractionGroup.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — compact-Cayley extraction quotient skeleton.
 
@@ -3924,10 +3880,6 @@ lemma FourierSeq.extractionGenerator_eq_iff_eventually_freq_eq
   simp [FourierSeq.wordLiftHom_apply_of, FourierSeq.wordLift]
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/StableExtraction.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — compact-Cayley diagonal extraction data.
@@ -4095,10 +4047,6 @@ theorem FourierSeq.exists_stableSubseqData
 end
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/QuotientLift.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — finite lifts from the compact-Cayley extraction quotient.
@@ -4328,10 +4276,6 @@ end
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/TorsionFree.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — torsion-freeness of the compact-Cayley extraction quotient.
 
@@ -4436,10 +4380,6 @@ end FourierSeq.StableSubseqData
 end
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/CoeffLimit.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — quotient coefficient limits and large-spectrum cover.
@@ -4625,10 +4565,6 @@ end FourierSeq.StableSubseqData
 end
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/CayleyExtraction.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — compact-Cayley extraction specialized to counterexamples.
@@ -4822,10 +4758,6 @@ end
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/CompactDual.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — compact dual attached to compact-Cayley extraction.
 
@@ -4973,10 +4905,6 @@ end CayleyExtraction
 end
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Characters.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — characters on the compact-Cayley compact dual.
@@ -5300,10 +5228,6 @@ end CayleyExtraction
 end
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/TrigPolynomial.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — trigonometric polynomials for compact-Cayley extraction.
@@ -5938,10 +5862,6 @@ end
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/PairOverlap.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — generic finite pair-overlap predicates.
 -/
@@ -6027,10 +5947,6 @@ lemma of_lowerBound {Q B : Finset G} {M : ℝ}
 end PairCoeffRealBound
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Fejer.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — Fejér kernels for compact-Cayley extraction.
@@ -6822,10 +6738,6 @@ end CayleyExtraction
 end
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Smoothing.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — finite Fejér smoothing for compact-Cayley extraction.
@@ -8072,10 +7984,6 @@ end
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Folner.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — finite Følner overlap infrastructure.
 
@@ -8784,10 +8692,6 @@ end CayleyExtraction
 end
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/ContinuousEndpoint.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — Layer 1 continuous-analogue lemma.
@@ -10004,10 +9908,6 @@ theorem tao_continuous_avoidance
     exact hx i j hij ((hH_eq (x i - x j)).mpr heq)
   exact lt_of_le_of_ne (hf_le _) h_ne_one
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/PositiveDefinite.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — compact-Cayley route, positive-definite endpoint interface.
 
@@ -10370,10 +10270,6 @@ theorem continuousCliqueDensity_pos_of_lt_one_or_realHilbertKernelRepresentation
   refine continuousCliqueDensity_pos_of_lt_one_or_levelOneSubgroupKernel μ M g hg_cont
     hg_nonneg hg_le hη hmean ?_
   exact hbranch.imp id (fun hrep => levelOneSubgroupKernel_of_realHilbertKernelRepresentation hrep.some)
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/LimitKernel.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — first compact-limit kernel coefficient layer.
@@ -12620,10 +12516,6 @@ end
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/SmoothDensityConvergence.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — finite-to-compact density convergence for smoothed kernels.
 
@@ -14043,10 +13935,6 @@ end
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Contradiction.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — contradiction from a compact-Cayley counterexample sequence.
 -/
@@ -14181,10 +14069,6 @@ end
 
 end CompactCayley
 
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/CliqueAxiom.lean
-    ============================================================= -/
-
 /-
 Erdős Problem 42 — Route B trust boundary: compact Cayley clique theorem.
 
@@ -14232,10 +14116,6 @@ theorem compact_cayley_clique
   exact S.false _hℓ _hη
 
 end CompactCayley
-
-/-! =============================================================
-    Section from: Erdos/P42/CompactCayley/Main.lean
-    ============================================================= -/
 
 /-
 Erdős Problem 42 — Route B final assembly.

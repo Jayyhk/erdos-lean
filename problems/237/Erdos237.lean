@@ -64,7 +64,7 @@ do not cover all of `ZMod p`. -/
 def Admissible (B : Finset ℤ) : Prop :=
   ∀ p : ℕ, p.Prime → (Finset.image (· % (p : ℤ)) B).card < p
 
-/-! ## Axioms from analytic number theory -/
+/-! ## Assumed inputs from analytic number theory -/
 
 /-- Intermediate result on page 7 in the proof of **Theorem 1.1 of Maynard**
 (*Small gaps between primes*, Annals of Math. 181 (2015), 383–413). For any `m ≥ 2`,

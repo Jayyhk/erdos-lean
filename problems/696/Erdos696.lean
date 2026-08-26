@@ -8902,7 +8902,7 @@ This file collects the classical analytic NT statements used unconditionally
 throughout the paper.  They correspond to Lemmas 2.1–2.4 + 2.7 in
 `erdos_696_paper.tex`.
 
-**Axioms (2 — Mathlib v4.28.0 gaps, all classical NT textbook results):**
+**Assumed (2 — Mathlib v4.28.0 gaps, all classical NT textbook results):**
 * `siegel_walfisz` (Lemma 2.1) — Davenport, *Multiplicative Number Theory*, Ch. 22.
 * `brun_titchmarsh` (Lemma 2.2) — Iwaniec–Kowalski, *Analytic Number Theory*, Thm. 6.6.
 

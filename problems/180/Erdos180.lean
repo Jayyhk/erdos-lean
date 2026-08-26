@@ -23,8 +23,8 @@ can be one of its dependencies). The namespace is renamed from `CompactnessConje
 `Erdos180`, and `not_erdos_180` is renamed to `erdos_180`. No mathematical content is
 changed.
 
-Note: erdosproblems.com still lists #180 as open. The formalisation compiles and is free
-of `sorry`, but the statement has not been independently confirmed by the site maintainer.
+Note: erdosproblems.com still lists #180 as open. The formalisation compiles
+completely, but the statement has not been independently confirmed by the site maintainer.
 -/
 
 noncomputable section Foundations

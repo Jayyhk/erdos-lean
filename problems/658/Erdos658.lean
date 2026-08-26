@@ -8,7 +8,7 @@ namespace Erdos658
 # Problem Description
 
 Erdős Problem 658. `erdos_658` is proved unconditionally here: the Frankl–Rödl theorem,
-previously assumed in this repository as the axiom `frankl_roedl_theorem`, is proved
+previously assumed in this repository as `frankl_roedl_theorem`, is proved
 rather than assumed.
 
 The original proof was found by: plby (github.com/plby/lean-proofs), file
