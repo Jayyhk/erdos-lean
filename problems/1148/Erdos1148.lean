@@ -83,7 +83,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PartialEntropyCollision.lean` -/
 
 section
@@ -126,7 +125,6 @@ theorem neg_mul_log_collision_div_mass_le_finiteEntropy {ι : Type*} [Fintype ι
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteCoverPairMass.lean` -/
 
@@ -176,23 +174,9 @@ theorem finite_cover_mass_sq_le_pair_mass {X : Type*} [MeasurableSpace X]
         (sq_sum_le_card_mul_sum_sq (s := Finset.univ) (f := fun i => μ.real (t i)))
     _ ≤ _ := mul_le_mul_of_nonneg_left hprod (Nat.cast_nonneg _)
 
-theorem fintype_cover_mass_sq_le_pair_mass {X ι : Type*} [MeasurableSpace X] [Fintype ι]
-    (μ : Measure X) [IsFiniteMeasure μ] (s : ι → Set X)
-    (hs : ∀ i, MeasurableSet (s i)) {E : Set X} (hcover : E ⊆ ⋃ i, s i)
-    {R : Set (X × X)} (hpair : ∀ i, s i ×ˢ s i ⊆ R) :
-    μ.real E ^ 2 ≤ (Fintype.card ι : ℝ) * (μ.prod μ).real R := by
-  classical
-  let e := Fintype.equivFin ι
-  apply finite_cover_mass_sq_le_pair_mass μ (fun i => s (e.symm i)) (fun i => hs (e.symm i))
-    (hpair := fun i => hpair (e.symm i))
-  intro x hx
-  obtain ⟨i, hi⟩ := mem_iUnion.mp (hcover hx)
-  exact mem_iUnion.mpr ⟨e i, by simpa only [Equiv.symm_apply_apply] using hi⟩
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PartitionEntropyCollision.lean` -/
 
@@ -207,35 +191,9 @@ noncomputable def finitePartitionEntropy {X ι : Type*} [MeasurableSpace X] [Fin
     (μ : Measure X) (s : ι → Set X) : ℝ :=
   finiteEntropy (fun i => μ.real (s i))
 
-theorem neg_mass_log_pair_bound_div_mass_le_partitionEntropy {X ι : Type*}
-    [MeasurableSpace X] [Fintype ι] (μ : Measure X) [IsFiniteMeasure μ] (s : ι → Set X)
-    (hs : ∀ i, MeasurableSet (s i)) (hdisj : Pairwise (Disjoint on s))
-    {m : ℝ} (hm : 0 < m) (hsum : ∑ i, μ.real (s i) = m) {R : Set (X × X)}
-    (hpair : ∀ i, s i ×ˢ s i ⊆ R) {B : ℝ} (hB : (μ.prod μ).real R ≤ B) :
-    -m * Real.log (B / m) ≤ finitePartitionEntropy μ s := by
-  have hpos := finite_collision_pos_of_sum_pos (by rwa [hsum] : 0 < ∑ i, μ.real (s i))
-  have hcol := (sum_sq_measureReal_le_pair_mass μ s hs hdisj hpair).trans hB
-  have hlog := Real.log_le_log (div_pos hpos hm) (div_le_div_of_nonneg_right hcol hm.le)
-  exact (mul_le_mul_of_nonpos_left hlog (neg_nonpos.mpr hm.le)).trans
-    (neg_mul_log_collision_div_mass_le_finiteEntropy (fun i => measureReal_nonneg) hm hsum)
-
-theorem neg_log_pair_bound_le_partitionEntropy {X ι : Type*} [MeasurableSpace X] [Fintype ι]
-    (μ : Measure X) [IsProbabilityMeasure μ] (s : ι → Set X)
-    (hs : ∀ i, MeasurableSet (s i)) (hdisj : Pairwise (Disjoint on s))
-    (hcover : (⋃ i, s i) = Set.univ) {R : Set (X × X)}
-    (hpair : ∀ i, s i ×ˢ s i ⊆ R) {B : ℝ} (hB : (μ.prod μ).real R ≤ B) :
-    -Real.log B ≤ finitePartitionEntropy μ s := by
-  have hsum : ∑ i, μ.real (s i) = 1 := by
-    rw [← measureReal_iUnion_fintype hdisj hs, hcover]
-    simp
-  have hcol := sum_sq_measureReal_le_pair_mass μ s hs hdisj hpair
-  exact (neg_le_neg (Real.log_le_log (finite_collision_pos hsum) (hcol.trans hB))).trans
-    (neg_log_collision_le_finiteEntropy (fun i => measureReal_nonneg) hsum)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteEntropySubadditivity.lean` -/
 
@@ -314,7 +272,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteEntropyBounds.lean` -/
 
 section
@@ -355,7 +312,6 @@ theorem continuous_finiteEntropy {ι : Type*} [Fintype ι] :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FinitePartitionEntropy.lean` -/
 
@@ -410,7 +366,6 @@ theorem finitePartitionEntropy_preimage_of_invariant {X ι : Type*} [MeasurableS
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteOrbitPartition.lean` -/
 
@@ -513,7 +468,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/BasicLemmaArithmetic.lean` -/
 
 section
@@ -536,16 +490,6 @@ def pairing {R : Type*} [CommRing R] (t u : R × R × R) : R :=
 lemma discr_sub {R : Type*} [CommRing R] (t u : R × R × R) :
     discr (t - u) = discr t + discr u - pairing t u := by
   simp only [discr, pairing, Prod.fst_sub, Prod.snd_sub]
-  ring
-
-lemma discr_neg {R : Type*} [CommRing R] (t : R × R × R) :
-    discr (-t) = discr t := by
-  simp only [discr, Prod.fst_neg, Prod.snd_neg]
-  ring
-
-lemma pairing_neg_right {R : Type*} [CommRing R] (t u : R × R × R) :
-    pairing t (-u) = -pairing t u := by
-  simp only [pairing, Prod.fst_neg, Prod.snd_neg]
   ring
 
 lemma eq_zero_of_nonsquare_mul_sq {d x y : ℤ} (hd : ¬ IsSquare d)
@@ -589,60 +533,6 @@ lemma eq_of_pairing_eq_two_mul {d : ℤ} {t u : ℤ × ℤ × ℤ}
     exact mul_left_cancel₀ ha hmul
   subst c'
   rfl
-
-/-- The degenerate negative pairing occurs only for opposite forms. -/
-lemma eq_neg_of_pairing_eq_neg_two_mul {d : ℤ} {t u : ℤ × ℤ × ℤ}
-    (hd : ¬ IsSquare d) (ht : discr t = d) (hu : discr u = d)
-    (hp : pairing t u = -(2 * d)) : t = -u := by
-  apply eq_of_pairing_eq_two_mul hd ht
-  · simpa only [discr_neg] using hu
-  · rw [pairing_neg_right, hp, neg_neg]
-
-lemma pairing_sq_ne_four_mul_sq {d : ℤ} {t u : ℤ × ℤ × ℤ}
-    (hd : ¬ IsSquare d) (ht : discr t = d) (hu : discr u = d)
-    (hne : t ≠ u) (hneg : t ≠ -u) : (pairing t u) ^ 2 ≠ 4 * d ^ 2 := by
-  intro h
-  have heq : (pairing t u) ^ 2 = (2 * d) ^ 2 := by nlinarith [h]
-  rcases (sq_eq_sq_iff_eq_or_eq_neg).mp heq with hp | hp
-  · exact hne (eq_of_pairing_eq_two_mul hd ht hu hp)
-  · exact hneg (eq_neg_of_pairing_eq_neg_two_mul hd ht hu hp)
-
-/-- Closeness excludes the negative degenerate value without a separate sign assumption. -/
-lemma pairing_ne_degenerate_of_close {d L : ℤ} {t u : ℤ × ℤ × ℤ}
-    (hd : ¬ IsSquare d) (ht : discr t = d) (hu : discr u = d) (hne : t ≠ u)
-    (hL : L < 4 * d) (hclose : |2 * d - pairing t u| ≤ L) :
-    pairing t u ≠ 2 * d ∧ pairing t u ≠ -(2 * d) := by
-  constructor
-  · intro hp
-    exact hne (eq_of_pairing_eq_two_mul hd ht hu hp)
-  · intro hp
-    have habs := le_abs_self (2 * d - pairing t u)
-    rw [hp] at habs hclose
-    linarith
-
-lemma abs_discr_le {t : ℝ × ℝ × ℝ} {B : ℝ}
-    (ha : |t.1| ≤ B) (hb : |t.2.1| ≤ B) (hc : |t.2.2| ≤ B) :
-    |discr t| ≤ 5 * B ^ 2 := by
-  have hB : 0 ≤ B := (abs_nonneg _).trans ha
-  have hb2 : t.2.1 ^ 2 ≤ B ^ 2 := by
-    nlinarith [sq_abs t.2.1, mul_self_le_mul_self (abs_nonneg _) hb]
-  have hac : |t.1| * |t.2.2| ≤ B ^ 2 := by
-    simpa only [pow_two] using mul_le_mul ha hc (abs_nonneg _) hB
-  calc
-    |discr t| ≤ |t.2.1 ^ 2| + |4 * t.1 * t.2.2| := abs_sub _ _
-    _ = t.2.1 ^ 2 + 4 * (|t.1| * |t.2.2|) := by
-      rw [abs_of_nonneg (sq_nonneg _), abs_mul, abs_mul]
-      norm_num
-      ring
-    _ ≤ 5 * B ^ 2 := by linarith
-
-/-- The pairing lies in an interval quadratic in the coefficient distance. -/
-lemma abs_two_mul_sub_pairing_le {d B : ℝ} {t u : ℝ × ℝ × ℝ}
-    (ht : discr t = d) (hu : discr u = d)
-    (ha : |t.1 - u.1| ≤ B) (hb : |t.2.1 - u.2.1| ≤ B)
-    (hc : |t.2.2 - u.2.2| ≤ B) : |2 * d - pairing t u| ≤ 5 * B ^ 2 := by
-  have h := abs_discr_le (t := t - u) ha hb hc
-  rwa [discr_sub, ht, hu, ← two_mul] at h
 
 /-- Multiples in a closed interval centered at a multiple, excluding the center. -/
 noncomputable def noncentralMultiples (center L m : ℤ) : Finset ℤ :=
@@ -779,7 +669,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormAction.lean` -/
 
 section
@@ -861,12 +750,6 @@ lemma discr_formAction {R : Type*} [CommRing R] (g : SL(2, R)) (t : R × R × R)
     discr (formAction g t) = discr t := by
   rw [formAction, discr_transform, Matrix.SpecialLinearGroup.det_coe, one_pow, one_mul]
 
-lemma formAction_injective {R : Type*} [CommRing R] (g : SL(2, R)) :
-    Function.Injective (formAction g) := by
-  intro t u h
-  have heq := congrArg (formAction g⁻¹) h
-  simpa only [← formAction_mul, inv_mul_cancel, formAction_one] using heq
-
 def transformLinear {R : Type*} [CommRing R] (M : Matrix (Fin 2) (Fin 2) R) :
     (R × R × R) →ₗ[R] (R × R × R) where
   toFun := transform M
@@ -921,7 +804,6 @@ abbrev IntegralPairOrbits (d ℓ : ℤ) :=
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PellAutomorphisms.lean` -/
 
@@ -982,7 +864,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairEmbeddings.lean` -/
 
 section
@@ -1002,130 +883,9 @@ def discrQuadraticForm (R : Type*) [CommRing R] : QuadraticForm R (R × R × R) 
     (by intro t u v; dsimp [QuadraticMap.polar, discr]; ring)
     (by intro a t u; dsimp [QuadraticMap.polar, discr]; ring)
 
-def pairSourceForm {R : Type*} [CommRing R] (d ℓ : R) : QuadraticForm R (R × R) :=
-  QuadraticMap.ofPolar (fun v => d * v.1 ^ 2 + ℓ * v.1 * v.2 + d * v.2 ^ 2)
-    (by intro a t; dsimp; ring)
-    (by intro t u v; dsimp [QuadraticMap.polar]; ring)
-    (by intro a t u; dsimp [QuadraticMap.polar]; ring)
-
-def pairLinear {R : Type*} [CommRing R] (t u : R × R × R) :
-    (R × R) →ₗ[R] (R × R × R) where
-  toFun v := (v.1 * t.1 + v.2 * u.1,
-    v.1 * t.2.1 + v.2 * u.2.1, v.1 * t.2.2 + v.2 * u.2.2)
-  map_add' v w := by ext <;> dsimp <;> ring
-  map_smul' a v := by ext <;> dsimp <;> ring
-
-lemma discr_pairLinear {R : Type*} [CommRing R] {d ℓ : R} {t u : R × R × R}
-    (ht : discr t = d) (hu : discr u = d) (hp : pairing t u = ℓ) (v : R × R) :
-    discr (pairLinear t u v) = pairSourceForm d ℓ v := by
-  change discr (pairLinear t u v) = d * v.1 ^ 2 + ℓ * v.1 * v.2 + d * v.2 ^ 2
-  dsimp [discr, pairing, pairLinear] at ht hu hp ⊢
-  linear_combination v.1 ^ 2 * ht + v.2 ^ 2 * hu + v.1 * v.2 * hp
-
-def pairIsometry {R : Type*} [CommRing R] {d ℓ : R} (p : FormPair R d ℓ) :
-    QuadraticMap.Isometry (pairSourceForm d ℓ) (discrQuadraticForm R) :=
-  { pairLinear p.1.1 p.1.2 with
-    map_app' := discr_pairLinear p.2.1 p.2.2.1 p.2.2.2 }
-
-lemma pairing_self {R : Type*} [CommRing R] (t : R × R × R) :
-    pairing t t = 2 * discr t := by
-  dsimp [pairing, discr]
-  ring
-
-lemma pairing_comm {R : Type*} [CommRing R] (t u : R × R × R) :
-    pairing t u = pairing u t := by
-  dsimp [pairing]
-  ring
-
-lemma pairing_pairLinear_right {R : Type*} [CommRing R]
-    (t u w : R × R × R) (v : R × R) :
-    pairing t (pairLinear u w v) = v.1 * pairing t u + v.2 * pairing t w := by
-  dsimp [pairing, pairLinear]
-  ring
-
-lemma pairLinear_eq_zero {R : Type*} [CommRing R] [NoZeroDivisors R]
-    {d ℓ : R} {t u : R × R × R} (ht : discr t = d) (hu : discr u = d)
-    (hp : pairing t u = ℓ) (hnd : ℓ ^ 2 ≠ 4 * d ^ 2) {v : R × R}
-    (hv : pairLinear t u v = 0) : v = 0 := by
-  have hxt := congrArg (pairing t) hv
-  have hxu := congrArg (pairing u) hv
-  have hzero (w : R × R × R) : pairing w 0 = 0 := by simp [pairing]
-  have hxt' : v.1 * (2 * d) + v.2 * ℓ = 0 := by
-    simpa only [pairing_pairLinear_right, pairing_self, ht, hp, hzero] using hxt
-  have hxu' : v.1 * ℓ + v.2 * (2 * d) = 0 := by
-    simpa only [pairing_pairLinear_right, pairing_comm u t, pairing_self, hu, hp, hzero]
-      using hxu
-  have hdet : 4 * d ^ 2 - ℓ ^ 2 ≠ 0 := sub_ne_zero.mpr hnd.symm
-  have hx : v.1 = 0 := by
-    have hmul : (4 * d ^ 2 - ℓ ^ 2) * v.1 = 0 := by
-      linear_combination 2 * d * hxt' - ℓ * hxu'
-    exact (mul_eq_zero.mp hmul).resolve_left hdet
-  have hy : v.2 = 0 := by
-    have hmul : (4 * d ^ 2 - ℓ ^ 2) * v.2 = 0 := by
-      linear_combination 2 * d * hxu' - ℓ * hxt'
-    exact (mul_eq_zero.mp hmul).resolve_left hdet
-  exact Prod.ext hx hy
-
-lemma pairIsometry_injective {R : Type*} [CommRing R] [NoZeroDivisors R]
-    {d ℓ : R} (p : FormPair R d ℓ) (hnd : ℓ ^ 2 ≠ 4 * d ^ 2) :
-    Function.Injective (pairIsometry p) := by
-  intro v w hvw
-  have hzero : pairLinear p.1.1 p.1.2 (v - w) = 0 := by
-    rw [map_sub]
-    exact sub_eq_zero.mpr hvw
-  exact sub_eq_zero.mp (pairLinear_eq_zero p.2.1 p.2.2.1 p.2.2.2 hnd hzero)
-
-def formPairOfIsometry {R : Type*} [CommRing R] {d ℓ : R}
-    (f : QuadraticMap.Isometry (pairSourceForm d ℓ) (discrQuadraticForm R)) :
-    FormPair R d ℓ := by
-  have ht : discr (f (1, 0)) = d := by
-    have h := f.map_app (1, 0)
-    change discr (f (1, 0)) = d * 1 ^ 2 + ℓ * 1 * 0 + d * 0 ^ 2 at h
-    simpa only [one_pow, zero_pow (by decide : 2 ≠ 0), mul_one, mul_zero, add_zero] using h
-  have hu : discr (f (0, 1)) = d := by
-    have h := f.map_app (0, 1)
-    change discr (f (0, 1)) = d * 0 ^ 2 + ℓ * 0 * 1 + d * 1 ^ 2 at h
-    simpa only [one_pow, zero_pow (by decide : 2 ≠ 0), mul_one, mul_zero, zero_add] using h
-  refine ⟨(f (1, 0), f (0, 1)), ht, hu, ?_⟩
-  have hmap : f (1, -1) = f (1, 0) - f (0, 1) := by
-    convert f.toLinearMap.map_sub (1, 0) (0, 1) using 1 <;> simp
-  have h := f.map_app (1, -1)
-  change discr (f (1, -1)) = d * 1 ^ 2 + ℓ * 1 * (-1) + d * (-1) ^ 2 at h
-  rw [hmap, discr_sub, ht, hu] at h
-  linear_combination -h
-
-lemma formPairOfIsometry_pairIsometry {R : Type*} [CommRing R] {d ℓ : R}
-    (p : FormPair R d ℓ) : formPairOfIsometry (pairIsometry p) = p := by
-  apply Subtype.ext
-  change (pairLinear p.1.1 p.1.2 (1, 0), pairLinear p.1.1 p.1.2 (0, 1)) = p.1
-  simp [pairLinear]
-
-lemma pairIsometry_formPairOfIsometry {R : Type*} [CommRing R] {d ℓ : R}
-    (f : QuadraticMap.Isometry (pairSourceForm d ℓ) (discrQuadraticForm R)) :
-    pairIsometry (formPairOfIsometry f) = f := by
-  apply QuadraticMap.Isometry.ext
-  intro v
-  change pairLinear (f (1, 0)) (f (0, 1)) v = f v
-  symm
-  calc
-    f v = f (v.1 • (1, 0) + v.2 • (0, 1)) := by
-      congr 1
-      ext <;> simp
-    _ = v.1 • f (1, 0) + v.2 • f (0, 1) := by rw [map_add, map_smul, map_smul]
-    _ = pairLinear (f (1, 0)) (f (0, 1)) v := rfl
-
-/-- The correspondence used to transfer the representation bound to pairs of forms. -/
-def formPairEquivIsometry {R : Type*} [CommRing R] (d ℓ : R) :
-    FormPair R d ℓ ≃ QuadraticMap.Isometry (pairSourceForm d ℓ) (discrQuadraticForm R) where
-  toFun := pairIsometry
-  invFun := formPairOfIsometry
-  left_inv := formPairOfIsometry_pairIsometry
-  right_inv := pairIsometry_formPairOfIsometry
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/IsotropicDirections.lean` -/
 
@@ -1143,14 +903,6 @@ namespace DukeArithmetic
 def isotropicDirection {K : Type*} [Field K] : Option K → K × K × K
   | none => (0, 0, 1)
   | some x => (1, 2 * x, x ^ 2)
-
-lemma discr_isotropicDirection {K : Type*} [Field K] (x : Option K) :
-    discr (isotropicDirection x) = 0 := by
-  cases x <;> dsimp [isotropicDirection, discr] <;> ring
-
-lemma isotropicDirection_ne_zero {K : Type*} [Field K] (x : Option K) :
-    isotropicDirection x ≠ 0 := by
-  cases x <;> simp [isotropicDirection]
 
 lemma exists_isotropicDirection {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
     {t : K × K × K} (ht : discr t = 0) (hne : t ≠ 0) :
@@ -1186,165 +938,9 @@ lemma pairing_smul_smul {R : Type*} [CommRing R] (a b : R) (t u : R × R × R) :
   dsimp [pairing]
   ring
 
-lemma pairing_smul_left {R : Type*} [CommRing R] (a : R) (t u : R × R × R) :
-    pairing (a • t) u = a * pairing t u := by
-  simpa only [one_smul, mul_one] using pairing_smul_smul a 1 t u
-
-lemma pairing_isotropicDirection_eq_zero_iff {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
-    (x y : Option K) : pairing (isotropicDirection x) (isotropicDirection y) = 0 ↔ x = y := by
-  have h4 : (4 : K) ≠ 0 := by
-    simpa only [show (2 : K) * 2 = 4 by norm_num] using mul_ne_zero h2 h2
-  cases x with
-  | none => cases y <;> simp [isotropicDirection, pairing, h4]
-  | some x =>
-    cases y with
-    | none => simp [isotropicDirection, pairing, h4]
-    | some y =>
-      have heq : pairing (isotropicDirection (some x)) (isotropicDirection (some y)) =
-          -4 * (x - y) ^ 2 := by
-        dsimp [isotropicDirection, pairing]
-        ring
-      rw [heq]
-      simp [mul_eq_zero, h4, sub_eq_zero]
-
-/-- An isotropic nonzero vector determines exactly one orthogonal isotropic direction. -/
-lemma existsUnique_orthogonal_direction_of_isotropic {K : Type*} [Field K]
-    (h2 : (2 : K) ≠ 0) {t : K × K × K} (ht : discr t = 0) (hne : t ≠ 0) :
-    ∃! x : Option K, pairing t (isotropicDirection x) = 0 := by
-  obtain ⟨a, ha, x, htx⟩ := exists_isotropicDirection h2 ht hne
-  refine ⟨x, ?_, ?_⟩
-  · dsimp only
-    rw [htx, pairing_smul_left,
-      (pairing_isotropicDirection_eq_zero_iff h2 x x).mpr rfl, mul_zero]
-  · intro y hy
-    rw [htx, pairing_smul_left] at hy
-    have hxy := (pairing_isotropicDirection_eq_zero_iff h2 x y).mp
-      ((mul_eq_zero.mp hy).resolve_left ha)
-    exact hxy.symm
-
-/-- A totally isotropic plane cannot occur in this split nondegenerate ternary space. -/
-lemma isotropic_orthogonal_collinear {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
-    {t u : K × K × K} (ht : discr t = 0) (hu : discr u = 0)
-    (hne : t ≠ 0) (hpair : pairing t u = 0) : ∃ a : K, u = a • t := by
-  by_cases hu0 : u = 0
-  · exact ⟨0, by simp [hu0]⟩
-  obtain ⟨a, ha, x, htx⟩ := exists_isotropicDirection h2 ht hne
-  obtain ⟨b, hb, y, huy⟩ := exists_isotropicDirection h2 hu hu0
-  rw [htx, huy, pairing_smul_smul] at hpair
-  have hp := (mul_eq_zero.mp hpair).resolve_left (mul_ne_zero ha hb)
-  have hxy := (pairing_isotropicDirection_eq_zero_iff h2 x y).mp hp
-  refine ⟨b / a, ?_⟩
-  rw [htx, huy, hxy, smul_smul, div_mul_cancel₀ b ha]
-
-lemma pairing_isotropicDirection_some {K : Type*} [Field K] (t : K × K × K) (x : K) :
-    pairing t (isotropicDirection (some x)) = -4 * (t.1 * x ^ 2 - t.2.1 * x + t.2.2) := by
-  dsimp [pairing, isotropicDirection]
-  ring
-
-lemma pairing_isotropicDirection_none {K : Type*} [Field K] (t : K × K × K) :
-    pairing t (isotropicDirection none) = -4 * t.1 := by
-  dsimp [pairing, isotropicDirection]
-  ring
-
-lemma coefficients_zero_of_three_roots {K : Type*} [Field K] {a b c x y z : K}
-    (hxy : x ≠ y) (hxz : x ≠ z) (hyz : y ≠ z)
-    (hx : a * x ^ 2 - b * x + c = 0) (hy : a * y ^ 2 - b * y + c = 0)
-    (hz : a * z ^ 2 - b * z + c = 0) : a = 0 ∧ b = 0 ∧ c = 0 := by
-  have hxy' : a * (x + y) - b = 0 := by
-    have hm : (x - y) * (a * (x + y) - b) = 0 := by linear_combination hx - hy
-    exact (mul_eq_zero.mp hm).resolve_left (sub_ne_zero.mpr hxy)
-  have hxz' : a * (x + z) - b = 0 := by
-    have hm : (x - z) * (a * (x + z) - b) = 0 := by linear_combination hx - hz
-    exact (mul_eq_zero.mp hm).resolve_left (sub_ne_zero.mpr hxz)
-  have ha : a = 0 := by
-    have hm : a * (y - z) = 0 := by linear_combination hxy' - hxz'
-    exact (mul_eq_zero.mp hm).resolve_right (sub_ne_zero.mpr hyz)
-  have hb : b = 0 := by simpa [ha] using hxy'
-  have hc : c = 0 := by simpa [ha, hb] using hx
-  exact ⟨ha, hb, hc⟩
-
-lemma affine_root_of_orthogonal {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
-    {t : K × K × K} {x : K} (hx : pairing t (isotropicDirection (some x)) = 0) :
-    t.1 * x ^ 2 - t.2.1 * x + t.2.2 = 0 := by
-  have h4 : (4 : K) ≠ 0 := by
-    simpa only [show (2 : K) * 2 = 4 by norm_num] using mul_ne_zero h2 h2
-  rw [pairing_isotropicDirection_some] at hx
-  exact (mul_eq_zero.mp hx).resolve_left (neg_ne_zero.mpr h4)
-
-lemma eq_zero_of_three_affine_orthogonal {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
-    {t : K × K × K} {x y z : K} (hxy : x ≠ y) (hxz : x ≠ z) (hyz : y ≠ z)
-    (hx : pairing t (isotropicDirection (some x)) = 0)
-    (hy : pairing t (isotropicDirection (some y)) = 0)
-    (hz : pairing t (isotropicDirection (some z)) = 0) : t = 0 := by
-  obtain ⟨ha, hb, hc⟩ := coefficients_zero_of_three_roots hxy hxz hyz
-    (affine_root_of_orthogonal h2 hx) (affine_root_of_orthogonal h2 hy)
-    (affine_root_of_orthogonal h2 hz)
-  exact Prod.ext ha (Prod.ext hb hc)
-
-lemma eq_zero_of_infinity_two_affine_orthogonal {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
-    {t : K × K × K} {x y : K} (hxy : x ≠ y)
-    (hinf : pairing t (isotropicDirection none) = 0)
-    (hx : pairing t (isotropicDirection (some x)) = 0)
-    (hy : pairing t (isotropicDirection (some y)) = 0) : t = 0 := by
-  have h4 : (4 : K) ≠ 0 := by
-    simpa only [show (2 : K) * 2 = 4 by norm_num] using mul_ne_zero h2 h2
-  have ha : t.1 = 0 := by
-    rw [pairing_isotropicDirection_none] at hinf
-    exact (mul_eq_zero.mp hinf).resolve_left (neg_ne_zero.mpr h4)
-  have hx' := affine_root_of_orthogonal h2 hx
-  have hy' := affine_root_of_orthogonal h2 hy
-  rw [ha, zero_mul, zero_sub] at hx' hy'
-  have hb : t.2.1 = 0 := by
-    have hm : t.2.1 * (x - y) = 0 := by linear_combination hy' - hx'
-    exact (mul_eq_zero.mp hm).resolve_right (sub_ne_zero.mpr hxy)
-  have hc : t.2.2 = 0 := by simpa [hb] using hx'
-  exact Prod.ext ha (Prod.ext hb hc)
-
-lemma eq_zero_of_three_orthogonal_directions {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
-    {t : K × K × K} {x y z : Option K} (hxy : x ≠ y) (hxz : x ≠ z) (hyz : y ≠ z)
-    (hx : pairing t (isotropicDirection x) = 0)
-    (hy : pairing t (isotropicDirection y) = 0)
-    (hz : pairing t (isotropicDirection z) = 0) : t = 0 := by
-  cases x with
-  | none =>
-    cases y with
-    | none => exact (hxy rfl).elim
-    | some y =>
-      cases z with
-      | none => exact (hxz rfl).elim
-      | some z =>
-        exact eq_zero_of_infinity_two_affine_orthogonal h2
-          (fun h => hyz (congrArg some h)) hx hy hz
-  | some x =>
-    cases y with
-    | none =>
-      cases z with
-      | none => exact (hyz rfl).elim
-      | some z =>
-        exact eq_zero_of_infinity_two_affine_orthogonal h2
-          (fun h => hxz (congrArg some h)) hy hx hz
-    | some y =>
-      cases z with
-      | none =>
-        exact eq_zero_of_infinity_two_affine_orthogonal h2
-          (fun h => hxy (congrArg some h)) hz hx hy
-      | some z =>
-        exact eq_zero_of_three_affine_orthogonal h2
-          (fun h => hxy (congrArg some h)) (fun h => hxz (congrArg some h))
-          (fun h => hyz (congrArg some h)) hx hy hz
-
-/-- A nonzero vector is orthogonal to at most two isotropic directions. -/
-theorem card_orthogonal_directions_le_two {K : Type*} [Field K] (h2 : (2 : K) ≠ 0)
-    {t : K × K × K} (ht : t ≠ 0) (s : Finset (Option K))
-    (hs : ∀ x ∈ s, pairing t (isotropicDirection x) = 0) : s.card ≤ 2 := by
-  by_contra hcard
-  obtain ⟨x, hx, y, hy, z, hz, hxy, hxz, hyz⟩ := Finset.two_lt_card.mp (by omega : 2 < s.card)
-  exact ht (eq_zero_of_three_orthogonal_directions h2 hxy hxz hyz (hs x hx) (hs y hy) (hs z hz))
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealFlow.lean` -/
 
@@ -1395,9 +991,6 @@ lemma formAction_diagonalFlow (t : ℝ) (v : ℝ × ℝ × ℝ) :
 
 def splitForm (R : Type*) [CommRing R] : R × R × R := (0, 1, 0)
 
-lemma discr_splitForm {R : Type*} [CommRing R] : discr (splitForm R) = 1 := by
-  simp [splitForm, discr]
-
 lemma formAction_diagonalFlow_splitForm (t : ℝ) :
     formAction (diagonalFlow t) (splitForm ℝ) = splitForm ℝ := by
   simp [formAction_diagonalFlow, splitForm]
@@ -1441,7 +1034,6 @@ lemma offDiagonal_product_lower_bound {d ℓ : ℤ} (hd : 0 < d) (hℓ : ℓ ≠
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowStabilizer.lean` -/
 
@@ -1534,7 +1126,6 @@ theorem exists_signed_flow_of_formAction_eq {g h : SL(2, ℝ)}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairFrames.lean` -/
 
@@ -1728,24 +1319,6 @@ lemma isUnit_det_pairFrame {R : Type*} [CommRing R] {d ℓ : R}
     ring
   exact isUnit_of_mul_isUnit_right hprod
 
-/-- The unramified, unit-discriminant case needs no lattice enumeration. -/
-theorem exists_isometry_of_unit_pair_discriminant {R : Type*} [CommRing R]
-    [NoZeroDivisors R] [CharZero R] {d ℓ : R} (p q : FormPair R d ℓ)
-    (hunit : IsUnit (ℓ ^ 2 - 4 * d ^ 2)) :
-    ∃ g : QuadraticMap.IsometryEquiv (discrQuadraticForm R) (discrQuadraticForm R),
-      g p.1.1 = q.1.1 ∧ g p.1.2 = q.1.2 := by
-  let hp := isUnit_det_pairFrame p hunit
-  let hq := isUnit_det_pairFrame q hunit
-  exact ⟨frameIsometryOfUnit p q hp hq,
-    frameIsometryOfUnit_first p q hp hq, frameIsometryOfUnit_second p q hp hq⟩
-
-/-- The rational extension step, specialized to the discriminant ternary form. -/
-theorem exists_isometry_of_nondegenerate_pair {K : Type*} [Field K] [CharZero K]
-    {d ℓ : K} (p q : FormPair K d ℓ) (hnd : ℓ ^ 2 ≠ 4 * d ^ 2) :
-    ∃ g : QuadraticMap.IsometryEquiv (discrQuadraticForm K) (discrQuadraticForm K),
-      g p.1.1 = q.1.1 ∧ g p.1.2 = q.1.2 :=
-  exists_isometry_of_unit_pair_discriminant p q (isUnit_iff_ne_zero.mpr (sub_ne_zero.mpr hnd))
-
 /-- The explicit extension also has determinant one, as required for special-orthogonal orbits. -/
 theorem exists_specialIsometry_of_unit_pair_discriminant {R : Type*} [CommRing R]
     [NoZeroDivisors R] [CharZero R] {d ℓ : R} (p q : FormPair R d ℓ)
@@ -1767,7 +1340,6 @@ theorem exists_specialIsometry_of_nondegenerate_pair {K : Type*} [Field K] [Char
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SpecialOrbits.lean` -/
 
@@ -1839,14 +1411,6 @@ theorem specialPairOrbits_subsingleton_of_unit {R : Type*} [CommRing R]
     apply Subtype.ext
     exact Prod.ext hfirst hsecond
 
-theorem card_specialPairOrbits_eq_one_of_unit {R : Type*} [CommRing R]
-    [NoZeroDivisors R] [CharZero R] {d ℓ : R} [Nonempty (FormPair R d ℓ)]
-    (hunit : IsUnit (ℓ ^ 2 - 4 * d ^ 2)) : Nat.card (SpecialPairOrbits R d ℓ) = 1 := by
-  let := specialPairOrbits_subsingleton_of_unit hunit
-  let : Nonempty (SpecialPairOrbits R d ℓ) :=
-    ⟨Quotient.mk _ (Classical.choice (inferInstance : Nonempty (FormPair R d ℓ)))⟩
-  exact Nat.card_unique
-
 lemma padic_isUnit_pair_discriminant (p : ℕ) [Fact p.Prime] (d ℓ : ℤ)
     (hgood : ¬ (p : ℤ) ∣ ℓ ^ 2 - 4 * d ^ 2) :
     IsUnit ((ℓ : PadicInt p) ^ 2 - 4 * (d : PadicInt p) ^ 2) := by
@@ -1857,18 +1421,9 @@ lemma padic_isUnit_pair_discriminant (p : ℕ) [Fact p.Prime] (d ℓ : ℤ)
     rwa [PadicInt.norm_int_lt_one_iff_dvd]
   simpa only [Int.cast_sub, Int.cast_pow, Int.cast_mul, Int.cast_ofNat] using hunitZ
 
-/-- At every prime not dividing the binary discriminant the local factor is exactly one. -/
-theorem padic_card_specialPairOrbits_eq_one (p : ℕ) [Fact p.Prime] (d ℓ : ℤ)
-    (hgood : ¬ (p : ℤ) ∣ ℓ ^ 2 - 4 * d ^ 2)
-    (pair : FormPair (PadicInt p) d ℓ) :
-    Nat.card (SpecialPairOrbits (PadicInt p) d ℓ) = 1 := by
-  let : Nonempty (FormPair (PadicInt p) d ℓ) := ⟨pair⟩
-  exact card_specialPairOrbits_eq_one_of_unit (padic_isUnit_pair_discriminant p d ℓ hgood)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FrameCongruence.lean` -/
 
@@ -1886,12 +1441,6 @@ def coeffMatrixMap {R : Type*} [CommRing R] (M : Matrix (Fin 3) (Fin 3) R) :
     (R × R × R) →ₗ[R] (R × R × R) :=
   (coeffVecEquiv R).symm.toLinearMap.comp
     ((Matrix.toLin' M).comp (coeffVecEquiv R).toLinearMap)
-
-lemma coeffMatrixMap_one {R : Type*} [CommRing R] :
-    coeffMatrixMap (1 : Matrix (Fin 3) (Fin 3) R) = LinearMap.id := by
-  apply LinearMap.ext
-  intro t
-  simp [coeffMatrixMap]
 
 lemma coeffMatrixMap_mul {R : Type*} [CommRing R]
     (M N : Matrix (Fin 3) (Fin 3) R) :
@@ -2068,15 +1617,6 @@ theorem finite_specialPairOrbits_of_residue_map {R S : Type*} [CommRing R] [Comm
     Finite (SpecialPairOrbits R d ℓ) :=
   Finite.of_injective _ (orbitFrameResidues_injective base hnd φ hker)
 
-/-- A coarse finite bound, preceding the sharper local estimates in the source proof. -/
-theorem card_specialPairOrbits_le_residue_card_pow {R S : Type*} [CommRing R] [CommRing S]
-    [NoZeroDivisors R] [CharZero R] [Finite S] {d ℓ : R} (base : FormPair R d ℓ)
-    (hnd : ℓ ^ 2 ≠ 4 * d ^ 2) (φ : R →+* S)
-    (hker : ∀ a, φ a = 0 → (pairFrame base.1.1 base.1.2).det ∣ a) :
-    Nat.card (SpecialPairOrbits R d ℓ) ≤ Nat.card S ^ 9 := by
-  have h := Nat.card_le_card_of_injective _ (orbitFrameResidues_injective base hnd φ hker)
-  simpa only [Matrix, Nat.card_fun, Nat.card_fin, ← pow_mul, show 3 * 3 = 9 by decide] using h
-
 lemma int_frame_residue_kernel (D a : ℤ) (ha : (a : ZMod D.natAbs) = 0) : D ∣ a := by
   have h := (ZMod.intCast_zmod_eq_zero_iff_dvd a D.natAbs).mp ha
   simpa only [Int.natCast_natAbs, abs_dvd] using h
@@ -2087,15 +1627,6 @@ theorem finite_integer_specialPairOrbits {d ℓ : ℤ} (base : FormPair ℤ d �
   let : NeZero D.natAbs := ⟨Int.natAbs_ne_zero.mpr (det_pairFrame_ne_zero base hnd)⟩
   exact finite_specialPairOrbits_of_residue_map base hnd (Int.castRingHom (ZMod D.natAbs))
     (int_frame_residue_kernel D)
-
-theorem card_integer_specialPairOrbits_le {d ℓ : ℤ} (base : FormPair ℤ d ℓ)
-    (hnd : ℓ ^ 2 ≠ 4 * d ^ 2) :
-    Nat.card (SpecialPairOrbits ℤ d ℓ) ≤ (pairFrame base.1.1 base.1.2).det.natAbs ^ 9 := by
-  let D := (pairFrame base.1.1 base.1.2).det
-  let : NeZero D.natAbs := ⟨Int.natAbs_ne_zero.mpr (det_pairFrame_ne_zero base hnd)⟩
-  have h := card_specialPairOrbits_le_residue_card_pow base hnd
-    (Int.castRingHom (ZMod D.natAbs)) (int_frame_residue_kernel D)
-  simpa only [Nat.card_eq_fintype_card, ZMod.card] using h
 
 lemma padic_frame_residue_kernel (p : ℕ) [Fact p.Prime] (D : PadicInt p) (hD : D ≠ 0)
     (a : PadicInt p) (ha : PadicInt.toZModPow D.valuation a = 0) : D ∣ a := by
@@ -2111,20 +1642,9 @@ theorem finite_padic_specialPairOrbits (p : ℕ) [Fact p.Prime] {d ℓ : PadicIn
   exact finite_specialPairOrbits_of_residue_map base hnd (PadicInt.toZModPow D.valuation)
     (padic_frame_residue_kernel p D (det_pairFrame_ne_zero base hnd))
 
-/-- This exponent is only a finiteness bound; it is not the sharp basic-lemma estimate. -/
-theorem card_padic_specialPairOrbits_le (p : ℕ) [Fact p.Prime] {d ℓ : PadicInt p}
-    (base : FormPair (PadicInt p) d ℓ) (hnd : ℓ ^ 2 ≠ 4 * d ^ 2) :
-    Nat.card (SpecialPairOrbits (PadicInt p) d ℓ) ≤
-      p ^ ((pairFrame base.1.1 base.1.2).det.valuation * 9) := by
-  let D := (pairFrame base.1.1 base.1.2).det
-  have h := card_specialPairOrbits_le_residue_card_pow base hnd (PadicInt.toZModPow D.valuation)
-    (padic_frame_residue_kernel p D (det_pairFrame_ne_zero base hnd))
-  simpa only [Nat.card_eq_fintype_card, ZMod.card, ← pow_mul] using h
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairStabilizer.lean` -/
 
@@ -2258,7 +1778,6 @@ lemma specialDiscrGroup_ext_of_pair {R : Type*} [CommRing R]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BaseChange.lean` -/
 
@@ -2462,14 +1981,9 @@ noncomputable def specialPairOrbitBaseChange {R S : Type*} [CommRing R] [CommRin
     refine ⟨specialDiscrBaseChange φ g, ?_⟩
     rw [← mapFormPair_smul, hg])
 
-lemma specialPairOrbitBaseChange_mk {R S : Type*} [CommRing R] [CommRing S]
-    (φ : R →+* S) {d ℓ : R} (p : FormPair R d ℓ) :
-    specialPairOrbitBaseChange φ (Quotient.mk _ p) = Quotient.mk _ (mapFormPair φ p) := rfl
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormActionBaseChange.lean` -/
 
@@ -2500,7 +2014,6 @@ lemma formAction_smul {R : Type*} [CommRing R] (g : SL(2, R)) (c : R) (t : R × 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowPeriods.lean` -/
 
@@ -2595,7 +2108,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PeriodGap.lean` -/
 
 section
@@ -2661,7 +2173,6 @@ lemma period_gap_pos : 0 < 2 * Real.log (3 / 2 : ℝ) :=
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PeriodGroup.lean` -/
 
@@ -2741,7 +2252,6 @@ theorem exists_least_positive_flow_period {d : ℤ} (hd : 0 < d) (hns : ¬IsSqua
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularOrbitSpace.lean` -/
 
@@ -2846,7 +2356,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularTopology.lean` -/
 
 section
@@ -2868,7 +2377,6 @@ instance modularOrbitSpaceLocallyCompact : LocallyCompactSpace ModularOrbitSpace
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PartitionCompactCores.lean` -/
 
@@ -2925,7 +2433,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneRectangles.lean` -/
 
 section
@@ -2958,15 +2465,9 @@ lemma measurableSet_upperHalfOpenRectangle (a b c d : ℝ) :
   (measurableSet_Ico.preimage UpperHalfPlane.continuous_re.measurable).inter
     (measurableSet_Icc.preimage UpperHalfPlane.continuous_im.measurable)
 
-lemma upperHalfOpenRectangle_subset_closed (a b c d : ℝ) :
-    upperHalfOpenRectangle a b c d ⊆ upperClosedRectangle a b c d := by
-  rintro z ⟨hre, him⟩
-  exact ⟨⟨hre.1, hre.2.le⟩, him⟩
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowWindows.lean` -/
 
@@ -3040,28 +2541,9 @@ lemma offDiagonal_log_window_le {β γ η d : ℝ}
   have hlogη : Real.log η ≤ 0 := Real.log_nonpos hη0.le hη
   linarith
 
-lemma closeFlowCoordinates_time_difference_le {α β γ η d v w v' w' : ℝ}
-    (hd : 0 < d) (hη0 : 0 < η) (hη : η ≤ 1 / 2)
-    (hprod : 1 / (4 * d) ≤ |β * γ|)
-    (h : CloseFlowCoordinates α β γ η v w)
-    (h' : CloseFlowCoordinates α β γ η v' w') :
-    |(w - v) - (w' - v')| ≤ Real.log (4 * d) + 4 * η := by
-  have hbg : β * γ ≠ 0 := abs_pos.mp (lt_of_lt_of_le (by positivity) hprod)
-  obtain ⟨hα, hvlo, hvhi⟩ := closeFlowCoordinates_diagonal_bounds (by linarith) h
-  obtain ⟨_, hvlo', hvhi'⟩ := closeFlowCoordinates_diagonal_bounds (by linarith) h'
-  obtain ⟨hwlo, hwhi⟩ := closeFlowCoordinates_offDiagonal_bounds
-    (left_ne_zero_of_mul hbg) (right_ne_zero_of_mul hbg) h
-  obtain ⟨hwlo', hwhi'⟩ := closeFlowCoordinates_offDiagonal_bounds
-    (left_ne_zero_of_mul hbg) (right_ne_zero_of_mul hbg) h'
-  have hvwidth := diagonal_log_window_le hη0.le hη
-  have hwwidth := offDiagonal_log_window_le hd hη0 (by linarith) hprod
-  apply abs_le.mpr
-  constructor <;> linarith
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowVolume.lean` -/
 
@@ -3158,7 +2640,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RelativeFlow.lean` -/
 
 section
@@ -3234,7 +2715,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RotationFrames.lean` -/
 
 section
@@ -3302,7 +2782,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReducedFormBounds.lean` -/
 
 section
@@ -3360,7 +2839,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/IntegralFormOrbits.lean` -/
 
 section
@@ -3379,9 +2857,6 @@ instance integralDiscrFormMulAction (d : ℤ) : MulAction SL(2, ℤ) (IntegralDi
   smul := integralFormAction
   one_smul t := Subtype.ext (formAction_one t.1)
   mul_smul g h t := Subtype.ext (formAction_mul g h t.1)
-
-lemma integralFormAction_val {d : ℤ} (g : SL(2, ℤ)) (t : IntegralDiscrForm d) :
-    (g • t).1 = formAction g t.1 := rfl
 
 abbrev IntegralFormOrbits (d : ℤ) := Quotient (MulAction.orbitRel SL(2, ℤ) (IntegralDiscrForm d))
 
@@ -3408,7 +2883,6 @@ lemma integralFormOrbitMk_action {d : ℤ} (g : SL(2, ℤ)) (t : IntegralDiscrFo
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReducedForms.lean` -/
 
@@ -3502,7 +2976,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosedOrbitMeasure.lean` -/
 
 section
@@ -3522,9 +2995,6 @@ open scoped MatrixGroups
 noncomputable def closedOrbitCurve {g : SL(2, ℝ)} {T : ℝ}
     (hT : T ∈ flowPeriodGroup g) : AddCircle T → ModularOrbitSpace :=
   (modularFlowCurve_periodic hT).lift
-
-lemma closedOrbitCurve_coe {g : SL(2, ℝ)} {T : ℝ} (hT : T ∈ flowPeriodGroup g) (s : ℝ) :
-    closedOrbitCurve hT (s : AddCircle T) = modularFlowCurve g s := rfl
 
 lemma continuous_closedOrbitCurve {g : SL(2, ℝ)} {T : ℝ} (hT : T ∈ flowPeriodGroup g) :
     Continuous (closedOrbitCurve hT) :=
@@ -3560,7 +3030,6 @@ instance closedOrbitMeasure_isFinite {g : SL(2, ℝ)} {T : ℝ} [Fact (0 < T)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosedOrbitInvariance.lean` -/
 
@@ -3616,7 +3085,6 @@ theorem closedOrbitMeasure_flow_invariant {g : SL(2, ℝ)} {T : ℝ} [Fact (0 < 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowMeasureChange.lean` -/
 
@@ -3695,7 +3163,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealFormOrbit.lean` -/
 
 section
@@ -3752,7 +3219,6 @@ theorem exists_formAction_sqrt_discr {d : ℝ} (hd : 0 < d)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosedFlowOrbit.lean` -/
 
@@ -3828,7 +3294,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/IntrinsicOrbitMeasure.lean` -/
 
 section
@@ -3882,7 +3347,6 @@ lemma ClosedFlowOrbit.measure_eq_of_formAction_eq (o p : ClosedFlowOrbit)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DiscriminantPacket.lean` -/
 
@@ -3967,7 +3431,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketComponentMeasure.lean` -/
 
 section
@@ -4014,7 +3477,6 @@ theorem ClosedFlowOrbit.measure_eq_packetOrbit {d : ℤ} (hd : 0 < d) (hns : ¬I
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairOrbitComponents.lean` -/
 
@@ -4063,7 +3525,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuotientImageMeasure.lean` -/
 
 section
@@ -4106,7 +3567,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosedOrbitImageMeasure.lean` -/
 
 section
@@ -4132,26 +3592,9 @@ lemma closedOrbitMeasure_eq_map_interval {g : SL(2, ℝ)} {T : ℝ} [Fact (0 < T
         (volume.restrict (Set.Ioc a (a + T))) := Measure.map_map hc hp.measurable
     _ = _ := rfl
 
-theorem closedOrbitMeasure_image_le {g : SL(2, ℝ)} {T : ℝ} [Fact (0 < T)]
-    (hT : T ∈ flowPeriodGroup g) (hgen : flowPeriodGroup g = AddSubgroup.zmultiples T)
-    (E : Set ℝ) (hE : MeasurableSet (modularFlowCurve g '' E)) :
-    closedOrbitMeasure hT (modularFlowCurve g '' E) ≤ volume E := by
-  have hs := isAddFundamentalDomain_Ioc (Fact.out : 0 < T) 0
-  have hsep (s t : ℝ) (heq : modularFlowCurve g s = modularFlowCurve g t) :
-      ∃ n : AddSubgroup.zmultiples T, n +ᵥ s = t := by
-    have hp := (modularFlowCurve_eq_iff g s t).mp heq
-    rw [hgen] at hp
-    refine ⟨⟨t - s, hp⟩, ?_⟩
-    change (t - s) + s = t
-    ring
-  rw [closedOrbitMeasure_eq_map_interval hT 0]
-  exact addFundamentalDomain_map_image_le volume hs
-    (continuous_modularFlowCurve g).measurable hsep E hE
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PeriodRectangle.lean` -/
 
@@ -4197,7 +3640,6 @@ lemma isAddFundamentalDomain_period_rectangle {T U : ℝ} (hT : 0 < T) (hU : 0 <
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosedPairImageMeasure.lean` -/
 
@@ -4249,7 +3691,6 @@ theorem closedOrbitMeasure_prod_image_le {g h : SL(2, ℝ)} {T U : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SignedFlow.lean` -/
 
@@ -4318,7 +3759,6 @@ lemma close_pairing_cutoff_bounds {d : ℤ} (hd : 0 < d)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosePairImage.lean` -/
 
@@ -4390,26 +3830,9 @@ theorem closedPair_image_le_parameterArea {g h : SL(2, ℝ)} {T U : ℝ}
     (MeasurableEquiv.finTwoArrow '' E) (himage.symm ▸ hE)
   simpa only [himage, volume_finTwoArrow_image] using hbound
 
-theorem closedPair_closeImage_le {g h : SL(2, ℝ)} {T U : ℝ}
-    [Fact (0 < T)] [Fact (0 < U)] (hT : T ∈ flowPeriodGroup g) (hU : U ∈ flowPeriodGroup h)
-    (hgenT : flowPeriodGroup g = AddSubgroup.zmultiples T)
-    (hgenU : flowPeriodGroup h = AddSubgroup.zmultiples U)
-    {d ℓ : ℤ} (hd : 0 < d) (hℓ : ℓ ≠ 2 * d) {η : ℝ} (hη0 : 0 < η) (hη : η ≤ 1 / 2)
-    (hpair : (ℓ : ℝ) = (d : ℝ) * (2 + 4 * (g⁻¹ * h) 0 1 * (g⁻¹ * h) 1 0)) :
-    (closedOrbitMeasure hT).prod (closedOrbitMeasure hU)
-      (finPairFlowCurve g h '' signedCloseDiagonalFlowTimes (g⁻¹ * h) η) ≤
-        ENNReal.ofReal (16 * η * Real.log (4 * (d : ℝ))) := by
-  let E := signedCloseDiagonalFlowTimes (g⁻¹ * h) η
-  have hmeas : MeasurableSet (finPairFlowCurve g h '' E) :=
-    measurableSet_image_of_isClosed_sigmaCompact (continuous_finPairFlowCurve g h)
-      (isClosed_signedCloseDiagonalFlowTimes (g⁻¹ * h) η)
-  have hbound := closedPair_image_le_parameterArea hT hU hgenT hgenU E hmeas
-  exact hbound.trans (volume_signedCloseDiagonalFlowTimes_le hd hℓ hη0 hη _ hpair)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairRealFrames.lean` -/
 
@@ -4478,7 +3901,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PadicPrimitiveMatrix.lean` -/
 
 section
@@ -4522,7 +3944,6 @@ lemma exists_padic_primitive_matrix (p : ℕ) [Fact p.Prime]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/NormalizedAction.lean` -/
 
@@ -4618,7 +4039,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/NeighborLifting.lean` -/
 
 section
@@ -4642,18 +4062,6 @@ lemma det_neighborMatrix {R : Type*} [CommRing R] (π z : R) :
 def neighborRemainder {R : Type*} [CommRing R] (z : R) (t : R × R × R) : R :=
   t.1 * z ^ 2 - t.2.1 * z + t.2.2
 
-lemma discr_neighborRemainder {R : Type*} [CommRing R] (z : R) (t : R × R × R) :
-    (t.2.1 - 2 * t.1 * z) ^ 2 - discr t = 4 * t.1 * neighborRemainder z t := by
-  dsimp [discr, neighborRemainder]
-  ring
-
-lemma square_dvd_neighborRemainder {R : Type*} [CommRing R] (π z : R) (t : R × R × R)
-    (hu : IsUnit (4 * t.1)) (hb : π ∣ t.2.1 - 2 * t.1 * z) (hd : π ^ 2 ∣ discr t) :
-    π ^ 2 ∣ neighborRemainder z t := by
-  apply hu.dvd_mul_left.mp
-  rw [← discr_neighborRemainder]
-  exact dvd_sub (pow_dvd_pow_of_dvd hb 2) hd
-
 lemma transform_neighborMatrix {K : Type*} [Field K] (π z : K) (hπ : π ≠ 0)
     (t : K × K × K) :
     (normalizedTransformIsometry (neighborMatrix π z)
@@ -4662,74 +4070,6 @@ lemma transform_neighborMatrix {K : Type*} [Field K] (π z : K) (hπ : π ≠ 0)
         π⁻¹ * t.1 * z ^ 2 + t.2.1 * z + π * t.2.2) := by
   rw [normalizedTransformIsometry_apply, det_neighborMatrix]
   ext <;> dsimp [transform, neighborMatrix] <;> field_simp <;> ring
-
-/-- The finite-direction neighbor contains a divided vector when these two
-integral coordinates exist. -/
-lemma neighbor_contains_divided_vector {R K : Type*} [CommRing R] [Field K]
-    (φ : R →+* K) (π z : R) (hπ : φ π ≠ 0) (t : R × R × R)
-    (hb : π ∣ t.2.1 - 2 * t.1 * z) (hc : π ^ 2 ∣ neighborRemainder z t) :
-    ∃ s : R × R × R,
-      (normalizedTransformIsometry (neighborMatrix (φ π) (φ z))
-        (by rwa [det_neighborMatrix])).1 (mapCoeffs φ s) =
-        (φ π)⁻¹ • mapCoeffs φ t := by
-  obtain ⟨b, hb⟩ := hb
-  obtain ⟨c, hc⟩ := hc
-  refine ⟨(t.1, b, c), ?_⟩
-  have hbK : φ t.2.1 - 2 * φ t.1 * φ z = φ π * φ b := by
-    simpa only [map_sub, map_mul, map_ofNat] using congrArg φ hb
-  have hcK : φ t.1 * φ z ^ 2 - φ t.2.1 * φ z + φ t.2.2 = φ π ^ 2 * φ c := by
-    simpa only [neighborRemainder, map_sub, map_add, map_mul, map_pow] using congrArg φ hc
-  rw [transform_neighborMatrix _ _ hπ]
-  ext
-  · rfl
-  · dsimp [mapCoeffs]
-    apply mul_left_cancel₀ hπ
-    field_simp
-    linear_combination -hbK
-  · dsimp [mapCoeffs]
-    apply mul_left_cancel₀ hπ
-    field_simp
-    linear_combination -(φ z) * hbK - hcK
-
-def infinityNeighborMatrix {R : Type*} [CommRing R] (π : R) : Matrix (Fin 2) (Fin 2) R :=
-  !![π, 0; 0, 1]
-
-lemma det_infinityNeighborMatrix {R : Type*} [CommRing R] (π : R) :
-    (infinityNeighborMatrix π).det = π := by
-  simp [infinityNeighborMatrix, Matrix.det_fin_two]
-
-lemma transform_infinityNeighborMatrix {K : Type*} [Field K] (π : K) (hπ : π ≠ 0)
-    (t : K × K × K) :
-    (normalizedTransformIsometry (infinityNeighborMatrix π)
-      (by rwa [det_infinityNeighborMatrix])).1 t =
-      (π * t.1, t.2.1, π⁻¹ * t.2.2) := by
-  rw [normalizedTransformIsometry_apply, det_infinityNeighborMatrix]
-  ext <;> dsimp [transform, infinityNeighborMatrix] <;> field_simp <;> ring
-
-lemma square_dvd_first_of_isotropic_reduction {R : Type*} [CommRing R]
-    (π : R) (t : R × R × R) (hu : IsUnit (4 * t.2.2))
-    (hb : π ∣ t.2.1) (hd : π ^ 2 ∣ discr t) : π ^ 2 ∣ t.1 := by
-  apply hu.dvd_mul_left.mp
-  have hid : (4 * t.2.2) * t.1 = t.2.1 ^ 2 - discr t := by dsimp [discr]; ring
-  rw [hid]
-  exact dvd_sub (pow_dvd_pow_of_dvd hb 2) hd
-
-lemma infinityNeighbor_contains_divided_vector {R K : Type*} [CommRing R] [Field K]
-    (φ : R →+* K) (π : R) (hπ : φ π ≠ 0) (t : R × R × R)
-    (ha : π ^ 2 ∣ t.1) (hb : π ∣ t.2.1) :
-    ∃ s : R × R × R,
-      (normalizedTransformIsometry (infinityNeighborMatrix (φ π))
-        (by rwa [det_infinityNeighborMatrix])).1 (mapCoeffs φ s) =
-        (φ π)⁻¹ • mapCoeffs φ t := by
-  obtain ⟨a, ha⟩ := ha
-  obtain ⟨b, hb⟩ := hb
-  refine ⟨(a, b, t.2.2), ?_⟩
-  rw [transform_infinityNeighborMatrix _ hπ]
-  ext <;> dsimp [mapCoeffs]
-  · rw [ha, map_mul, map_pow]
-    field_simp
-  · rw [hb, map_mul]
-    field_simp
 
 lemma neighborRemainder_mapCoeffs {R S : Type*} [CommRing R] [CommRing S]
     (φ : R →+* S) (z : R) (t : R × R × R) :
@@ -4771,28 +4111,9 @@ lemma neighbor_contains_integral_iff {R K : Type*} [CommRing R] [Field K]
       field_simp
       linear_combination -hcK
 
-lemma infinityNeighbor_contains_integral_iff {R K : Type*} [CommRing R] [Field K]
-    (φ : R →+* K) (hφ : Function.Injective φ) (π : R) (hπ : φ π ≠ 0)
-    (t : R × R × R) :
-    (∃ s : R × R × R,
-      (normalizedTransformIsometry (infinityNeighborMatrix (φ π))
-        (by rwa [det_infinityNeighborMatrix])).1 (mapCoeffs φ s) = mapCoeffs φ t) ↔
-      π ∣ t.1 := by
-  constructor
-  · rintro ⟨s, hs⟩
-    refine ⟨s.1, hφ ?_⟩
-    have h := congrArg Prod.fst hs
-    rw [transform_infinityNeighborMatrix _ hπ] at h
-    simpa only [mapCoeffs, map_mul] using h.symm
-  · rintro ⟨a, ha⟩
-    refine ⟨(a, t.2.1, π * t.2.2), ?_⟩
-    rw [transform_infinityNeighborMatrix _ hπ]
-    ext <;> simp [mapCoeffs, ha, hπ]
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/TriangularMatrices.lean` -/
 
@@ -4900,7 +4221,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ResidueFibers.lean` -/
 
 section
@@ -4956,7 +4276,6 @@ lemma padic_pow_dvd_sub_iff_reduction_eq (p : ℕ) [Fact p.Prime]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PadicTriangularMatrices.lean` -/
 
@@ -5025,7 +4344,6 @@ theorem padic_triangular_representatives (p : ℕ) [Fact p.Prime]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoefficientLattices.lean` -/
 
@@ -5160,17 +4478,6 @@ lemma coefficientLattice_baseChange_mul {R S : Type*} [CommRing R] [CommRing S]
   ext t
   exact mem_integralCoeffSet_baseChange_iff φ k (g.1 t)
 
-lemma integralCoeffSet_subset_iff {R S : Type*} [CommRing R] [CommRing S]
-    (φ : R →+* S) (hφ : Function.Injective φ) (g : specialDiscrGroup S) :
-    integralCoeffSet φ ⊆ coefficientLattice φ g ↔
-      ∃ k : specialDiscrGroup R, specialDiscrBaseChange φ k = g := by
-  rw [← integral_coeffs_iff_baseChange φ hφ g]
-  constructor
-  · intro h t
-    exact h ⟨t, rfl⟩
-  · rintro h _ ⟨t, rfl⟩
-    exact h t
-
 lemma exists_baseChange_of_lattice_eq {R S : Type*} [CommRing R] [CommRing S]
     (φ : R →+* S) (hφ : Function.Injective φ) (g h : specialDiscrGroup S)
     (heq : coefficientLattice φ g = coefficientLattice φ h) :
@@ -5200,7 +4507,6 @@ lemma pairOrbit_eq_of_transporter_lattice_eq {R S : Type*} [CommRing R] [CommRin
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/NormalizedIntegralAction.lean` -/
 
@@ -5289,7 +4595,6 @@ lemma image_lattice_normalized_left_unit {R K : Type*} [CommRing R] [Field K]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ProjectiveAction.lean` -/
 
@@ -5385,7 +4690,6 @@ theorem exists_normalizedTransformIsometry {K : Type*} [Field K] [CharZero K]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PadicLatticeRepresentatives.lean` -/
 
@@ -5518,7 +4822,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairResultant.lean` -/
 
 section
@@ -5567,11 +4870,6 @@ lemma pairResultant_ne_zero {R : Type*} [CommRing R] {d ℓ : R}
   apply hnd
   linear_combination -h
 
-lemma pairResultant_mapCoeffs {R S : Type*} [CommRing R] [CommRing S]
-    (φ : R →+* S) (t u : R × R × R) :
-    pairResultant (mapCoeffs φ t) (mapCoeffs φ u) = φ (pairResultant t u) := by
-  simp [pairResultant, mapCoeffs]
-
 /-- A nonzero resultant gives a uniform upper bound on simultaneous root depth. -/
 theorem common_root_depth_le (p : ℕ) [Fact p.Prime]
     (t u : PadicInt p × PadicInt p × PadicInt p)
@@ -5586,7 +4884,6 @@ theorem common_root_depth_le (p : ℕ) [Fact p.Prime]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ChartContainment.lean` -/
 
@@ -5690,7 +4987,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PadicCongruences.lean` -/
 
 section
@@ -5746,16 +5042,6 @@ lemma valuation_eq_of_deep_congruence (p : ℕ) [Fact p.Prime]
   rw [padic_pow_dvd_iff_le_valuation p x hx] at hlow hhigh
   exact ⟨hx, by omega⟩
 
-lemma valuation_two_le_one (p : ℕ) [Fact p.Prime] : (2 : PadicInt p).valuation ≤ 1 := by
-  have hp : 2 ≤ p := (Fact.out : p.Prime).two_le
-  have htwo : (2 : PadicInt p) ≠ 0 := by norm_num
-  by_contra hn
-  have hd : (p : PadicInt p) ^ 2 ∣ 2 :=
-    (padic_pow_dvd_iff_le_valuation p 2 htwo 2).mpr (by omega)
-  have hdn : p ^ 2 ∣ 2 := (padic_pow_dvd_natCast_iff p 2 2).mp hd
-  have hle := Nat.le_of_dvd (by decide : 0 < 2) hdn
-  nlinarith
-
 /-- Two square roots modulo a prime power lie in at most two smaller residue classes. -/
 lemma square_congruence_close_to_sign (p : ℕ) [Fact p.Prime]
     (x y : PadicInt p) (hy : y ≠ 0) (n : ℕ)
@@ -5800,7 +5086,6 @@ lemma padic_pow_dvd_of_dvd_mul (p : ℕ) [Fact p.Prime]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SquareRootCounts.lean` -/
 
@@ -5925,7 +5210,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/AffineResidueFibers.lean` -/
 
 section
@@ -5985,7 +5269,6 @@ lemma finite_fiber_card_bound {A B : Type*} [DecidableEq B]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticRootCounts.lean` -/
 
@@ -6141,7 +5424,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlippedRootCounts.lean` -/
 
 section
@@ -6217,7 +5499,6 @@ theorem quadraticRootResidues_flip_card_le_of_scaled_unit (p : ℕ) [Fact p.Prim
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LocalLatticeCount.lean` -/
 
@@ -6338,18 +5619,9 @@ theorem card_pairOrbits_eq_containing_lattices {R K : Type*}
     Nat.card (SpecialPairOrbits R d ℓ) = Nat.card (containingPairLattices φ base) :=
   Nat.card_congr (pairOrbitEquivLattice φ hφ base hnd)
 
-/-- Counting containing lattices bounds the local embedding count. -/
-theorem card_pairOrbits_le_containing_lattices {R K : Type*}
-    [CommRing R] [Field K] [CharZero K]
-    (φ : R →+* K) (hφ : Function.Injective φ) {d ℓ : R} (base : FormPair R d ℓ)
-    (hnd : ℓ ^ 2 ≠ 4 * d ^ 2) [Finite (containingPairLattices φ base)] :
-    Nat.card (SpecialPairOrbits R d ℓ) ≤ Nat.card (containingPairLattices φ base) :=
-  Nat.card_le_card_of_injective _ (pairOrbitToLattice_injective φ hφ base hnd)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LocalCountBound.lean` -/
 
@@ -6468,7 +5740,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PadicNeighbors.lean` -/
 
 section
@@ -6482,11 +5753,6 @@ by the prime. Orthogonal isotropic reductions select the same neighbor.
 
 namespace DukeArithmetic
 
-lemma padic_dvd_iff_reduction_zero (p : ℕ) [Fact p.Prime] (x : PadicInt p) :
-    (p : PadicInt p) ∣ x ↔ PadicInt.toZMod x = 0 := by
-  rw [← Ideal.mem_span_singleton, ← PadicInt.maximalIdeal_eq_span_p,
-    ← PadicInt.ker_toZMod, RingHom.mem_ker]
-
 lemma padic_unit_of_reduction_ne_zero (p : ℕ) [Fact p.Prime]
     (x : PadicInt p) (hx : PadicInt.toZMod x ≠ 0) : IsUnit x := by
   by_contra hunit
@@ -6495,226 +5761,9 @@ lemma padic_unit_of_reduction_ne_zero (p : ℕ) [Fact p.Prime]
   rw [PadicInt.ker_toZMod, IsLocalRing.mem_maximalIdeal]
   exact hunit
 
-lemma zmod_two_ne_zero_of_gt (p : ℕ) (hp : 2 < p) : (2 : ZMod p) ≠ 0 := by
-  intro h
-  have hdiv : p ∣ 2 := (ZMod.natCast_eq_zero_iff 2 p).mp h
-  exact Nat.not_dvd_of_pos_of_lt (by decide) hp hdiv
-
-lemma padic_prime_ne_zero (p : ℕ) [Fact p.Prime] : (p : Padic p) ≠ 0 := by
-  exact_mod_cast (Fact.out : p.Prime).ne_zero
-
-noncomputable def padicNeighborIsometry (p : ℕ) [Fact p.Prime]
-    (x : Option (ZMod p)) : specialDiscrGroup (Padic p) :=
-  match x with
-  | none => normalizedTransformIsometry (infinityNeighborMatrix (p : Padic p))
-      (by rw [det_infinityNeighborMatrix]; exact padic_prime_ne_zero p)
-  | some z => normalizedTransformIsometry (neighborMatrix (p : Padic p) (z.val : Padic p))
-      (by rw [det_neighborMatrix]; exact padic_prime_ne_zero p)
-
-def padicNeighborLattice (p : ℕ) [Fact p.Prime] (x : Option (ZMod p)) :
-    Set (Padic p × Padic p × Padic p) :=
-  coefficientLattice (algebraMap (PadicInt p) (Padic p)) (padicNeighborIsometry p x)⁻¹
-
-theorem divided_mem_neighbor_of_direction (p : ℕ) [Fact p.Prime] (hp : 2 < p)
-    (t : PadicInt p × PadicInt p × PadicInt p)
-    (hd : (p : PadicInt p) ^ 2 ∣ discr t) (a : ZMod p) (ha : a ≠ 0)
-    (x : Option (ZMod p)) (hx : mapCoeffs PadicInt.toZMod t = a • isotropicDirection x) :
-    (p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈
-      padicNeighborLattice p x := by
-  let φ := algebraMap (PadicInt p) (Padic p)
-  have hπ : φ (p : PadicInt p) ≠ 0 := by
-    simpa only [map_natCast] using padic_prime_ne_zero p
-  have h4 : (4 : ZMod p) ≠ 0 := by
-    simpa only [show (2 : ZMod p) * 2 = 4 by norm_num]
-      using mul_ne_zero (zmod_two_ne_zero_of_gt p hp) (zmod_two_ne_zero_of_gt p hp)
-  have hu4 : IsUnit (4 : PadicInt p) :=
-    padic_unit_of_reduction_ne_zero p _ (by simpa only [map_ofNat] using h4)
-  cases x with
-  | none =>
-    have hb0 : PadicInt.toZMod t.2.1 = 0 := by
-      simpa [mapCoeffs, isotropicDirection] using congrArg (fun v => v.2.1) hx
-    have hc0 : PadicInt.toZMod t.2.2 = a := by
-      simpa [mapCoeffs, isotropicDirection] using congrArg (fun v => v.2.2) hx
-    have hu : IsUnit (4 * t.2.2) :=
-      hu4.mul (padic_unit_of_reduction_ne_zero p _ (hc0 ▸ ha))
-    have hb := (padic_dvd_iff_reduction_zero p t.2.1).mpr hb0
-    have hfirst := square_dvd_first_of_isotropic_reduction (p : PadicInt p) t hu hb hd
-    apply (mem_coefficientLattice_inv_iff _ _ _).mpr
-    simpa only [padicNeighborIsometry, map_natCast] using
-      infinityNeighbor_contains_divided_vector φ (p : PadicInt p) hπ t hfirst hb
-  | some z =>
-    have ha0 : PadicInt.toZMod t.1 = a := by
-      simpa [mapCoeffs, isotropicDirection] using congrArg Prod.fst hx
-    have hb0 : PadicInt.toZMod t.2.1 = a * (2 * z) := by
-      simpa [mapCoeffs, isotropicDirection] using congrArg (fun v => v.2.1) hx
-    have hu : IsUnit (4 * t.1) :=
-      hu4.mul (padic_unit_of_reduction_ne_zero p _ (ha0 ▸ ha))
-    have hb : (p : PadicInt p) ∣ t.2.1 - 2 * t.1 * (z.val : PadicInt p) := by
-      apply (padic_dvd_iff_reduction_zero p _).mpr
-      simp only [map_sub, map_mul, map_ofNat, map_natCast, ZMod.natCast_zmod_val, ha0, hb0]
-      ring
-    have hc := square_dvd_neighborRemainder (p : PadicInt p) (z.val : PadicInt p) t hu hb hd
-    apply (mem_coefficientLattice_inv_iff _ _ _).mpr
-    simpa only [padicNeighborIsometry, map_natCast] using
-      neighbor_contains_divided_vector φ (p : PadicInt p) (z.val : PadicInt p) hπ t hb hc
-
-lemma reduction_discr_zero_of_square_dvd (p : ℕ) [Fact p.Prime]
-    (t : PadicInt p × PadicInt p × PadicInt p) (hd : (p : PadicInt p) ^ 2 ∣ discr t) :
-    discr (mapCoeffs PadicInt.toZMod t) = 0 := by
-  obtain ⟨q, hq⟩ := hd
-  rw [discr_mapCoeffs, hq]
-  simp
-
-theorem common_neighbor_of_primitive_orthogonal (p : ℕ) [Fact p.Prime] (hp : 2 < p)
-    (t u : PadicInt p × PadicInt p × PadicInt p)
-    (ht : (p : PadicInt p) ^ 2 ∣ discr t) (hu : (p : PadicInt p) ^ 2 ∣ discr u)
-    (hpair : pairing t u = 0)
-    (htprim : mapCoeffs PadicInt.toZMod t ≠ 0)
-    (huprim : mapCoeffs PadicInt.toZMod u ≠ 0) :
-    ∃ x : Option (ZMod p),
-      (p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈
-        padicNeighborLattice p x ∧
-      (p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) u ∈
-        padicNeighborLattice p x := by
-  have ht0 := reduction_discr_zero_of_square_dvd p t ht
-  have hu0 := reduction_discr_zero_of_square_dvd p u hu
-  have hpair0 : pairing (mapCoeffs PadicInt.toZMod t) (mapCoeffs PadicInt.toZMod u) = 0 := by
-    rw [pairing_mapCoeffs, hpair, map_zero]
-  obtain ⟨a, ha, x, hx⟩ := exists_isotropicDirection (zmod_two_ne_zero_of_gt p hp) ht0 htprim
-  obtain ⟨c, hc⟩ := isotropic_orthogonal_collinear (zmod_two_ne_zero_of_gt p hp)
-    ht0 hu0 htprim hpair0
-  have hc0 : c ≠ 0 := by
-    intro hz
-    apply huprim
-    rw [hc, hz, zero_smul]
-  refine ⟨x, divided_mem_neighbor_of_direction p hp t ht a ha x hx, ?_⟩
-  apply divided_mem_neighbor_of_direction p hp u hu (c * a) (mul_ne_zero hc0 ha) x
-  rw [hc, hx, smul_smul]
-
-lemma divided_integral_of_reduction_zero (p : ℕ) [Fact p.Prime]
-    (t : PadicInt p × PadicInt p × PadicInt p) (ht : mapCoeffs PadicInt.toZMod t = 0) :
-    (p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈
-      integralCoeffSet (algebraMap (PadicInt p) (Padic p)) := by
-  have ha : (p : PadicInt p) ∣ t.1 := (padic_dvd_iff_reduction_zero p _).mpr
-    (congrArg Prod.fst ht)
-  have hb : (p : PadicInt p) ∣ t.2.1 := (padic_dvd_iff_reduction_zero p _).mpr
-    (congrArg (fun v => v.2.1) ht)
-  have hc : (p : PadicInt p) ∣ t.2.2 := (padic_dvd_iff_reduction_zero p _).mpr
-    (congrArg (fun v => v.2.2) ht)
-  obtain ⟨a, ha⟩ := ha
-  obtain ⟨b, hb⟩ := hb
-  obtain ⟨c, hc⟩ := hc
-  refine ⟨(a, b, c), ?_⟩
-  ext <;> simp [mapCoeffs, ha, hb, hc, ← mul_assoc]
-
-/-- The three alternatives in the odd-prime local lattice recurrence. -/
-theorem local_neighbor_recurrence (p : ℕ) [Fact p.Prime] (hp : 2 < p)
-    (t u : PadicInt p × PadicInt p × PadicInt p)
-    (ht : (p : PadicInt p) ^ 2 ∣ discr t) (hu : (p : PadicInt p) ^ 2 ∣ discr u)
-    (hpair : pairing t u = 0) :
-    ((p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈
-      integralCoeffSet (algebraMap (PadicInt p) (Padic p))) ∨
-    ((p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) u ∈
-      integralCoeffSet (algebraMap (PadicInt p) (Padic p))) ∨
-    ∃ x : Option (ZMod p),
-      (p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈
-        padicNeighborLattice p x ∧
-      (p : Padic p)⁻¹ • mapCoeffs (algebraMap (PadicInt p) (Padic p)) u ∈
-        padicNeighborLattice p x := by
-  by_cases htprim : mapCoeffs PadicInt.toZMod t = 0
-  · exact Or.inl (divided_integral_of_reduction_zero p t htprim)
-  by_cases huprim : mapCoeffs PadicInt.toZMod u = 0
-  · exact Or.inr (Or.inl (divided_integral_of_reduction_zero p u huprim))
-  exact Or.inr (Or.inr (common_neighbor_of_primitive_orthogonal p hp t u ht hu hpair htprim huprim))
-
-theorem mem_padicNeighbor_iff_pairing_zero (p : ℕ) [Fact p.Prime] (hp : 2 < p)
-    (t : PadicInt p × PadicInt p × PadicInt p) (x : Option (ZMod p)) :
-    mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈ padicNeighborLattice p x ↔
-      pairing (mapCoeffs PadicInt.toZMod t) (isotropicDirection x) = 0 := by
-  let φ := algebraMap (PadicInt p) (Padic p)
-  have hφ : Function.Injective φ := FaithfulSMul.algebraMap_injective (PadicInt p) (Padic p)
-  have hπ : φ (p : PadicInt p) ≠ 0 := by
-    simpa only [map_natCast] using padic_prime_ne_zero p
-  have h4 : (-4 : ZMod p) ≠ 0 := by
-    have h := mul_ne_zero (zmod_two_ne_zero_of_gt p hp) (zmod_two_ne_zero_of_gt p hp)
-    norm_num at h ⊢
-    exact h
-  rw [padicNeighborLattice, mem_coefficientLattice_inv_iff]
-  cases x with
-  | none =>
-    have hiff := infinityNeighbor_contains_integral_iff φ hφ (p : PadicInt p) hπ t
-    simp only [map_natCast] at hiff
-    rw [padicNeighborIsometry, hiff, padic_dvd_iff_reduction_zero,
-      pairing_isotropicDirection_none]
-    rw [mul_eq_zero]
-    simp only [h4, false_or, mapCoeffs]
-  | some z =>
-    have hiff := neighbor_contains_integral_iff φ hφ (p : PadicInt p) (z.val : PadicInt p) hπ t
-    simp only [map_natCast] at hiff
-    rw [padicNeighborIsometry, hiff, padic_dvd_iff_reduction_zero,
-      pairing_isotropicDirection_some]
-    rw [mul_eq_zero]
-    simp only [h4, false_or]
-    have hrem := neighborRemainder_mapCoeffs PadicInt.toZMod (z.val : PadicInt p) t
-    simpa only [map_natCast, ZMod.natCast_zmod_val, neighborRemainder] using
-      Iff.of_eq (congrArg (fun a : ZMod p => a = 0) hrem).symm
-
-open Classical in
-theorem card_padicNeighbors_containing_primitive_le_two (p : ℕ) [Fact p.Prime] (hp : 2 < p)
-    (t : PadicInt p × PadicInt p × PadicInt p)
-    (ht : mapCoeffs PadicInt.toZMod t ≠ 0) :
-    (Finset.univ.filter (fun x : Option (ZMod p) =>
-      mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈ padicNeighborLattice p x)).card ≤ 2 := by
-  classical
-  apply card_orthogonal_directions_le_two (zmod_two_ne_zero_of_gt p hp) ht
-  intro x hx
-  exact (mem_padicNeighbor_iff_pairing_zero p hp t x).mp (Finset.mem_filter.mp hx).2
-
-theorem existsUnique_padicNeighbor_of_primitive_isotropic (p : ℕ) [Fact p.Prime] (hp : 2 < p)
-    (t : PadicInt p × PadicInt p × PadicInt p)
-    (ht : mapCoeffs PadicInt.toZMod t ≠ 0) (hd : (p : PadicInt p) ∣ discr t) :
-    ∃! x : Option (ZMod p),
-      mapCoeffs (algebraMap (PadicInt p) (Padic p)) t ∈ padicNeighborLattice p x := by
-  have hd0 : discr (mapCoeffs PadicInt.toZMod t) = 0 := by
-    rw [discr_mapCoeffs]
-    exact (padic_dvd_iff_reduction_zero p _).mp hd
-  simpa only [mem_padicNeighbor_iff_pairing_zero p hp] using
-    existsUnique_orthogonal_direction_of_isotropic (zmod_two_ne_zero_of_gt p hp) hd0 ht
-
-noncomputable def padicDirectionLift (p : ℕ) [Fact p.Prime] (x : Option (ZMod p)) :
-    PadicInt p × PadicInt p × PadicInt p :=
-  match x with
-  | none => (0, 0, 1)
-  | some z => (1, 2 * (z.val : PadicInt p), (z.val : PadicInt p) ^ 2)
-
-lemma reduction_padicDirectionLift (p : ℕ) [Fact p.Prime] (x : Option (ZMod p)) :
-    mapCoeffs PadicInt.toZMod (padicDirectionLift p x) = isotropicDirection x := by
-  cases x <;> simp [padicDirectionLift, mapCoeffs, isotropicDirection, map_ofNat]
-
-lemma discr_padicDirectionLift (p : ℕ) [Fact p.Prime] (x : Option (ZMod p)) :
-    discr (padicDirectionLift p x) = 0 := by
-  cases x <;> dsimp [padicDirectionLift, discr] <;> ring
-
-theorem padicNeighborLattice_injective (p : ℕ) [Fact p.Prime] (hp : 2 < p) :
-    Function.Injective (padicNeighborLattice p) := by
-  intro x y hxy
-  have hmem : mapCoeffs (algebraMap (PadicInt p) (Padic p)) (padicDirectionLift p x) ∈
-      padicNeighborLattice p x := by
-    rw [mem_padicNeighbor_iff_pairing_zero p hp, reduction_padicDirectionLift]
-    exact (pairing_isotropicDirection_eq_zero_iff (zmod_two_ne_zero_of_gt p hp) x x).mpr rfl
-  rw [hxy, mem_padicNeighbor_iff_pairing_zero p hp, reduction_padicDirectionLift] at hmem
-  exact (pairing_isotropicDirection_eq_zero_iff (zmod_two_ne_zero_of_gt p hp) x y).mp hmem
-
-open Classical in
-theorem card_padicNeighborLattices (p : ℕ) [Fact p.Prime] (hp : 2 < p) :
-    (Finset.univ.image (padicNeighborLattice p)).card = p + 1 := by
-  rw [Finset.card_image_of_injective _ (padicNeighborLattice_injective p hp)]
-  simp [Fintype.card_option, ZMod.card]
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PadicFormNormalization.lean` -/
 
@@ -6843,7 +5892,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/LocalCountInvariance.lean` -/
 
 section
@@ -6924,7 +5972,6 @@ theorem card_padicContainingLattices_le (p : ℕ) [Fact p.Prime]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LocalPairCount.lean` -/
 
@@ -7037,7 +6084,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/IntegerLocalCount.lean` -/
 
 section
@@ -7100,7 +6146,6 @@ theorem card_padicPairOrbits_le_factorization (p : ℕ) [Fact p.Prime]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SquareContent.lean` -/
 
@@ -7177,7 +6222,6 @@ lemma pairSquareContent_dvd_binary_discriminant (d ℓ : ℤ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitiveMatrix.lean` -/
 
@@ -7256,7 +6300,6 @@ lemma isUnit_of_dvd_squares_primitive {ι : Type*} [Fintype ι] (v : ι → ℤ)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/IntegralProjectiveAction.lean` -/
 
@@ -7339,7 +6382,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RationalIntegrality.lean` -/
 
 section
@@ -7376,7 +6418,6 @@ lemma exists_int_of_forall_padic_integral (q : ℚ)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GlobalToLocal.lean` -/
 
@@ -7495,7 +6536,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/LocalProduct.lean` -/
 
 section
@@ -7555,7 +6595,6 @@ theorem card_integer_specialPairOrbits_le_local_product {d ℓ : ℤ} (base : Fo
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrbitComparison.lean` -/
 
@@ -7706,7 +6745,6 @@ theorem card_integralPairOrbits_le_local_product {d ℓ : ℤ} (base : FormPair 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DivisorBounds.lean` -/
 
@@ -7873,7 +6911,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/GlobalPairCount.lean` -/
 
 section
@@ -7959,7 +6996,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/SquareContentSum.lean` -/
 
 section
@@ -8009,20 +7045,6 @@ lemma sum_squareDivisor_weight_eq (center L : ℤ) (f : ℕ) :
     simp [noncentralMultiples, and_assoc, and_left_comm, and_comm]
   rw [← Finset.sum_filter, hfilter, Finset.sum_const, nsmul_eq_mul, mul_comm]
 
-theorem sum_pairSquareContent_le {d : ℕ} {L : ℤ} (hd : 0 < d) (hL : 0 ≤ L) :
-    (∑ ℓ ∈ noncentralMultiples (2 * d) L 1, (pairSquareContent d ℓ : ℝ)) ≤
-      2 * (L : ℝ) * (1 + Real.log d) := by
-  classical
-  calc
-    _ ≤ ∑ ℓ ∈ noncentralMultiples (2 * d) L 1,
-        ∑ f ∈ squareDivisors d, if (f : ℤ) ^ 2 ∣ ℓ then (f : ℝ) else 0 :=
-      Finset.sum_le_sum (fun ℓ _ => pairSquareContent_le_squareDivisor_sum hd ℓ)
-    _ = ∑ f ∈ squareDivisors d,
-        (f : ℝ) * (noncentralMultiples (2 * d) L ((f : ℤ) ^ 2)).card := by
-      rw [Finset.sum_comm]
-      exact Finset.sum_congr rfl (fun f _ => sum_squareDivisor_weight_eq _ _ f)
-    _ ≤ _ := sum_weighted_card_noncentralMultiples_le hd hL
-
 theorem sum_pairSquareContent_le_rpow {d : ℕ} {L : ℤ} {ε : ℝ}
     (hd : 0 < d) (hL : 0 ≤ L) (hε : 0 < ε) :
     (∑ ℓ ∈ noncentralMultiples (2 * d) L 1, (pairSquareContent d ℓ : ℝ)) ≤
@@ -8041,7 +7063,6 @@ theorem sum_pairSquareContent_le_rpow {d : ℕ} {L : ℤ} {ε : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BasicLemmaOrbitCount.lean` -/
 
@@ -8131,7 +7152,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairOrbitArea.lean` -/
 
 section
@@ -8218,7 +7238,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/NearPairArea.lean` -/
 
 section
@@ -8289,7 +7308,6 @@ theorem exists_sum_near_pairOrbitParameterArea_le {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketPairImages.lean` -/
 
@@ -8383,7 +7401,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/SignedPairLifts.lean` -/
 
 section
@@ -8440,7 +7457,6 @@ lemma finPairFlowCurve_integral_mul (γ : SL(2, ℤ)) (g h : SL(2, ℝ)) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PairLiftCover.lean` -/
 
@@ -8515,7 +7531,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosedOrbitCarrier.lean` -/
 
 section
@@ -8565,7 +7580,6 @@ lemma ClosedFlowOrbit.ae_mem_carrier (o : ClosedFlowOrbit) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketCarrier.lean` -/
 
@@ -8646,7 +7660,6 @@ theorem packetPairImage_subset_carriers {d ℓ : ℤ} (hd : 0 < d) (hns : ¬IsSq
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketShortVectors.lean` -/
 
@@ -8731,7 +7744,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketCuspHeight.lean` -/
 
 section
@@ -8807,7 +7819,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularCompactCore.lean` -/
 
 section
@@ -8867,7 +7878,6 @@ theorem modularCusp_compl_subset_compactCore {H : ℝ} (hH : 0 < H) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/IwasawaFrames.lean` -/
 
@@ -8935,7 +7945,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperTriangularFrames.lean` -/
 
 section
@@ -8989,7 +7998,6 @@ theorem upperTriangularFrame_relative_close {x y h k H δ : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LatticeVectorAction.lean` -/
 
@@ -9063,7 +8071,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RotationEntryBounds.lean` -/
 
 section
@@ -9135,7 +8142,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealIntervalGrid.lean` -/
 
 section
@@ -9178,7 +8184,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FrameBoxCloseness.lean` -/
 
 section
@@ -9208,7 +8213,6 @@ theorem cuspFrame_relative_close {x y h k θ φ H δ : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FrameVectorLengths.lean` -/
 
@@ -9273,7 +8277,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowVectorLengths.lean` -/
 
 section
@@ -9319,7 +8322,6 @@ theorem modularVectorLengthSq_flow_le (g : SL(2, ℝ)) (t : ℝ) (u v : ℤ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/HorocycleFrames.lean` -/
 
@@ -9395,7 +8397,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussFrameCoordinates.lean` -/
 
 section
@@ -9439,7 +8440,6 @@ theorem entryCloseOne_gauss_coordinates {η : ℝ} (hη : η ≤ 1 / 2) {g : SL(
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BowenTube.lean` -/
 
@@ -9512,7 +8512,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussRelativeFrames.lean` -/
 
 section
@@ -9559,7 +8558,6 @@ theorem upperHorocycleUpper_matrix (x y h k q : ℝ) (hh : h ≠ 0) (hk : k ≠ 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/HorocycleContraction.lean` -/
 
@@ -9633,7 +8631,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/HorocycleGeneration.lean` -/
 
 section
@@ -9700,7 +8697,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/SpecialLinearCharacters.lean` -/
 
 section
@@ -9761,7 +8757,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneAffine.lean` -/
 
 section
@@ -9809,7 +8804,6 @@ lemma diagonal_frame_smul_im (h : ℝ) (hh : h ≠ 0) (z : UpperHalfPlane) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneRectanglePacking.lean` -/
 
@@ -9876,7 +8870,6 @@ theorem invariant_upper_thin_rectangle_packing (ν : Measure UpperHalfPlane)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneStripMass.lean` -/
 
@@ -9949,7 +8942,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/SpecialLinearHaar.lean` -/
 
 section
@@ -9976,7 +8968,6 @@ theorem specialLinear_haar_map_right (μ : Measure SL(2, ℝ)) [IsHaarMeasure μ
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneHaarImage.lean` -/
 
@@ -10010,20 +9001,9 @@ instance upperHalfPlaneHaarImage_invariant :
     (fun g : SL(2, ℝ) => g • UpperHalfPlane.I) (fun a g => mul_smul a g UpperHalfPlane.I)
     measurable_smul_I
 
-theorem upperHalfPlaneHaarImage_open_pos {U : Set UpperHalfPlane}
-    (hU : IsOpen U) (hne : U.Nonempty) : 0 < upperHalfPlaneHaarImage U := by
-  rw [upperHalfPlaneHaarImage, Measure.map_apply measurable_smul_I hU.measurableSet]
-  apply IsOpen.measure_pos (Measure.haar (G := SL(2, ℝ)))
-    (hU.preimage (continuous_id.smul continuous_const))
-  obtain ⟨z, hz⟩ := hne
-  refine ⟨z.toSL2R, ?_⟩
-  change z.toSL2R • UpperHalfPlane.I ∈ U
-  rwa [UpperHalfPlane.toSL2R_smul_I]
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneFundamentalMass.lean` -/
 
@@ -10090,7 +9070,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneVerticalNull.lean` -/
 
 section
@@ -10128,7 +9107,6 @@ theorem invariant_upperHalfPlane_vertical_eq_zero (ν : Measure UpperHalfPlane) 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/UpperHalfPlaneCircleNull.lean` -/
 
@@ -10189,7 +9167,6 @@ theorem invariant_upperHalfPlane_fd_boundary_eq_zero (ν : Measure UpperHalfPlan
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarDomain.lean` -/
 
@@ -10268,7 +9245,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarFundamentalDomain.lean` -/
 
 section
@@ -10336,7 +9312,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarMeasure.lean` -/
 
 section
@@ -10401,9 +9376,6 @@ noncomputable def normalizedModularHaarMeasure : Measure ModularOrbitSpace :=
 instance normalizedModularHaarMeasure_probability : IsProbabilityMeasure normalizedModularHaarMeasure :=
   inferInstanceAs (IsProbabilityMeasure ((modularHaarMeasure Set.univ)⁻¹ • modularHaarMeasure))
 
-noncomputable def modularHaarProbability : ProbabilityMeasure ModularOrbitSpace :=
-  ⟨normalizedModularHaarMeasure, inferInstance⟩
-
 theorem normalizedModularHaarMeasure_right_invariant (g : SL(2, ℝ)) :
     Measure.map (modularRightTranslate g) normalizedModularHaarMeasure =
       normalizedModularHaarMeasure := by
@@ -10412,7 +9384,6 @@ theorem normalizedModularHaarMeasure_right_invariant (g : SL(2, ℝ)) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularRightTranslation.lean` -/
 
@@ -10453,7 +9424,6 @@ theorem measurePreserving_modularRightTranslate (g : SL(2, ℝ)) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowCoordinateBounds.lean` -/
 
@@ -10497,7 +9467,6 @@ lemma unstable_parameter_difference_le {x y r s e c : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/HorocycleExcursionWidth.lean` -/
 
@@ -10545,7 +9514,6 @@ theorem horocycle_width_of_shared_returning_vector (g : SL(2, ℝ))
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussVectorEnergy.lean` -/
 
@@ -10615,7 +9583,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReturningGaussWidth.lean` -/
 
 section
@@ -10649,7 +9616,6 @@ theorem returning_gauss_width_le (g : SL(2, ℝ)) (r₁ r₂ x₁ x₂ h₁ h₂
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BoundedLatticeVectors.lean` -/
 
@@ -10719,7 +9685,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussBoxVectorCandidates.lean` -/
 
 section
@@ -10787,7 +9752,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReturningGaussParameters.lean` -/
 
 section
@@ -10833,7 +9797,6 @@ theorem exists_uniform_returningGauss_candidates {A : ℝ} (hA : 0 ≤ A) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussRelativeBounds.lean` -/
 
@@ -10930,7 +9893,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ForwardBowenTube.lean` -/
 
 section
@@ -10973,7 +9935,6 @@ theorem entryForwardBowenTube_iff_flow_closeness {η S : ℝ} (hS : 0 ≤ S) (g 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussForwardCloseness.lean` -/
 
@@ -11023,7 +9984,6 @@ theorem gaussFrame_forward_close (g : SL(2, ℝ)) {r s x y h k δ S : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BowenTubeNormalization.lean` -/
 
@@ -11090,7 +10050,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/BowenTubeFlowGrid.lean` -/
 
 section
@@ -11120,7 +10079,6 @@ theorem exists_bowenTube_flow_grid {η δ : ℝ} (hη0 : 0 ≤ η) (hη : η ≤
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketPairMeasure.lean` -/
 
@@ -11177,7 +10135,6 @@ theorem packetProduct_pairImage_iUnion_le {d ℓ : ℤ} (hd : 0 < d) (hns : ¬Is
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/NoncentralPacketPairs.lean` -/
 
@@ -11244,7 +10201,6 @@ theorem exists_packetProduct_distinctClose_le {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ShortOrbitPairs.lean` -/
 
@@ -11324,7 +10280,6 @@ theorem ClosedFlowOrbit.mem_shortPairs_of_flow (o : ClosedFlowOrbit)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoincidentFormPairs.lean` -/
 
@@ -11410,7 +10365,6 @@ theorem packetProduct_coincidentClose_le {d : ℤ} (hd : 0 < d)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketClosePairs.lean` -/
 
@@ -11514,7 +10468,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularBowenPairs.lean` -/
 
 section
@@ -11601,7 +10554,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularForwardBowenPairs.lean` -/
 
 section
@@ -11654,7 +10606,6 @@ theorem modularForwardBowenPairs_mass (μ : Measure ModularOrbitSpace) [SFinite 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussParameterBoxes.lean` -/
 
@@ -11714,36 +10665,9 @@ lemma isClosed_gaussParameterCell (a b c wr wx wh : ℝ) :
     ((isClosed_Icc.preimage (by fun_prop : Continuous (fun p : BoundedGaussParameters => p.val.2.1))).inter
       (isClosed_Icc.preimage (by fun_prop : Continuous (fun p : BoundedGaussParameters => p.val.2.2))))
 
-noncomputable def gaussParameterBox (g : SL(2, ℝ)) (a b c wr wx wh : ℝ) : Set ModularOrbitSpace :=
-  (fun p : BoundedGaussParameters => modularMk (gaussParameterFrame g p)) ''
-    gaussParameterCell a b c wr wx wh
-
-theorem isCompact_gaussParameterBox (g : SL(2, ℝ)) (a b c wr wx wh : ℝ) :
-    IsCompact (gaussParameterBox g a b c wr wx wh) :=
-  (isClosed_gaussParameterCell a b c wr wx wh).isCompact.image
-    (continuous_modularMk.comp (continuous_gaussParameterFrame g))
-
-lemma measurableSet_gaussParameterBox (g : SL(2, ℝ)) (a b c wr wx wh : ℝ) :
-    MeasurableSet (gaussParameterBox g a b c wr wx wh) :=
-  (isCompact_gaussParameterBox g a b c wr wx wh).measurableSet
-
-theorem gaussParameterBox_prod_subset_forward (g : SL(2, ℝ)) (a b c : ℝ) {δ S : ℝ}
-    (hδ : 0 ≤ δ) (hS : 0 ≤ S) :
-    let B := gaussParameterBox g a b c (δ * Real.exp (-S)) δ δ
-    B ×ˢ B ⊆ modularForwardBowenPairs (8 * δ) S := by
-  dsimp only
-  rintro ⟨u, v⟩ ⟨⟨p, hp, rfl⟩, ⟨q, hq, rfl⟩⟩
-  apply mem_modularForwardBowenPairs_of_lifts hS
-  exact gaussFrame_forward_close g p.property.2.1 q.property.2.1
-    p.property.2.2.1 q.property.2.2.1 p.property.2.2.2 q.property.2.2.2 hδ hS
-    (abs_sub_le_of_mem_same_interval hq.2.2 hp.2.2)
-    (abs_sub_le_of_mem_same_interval hq.2.1 hp.2.1)
-    (abs_sub_le_of_mem_same_interval hq.1 hp.1)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LiftForwardClose.lean` -/
 
@@ -11763,11 +10687,6 @@ theorem LiftForwardClose.mono {η S : ℝ} {E F : Set SL(2, ℝ)}
   intro g hg h hh t ht
   exact hE g (hFE hg) h (hFE hh) t ht
 
-theorem LiftForwardClose.time_mono {η S T : ℝ} {E : Set SL(2, ℝ)}
-    (hE : LiftForwardClose η T E) (hST : S ≤ T) : LiftForwardClose η S E := by
-  intro g hg h hh t ht
-  exact hE g hg h hh t ⟨ht.1, ht.2.trans hST⟩
-
 theorem LiftForwardClose.left_mul {η S : ℝ} {E : Set SL(2, ℝ)}
     (hE : LiftForwardClose η S E) (a : SL(2, ℝ)) :
     LiftForwardClose η S ((fun g => a * g) '' E) := by
@@ -11776,16 +10695,6 @@ theorem LiftForwardClose.left_mul {η S : ℝ} {E : Set SL(2, ℝ)}
       (g * diagonalFlow t)⁻¹ * (h * diagonalFlow t) := by group
   rw [heq]
   exact hE g hg h hh t ht
-
-theorem liftForwardClose_left_mul_iff {η S : ℝ} {E : Set SL(2, ℝ)} (a : SL(2, ℝ)) :
-    LiftForwardClose η S ((fun g => a * g) '' E) ↔ LiftForwardClose η S E := by
-  constructor
-  · intro hE g hg h hh t ht
-    have hc := hE (a * g) ⟨g, hg, rfl⟩ (a * h) ⟨h, hh, rfl⟩ t ht
-    have heq : ((a * g) * diagonalFlow t)⁻¹ * ((a * h) * diagonalFlow t) =
-        (g * diagonalFlow t)⁻¹ * (h * diagonalFlow t) := by group
-    rwa [heq] at hc
-  · exact fun hE => hE.left_mul a
 
 theorem LiftForwardClose.append {η S T : ℝ} {E : Set SL(2, ℝ)}
     (hE : LiftForwardClose η S E)
@@ -11808,7 +10717,6 @@ theorem LiftForwardClose.modular_image {η S : ℝ} {E : Set SL(2, ℝ)}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussLiftBoxes.lean` -/
 
@@ -11840,7 +10748,6 @@ theorem gaussLiftBox_forward_close (g : SL(2, ℝ)) (a b c : ℝ) {δ S : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussParameterGridCover.lean` -/
 
@@ -11882,7 +10789,6 @@ theorem exists_gauss_lift_cover_of_parameter_grids {δ T : ℝ} (hδ : 0 ≤ δ)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SmallGaussLiftCover.lean` -/
 
@@ -11951,7 +10857,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/NearbyGaussParameters.lean` -/
 
 section
@@ -12002,7 +10907,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/LiftCoverRefinement.lean` -/
 
 section
@@ -12043,7 +10947,6 @@ theorem exists_lift_cover_refinement {η S T : ℝ} {E : Set SL(2, ℝ)}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/UniformOrdinaryRefinement.lean` -/
 
@@ -12086,7 +10989,6 @@ theorem exists_uniform_ordinary_lift_refinement {η S T : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/EntryDifferenceCloseness.lean` -/
 
@@ -12136,7 +11038,6 @@ theorem entryCloseOne_of_entry_differences {A δ η : ℝ} (hA : 0 ≤ A) (hδ :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/EntryNeighborhoodAlgebra.lean` -/
 
@@ -12203,7 +11104,6 @@ theorem entryCloseOne_conjugate {A η : ℝ} (hA : 0 ≤ A) (hη : 0 ≤ η)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ForwardHaarTube.lean` -/
 
@@ -12313,7 +11213,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularOpenThickening.lean` -/
 
 section
@@ -12365,7 +11264,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactModularThickening.lean` -/
 
 section
@@ -12395,7 +11293,6 @@ theorem exists_compact_modular_right_thickening {K U : Set ModularOrbitSpace}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PartitionStableCores.lean` -/
 
@@ -12443,7 +11340,6 @@ theorem exists_partition_stable_cores {ι : Type*} [Fintype ι]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/InvariantVisitCount.lean` -/
 
@@ -12530,7 +11426,6 @@ theorem orbitVisitCount_below_mass_lower [IsProbabilityMeasure μ] (hf : Measure
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/HammingWordBound.lean` -/
 
@@ -12627,7 +11522,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/LatticeShortVectorUniqueness.lean` -/
 
 section
@@ -12661,7 +11555,6 @@ theorem int_pair_determinant_eq_zero_of_short_product (g : SL(2, ℝ)) (u v w z 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitiveLatticeVectors.lean` -/
 
@@ -12721,7 +11614,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowShortVectorIntervals.lean` -/
 
 section
@@ -12751,7 +11643,6 @@ theorem convex_short_vector_times (g : SL(2, ℝ)) (u v : ℤ) (R : ℝ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspExcursionSeparation.lean` -/
 
@@ -12829,7 +11720,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteIntervalPatterns.lean` -/
 
 section
@@ -12873,7 +11763,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspVisitPatterns.lean` -/
 
 section
@@ -12915,7 +11804,6 @@ theorem exists_cusp_visit_patterns {H : ℝ} (hH : 0 < H) (n : ℕ)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LongCuspVisitPatterns.lean` -/
 
@@ -12980,7 +11868,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularFlowHomeomorph.lean` -/
 
 section
@@ -13023,7 +11910,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularTimeOne.lean` -/
 
 section
@@ -13057,7 +11943,6 @@ lemma modularTimeOne_iterate_mk (n : ℕ) (g : SL(2, ℝ)) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoherentWordMismatch.lean` -/
 
@@ -13108,7 +11993,6 @@ theorem coherent_word_mismatch_le_bad_visits {ι : Type*} [Fintype ι] [Decidabl
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RegularOrbitWords.lean` -/
 
@@ -13176,7 +12060,6 @@ theorem regularOrbitWords_mass_lower {X ι : Type*} [MeasurableSpace X] [Fintype
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoherentRegularWordCount.lean` -/
 
@@ -13253,7 +12136,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RegularWordCoverFamilies.lean` -/
 
 section
@@ -13309,7 +12191,6 @@ theorem regular_word_families_of_covers {ι : Type*} [Fintype ι] [DecidableEq �
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteEntropyCrossBound.lean` -/
 
@@ -13382,7 +12263,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteEntropyThreeClasses.lean` -/
 
 section
@@ -13445,7 +12325,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteEntropyGapAlgebra.lean` -/
 
 section
@@ -13493,7 +12372,6 @@ theorem finiteEntropy_le_gap_of_word_families {ι : Type*} [Fintype ι] [Decidab
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SubadditiveEntropyTransfer.lean` -/
 
@@ -13555,7 +12433,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteOrbitEntropy.lean` -/
 
 section
@@ -13597,10 +12474,6 @@ lemma orbitEntropy_le_linear (P : FiniteMeasurablePartition X ι) (μ : Measure 
   simpa only [orbitEntropy, orbitPartition, Fintype.card_fun, Fintype.card_fin,
     Nat.cast_pow, Real.log_pow] using h
 
-lemma orbitEntropy_zero (P : FiniteMeasurablePartition X ι) (μ : Measure X)
-    [IsProbabilityMeasure μ] (f : X → X) : P.orbitEntropy μ f 0 = 0 := by
-  simp [orbitEntropy, finitePartitionEntropy, finiteEntropy, orbitAtom]
-
 theorem orbitEntropy_subadditive (P : FiniteMeasurablePartition X ι) (μ : Measure X)
     [IsProbabilityMeasure μ] {f : X → X} (hf : Measurable f)
     (hinv : Measure.map f μ = μ) : Subadditive (P.orbitEntropy μ f) := by
@@ -13636,7 +12509,6 @@ end FiniteMeasurablePartition
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrbitCoverEntropyEstimate.lean` -/
 
@@ -13709,7 +12581,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ErgodicAvoidance.lean` -/
 
 section
@@ -13779,7 +12650,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/MautnerContraction.lean` -/
 
 section
@@ -13813,7 +12683,6 @@ theorem fixed_of_conjugates_tendsto_one {G X ι : Type*} [Group G] [TopologicalS
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/HorocycleFixedPoints.lean` -/
 
@@ -13853,7 +12722,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/SpecialLinearMautner.lean` -/
 
 section
@@ -13872,7 +12740,6 @@ theorem specialLinear_fixed_of_diagonal_fixed {X : Type*} [MetricSpace X]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularL2Action.lean` -/
 
@@ -13900,10 +12767,6 @@ noncomputable instance modularL2Action : MulAction SL(2, ℝ) ModularL2 where
     simpa only [modularRightTranslate_mul] using Lp.compMeasurePreserving_comp_apply f
       (measurePreserving_modularRightTranslate h) (measurePreserving_modularRightTranslate g)
 
-lemma modularL2_smul_eq (g : SL(2, ℝ)) (f : ModularL2) :
-    g • f = Lp.compMeasurePreserving (modularRightTranslate g)
-      (measurePreserving_modularRightTranslate g) f := rfl
-
 instance modularL2Isometric : IsIsometricSMul SL(2, ℝ) ModularL2 where
   isometry_smul g := Lp.isometry_compMeasurePreserving (measurePreserving_modularRightTranslate g)
 
@@ -13923,7 +12786,6 @@ theorem modularL2_fixed_of_time_one_fixed {f : ModularL2}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarNullSets.lean` -/
 
@@ -13975,7 +12837,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarErgodicAction.lean` -/
 
 section
@@ -14017,7 +12878,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarTimeOneErgodic.lean` -/
 
 section
@@ -14058,7 +12918,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarAvoidance.lean` -/
 
 section
@@ -14079,7 +12938,6 @@ theorem modularHaar_open_avoidance_tendsto_zero {U : Set ModularOrbitSpace}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactLiftThickening.lean` -/
 
@@ -14143,7 +13001,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ForwardHaarTubeGeometry.lean` -/
 
 section
@@ -14156,10 +13013,6 @@ open scoped MatrixGroups
 lemma isClosed_forwardHaarTube (η S : ℝ) : IsClosed (forwardHaarTube η S) :=
   (isClosed_entryCloseOne η).inter
     (isClosed_le (continuous_realMatrixEntry 1 0).abs continuous_const)
-
-lemma one_mem_forwardHaarTube {η S : ℝ} (hη : 0 ≤ η) : (1 : SL(2, ℝ)) ∈ forwardHaarTube η S := by
-  simp [forwardHaarTube, EntryForwardBowenTube, EntryCloseOne, hη,
-    mul_nonneg hη (Real.exp_pos (-S)).le]
 
 lemma forwardHaarTube_mono {η δ S : ℝ} (hηδ : η ≤ δ) :
     forwardHaarTube η S ⊆ forwardHaarTube δ S := by
@@ -14211,7 +13064,6 @@ theorem isCompact_forwardHaarTube {η S : ℝ} (hη : 0 ≤ η) (hηsmall : η �
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarLocalMass.lean` -/
 
@@ -14272,7 +13124,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/BoundedFrameInjectivity.lean` -/
 
 section
@@ -14329,7 +13180,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHaarBowenBall.lean` -/
 
 section
@@ -14351,10 +13201,6 @@ lemma isCompact_modularForwardHaarBall {η S : ℝ} (hη : 0 ≤ η) (hηsmall :
     (hS : 0 ≤ S) (g : SL(2, ℝ)) : IsCompact (modularForwardHaarBall η S g) :=
   (isCompact_forwardHaarTube hη hηsmall hS).image
     (continuous_modularMk.comp (continuous_const.mul continuous_id))
-
-lemma modularMk_mem_modularForwardHaarBall {η S : ℝ} (hη : 0 ≤ η) (g : SL(2, ℝ)) :
-    modularMk g ∈ modularForwardHaarBall η S g :=
-  ⟨1, one_mem_forwardHaarTube hη, by simp only [mul_one]⟩
 
 lemma modularForwardHaarBall_integral_mul (η S : ℝ) (γ : SL(2, ℤ)) (g : SL(2, ℝ)) :
     modularForwardHaarBall η S ((γ : SL(2, ℝ)) * g) = modularForwardHaarBall η S g := by
@@ -14399,7 +13245,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularAvoidanceTube.lean` -/
 
 section
@@ -14438,7 +13283,6 @@ theorem modularForwardHaarBall_subset_avoidance {η : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteMeasurePacking.lean` -/
 
@@ -14532,7 +13376,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularBowenPacking.lean` -/
 
 section
@@ -14611,7 +13454,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactCoreLifts.lean` -/
 
 section
@@ -14664,7 +13506,6 @@ theorem exists_compactCore_integral_bounded_lifts (H : ℝ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactSubsetLifts.lean` -/
 
@@ -14724,7 +13565,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactHaarBowenMass.lean` -/
 
 section
@@ -14761,7 +13601,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularAvoidanceCover.lean` -/
 
 section
@@ -14796,7 +13635,6 @@ theorem exists_compact_avoidance_cover_bound {K : Set ModularOrbitSpace} (hK : I
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SmallAvoidanceCover.lean` -/
 
@@ -14845,7 +13683,6 @@ theorem exists_small_compact_avoidance_cover {K U : Set ModularOrbitSpace}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ShrinkingBowenCover.lean` -/
 
@@ -14933,7 +13770,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteShrinkingBowenCover.lean` -/
 
 section
@@ -14979,7 +13815,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FixedRadiusAvoidanceCover.lean` -/
 
 section
@@ -15020,7 +13855,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactModularInjectivity.lean` -/
 
 section
@@ -15052,7 +13886,6 @@ theorem exists_compact_modular_injective_radius {K : Set ModularOrbitSpace} (hK 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactImageLiftRefinement.lean` -/
 
@@ -15134,7 +13967,6 @@ theorem exists_compact_image_lift_refinement {η S T : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteLiftCoverComposition.lean` -/
 
@@ -15237,7 +14069,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/AvoidanceBlockRefinement.lean` -/
 
 section
@@ -15271,7 +14102,6 @@ theorem exists_avoidance_block_refinement {K U : Set ModularOrbitSpace}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/MarkedAvoidanceBlocks.lean` -/
 
@@ -15319,7 +14149,6 @@ theorem marked_avoidance_block_lift_cover {η q : ℝ} (hη : 0 < η) (hηsmall 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/AvoidanceBlockCost.lean` -/
 
@@ -15388,7 +14217,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrbitAvoidanceShift.lean` -/
 
 section
@@ -15425,7 +14253,6 @@ theorem ae_finiteOrbitAvoidance_of_null {X : Type*} [MeasurableSpace X]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FixedAvoidancePatternCover.lean` -/
 
@@ -15481,7 +14308,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrbitBlockPatterns.lean` -/
 
 section
@@ -15521,7 +14347,6 @@ lemma orbitBlockPattern_card {X : Type*} (f : X → X) (Q : Set X) (n k : ℕ) (
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GoodAvoidanceBlocks.lean` -/
 
@@ -15588,7 +14413,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteLiftCoverUnion.lean` -/
 
 section
@@ -15634,7 +14458,6 @@ theorem LiftCoverBound.iUnion {η T K : ℝ} {ι : Type*} [Fintype ι]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GoodAvoidanceLiftCover.lean` -/
 
@@ -15691,7 +14514,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoherentNeighborhoods.lean` -/
 
 section
@@ -15743,7 +14565,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactInitialLiftCover.lean` -/
 
 section
@@ -15774,7 +14595,6 @@ theorem exists_compact_initial_lift_cover {K : Set ModularOrbitSpace} (hK : IsCo
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactCoherentCover.lean` -/
 
@@ -15811,7 +14631,6 @@ theorem LiftCoverBound.exists_compact_cover {η S M : ℝ} {E : Set SL(2, ℝ)}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GoodAvoidanceBlockCover.lean` -/
 
@@ -15866,7 +14685,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PositiveMassAvoidanceCover.lean` -/
 
 section
@@ -15909,7 +14727,6 @@ theorem exists_positive_mass_avoidance_cover (μ : Measure ModularOrbitSpace) [I
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PositiveMassAvoidanceRate.lean` -/
 
@@ -15974,7 +14791,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactOrdinaryOrbitCover.lean` -/
 
 section
@@ -16012,7 +14828,6 @@ theorem exists_compact_ordinary_orbit_cover {K : Set ModularOrbitSpace} (hK : Is
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PartitionAvoidanceEntropy.lean` -/
 
@@ -16096,7 +14911,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/AvoidanceEntropyGap.lean` -/
 
 section
@@ -16139,7 +14953,6 @@ theorem exists_uniform_continuity_partition_entropy_gap
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LogarithmicObservationTime.lean` -/
 
@@ -16200,7 +15013,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/NormalizedPairBound.lean` -/
 
 section
@@ -16250,7 +15062,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticOrderField.lean` -/
 
 section
@@ -16291,7 +15102,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticFormEmbedding.lean` -/
 
 section
@@ -16322,15 +15132,9 @@ lemma quadraticFormEmbedding_apply {R : Type*} [CommRing R] {d : R}
   ext i j
   fin_cases i <;> fin_cases j <;> simp [formRootMatrix, pellFormMatrix] <;> ring
 
-lemma quadraticFormEmbedding_injective {d : ℤ} [Fact (¬IsSquare d)]
-    {t : ℚ × ℚ × ℚ} (ht : discr t = (d : ℚ)) :
-    Function.Injective (quadraticFormEmbedding ht) :=
-  (quadraticFormEmbedding ht).injective
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitiveForms.lean` -/
 
@@ -16383,7 +15187,6 @@ lemma PrimitiveIntegralForm.integer_of_scaled_coefficients {R : Type*} [CommRing
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PeriodPellMatrix.lean` -/
 
@@ -16443,7 +15246,6 @@ theorem integral_period_pellFormMatrix {d : ℤ} (hd : 0 < d) {t : ℤ × ℤ ×
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitivePellPeriods.lean` -/
 
@@ -16564,7 +15366,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/SharedPrimitivePeriod.lean` -/
 
 section
@@ -16622,7 +15423,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/IntegralFormEmbedding.lean` -/
 
 section
@@ -16679,7 +15479,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/IntegralVectorLattice.lean` -/
 
 section
@@ -16693,9 +15492,6 @@ def intVectorCast : (Fin 2 → ℤ) →ₗ[ℤ] (Fin 2 → ℚ) where
   map_smul' c v := by ext i; simp
 
 def standardRationalLattice : Submodule ℤ (Fin 2 → ℚ) := intVectorCast.range
-
-lemma mem_standardRationalLattice_iff (v : Fin 2 → ℚ) :
-    v ∈ standardRationalLattice ↔ ∃ u : Fin 2 → ℤ, intVectorCast u = v := Iff.rfl
 
 lemma intVectorCast_mulVec (M : Matrix (Fin 2) (Fin 2) ℤ) (v : Fin 2 → ℤ) :
     intVectorCast (M.mulVec v) = (M.map (Int.castRingHom ℚ)).mulVec (intVectorCast v) := by
@@ -16730,7 +15526,6 @@ theorem matrix_preserves_standardRationalLattice_iff (M : Matrix (Fin 2) (Fin 2)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormLatticeCoordinates.lean` -/
 
@@ -16771,7 +15566,6 @@ lemma formLatticeCoordinates_mul {d : ℤ} {t : ℤ × ℤ × ℤ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/OptimalFormEmbedding.lean` -/
 
@@ -16817,16 +15611,6 @@ theorem integral_form_preimage_coordinates {d : ℤ} {t : ℤ × ℤ × ℤ}
       quadraticOrderGenerator, zero_mul, mul_zero, add_zero, zero_add]
     linarith
 
-theorem primitive_form_embedding_optimal {d : ℤ} {t : ℤ × ℤ × ℤ}
-    (ht : discr t = d) (hprim : PrimitiveIntegralForm t) :
-    integralRationalMatrices.comap (integralFormFieldEmbedding ht).toRingHom =
-      quadraticOrder d := by
-  apply le_antisymm
-  · intro w hw
-    obtain ⟨x, y, rfl⟩ := integral_form_preimage_coordinates ht hprim w hw
-    exact int_combination_mem_quadraticOrder d x y
-  · exact quadraticOrder_le_integral_preimage ht
-
 theorem mem_quadraticOrder_iff_coordinates {d : ℤ} {t : ℤ × ℤ × ℤ}
     (ht : discr t = d) (hprim : PrimitiveIntegralForm t) (w : QuadraticDiscrAlgebra d) :
     w ∈ quadraticOrder d ↔ ∃ x y : ℤ, w = (x : QuadraticDiscrAlgebra d) +
@@ -16840,7 +15624,6 @@ theorem mem_quadraticOrder_iff_coordinates {d : ℤ} {t : ℤ × ℤ × ℤ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ProperFormLattice.lean` -/
 
@@ -16890,11 +15673,6 @@ theorem formIdealLattice_multiplier_ring {d : ℤ} {t : ℤ × ℤ × ℤ}
   · intro h z hz
     exact h _ hz
 
-theorem primitive_formIdealLattice_proper {d : ℤ} {t : ℤ × ℤ × ℤ}
-    (ht : discr t = d) (hprim : PrimitiveIntegralForm t) (ha : t.1 ≠ 0) :
-    latticeMultiplierRing (formIdealLattice (d := d) t ha) = quadraticOrder d :=
-  (formIdealLattice_multiplier_ring ht ha).trans (primitive_form_embedding_optimal ht hprim)
-
 lemma formIdealLattice_order_mul_mem {d : ℤ} {t : ℤ × ℤ × ℤ}
     (ht : discr t = d) (ha : t.1 ≠ 0) {u z : QuadraticDiscrAlgebra d}
     (hu : u ∈ quadraticOrder d) (hz : z ∈ formIdealLattice t ha) :
@@ -16907,7 +15685,6 @@ lemma formIdealLattice_order_mul_mem {d : ℤ} {t : ℤ × ℤ × ℤ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormLatticeBasis.lean` -/
 
@@ -16997,7 +15774,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormFractionalIdeal.lean` -/
 
 section
@@ -17032,10 +15808,6 @@ noncomputable def formIdealSubmodule {d : ℤ} {t : ℤ × ℤ × ℤ}
     change (u : QuadraticDiscrAlgebra d) * z ∈ formIdealLattice t ha
     exact formIdealLattice_order_mul_mem ht ha u.2 hz
 
-lemma mem_formIdealSubmodule {d : ℤ} {t : ℤ × ℤ × ℤ}
-    (ht : discr t = d) (ha : t.1 ≠ 0) (z : QuadraticDiscrAlgebra d) :
-    z ∈ formIdealSubmodule ht ha ↔ z ∈ formIdealLattice t ha := Iff.rfl
-
 theorem formIdealSubmodule_isFractional {d : ℤ} [Fact (¬IsSquare d)]
     {t : ℤ × ℤ × ℤ} (ht : discr t = d) (ha : t.1 ≠ 0) :
     IsFractional (quadraticOrder d)⁰ (formIdealSubmodule ht ha) := by
@@ -17057,18 +15829,9 @@ lemma one_mem_formFractionalIdeal {d : ℤ} [Fact (¬IsSquare d)]
     (1 : QuadraticDiscrAlgebra d) ∈ formFractionalIdeal ht ha :=
   one_mem_formIdealLattice t ha
 
-theorem formFractionalIdeal_ne_zero {d : ℤ} [Fact (¬IsSquare d)]
-    {t : ℤ × ℤ × ℤ} (ht : discr t = d) (ha : t.1 ≠ 0) :
-    formFractionalIdeal ht ha ≠ 0 := by
-  intro hz
-  have hmem := one_mem_formFractionalIdeal ht ha
-  rw [hz] at hmem
-  simp at hmem
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticOrderFractionField.lean` -/
 
@@ -17123,7 +15886,6 @@ instance quadraticDiscrAlgebra_numberField (d : ℤ) [Fact (¬IsSquare d)] :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticOrderBasis.lean` -/
 
@@ -17199,18 +15961,9 @@ noncomputable def quadraticOrderBasis {d : ℤ} {t : ℤ × ℤ × ℤ} (ht : di
 lemma quadraticOrder_moduleFinite {d : ℤ} {t : ℤ × ℤ × ℤ} (ht : discr t = d) :
     Module.Finite ℤ (quadraticOrder d) := Module.Finite.of_basis (quadraticOrderBasis ht)
 
-lemma quadraticOrder_moduleFree {d : ℤ} {t : ℤ × ℤ × ℤ} (ht : discr t = d) :
-    Module.Free ℤ (quadraticOrder d) := Module.Free.of_basis (quadraticOrderBasis ht)
-
-lemma quadraticOrder_isNoetherianRing {d : ℤ} {t : ℤ × ℤ × ℤ} (ht : discr t = d) :
-    IsNoetherianRing (quadraticOrder d) := by
-  let := quadraticOrder_moduleFinite ht
-  exact IsNoetherianRing.of_finite ℤ (quadraticOrder d)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticOrderIntegers.lean` -/
 
@@ -17235,10 +15988,6 @@ noncomputable def quadraticOrderToIntegers {d : ℤ} [Fact (¬IsSquare d)]
   map_add' _ _ := rfl
   map_mul' _ _ := rfl
 
-lemma quadraticOrderToIntegers_val {d : ℤ} [Fact (¬IsSquare d)]
-    {t : ℤ × ℤ × ℤ} (ht : discr t = d) (w : quadraticOrder d) :
-    (quadraticOrderToIntegers ht w : QuadraticDiscrAlgebra d) = w := rfl
-
 theorem quadraticOrderToIntegers_injective {d : ℤ} [Fact (¬IsSquare d)]
     {t : ℤ × ℤ × ℤ} (ht : discr t = d) : Function.Injective (quadraticOrderToIntegers ht) := by
   intro x y h
@@ -17248,7 +15997,6 @@ theorem quadraticOrderToIntegers_injective {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticOrderConductor.lean` -/
 
@@ -17298,11 +16046,6 @@ def quadraticOrderConductor (d : ℤ) [Fact (¬IsSquare d)] :
       (y : QuadraticDiscrAlgebra d) ∈ quadraticOrder d
     simpa only [mul_assoc, mul_left_comm] using h
 
-lemma mem_quadraticOrderConductor {d : ℤ} [Fact (¬IsSquare d)]
-    (x : 𝓞 (QuadraticDiscrAlgebra d)) :
-    x ∈ quadraticOrderConductor d ↔ ∀ y : 𝓞 (QuadraticDiscrAlgebra d),
-      (x : QuadraticDiscrAlgebra d) * (y : QuadraticDiscrAlgebra d) ∈ quadraticOrder d := Iff.rfl
-
 lemma quadraticOrderConductor_mem_order {d : ℤ} [Fact (¬IsSquare d)]
     {x : 𝓞 (QuadraticDiscrAlgebra d)} (hx : x ∈ quadraticOrderConductor d) :
     (x : QuadraticDiscrAlgebra d) ∈ quadraticOrder d := by
@@ -17336,16 +16079,9 @@ theorem conductorQuotientMap_injective {d : ℤ} [Fact (¬IsSquare d)]
     {t : ℤ × ℤ × ℤ} (ht : discr t = d) : Function.Injective (conductorQuotientMap ht) :=
   Ideal.quotientMap_injective
 
-theorem orderConductorIdeal_quotient_finite {d : ℤ} [Fact (¬IsSquare d)]
-    {t : ℤ × ℤ × ℤ} (ht : discr t = d) :
-    Finite (quadraticOrder d ⧸ orderConductorIdeal ht) := by
-  let := quadraticOrderConductor_quotient_finite ht
-  exact Finite.of_injective (conductorQuotientMap ht) (conductorQuotientMap_injective ht)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorIdealCorrespondence.lean` -/
 
@@ -17465,7 +16201,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderFractionalExtension.lean` -/
 
 section
@@ -17532,7 +16267,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormEmbeddingAction.lean` -/
 
 section
@@ -17568,7 +16302,6 @@ theorem integralFormFieldEmbedding_action {d : ℤ} {t : ℤ × ℤ × ℤ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormLatticeAction.lean` -/
 
@@ -17629,7 +16362,6 @@ theorem formIdealLattice_action_mem_iff {d : ℤ} {t : ℤ × ℤ × ℤ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormIdealGenerators.lean` -/
 
@@ -17698,7 +16430,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConjugateFormIdeal.lean` -/
 
 section
@@ -17763,7 +16494,6 @@ theorem leading_mul_formIdeal_product_mem_order {d : ℤ} {t : ℤ × ℤ × ℤ
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/InvertibleFormIdeal.lean` -/
 
@@ -17863,7 +16593,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormIdealAction.lean` -/
 
 section
@@ -17910,7 +16639,6 @@ theorem formFractionalIdeal_action_eq_span_mul {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitiveFormClass.lean` -/
 
@@ -17966,7 +16694,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderClassExtension.lean` -/
 
 section
@@ -18019,7 +16746,6 @@ theorem orderClassExtension_mk {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorContractInvertible.lean` -/
 
@@ -18112,7 +16838,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/IntegralIdealClass.lean` -/
 
 section
@@ -18147,7 +16872,6 @@ theorem classGroup_exists_integral_representative {R K : Type*} [CommRing R] [Is
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoprimeClassRepresentative.lean` -/
 
@@ -18212,7 +16936,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderClassSurjective.lean` -/
 
 section
@@ -18255,7 +16978,6 @@ theorem orderClassExtension_surjective {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PellOrderUnit.lean` -/
 
@@ -18302,15 +17024,9 @@ noncomputable def pellOrderUnit (d T U : ℤ) (hpell : T ^ 2 - d * U ^ 2 = 4)
     rw [mul_comm]
     exact pellQuadraticElement_mul_conjugate d T U hpell
 
-lemma pellOrderUnit_val (d T U : ℤ) (hpell : T ^ 2 - d * U ^ 2 = 4)
-    (hpar : Even (T - d * U)) :
-    ((pellOrderUnit d T U hpell hpar : quadraticOrder d) : QuadraticDiscrAlgebra d) =
-      pellQuadraticElement d T U := rfl
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticRealEmbedding.lean` -/
 
@@ -18354,7 +17070,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PeriodIntegerUnit.lean` -/
 
 section
@@ -18376,43 +17091,9 @@ theorem exists_orderUnit_of_primitive_period {d : ℤ} (hd : 0 < d)
   refine ⟨pellOrderUnit d T U hpell hpar, ?_⟩
   exact quadraticRealEmbedding_pell_period hd T U s hT hU
 
-theorem exists_integerUnit_of_primitive_period {d : ℤ} [Fact (¬IsSquare d)] (hd : 0 < d)
-    {t : ℤ × ℤ × ℤ} (ht : PrimitiveIntegralForm t) (htd : discr t = d) (g : SL(2, ℝ))
-    (hg : Real.sqrt (d : ℝ) • formAction g (splitForm ℝ) = mapCoeffs (Int.castRingHom ℝ) t)
-    (s : ℝ) (hs : s ∈ flowPeriodGroup g) :
-    ∃ u : (𝓞 (QuadraticDiscrAlgebra d))ˣ,
-      quadraticRealEmbedding hd ((u : 𝓞 (QuadraticDiscrAlgebra d)) : QuadraticDiscrAlgebra d) =
-        Real.exp (-(s / 2)) := by
-  obtain ⟨u, hu⟩ := exists_orderUnit_of_primitive_period hd ht htd g hg s hs
-  exact ⟨Units.map (quadraticOrderToIntegers htd).toMonoidHom u, hu⟩
-
-theorem exists_integerUnit_log_of_primitive_period {d : ℤ} [Fact (¬IsSquare d)] (hd : 0 < d)
-    {t : ℤ × ℤ × ℤ} (ht : PrimitiveIntegralForm t) (htd : discr t = d) (g : SL(2, ℝ))
-    (hg : Real.sqrt (d : ℝ) • formAction g (splitForm ℝ) = mapCoeffs (Int.castRingHom ℝ) t)
-    (s : ℝ) (hs : s ∈ flowPeriodGroup g) :
-    ∃ u : (𝓞 (QuadraticDiscrAlgebra d))ˣ,
-      Real.log |quadraticRealEmbedding hd
-        ((u : 𝓞 (QuadraticDiscrAlgebra d)) : QuadraticDiscrAlgebra d)| = -(s / 2) := by
-  obtain ⟨u, hu⟩ := exists_integerUnit_of_primitive_period hd ht htd g hg s hs
-  refine ⟨u, ?_⟩
-  rw [hu, abs_of_pos (Real.exp_pos _), Real.log_exp]
-
-theorem ClosedFlowOrbit.exists_integerUnit_abs_log {d : ℤ} [Fact (¬IsSquare d)] (hd : 0 < d)
-    {t : ℤ × ℤ × ℤ} (ht : PrimitiveIntegralForm t) (htd : discr t = d)
-    (o : ClosedFlowOrbit)
-    (ho : Real.sqrt (d : ℝ) • formAction o.lift (splitForm ℝ) = mapCoeffs (Int.castRingHom ℝ) t) :
-    ∃ u : (𝓞 (QuadraticDiscrAlgebra d))ˣ,
-      |Real.log (|quadraticRealEmbedding hd
-        ((u : 𝓞 (QuadraticDiscrAlgebra d)) : QuadraticDiscrAlgebra d)|)| = o.period / 2 := by
-  obtain ⟨u, hu⟩ := exists_integerUnit_log_of_primitive_period hd ht htd
-    o.lift ho o.period o.period_mem
-  refine ⟨u, ?_⟩
-  rw [hu, abs_neg, abs_of_pos (half_pos o.period_pos)]
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticInfinitePlace.lean` -/
 
@@ -18460,14 +17141,9 @@ theorem quadraticDiscrAlgebra_card_infinitePlace {d : ℤ} [Fact (¬IsSquare d)]
   rw [InfinitePlace.card_eq_nrRealPlaces_add_nrComplexPlaces,
     quadraticDiscrAlgebra_nrRealPlaces hd, quadraticDiscrAlgebra_nrComplexPlaces hd]
 
-theorem quadraticDiscrAlgebra_unitRank {d : ℤ} [Fact (¬IsSquare d)] (hd : 0 < d) :
-    NumberField.Units.rank (QuadraticDiscrAlgebra d) = 1 := by
-  rw [NumberField.Units.rank, quadraticDiscrAlgebra_card_infinitePlace hd]
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderUnitSubgroup.lean` -/
 
@@ -18537,7 +17213,6 @@ theorem exists_orderSubgroupUnit_of_primitive_period {d : ℤ} [Fact (¬IsSquare
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorUnitPullback.lean` -/
 
@@ -18628,7 +17303,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorGluedIdeal.lean` -/
 
 section
@@ -18709,7 +17383,6 @@ theorem lift_mem_conductorGluedIdeal {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorGluedIdealProduct.lean` -/
 
@@ -18806,7 +17479,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorClassMap.lean` -/
 
 section
@@ -18856,7 +17528,6 @@ noncomputable def conductorClassMap {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GluedIdealExtension.lean` -/
 
@@ -18913,7 +17584,6 @@ theorem conductorClassMap_range_le_orderClassExtension_ker {d : ℤ} [Fact (¬Is
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorClassMapKernel.lean` -/
 
@@ -19008,7 +17678,6 @@ theorem residueUnits_sup_reducedUnits_le_conductorClassMap_ker
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorExactKernel.lean` -/
 
@@ -19108,7 +17777,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormOfOrderMatrix.lean` -/
 
 section
@@ -19174,7 +17842,6 @@ theorem formRootMatrix_formOfOrderMatrix {d : ℤ} (hns : ¬IsSquare d)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/IdealOrderMatrix.lean` -/
 
@@ -19247,7 +17914,6 @@ theorem formOfIdealBasis_fst_ne_zero {d : ℤ} [hns : Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/IdealBasisLattice.lean` -/
 
@@ -19352,7 +18018,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitiveOfOptimal.lean` -/
 
 section
@@ -19429,7 +18094,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitiveOfInvertible.lean` -/
 
 section
@@ -19472,16 +18136,9 @@ theorem primitiveIntegralForm_of_formFractionalIdeal_isUnit {d : ℤ} [Fact (¬I
     exact r.2
   · exact quadraticOrder_le_integral_preimage ht
 
-theorem formFractionalIdeal_isUnit_iff {d : ℤ} [Fact (¬IsSquare d)]
-    {t : ℤ × ℤ × ℤ} (ht : discr t = d) (ha : t.1 ≠ 0) :
-    IsUnit (formFractionalIdeal ht ha) ↔ PrimitiveIntegralForm t :=
-  ⟨primitiveIntegralForm_of_formFractionalIdeal_isUnit ht ha,
-    fun hp => formFractionalIdeal_isUnit ht hp ha⟩
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitivePacketMass.lean` -/
 
@@ -19539,7 +18196,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FormOrbitClass.lean` -/
 
 section
@@ -19587,7 +18243,6 @@ theorem primitiveFormOrbitClass_mk {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/IdealFormClassSurjective.lean` -/
 
@@ -19642,7 +18297,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderClassPacketMass.lean` -/
 
 section
@@ -19680,7 +18334,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConductorClassCard.lean` -/
 
 section
@@ -19700,20 +18353,9 @@ theorem conductorClassMap_range_card_mul_unitIndex {d : ℤ} [Fact (¬IsSquare d
   rw [← Subgroup.index_ker, conductorClassMap_ker, orderUnitSubgroup_index_eq_residue_relIndex]
   simpa only [mul_comm] using h
 
-theorem residueUnitIndex_le_class_card_mul_unitIndex {d : ℤ} [Fact (¬IsSquare d)]
-    (hd : 0 < d) {t : ℤ × ℤ × ℤ} (ht : discr t = d) :
-    (orderResidueUnitSubgroup ht).index ≤
-      Nat.card (ClassGroup (quadraticOrder d)) * (orderUnitSubgroup ht).index := by
-  let := quadraticOrder_classGroup_finite hd ht
-  have hc : Nat.card (conductorClassMap ht).range ≤ Nat.card (ClassGroup (quadraticOrder d)) :=
-    Nat.card_le_card_of_injective Subtype.val Subtype.val_injective
-  rw [← conductorClassMap_range_card_mul_unitIndex ht]
-  exact Nat.mul_le_mul_right _ hc
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderClassNumberBound.lean` -/
 
@@ -19758,7 +18400,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RankOneRegulator.lean` -/
 
 section
@@ -19787,29 +18428,9 @@ theorem regOfFamily_const_eq_abs_log {K : Type*} [Field K] [NumberField K]
     Matrix.det_eq_elem_of_subsingleton _ (⟨w, Ne.symm hv⟩ : {p : InfinitePlace K // p ≠ v})]
   simp [hw.mult_eq_one]
 
-theorem regulator_le_abs_log_of_two_places {K : Type*} [Field K] [NumberField K]
-    (hcard : Fintype.card (InfinitePlace K) = 2) (w : InfinitePlace K)
-    (hw : InfinitePlace.IsReal w) (u : (𝓞 K)ˣ) (hu : Real.log (w (u : K)) ≠ 0) :
-    regulator K ≤ |Real.log (w (u : K))| := by
-  let f : Fin (NumberField.Units.rank K) → (𝓞 K)ˣ := fun _ => u
-  have hf : regOfFamily f = |Real.log (w (u : K))| := regOfFamily_const_eq_abs_log hcard w hw u
-  have hidx := regOfFamily_div_regulator f
-  rw [hf] at hidx
-  have hpos : 0 < ((Subgroup.closure (Set.range f) ⊔ torsion K).index : ℝ) := by
-    rw [← hidx]
-    exact div_pos (abs_pos.mpr hu) (regulator_pos K)
-  have hnat : 1 ≤ (Subgroup.closure (Set.range f) ⊔ torsion K).index := by
-    have hn : 0 < (Subgroup.closure (Set.range f) ⊔ torsion K).index := by exact_mod_cast hpos
-    omega
-  have hge : (1 : ℝ) ≤ |Real.log (w (u : K))| / regulator K := by
-    rw [hidx]
-    exact_mod_cast hnat
-  simpa only [one_mul] using (le_div_iff₀ (regulator_pos K)).mp hge
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SubgroupRegulatorBound.lean` -/
 
@@ -19848,13 +18469,6 @@ lemma unitFamily_le_subgroup {K : Type*} [Field K] [NumberField K]
   rintro _ ⟨_, rfl⟩
   exact hu
 
-theorem unitSubgroup_finiteIndex {K : Type*} [Field K] [NumberField K]
-    (hcard : Fintype.card (InfinitePlace K) = 2) (w : InfinitePlace K)
-    (hw : InfinitePlace.IsReal w) (S : Subgroup (𝓞 K)ˣ) (hS : torsion K ≤ S)
-    (u : (𝓞 K)ˣ) (hu : u ∈ S) (hlog : Real.log (w (u : K)) ≠ 0) : S.FiniteIndex := by
-  let := unitFamily_finiteIndex hcard w hw u hlog
-  exact Subgroup.finiteIndex_of_le (unitFamily_le_subgroup S hS hu)
-
 theorem unitSubgroup_index_mul_regulator_le {K : Type*} [Field K] [NumberField K]
     (hcard : Fintype.card (InfinitePlace K) = 2) (w : InfinitePlace K)
     (hw : InfinitePlace.IsReal w) (S : Subgroup (𝓞 K)ˣ) (hS : torsion K ≤ S)
@@ -19872,7 +18486,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderUnitIndexPeriod.lean` -/
 
 section
@@ -19882,19 +18495,6 @@ namespace DukeArithmetic
 
 open NumberField
 open scoped ENNReal
-
-theorem ClosedFlowOrbit.orderUnitSubgroup_finiteIndex {d : ℤ} [Fact (¬IsSquare d)] (hd : 0 < d)
-    {t : ℤ × ℤ × ℤ} (ht : PrimitiveIntegralForm t) (htd : discr t = d)
-    (o : ClosedFlowOrbit)
-    (ho : Real.sqrt (d : ℝ) • formAction o.lift (splitForm ℝ) = mapCoeffs (Int.castRingHom ℝ) t) :
-    (orderUnitSubgroup htd).FiniteIndex := by
-  obtain ⟨u, hu, hlog⟩ := exists_orderSubgroupUnit_of_primitive_period hd ht htd o ho
-  apply unitSubgroup_finiteIndex (quadraticDiscrAlgebra_card_infinitePlace hd)
-    (quadraticRealPlace hd) (quadraticRealPlace_isReal hd) (orderUnitSubgroup htd)
-    (torsion_le_orderUnitSubgroup hd htd) u hu
-  intro hz
-  rw [hz, abs_zero] at hlog
-  linarith [o.period_pos]
 
 theorem ClosedFlowOrbit.orderUnitIndex_mul_regulator_le_half_period
     {d : ℤ} [Fact (¬IsSquare d)] (hd : 0 < d)
@@ -19929,7 +18529,6 @@ theorem orderClass_mul_unitIndex_mul_regulator_le_packetMass
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FieldClassPacketMass.lean` -/
 
@@ -19969,7 +18568,6 @@ theorem field_class_mul_residue_index_mul_regulator_le_packetMass
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticOrderDiscriminant.lean` -/
 
@@ -20026,7 +18624,6 @@ theorem quadraticOrderBasis_integer_discr {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticOrderIndex.lean` -/
 
@@ -20098,7 +18695,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderIndexConductor.lean` -/
 
 section
@@ -20131,30 +18727,9 @@ theorem quadraticOrderIndex_mem_conductor {d : ℤ} [Fact (¬IsSquare d)]
   intro x
   exact orderIndex_mul_integer_mem_order ht x
 
-theorem span_orderIndex_le_conductor {d : ℤ} [Fact (¬IsSquare d)]
-    {t : ℤ × ℤ × ℤ} (ht : discr t = d) :
-    Ideal.span {(quadraticOrderIndex ht : 𝓞 (QuadraticDiscrAlgebra d))} ≤
-      quadraticOrderConductor d :=
-  (Ideal.span_singleton_le_iff_mem _).mpr (quadraticOrderIndex_mem_conductor ht)
-
-theorem conductor_quotient_card_dvd_orderIndex_sq {d : ℤ} [Fact (¬IsSquare d)]
-    {t : ℤ × ℤ × ℤ} (ht : discr t = d) :
-    Nat.card (𝓞 (QuadraticDiscrAlgebra d) ⧸ quadraticOrderConductor d) ∣
-      quadraticOrderIndex ht ^ 2 := by
-  have hle : (nsmulAddMonoidHom (α := 𝓞 (QuadraticDiscrAlgebra d))
-      (quadraticOrderIndex ht)).range ≤ (quadraticOrderConductor d).toAddSubgroup := by
-    rintro _ ⟨x, rfl⟩
-    change (quadraticOrderIndex ht) • x ∈ quadraticOrderConductor d
-    rw [nsmul_eq_mul]
-    exact (quadraticOrderConductor d).mul_mem_right x (quadraticOrderIndex_mem_conductor ht)
-  have h := AddSubgroup.index_dvd_of_le hle
-  rw [AddSubgroup.index_range_nsmul, RingOfIntegers.rank, quadraticDiscrAlgebra_finrank] at h
-  exact h
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ResidueIndexComparison.lean` -/
 
@@ -20227,7 +18802,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteRingUnitDensity.lean` -/
 
 section
@@ -20281,7 +18855,6 @@ theorem finite_ring_card_le_pow_maximal_mul_units (R : Type*) [CommRing R] [Fini
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ResidueMaximalCount.lean` -/
 
@@ -20381,7 +18954,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ResidueUnitLowerBound.lean` -/
 
 section
@@ -20469,7 +19041,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderIndexPacketMass.lean` -/
 
 section
@@ -20500,7 +19071,6 @@ theorem exists_orderIndex_packetMass_lower_bound {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticZetaResidue.lean` -/
 
@@ -20548,7 +19118,6 @@ theorem quadraticField_zeta_residue_mul_sqrt {d : ℤ} [Fact (¬IsSquare d)] (hd
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ZetaResiduePacketMass.lean` -/
 
@@ -20624,7 +19193,6 @@ theorem exists_zetaResidue_packetMass_lower_bound {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DirichletHyperbola.lean` -/
 
@@ -20726,7 +19294,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/WeightedConvolution.lean` -/
 
 section
@@ -20778,7 +19345,6 @@ lemma weightedArithmeticPartialSum_eq_sum_range (f : ArithmeticFunction ℝ) (s 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DirichletPartialSums.lean` -/
 
@@ -20850,7 +19416,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/WeightedPartialSums.lean` -/
 
 section
@@ -20889,7 +19454,6 @@ theorem norm_sum_range_smul_le_of_antitone
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DirichletWeightedSums.lean` -/
 
@@ -20949,7 +19513,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletValue.lean` -/
 
 section
@@ -21003,7 +19566,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletContinuity.lean` -/
 
 section
@@ -21050,7 +19612,6 @@ theorem realDirichletValue_continuousAt {q : ℕ} [NeZero q]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletLFunction.lean` -/
 
@@ -21128,7 +19689,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletPositivity.lean` -/
 
 section
@@ -21191,7 +19751,6 @@ theorem realDirichletValue_one_pos {q : ℕ} [NeZero q]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PowerSumRegularization.lean` -/
 
@@ -21327,7 +19886,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealSeriesCutoff.lean` -/
 
 section
@@ -21400,7 +19958,6 @@ theorem realDirichletValue_sub_floor_partialSum_norm_le {q : ℕ} [NeZero q]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealZetaConvolution.lean` -/
 
@@ -21515,7 +20072,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimePowerConvolution.lean` -/
 
 section
@@ -21572,7 +20128,6 @@ lemma realCharacterArithmetic_pmul_prime_pow {q r p : ℕ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoprimeZetaConvolution.lean` -/
 
@@ -21644,7 +20199,6 @@ lemma realZetaConvolution_prime_pow {q p : ℕ} (χ : DirichletCharacter ℝ q)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticRootArithmetic.lean` -/
 
@@ -21741,7 +20295,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/LinearRootPrimeIdeal.lean` -/
 
 section
@@ -21802,7 +20355,6 @@ theorem linearRootPrimeIdeal_injective (hp : ¬p ∣ exponent θ) {r s : ZMod p}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BiquadraticConvolution.lean` -/
 
@@ -21949,7 +20501,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConvolutionDivisorBound.lean` -/
 
 section
@@ -22002,7 +20553,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/HyperbolaRpow.lean` -/
 
 section
@@ -22045,7 +20595,6 @@ lemma rpow_hyperbola_cross_term {x : ℝ} (hx : 0 < x) (s : ℝ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/HyperbolaStripEstimates.lean` -/
 
@@ -22152,7 +20701,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/HyperbolaBoundaryEstimates.lean` -/
 
 section
@@ -22240,7 +20788,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/WeightedDivisorSum.lean` -/
 
 section
@@ -22294,7 +20841,6 @@ theorem exists_weighted_divisor_sum_bound :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CharacterConvolutionEstimate.lean` -/
 
@@ -22424,7 +20970,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/NatSqrtRpow.lean` -/
 
 section
@@ -22495,7 +21040,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CharacterConvolutionCutoff.lean` -/
 
 section
@@ -22535,7 +21079,6 @@ theorem realCharacterConvolution_floor_error_le {q r : ℕ} [NeZero q] [NeZero r
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GeneralHyperbolaBoundary.lean` -/
 
@@ -22610,7 +21153,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/HyperbolaErrorAssembly.lean` -/
 
 section
@@ -22634,7 +21176,6 @@ lemma norm_hyperbola_error_le {A B P L Z R S T U a b c d : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ZetaCharacterGeneralEstimate.lean` -/
 
@@ -22705,7 +21246,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ZetaCharacterCutoff.lean` -/
 
 section
@@ -22772,7 +21312,6 @@ theorem realZetaConvolution_floor_error_le {q : ℕ} [NeZero q]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ConvolutionStripError.lean` -/
 
@@ -22873,7 +21412,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletProduct.lean` -/
 
 section
@@ -22956,7 +21494,6 @@ lemma realBiquadraticConvolution_grouped {q r : ℕ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BiquadraticBoundary.lean` -/
 
@@ -23070,7 +21607,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FourFactorHyperbola.lean` -/
 
 section
@@ -23164,7 +21700,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FourFactorScale.lean` -/
 
 section
@@ -23217,7 +21752,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FixedZeroResidue.lean` -/
 
 section
@@ -23262,7 +21796,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletLogBound.lean` -/
 
 section
@@ -23305,7 +21838,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletLogPower.lean` -/
 
 section
@@ -23336,7 +21868,6 @@ theorem productDirichletValue_one_le_rpow {q r : ℕ} [NeZero q] [NeZero r]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FixedZeroLowerBound.lean` -/
 
@@ -23395,7 +21926,6 @@ theorem exists_fixedZero_lower_bound {q : ℕ} [NeZero q]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ZetaCharacterHyperbolaEstimate.lean` -/
 
@@ -23473,7 +22003,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletZeroAlternative.lean` -/
 
 section
@@ -23526,7 +22055,6 @@ theorem realDirichlet_lower_bound_or_zero {q : ℕ} [NeZero q]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletPolynomialAlternative.lean` -/
 
@@ -23601,7 +22129,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletSiegel.lean` -/
 
 section
@@ -23659,7 +22186,6 @@ theorem exists_primitive_realDirichlet_siegel_lower_bound {ε : ℝ} (hε : 0 < 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletChangeLevel.lean` -/
 
@@ -23719,7 +22245,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RealDirichletImprimitiveSiegel.lean` -/
 
 section
@@ -23769,7 +22294,6 @@ theorem exists_realDirichlet_siegel_lower_bound {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticDirichletCharacter.lean` -/
 
@@ -23844,7 +22368,6 @@ theorem quadraticDirichletCharacter_apply_nat (a : ℕ) [NeZero a] (n : ℕ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/JacobiPrimePattern.lean` -/
 
@@ -23948,7 +22471,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticCharacterNonprincipal.lean` -/
 
 section
@@ -24024,7 +22546,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticSplitPrimes.lean` -/
 
 section
@@ -24070,7 +22591,6 @@ theorem exists_two_primeIdeals_of_legendre_one {d : ℤ} [Fact (¬IsSquare d)]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/IdealNormCountProduct.lean` -/
 
@@ -24137,7 +22657,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/IdealNormCountPrimePower.lean` -/
 
 section
@@ -24190,7 +22709,6 @@ theorem quadratic_ideal_norm_count_square_lower (d : ℤ) [Fact (¬IsSquare d)] 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticIdealCoefficient.lean` -/
 
@@ -24280,7 +22798,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrincipalCharacterMean.lean` -/
 
 section
@@ -24310,10 +22827,6 @@ lemma principalCharacterMean_nonneg (q : ℕ) : 0 ≤ principalCharacterMean q :
 lemma principalCharacterMean_le_one {q : ℕ} [NeZero q] : principalCharacterMean q ≤ 1 := by
   apply (div_le_one (by exact_mod_cast NeZero.pos q : (0 : ℝ) < q)).mpr
   exact_mod_cast Nat.totient_le q
-
-lemma principalCharacterMean_pos {q : ℕ} [NeZero q] : 0 < principalCharacterMean q := by
-  exact div_pos (by exact_mod_cast Nat.totient_pos.mpr (NeZero.pos q))
-    (by exact_mod_cast NeZero.pos q)
 
 lemma principal_character_sum_range_period {q : ℕ} [NeZero q] :
     ∑ k ∈ range q, (1 : DirichletCharacter ℝ q) k = (q.totient : ℝ) := by
@@ -24369,7 +22882,6 @@ theorem principal_character_sum_Ioc_error_le {q : ℕ} [NeZero q] (n : ℕ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoprimeHyperbolaStrips.lean` -/
 
@@ -24460,7 +22972,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoprimeConvolutionAsymptotic.lean` -/
 
 section
@@ -24546,7 +23057,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticResidueComparison.lean` -/
 
 section
@@ -24594,7 +23104,6 @@ theorem quadratic_residue_ge_principalMean_mul_LValue (a : ℕ) [NeZero a]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrincipalMeanLowerBound.lean` -/
 
@@ -24644,7 +23153,6 @@ theorem exists_principalMean_lower_bound {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuadraticSiegelResidue.lean` -/
 
@@ -24701,7 +23209,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UnconditionalPacketMass.lean` -/
 
 section
@@ -24753,7 +23260,6 @@ theorem exists_unconditional_packetMass_lower_bound {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/UnconditionalPairBound.lean` -/
 
@@ -24831,7 +23337,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UnconditionalBowenPairBound.lean` -/
 
 section
@@ -24878,7 +23383,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UnconditionalForwardPairBound.lean` -/
 
 section
@@ -24919,7 +23423,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ForwardPairTimeBound.lean` -/
 
 section
@@ -24951,7 +23454,6 @@ theorem exists_unconditional_forwardPairs_time_bound {σ : ℝ} (hσ : 0 < σ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketCriticalPairScale.lean` -/
 
@@ -25010,7 +23512,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/NullBoundaryOperations.lean` -/
 
 section
@@ -25065,7 +23566,6 @@ theorem measure_frontier_diff_eq_zero {X : Type*} [TopologicalSpace X]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FiniteCoverPartition.lean` -/
 
@@ -25143,7 +23643,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/NullBoundaryNeighborhoods.lean` -/
 
 section
@@ -25180,7 +23679,6 @@ theorem exists_open_compact_null_boundary_superset {X : Type*} [TopologicalSpace
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ClosePairLiftUniqueness.lean` -/
 
@@ -25220,7 +23718,6 @@ theorem entryCloseOne_of_close_lifts_and_modularClosePairs {A α η : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactCoreLiftRadius.lean` -/
 
@@ -25265,18 +23762,9 @@ theorem exists_compact_lift_radius {K : Set ModularOrbitSpace} (hK : IsCompact K
     hscale ((γ : SL(2, ℝ)) * g) ((γ : SL(2, ℝ)) * h) hγ hclose' hpair'
   rwa [heq] at h
 
-theorem exists_compactCore_lift_radius (H : ℝ) :
-    ∃ η : ℝ, 0 < η ∧ η ≤ 1 / 192 ∧
-      ∀ g h : SL(2, ℝ), modularMk g ∈ modularCompactCore H →
-        EntryCloseOne (η * Real.exp 1) (g⁻¹ * h) →
-        (modularMk g, modularMk h) ∈ modularClosePairs η →
-        EntryCloseOne η (g⁻¹ * h) :=
-  exists_compact_lift_radius (isCompact_modularCompactCore H)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FineModularPartition.lean` -/
 
@@ -25374,7 +23862,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/LiftEndpointCloseness.lean` -/
 
 section
@@ -25424,7 +23911,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CompactStepRefinement.lean` -/
 
 section
@@ -25462,7 +23948,6 @@ theorem LiftForwardClose.extend_over_compact_atom {η S : ℝ} {K : Set ModularO
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/MarkedOrbitLiftCover.lean` -/
 
@@ -25521,7 +24006,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/MeasurableLiftCover.lean` -/
 
 section
@@ -25551,7 +24035,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrbitAtomBowenCover.lean` -/
 
 section
@@ -25563,9 +24046,6 @@ open scoped MatrixGroups
 
 def orbitWordLabel {N n : ℕ} (w : Fin n → Option (Fin N)) (k : ℕ) : Option (Fin N) :=
   if h : k < n then w ⟨k, h⟩ else none
-
-lemma orbitWordLabel_val {N n : ℕ} (w : Fin n → Option (Fin N)) (j : Fin n) :
-    orbitWordLabel w j.val = w j := by simp only [orbitWordLabel, dif_pos j.isLt]
 
 noncomputable def exceptionalWordStepCount {N n : ℕ} (w : Fin (n + 1) → Option (Fin N)) : ℕ :=
   ((Finset.range n).filter (fun k => orbitWordLabel w (k + 1) = none)).card
@@ -25614,7 +24094,6 @@ theorem FineModularPartition.orbitAtom_bowen_cover (P : FineModularPartition) {n
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CoveredCellCollision.lean` -/
 
@@ -25679,7 +24158,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PartialPartitionEntropy.lean` -/
 
 section
@@ -25703,7 +24181,6 @@ theorem finitePartitionEntropy_subtype_le {X ι : Type*} [MeasurableSpace X]
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrbitAtomEntropy.lean` -/
 
@@ -25769,7 +24246,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ExceptionalVisitCount.lean` -/
 
 section
@@ -25806,11 +24282,6 @@ lemma exceptionalVisitCount_nonneg (P : FineModularPartition) (n : ℕ) (x : Mod
   apply Finset.sum_nonneg
   intro k _
   exact Set.indicator_nonneg (fun _ _ => zero_le_one) x
-
-lemma measurable_exceptionalVisitCount (P : FineModularPartition) (n : ℕ) :
-    Measurable (exceptionalVisitCount P n) :=
-  Finset.measurable_sum _ (fun k _ =>
-    measurable_const.indicator (measurableSet_exceptionalVisitSet P k))
 
 lemma integrable_exceptionalVisitCount (P : FineModularPartition)
     (μ : Measure ModularOrbitSpace) [IsFiniteMeasure μ] (n : ℕ) :
@@ -25853,7 +24324,6 @@ theorem exceptionalVisitCount_of_mem_orbitAtom (P : FineModularPartition) {n : �
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GoodOrbitMass.lean` -/
 
@@ -25946,7 +24416,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/EntropyRateAlgebra.lean` -/
 
 section
@@ -26004,7 +24473,6 @@ theorem eventual_entropy_rate_lower_of_linear_bound {ι : Type*} {l : Filter ι}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketOrbitEntropyRate.lean` -/
 
@@ -26067,7 +24535,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/WeakLimitPartitionEntropy.lean` -/
 
 section
@@ -26095,7 +24562,6 @@ theorem finitePartitionEntropy_tendsto_of_weak_limit {X ι κ : Type*}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrbitEntropyWeakLimit.lean` -/
 
@@ -26158,7 +24624,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderedIntervalLiftCover.lean` -/
 
 section
@@ -26219,7 +24684,6 @@ theorem ordered_interval_lift_cover {η K : ℝ} {E : Set SL(2, ℝ)} (hK : 0 �
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/InitialExceptionCover.lean` -/
 
@@ -26295,7 +24759,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/LatticeVectorCandidateCount.lean` -/
 
 section
@@ -26341,7 +24804,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuantitativeGaussCandidates.lean` -/
 
 section
@@ -26369,7 +24831,6 @@ theorem exists_uniform_returningGauss_candidates_card_bound {A : ℝ} (hA : 0 �
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DiameterIntervalGrid.lean` -/
 
@@ -26401,7 +24862,6 @@ theorem exists_diameter_interval_grid {E : Set ℝ} {D w : ℝ} (hD : 0 ≤ D) (
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReturningGaussGrid.lean` -/
 
@@ -26489,7 +24949,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuantitativeReturningGrid.lean` -/
 
 section
@@ -26517,7 +24976,6 @@ theorem exists_quantitative_returningGauss_unstable_grid {A c δ : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussLiftGridCover.lean` -/
 
@@ -26569,7 +25027,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuantitativeReturningCover.lean` -/
 
 section
@@ -26601,7 +25058,6 @@ theorem exists_quantitative_returningGauss_lift_cover {A c δ : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FundamentalFrameHeight.lean` -/
 
@@ -26668,7 +25124,6 @@ theorem frame_im_le_height_sq_of_not_mem_cusp (z : UpperHalfPlane) (θ : ℝ) {Y
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/QuantitativeCuspLifts.lean` -/
 
@@ -26739,7 +25194,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReturningCoverHeightBound.lean` -/
 
 section
@@ -26771,7 +25225,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ShortReturningScale.lean` -/
 
 section
@@ -26799,7 +25252,6 @@ theorem exp_le_ten_height_mul_exp_half {Y T : ℝ} (hY : 0 < Y)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReturningVectors.lean` -/
 
@@ -26836,7 +25288,6 @@ theorem exists_returningGaussParameters_of_close {η S c : ℝ} (hη : η ≤ 1 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/GaussLiftCover.lean` -/
 
@@ -26899,7 +25350,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrdinaryLiftRefinement.lean` -/
 
 section
@@ -26943,7 +25393,6 @@ theorem exists_ordinary_lift_refinement {η : ℝ} (hηpos : 0 < η) (hη : η �
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/HeightReturningRefinement.lean` -/
 
@@ -27035,7 +25484,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CommonCuspVector.lean` -/
 
 section
@@ -27099,7 +25547,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FlowTimeBounds.lean` -/
 
 section
@@ -27129,7 +25576,6 @@ theorem modularVectorLengthSq_of_short_time (g : SL(2, ℝ)) (s t H C : ℝ)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedCuspVector.lean` -/
 
@@ -27173,7 +25619,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspFlowDistortion.lean` -/
 
 section
@@ -27194,20 +25639,9 @@ theorem modularRightTranslate_mem_cusp_of_scale {H M t : ℝ}
     exact (modularVectorLengthSq_flow_le g t u v).trans_lt
       ((mul_lt_mul_of_pos_left hshort (Real.exp_pos _)).trans_le hscale)
 
-theorem modularRightTranslate_mem_cusp_distortion {H : ℝ} (hH : 0 < H) (t : ℝ)
-    {x : ModularOrbitSpace} (hx : x ∈ modularCusp H) :
-    modularRightTranslate (diagonalFlow t) x ∈ modularCusp (H * Real.exp (-(|t| / 2))) := by
-  apply modularRightTranslate_mem_cusp_of_scale (H := H) (t := t) (hx := hx)
-  have hexp : Real.exp (-(|t| / 2)) ^ 2 = Real.exp (-|t|) := by
-    rw [pow_two, ← Real.exp_add]
-    congr 1
-    ring
-  rw [mul_pow, hexp, Real.exp_neg, mul_inv_rev, inv_inv]
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/InitialCuspReturn.lean` -/
 
@@ -27276,7 +25710,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ExcursionEnergyBounds.lean` -/
 
 section
@@ -27306,13 +25739,6 @@ lemma cuspEndpointLengthSqLower_pos : 0 < cuspEndpointLengthSqLower := by
   apply div_pos _ (pow_pos (Real.exp_pos _) 3)
   nlinarith
 
-lemma cuspEndpointLengthSqLower_le_one : cuspEndpointLengthSqLower ≤ 1 := by
-  have hp : 1 < Real.exp (1 : ℝ) := Real.one_lt_exp_iff.mpr (by norm_num)
-  unfold cuspEndpointLengthSqLower
-  apply (div_le_one (pow_pos (Real.exp_pos _) 3)).mpr
-  nlinarith [mul_nonneg (by linarith : 0 ≤ Real.exp (1 : ℝ) - 1)
-    (sq_nonneg (Real.exp (1 : ℝ)))]
-
 lemma exponential_energy_initial_coefficient_lower {R X Y L : ℝ}
     (hX : 0 ≤ X) (hY : 0 ≤ Y) (hL : 1 ≤ L)
     (hprev : R ≤ Real.exp 1 * X + Real.exp (-1) * Y)
@@ -27328,7 +25754,6 @@ lemma exponential_energy_initial_coefficient_lower {R X Y L : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedVectorLowerBounds.lean` -/
 
@@ -27382,7 +25807,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PrimitiveVectorCuspBound.lean` -/
 
 section
@@ -27411,7 +25835,6 @@ theorem not_mem_cusp_of_primitive_lengthSq_bounds (g : SL(2, ℝ)) {u v : ℤ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedExcursionCompact.lean` -/
 
@@ -27481,7 +25904,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedReturningVector.lean` -/
 
 section
@@ -27515,7 +25937,6 @@ theorem buffered_excursion_hasReturningVector (g : SL(2, ℝ)) {H L : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReturningGaussLiftCover.lean` -/
 
@@ -27572,7 +25993,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ReturningLiftRefinement.lean` -/
 
 section
@@ -27628,7 +26048,6 @@ theorem exists_returning_lift_refinement (H : ℝ) {c η : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedCuspEntry.lean` -/
 
@@ -27697,7 +26116,6 @@ theorem exists_buffered_cusp_entry_lift_refinement {η : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/MaximalNatRuns.lean` -/
 
@@ -27870,7 +26288,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedExcursionRefinement.lean` -/
 
 section
@@ -27900,28 +26317,9 @@ theorem BufferedCuspExcursion.hasReturningVector {H L : ℝ} {g : SL(2, ℝ)}
     (g * diagonalFlow (2 * Real.log H)) hH hL hg.1 hg.2.1
   simpa only [mul_assoc, ← diagonalFlow_add, add_neg_cancel, diagonalFlow_zero, mul_one] using h
 
-theorem exists_buffered_excursion_lift_refinement {η : ℝ}
-    (hηpos : 0 < η) (hη : η ≤ 1 / 2) :
-    ∃ K : ℝ, 0 < K ∧ ∀ {S H L : ℝ}, 0 ≤ S → 1 ≤ H → 1 ≤ L →
-      96 * Real.exp (-(L + 4 * Real.log H)) ≤ cuspEndpointLengthSqLower →
-      ∀ E : Set SL(2, ℝ), LiftForwardClose η S E →
-      (∀ g ∈ E, BufferedCuspExcursion H L (g * diagonalFlow S)) →
-      ∃ (N : ℕ) (C : Fin N → Set SL(2, ℝ)),
-        (N : ℝ) ≤ K * Real.exp ((L + 4 * Real.log H) / 2) ∧ (⋃ i, C i) = E ∧
-        ∀ i, LiftForwardClose η (S + (L + 4 * Real.log H)) (C i) := by
-  obtain ⟨K, hK, hrefine⟩ := exists_returning_lift_refinement cuspEndpointHeight
-    cuspEndpointLengthSqLower_pos hηpos hη
-  refine ⟨K, hK, ?_⟩
-  intro S H L hS hH hL hsmall E hE hexc
-  have hT : 0 ≤ L + 4 * Real.log H := by linarith [Real.log_nonneg hH]
-  exact hrefine hS hT hsmall E hE
-    (fun g hg => (hexc g hg).mem_compactCore hH hL)
-    (fun g hg => (hexc g hg).hasReturningVector hH hL)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DiscreteCuspRuns.lean` -/
 
@@ -27972,32 +26370,9 @@ theorem buffered_cusp_intervals_disjoint_of_exit (g : SL(2, ℝ)) {H a b t : ℝ
     a + 2 * Real.log H < b - 2 * Real.log H := by
   linarith [cusp_time_gap_gt_of_intermediate_exit g hH ht ha hb hexit]
 
-theorem bufferedCuspExcursion_of_integer_run (g : SL(2, ℝ)) {H : ℝ}
-    (hH : 0 < H) (hwindow : Real.exp 1 ≤ H ^ 4) {a b : ℕ}
-    (hvisits : ∀ k ∈ Finset.Icc a b, modularMk (g * diagonalFlow (k : ℝ)) ∈ modularCusp H)
-    (hbefore : modularMk (g * diagonalFlow ((a : ℝ) - 1)) ∉ modularCusp H)
-    (hafter : modularMk (g * diagonalFlow ((b : ℝ) + 1)) ∉ modularCusp H) :
-    BufferedCuspExcursion H ((b : ℝ) - a)
-      (g * diagonalFlow ((a : ℝ) - 2 * Real.log H)) := by
-  have hentry : (g * diagonalFlow ((a : ℝ) - 2 * Real.log H)) *
-      diagonalFlow (2 * Real.log H) = g * diagonalFlow (a : ℝ) := by
-    rw [mul_assoc, ← diagonalFlow_add, sub_add_cancel]
-  dsimp only [BufferedCuspExcursion]
-  rw [hentry]
-  refine ⟨?_, ?_, ?_⟩
-  · intro t ht
-    rw [mul_assoc, ← diagonalFlow_add]
-    apply cusp_on_real_interval_of_integer_visits g hH hwindow hvisits
-    constructor <;> linarith [ht.1, ht.2]
-  · simpa only [mul_assoc, ← diagonalFlow_add, sub_eq_add_neg] using hbefore
-  · rw [mul_assoc, ← diagonalFlow_add,
-      show (a : ℝ) + ((b : ℝ) - a + 1) = b + 1 by ring]
-    exact hafter
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/SeparatedVisitCounts.lean` -/
 
@@ -28053,7 +26428,6 @@ theorem cusp_run_starts_card_le (g : SL(2, ℝ)) {H : ℝ} (hH : 1 < H)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspRunGeometry.lean` -/
 
@@ -28116,43 +26490,6 @@ theorem card_maximal_cusp_runs_le (g : SL(2, ℝ)) {H : ℝ} (hH : 1 < H) (n : �
   have h := cusp_run_starts_card_le g hH s hbound hvisits hexits
   rwa [hcard] at h
 
-theorem maximal_cusp_run_buffered (g : SL(2, ℝ)) {H : ℝ} (hH : 0 < H)
-    (hwindow : Real.exp 1 ≤ H ^ 4) {n : ℕ} {p : ℕ × ℕ}
-    (hp : p ∈ maximalNatRuns (modularCuspVisitTimes H n (modularMk g)))
-    (hstart : modularMk g ∉ modularCusp H)
-    (hend : modularMk (g * diagonalFlow (n : ℝ)) ∉ modularCusp H) :
-    BufferedCuspExcursion H ((p.2 : ℝ) - p.1)
-      (g * diagonalFlow ((p.1 : ℝ) - 2 * Real.log H)) := by
-  let V := modularCuspVisitTimes H n (modularMk g)
-  have hr := (mem_maximalNatRuns_iff V p).mp hp
-  have hmem (k : ℕ) (hk : k ∈ Finset.Icc p.1 p.2) : k < n ∧
-      modularMk (g * diagonalFlow (k : ℝ)) ∈ modularCusp H :=
-    (mem_modularCuspVisitTimes_iff H n (modularMk g) k).mp (hr.2.1 hk)
-  have ha := hmem p.1 (Finset.mem_Icc.mpr ⟨le_rfl, hr.1⟩)
-  have hb := hmem p.2 (Finset.mem_Icc.mpr ⟨hr.1, le_rfl⟩)
-  have ha0 : p.1 ≠ 0 := by
-    intro hz
-    apply hstart
-    simpa only [hz, Nat.cast_zero, diagonalFlow_zero, mul_one] using ha.2
-  have hbefore : modularMk (g * diagonalFlow ((p.1 : ℝ) - 1)) ∉ modularCusp H := by
-    intro hcusp
-    apply hr.2.2.1.resolve_left ha0
-    apply (mem_modularCuspVisitTimes_iff H n (modularMk g) (p.1 - 1)).mpr
-    refine ⟨by omega, ?_⟩
-    simpa only [Nat.cast_sub (show 1 ≤ p.1 by omega), Nat.cast_one,
-      modularRightTranslate_mk] using hcusp
-  have hafter : modularMk (g * diagonalFlow ((p.2 : ℝ) + 1)) ∉ modularCusp H := by
-    intro hcusp
-    by_cases heq : p.2 + 1 = n
-    · apply hend
-      simpa only [← heq, Nat.cast_add, Nat.cast_one] using hcusp
-    · apply hr.2.2.2
-      apply (mem_modularCuspVisitTimes_iff H n (modularMk g) (p.2 + 1)).mpr
-      exact ⟨by omega, by
-        simpa only [Nat.cast_add, Nat.cast_one, modularRightTranslate_mk] using hcusp⟩
-  exact bufferedCuspExcursion_of_integer_run g hH hwindow (fun k hk => (hmem k hk).2)
-    hbefore hafter
-
 theorem maximal_cusp_runs_buffered_order (g : SL(2, ℝ)) {H : ℝ} (hH : 0 < H)
     {n : ℕ} {p q : ℕ × ℕ}
     (hp : p ∈ maximalNatRuns (modularCuspVisitTimes H n (modularMk g)))
@@ -28176,7 +26513,6 @@ theorem maximal_cusp_runs_buffered_order (g : SL(2, ℝ)) {H : ℝ} (hH : 0 < H)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DiscreteCuspEntry.lean` -/
 
@@ -28229,7 +26565,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/OrderedNatRuns.lean` -/
 
 section
@@ -28263,7 +26598,6 @@ theorem exists_ordered_maximalNatRuns (V : Finset ℕ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LongRunDuration.lean` -/
 
@@ -28307,7 +26641,6 @@ theorem exists_ordered_long_nat_runs (V : Finset ℕ) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedRunIntervals.lean` -/
 
@@ -28394,7 +26727,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/BufferedExcursionScale.lean` -/
 
 section
@@ -28418,7 +26750,6 @@ theorem exp_neg_buffered_duration_small {H L c : ℝ} (hc : 0 < c)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/MovingHeightPatternCover.lean` -/
 
@@ -28555,7 +26886,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/RefinedCoverExponent.lean` -/
 
 section
@@ -28599,7 +26929,6 @@ theorem fixed_pattern_cost_small_rate {K H ε : ℝ} (hK : 1 ≤ K) (hH : 1 < H)
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/MovingHeightPatternClassCover.lean` -/
 
@@ -28661,7 +26990,6 @@ theorem exists_small_rate_moving_pattern_cover {η : ℝ} (hηpos : 0 < η) (hη
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/MovingHighCuspVisitCover.lean` -/
 
@@ -28726,7 +27054,6 @@ theorem exists_moving_high_cusp_visit_lift_cover {η : ℝ} (hηpos : 0 < η) (h
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspPatternExponentialRate.lean` -/
 
@@ -28798,7 +27125,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspVisitTimePatterns.lean` -/
 
 section
@@ -28826,7 +27152,6 @@ theorem exists_cusp_visit_time_patterns_small_rate {ε : ℝ} (hε : 0 < ε) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspCoverHeightThreshold.lean` -/
 
@@ -28866,7 +27191,6 @@ theorem exists_cusp_cover_height_threshold (K Hp : ℝ) {ε : ℝ} (hε : 0 < ε
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RefinedMovingLocalCover.lean` -/
 
@@ -28922,30 +27246,9 @@ theorem exists_refined_moving_local_lift_cover {η ε : ℝ}
           (1 + ε) * n - A / 2 by ring]
   exact hc.mono_bound hcost
 
-theorem exists_refined_moving_local_cusp_cover {η ε : ℝ}
-    (hηpos : 0 < η) (hη : η ≤ 1 / 2) (hε : 0 < ε) :
-    ∃ H₀ : ℝ, 1 < H₀ ∧ ∀ H : ℝ, H₀ ≤ H → ∃ C : ℝ, 0 < C ∧
-      ∀ Y : ℝ, 1 ≤ Y → ∀ (n : ℕ) (E : Set SL(2, ℝ)) (A : ℝ), LiftForwardClose η 0 E →
-      ∃ (N : ℕ) (B : Fin N → Set ModularOrbitSpace),
-        (N : ℝ) ≤ C * (Y + 1) ^ 3 * Real.exp ((1 + ε) * n - A / 2) ∧
-        (∀ i, IsCompact (B i)) ∧ (∀ i, MeasurableSet (B i)) ∧
-        modularMk '' highCuspVisitsWithInitialHeight H Y n A E ⊆ ⋃ i, B i ∧
-        ∀ i, B i ×ˢ B i ⊆ modularForwardBowenPairs (32 * η) ((n : ℝ) + 4 * Real.log H) := by
-  obtain ⟨H₀, hH₀, hcover⟩ := exists_refined_moving_local_lift_cover hηpos hη hε
-  refine ⟨H₀, hH₀, ?_⟩
-  intro H hH
-  obtain ⟨C, hC, hlocal⟩ := hcover H hH
-  refine ⟨C, hC, ?_⟩
-  intro Y hY n E A hE
-  have hT : 0 ≤ (n : ℝ) + 4 * Real.log H := by
-    have hlog := (Real.log_pos (hH₀.trans_le hH)).le
-    positivity
-  exact (hlocal Y hY n E A hE).measurable_modular_cover hηpos.le hη hT
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/BoundedFrameLiftGrid.lean` -/
 
@@ -29018,7 +27321,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/ModularHighCuspVisits.lean` -/
 
 section
@@ -29043,7 +27345,6 @@ theorem not_mem_cusp_before_log_buffer {H Y : ℝ} (hH : 1 ≤ H) (x : ModularOr
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RefinedGlobalCover.lean` -/
 
@@ -29123,7 +27424,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketRefinedGlobalMass.lean` -/
 
 section
@@ -29173,7 +27473,6 @@ theorem exists_unconditional_packet_global_high_cusp_mass_bound {η ε σ : ℝ}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/RefinedMassScale.lean` -/
 
@@ -29237,7 +27536,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspVisitExceedance.lean` -/
 
 section
@@ -29264,7 +27562,6 @@ theorem cusp_visit_exceedance_mass_le (μ : Measure ModularOrbitSpace) [IsFinite
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/FrameBoxes.lean` -/
 
@@ -29337,7 +27634,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/FrameBandCover.lean` -/
 
 section
@@ -29399,19 +27695,9 @@ theorem exists_frameBand_cover {H δ : ℝ} (hH : 0 < H) (hδ : 0 < δ) (hδ1 : 
   · intro i
     exact frameBox_prod_subset_close hH (hch _) hδ.le
 
-theorem frameBand_mass_sq_le_pair_mass (μ : Measure ModularOrbitSpace) [IsFiniteMeasure μ]
-    {H δ : ℝ} (hH : 0 < H) (hδ : 0 < δ) (hδ1 : δ ≤ 1) :
-    μ.real (modularFrameBand H hH) ^ 2 ≤
-      (2 * (2 * Real.pi + 1) * (1 / (δ ^ 3 * H ^ 2) + 1 / δ ^ 2)) *
-        (μ.prod μ).real (modularClosePairs (5 * δ)) := by
-  obtain ⟨N, s, hN, hs, hcover, hpair⟩ := exists_frameBand_cover hH hδ hδ1
-  exact (finite_cover_mass_sq_le_pair_mass μ s hs hcover hpair).trans
-    (mul_le_mul_of_nonneg_right hN measureReal_nonneg)
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/DyadicBandCover.lean` -/
 
@@ -29486,7 +27772,6 @@ theorem dyadicBand_mass_sq_le_pair_mass (μ : Measure ModularOrbitSpace) [IsFini
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspBandCover.lean` -/
 
@@ -29563,7 +27848,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PowerHeightBands.lean` -/
 
 section
@@ -29595,7 +27879,6 @@ theorem exists_power_height_band_count {d : ℝ} (hd : 1 ≤ d) :
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/NaturalPairScale.lean` -/
 
@@ -29652,7 +27935,6 @@ theorem exists_naturalScale_normalizedPacketProduct_close_le {ε : ℝ} (hε : 0
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/NaturalCuspScaleAlgebra.lean` -/
 
@@ -29715,7 +27997,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UnconditionalCuspBound.lean` -/
 
 section
@@ -29765,7 +28046,6 @@ theorem exists_unconditional_normalizedPacket_cusp_bound {ε : ℝ} (hε : 0 < �
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketPowerHeightEscape.lean` -/
 
@@ -29821,7 +28101,6 @@ theorem normalizedPacket_cusp_power_tendsto_zero {ι : Type*} {l : Filter ι} {d
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketVisitExceedanceDecay.lean` -/
 
@@ -29914,7 +28193,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/CuspVisitCountIntegral.lean` -/
 
 section
@@ -29947,9 +28225,6 @@ theorem modularCuspVisitCount_eq_sum_indicator (H : ℝ) (n : ℕ) (x : ModularO
     modularRightTranslate (diagonalFlow (i.val : ℝ)) x ∈ modularCusp H)).card : ℝ) = _
   rw [Finset.natCast_card_filter]
   simp only [Set.indicator_apply, modularCuspVisitSet, Set.mem_preimage]
-
-theorem modularCuspVisitCount_nonneg (H : ℝ) (n : ℕ) (x : ModularOrbitSpace) :
-    0 ≤ modularCuspVisitCount H n x := Nat.cast_nonneg _
 
 theorem modularCuspVisitCount_le (H : ℝ) (n : ℕ) (x : ModularOrbitSpace) :
     modularCuspVisitCount H n x ≤ (n : ℝ) := by
@@ -30010,7 +28285,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/VisitCountTailBound.lean` -/
 
 section
@@ -30069,7 +28343,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketTightness.lean` -/
 
 section
@@ -30125,7 +28398,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/SequentialTightness.lean` -/
 
 section
@@ -30171,7 +28443,6 @@ theorem isTightMeasureSet_range_of_eventually_tight {X : Type*}
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketWeakCompactness.lean` -/
 
@@ -30245,7 +28516,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/WeakLimitInvariance.lean` -/
 
 section
@@ -30279,23 +28549,9 @@ theorem normalizedPacket_weak_limit_flow_invariant {ι : Type*} {l : Filter ι} 
   exact probability_weak_limit_invariant hlim (continuous_modularRightTranslate _)
     (fun i => normalizedDiscriminantPacket_flow_invariant (hd i) (hns i) t)
 
-theorem normalizedPacket_exists_invariant_weak_limit {d : ℕ → ℕ}
-    (hd : ∀ i, 0 < (d i : ℤ)) (hns : ∀ i, ¬IsSquare (d i : ℤ))
-    (base : ∀ i, IntegralDiscrForm (d i)) (hlim : Tendsto d atTop atTop) :
-    ∃ (ν : ProbabilityMeasure ModularOrbitSpace) (φ : ℕ → ℕ), StrictMono φ ∧
-      Tendsto (fun i => normalizedPacketProbability (hd (φ i)) (hns (φ i)) (base (φ i)))
-        atTop (𝓝 ν) ∧
-      ∀ t : ℝ, Measure.map (modularRightTranslate (diagonalFlow t))
-        (ν : Measure ModularOrbitSpace) = ν := by
-  obtain ⟨ν, φ, hφ, hconv⟩ :=
-    normalizedPacket_exists_weakly_convergent_subsequence hd hns base hlim
-  exact ⟨ν, φ, hφ, hconv, normalizedPacket_weak_limit_flow_invariant
-    (fun i => hd (φ i)) (fun i => hns (φ i)) (fun i => base (φ i)) hconv⟩
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/EntropyRateParameters.lean` -/
 
@@ -30337,7 +28593,6 @@ theorem exists_entropy_rate_parameters {ε L : ℝ} (hε : 0 < ε) (hεone : ε 
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketWeakLimitEntropy.lean` -/
 
@@ -30397,7 +28652,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketEntropyLimit.lean` -/
 
 section
@@ -30408,28 +28662,9 @@ namespace DukeArithmetic
 open MeasureTheory Filter
 open scoped Topology
 
-theorem normalizedPacket_exists_invariant_entropy_limit {d : ℕ → ℕ}
-    (hd : ∀ i, 0 < (d i : ℤ)) (hns : ∀ i, ¬IsSquare (d i : ℤ))
-    (base : ∀ i, IntegralDiscrForm (d i)) (hdisc : Tendsto d atTop atTop) :
-    ∃ (ν : ProbabilityMeasure ModularOrbitSpace) (φ : ℕ → ℕ), StrictMono φ ∧
-      Tendsto (fun i => normalizedPacketProbability (hd (φ i)) (hns (φ i)) (base (φ i)))
-        atTop (𝓝 ν) ∧
-      (∀ t : ℝ, Measure.map (modularRightTranslate (diagonalFlow t))
-        (ν : Measure ModularOrbitSpace) = ν) ∧
-      ∀ ε : ℝ, 0 < ε → ε ≤ 1 → ∃ P : FineModularPartition,
-        (∀ j, (ν : Measure ModularOrbitSpace) (frontier (P.partition.atom j)) = 0) ∧
-        ∀ k : ℕ, 0 < k → 1 - ε ≤ P.partition.orbitEntropy
-          (ν : Measure ModularOrbitSpace) modularTimeOne k / k := by
-  obtain ⟨ν, φ, hφ, hconv, hinv⟩ := normalizedPacket_exists_invariant_weak_limit hd hns base hdisc
-  refine ⟨ν, φ, hφ, hconv, hinv, ?_⟩
-  intro ε hε hεone
-  exact normalizedPacket_weak_limit_entropy_lower (fun i => hd (φ i))
-    (fun i => hns (φ i)) (fun i => base (φ i)) (hdisc.comp hφ.tendsto_atTop) hconv hε hεone
-
 end DukeArithmetic
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketFullSupport.lean` -/
 
@@ -30487,7 +28722,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketOpenExistence.lean` -/
 
 section
@@ -30518,7 +28752,6 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/Elementary.lean` -/
 
 section
@@ -30531,85 +28764,10 @@ remaining assertion to an explicit family of prime candidates. All proofs
 use the default computational limits.
 -/
 
-
-
 /-- The bounded representation sought in Erdős problem 1148. -/
 def HasBoundedRepresentation (n : ℤ) : Prop :=
   ∃ x y z : ℤ, n = x ^ 2 + y ^ 2 - z ^ 2 ∧
     max (x ^ 2) (max (y ^ 2) (z ^ 2)) ≤ n
-
-lemma boundedRepresentation_of_coordinates {n s x z : ℤ}
-    (hs : s ^ 2 ≤ n) (hx : 0 ≤ x) (hxs : x ≤ s)
-    (hz : 0 ≤ z) (hzs : z ≤ s)
-    (heq : n = x ^ 2 + s ^ 2 - z ^ 2) : HasBoundedRepresentation n := by
-  refine ⟨x, s, z, heq, max_le ?_ (max_le hs ?_)⟩
-  · nlinarith [mul_nonneg (sub_nonneg.mpr hxs) (show 0 ≤ s + x by omega)]
-  · nlinarith [mul_nonneg (sub_nonneg.mpr hzs) (show 0 ≤ s + z by omega)]
-
-lemma boundedRepresentation_of_odd_remainder {n s : ℤ}
-    (hs : s ^ 2 ≤ n) (hn : n < (s + 1) ^ 2)
-    (hodd : (n - s ^ 2) % 2 = 1) : HasBoundedRepresentation n := by
-  let d := n - s ^ 2
-  have hd : 0 ≤ d := by dsimp [d]; omega
-  have hds : d ≤ 2 * s := by dsimp [d]; nlinarith
-  have hdodd : d % 2 = 1 := hodd
-  have hx : 2 * ((d + 1) / 2) = d + 1 := by omega
-  have hz : 2 * ((d - 1) / 2) = d - 1 := by omega
-  apply boundedRepresentation_of_coordinates hs
-    (x := (d + 1) / 2) (z := (d - 1) / 2) <;> try omega
-  have hdrel : d = n - s ^ 2 := rfl
-  nlinarith [sq_nonneg ((d + 1) / 2 - (d - 1) / 2)]
-
-lemma boundedRepresentation_of_four_dvd_remainder {n s : ℤ}
-    (hs0 : 0 ≤ s) (hs : s ^ 2 ≤ n) (hn : n < (s + 1) ^ 2)
-    (hfour : (n - s ^ 2) % 4 = 0) : HasBoundedRepresentation n := by
-  let d := n - s ^ 2
-  have hd : 0 ≤ d := by dsimp [d]; omega
-  have hds : d ≤ 2 * s := by dsimp [d]; nlinarith
-  have hdfour : d % 4 = 0 := hfour
-  by_cases hd0 : d = 0
-  · have heq : n = s ^ 2 := by dsimp [d] at hd0; omega
-    refine ⟨0, s, 0, by simpa using heq, ?_⟩
-    simpa only [zero_pow (by decide : 2 ≠ 0)] using
-      max_le (le_trans (sq_nonneg s) hs) (max_le hs (le_trans (sq_nonneg s) hs))
-  have hdpos : 0 < d := by omega
-  have hdiv : 4 * (d / 4) = d := by omega
-  apply boundedRepresentation_of_coordinates hs
-    (x := d / 4 + 1) (z := d / 4 - 1) <;> try omega
-  have hdrel : d = n - s ^ 2 := rfl
-  nlinarith
-
-lemma int_sq_mod_four (s : ℤ) : s ^ 2 % 4 = 0 ∨ s ^ 2 % 4 = 1 := by
-  have hmod : s ^ 2 % 4 = (s % 4) ^ 2 % 4 := by
-    simpa only [pow_two] using Int.mul_emod s s 4
-  have hs0 : 0 ≤ s % 4 := Int.emod_nonneg _ (by norm_num)
-  have hs4 : s % 4 < 4 := Int.emod_lt_of_pos _ (by norm_num)
-  interval_cases h : s % 4 <;> norm_num [h] at hmod ⊢ <;> omega
-
-lemma exists_square_interval {n : ℤ} (hn : 0 ≤ n) :
-    ∃ s : ℤ, 0 ≤ s ∧ s ^ 2 ≤ n ∧ n < (s + 1) ^ 2 := by
-  refine ⟨Nat.sqrt n.toNat, Int.natCast_nonneg _, ?_, ?_⟩
-  · have hcast : (Nat.sqrt n.toNat : ℤ) ^ 2 ≤ (n.toNat : ℤ) := by
-      exact_mod_cast Nat.sqrt_le' n.toNat
-    simpa [Int.toNat_of_nonneg hn] using hcast
-  · have hcast : (n.toNat : ℤ) < ((Nat.sqrt n.toNat : ℤ) + 1) ^ 2 := by
-      exact_mod_cast Nat.lt_succ_sqrt' n.toNat
-    simpa [Int.toNat_of_nonneg hn] using hcast
-
-/-- The only remainder not handled by consecutive squares is `2` modulo `4`. -/
-theorem boundedRepresentation_of_remainder_ne_two {n s : ℤ}
-    (hs0 : 0 ≤ s) (hs : s ^ 2 ≤ n) (hnlt : n < (s + 1) ^ 2)
-    (hmod : (n - s ^ 2) % 4 ≠ 2) : HasBoundedRepresentation n := by
-  by_cases hodd : (n - s ^ 2) % 2 = 1
-  · exact boundedRepresentation_of_odd_remainder hs hnlt hodd
-  · exact boundedRepresentation_of_four_dvd_remainder hs0 hs hnlt (by omega)
-
-/-- An elementary construction covers both discriminant residue classes. -/
-theorem boundedRepresentation_of_mod_four {n : ℤ} (hn : 0 ≤ n)
-    (hmod : n % 4 = 0 ∨ n % 4 = 1) : HasBoundedRepresentation n := by
-  obtain ⟨s, hs0, hs, hnlt⟩ := exists_square_interval hn
-  have hsq := int_sq_mod_four s
-  exact boundedRepresentation_of_remainder_ne_two hs0 hs hnlt (by omega)
 
 /-- All perfect squares are covered, with no size restriction. -/
 theorem boundedRepresentation_of_isSquare {n : ℤ} (hn : IsSquare n) :
@@ -30619,183 +28777,7 @@ theorem boundedRepresentation_of_isSquare {n : ℤ} (hn : IsSquare n) :
   simp only [zero_pow (by decide : 2 ≠ 0), max_self, pow_two]
   exact max_le le_rfl (mul_self_nonneg s)
 
-/-- A representation scales by any integer square. -/
-theorem HasBoundedRepresentation.mul_sq {n : ℤ} (hn : HasBoundedRepresentation n)
-    (k : ℤ) : HasBoundedRepresentation (n * k ^ 2) := by
-  obtain ⟨x, y, z, heq, hmax⟩ := hn
-  have hx := (max_le_iff.mp hmax).1
-  have hy := (max_le_iff.mp (max_le_iff.mp hmax).2).1
-  have hz := (max_le_iff.mp (max_le_iff.mp hmax).2).2
-  refine ⟨x * k, y * k, z * k, ?_, max_le ?_ (max_le ?_ ?_)⟩
-  · rw [heq]; ring
-  · simpa only [mul_pow] using mul_le_mul_of_nonneg_right hx (sq_nonneg k)
-  · simpa only [mul_pow] using mul_le_mul_of_nonneg_right hy (sq_nonneg k)
-  · simpa only [mul_pow] using mul_le_mul_of_nonneg_right hz (sq_nonneg k)
-
-/-- The eventual assertion is equivalent to just its two remaining residue classes. -/
-theorem eventually_boundedRepresentation_iff_mod_four :
-    (∃ N : ℤ, ∀ n : ℤ, N ≤ n → HasBoundedRepresentation n) ↔
-      ∃ N : ℤ, ∀ n : ℤ, N ≤ n → n % 4 = 2 ∨ n % 4 = 3 →
-        HasBoundedRepresentation n := by
-  constructor
-  · rintro ⟨N, hN⟩
-    exact ⟨N, fun n hn _ ↦ hN n hn⟩
-  · rintro ⟨N, hN⟩
-    refine ⟨max N 0, fun n hn ↦ ?_⟩
-    by_cases hmod : n % 4 = 0 ∨ n % 4 = 1
-    · exact boundedRepresentation_of_mod_four (by omega) hmod
-    · exact hN n (by omega) (by omega)
-
-/-- An exact reduction to the exceptional remainder, retaining the original threshold. -/
-theorem eventually_boundedRepresentation_iff_remainder_two :
-    (∃ N : ℤ, ∀ n : ℤ, N ≤ n → HasBoundedRepresentation n) ↔
-      ∃ N : ℤ, ∀ s d : ℤ, 0 ≤ s → 0 ≤ d → d ≤ 2 * s → d % 4 = 2 →
-        N ≤ s ^ 2 + d → HasBoundedRepresentation (s ^ 2 + d) := by
-  constructor
-  · rintro ⟨N, hN⟩
-    exact ⟨N, fun s d _ _ _ _ hn ↦ hN _ hn⟩
-  · rintro ⟨N, hN⟩
-    refine ⟨max N 0, fun n hn ↦ ?_⟩
-    obtain ⟨s, hs0, hs, hnlt⟩ := exists_square_interval (show 0 ≤ n by omega)
-    by_cases hmod : (n - s ^ 2) % 4 = 2
-    · have h := hN s (n - s ^ 2) hs0 (by omega) (by nlinarith) hmod (by omega)
-      simpa using h
-    · exact boundedRepresentation_of_remainder_ne_two hs0 hs hnlt hmod
-
-/-- The exact arithmetic form of the problem: a square with a balanced
-factorization of its nonnegative remainder. No primitivity is needed. -/
-theorem boundedRepresentation_iff_balanced_factors (n : ℤ) :
-    HasBoundedRepresentation n ↔
-      ∃ y u v : ℤ, 0 ≤ u ∧ 0 ≤ v ∧ u % 2 = v % 2 ∧
-        n = y ^ 2 + u * v ∧ y ^ 2 ≤ n ∧ (u + v) ^ 2 ≤ 4 * n := by
-  constructor
-  · rintro ⟨x, y, z, heq, hmax⟩
-    have hx := (max_le_iff.mp hmax).1
-    have hy := (max_le_iff.mp (max_le_iff.mp hmax).2).1
-    have hzx : z ^ 2 ≤ x ^ 2 := by linarith
-    have habs : |z| ≤ |x| := (sq_le_sq).mp hzx
-    refine ⟨y, |x| - |z|, |x| + |z|, sub_nonneg.mpr habs,
-      add_nonneg (abs_nonneg _) (abs_nonneg _), by omega, ?_, hy, ?_⟩
-    · nlinarith [sq_abs x, sq_abs z]
-    · nlinarith [sq_abs x, sq_abs z]
-  · rintro ⟨y, u, v, hu, hv, hpar, heq, hy, hsum⟩
-    have hxu : 2 * ((u + v) / 2) = u + v := by omega
-    have hzu : 2 * ((v - u) / 2) = v - u := by omega
-    have hrepr : n = ((u + v) / 2) ^ 2 + y ^ 2 - ((v - u) / 2) ^ 2 := by
-      nlinarith [sq_nonneg (u + v), sq_nonneg (v - u)]
-    have hx : ((u + v) / 2) ^ 2 ≤ n := by nlinarith
-    have hz : ((v - u) / 2) ^ 2 ≤ n := by nlinarith [mul_nonneg hu hv]
-    exact ⟨(u + v) / 2, y, (v - u) / 2, hrepr, max_le hx (max_le hy hz)⟩
-
-/-- Factoring the remainder after the next smaller square often also covers
-the exceptional residue class. The factors need only be odd and nontrivial. -/
-theorem boundedRepresentation_of_shifted_factors {s d u v : ℤ}
-    (hs : 4 ≤ s) (hd : 0 ≤ d) (hds : d ≤ 2 * s)
-    (hu : 3 ≤ u) (hv : 3 ≤ v) (hpar : u % 2 = v % 2)
-    (hmul : u * v = d + 2 * s - 1) : HasBoundedRepresentation (s ^ 2 + d) := by
-  have hsum : u + v ≤ 2 * s := by
-    nlinarith [mul_nonneg (show 0 ≤ u - 3 by omega) (show 0 ≤ v - 3 by omega)]
-  apply (boundedRepresentation_iff_balanced_factors _).mpr
-  refine ⟨s - 1, u, v, by omega, by omega, hpar, by nlinarith, by nlinarith, ?_⟩
-  nlinarith [mul_nonneg (show 0 ≤ 2 * s - (u + v) by omega)
-    (show 0 ≤ 2 * s + (u + v) by omega)]
-
-/-- For a counterexample in a square interval, the remainder after the next
-smaller square must be prime. This is necessary, not sufficient. -/
-theorem prime_shifted_remainder_of_not_boundedRepresentation {s d : ℤ}
-    (hs : 4 ≤ s) (hd : 0 ≤ d) (hds : d ≤ 2 * s) (hdmod : d % 4 = 2)
-    (hno : ¬ HasBoundedRepresentation (s ^ 2 + d)) :
-    Nat.Prime (d + 2 * s - 1).toNat := by
-  have hmpos : 0 ≤ d + 2 * s - 1 := by omega
-  have hmcast : ((d + 2 * s - 1).toNat : ℤ) = d + 2 * s - 1 :=
-    Int.toNat_of_nonneg hmpos
-  by_contra hprime
-  obtain ⟨a, b, ha, hb, hab⟩ :=
-    (Nat.not_prime_iff_exists_mul_eq (show 2 ≤ (d + 2 * s - 1).toNat by omega)).mp hprime
-  have ha' : (2 : ℤ) ≤ a := by
-    by_contra h
-    have hsmall : a = 0 ∨ a = 1 := by omega
-    rcases hsmall with h0 | h1
-    · simp [h0] at hab; omega
-    · simp [h1] at hab; omega
-  have hb' : (2 : ℤ) ≤ b := by
-    by_contra h
-    have hsmall : b = 0 ∨ b = 1 := by omega
-    rcases hsmall with h0 | h1
-    · simp [h0] at hab; omega
-    · simp [h1] at hab; omega
-  have hab' : (a : ℤ) * b = d + 2 * s - 1 := by
-    have hc : (a : ℤ) * b = ((d + 2 * s - 1).toNat : ℤ) := by exact_mod_cast hab
-    omega
-  have hmod : ((a : ℤ) % 2) * ((b : ℤ) % 2) % 2 = 1 := by
-    rw [← Int.mul_emod, hab']
-    omega
-  have hpa : (a : ℤ) % 2 = 1 := by
-    have h0 : (a : ℤ) % 2 = 0 ∨ (a : ℤ) % 2 = 1 := by omega
-    rcases h0 with h0 | h1
-    · simp [h0] at hmod
-    · exact h1
-  have hpb : (b : ℤ) % 2 = 1 := by simpa [hpa] using hmod
-  apply hno
-  exact boundedRepresentation_of_shifted_factors hs hd hds (by omega) (by omega)
-    (by omega) hab'
-
-/-- A version of the original eventual assertion in which only the remaining
-prime candidates need to be considered. This is a reduction, not a proof of
-either side of the equivalence. -/
-theorem erdos_1148_iff_prime_candidates :
-    (∃ N : ℤ, ∀ n : ℤ, N ≤ n → ∃ x y z : ℤ,
-      n = x ^ 2 + y ^ 2 - z ^ 2 ∧ max (x ^ 2) (max (y ^ 2) (z ^ 2)) ≤ n) ↔
-      ∃ N : ℤ, ∀ s d : ℤ, 4 ≤ s → 0 ≤ d → d ≤ 2 * s → d % 4 = 2 →
-        Nat.Prime (d + 2 * s - 1).toNat → N ≤ s ^ 2 + d →
-          HasBoundedRepresentation (s ^ 2 + d) := by
-  constructor
-  · rintro ⟨N, hN⟩
-    exact ⟨N, fun s d _ _ _ _ _ hn ↦ hN _ hn⟩
-  · rintro ⟨N, hN⟩
-    refine ⟨max N 16, fun n hn ↦ ?_⟩
-    obtain ⟨s, hs0, hs, hnlt⟩ := exists_square_interval (show 0 ≤ n by omega)
-    have hs4 : 4 ≤ s := by
-      by_contra h
-      have hsle : s ≤ 3 := by omega
-      have hn16 : 16 ≤ n := by omega
-      nlinarith [mul_nonneg (show 0 ≤ 3 - s by omega) (show 0 ≤ s + 5 by omega)]
-    have hd : 0 ≤ n - s ^ 2 := by omega
-    have hds : n - s ^ 2 ≤ 2 * s := by nlinarith
-    by_cases hmod : (n - s ^ 2) % 4 = 2
-    · by_cases hp : Nat.Prime (n - s ^ 2 + 2 * s - 1).toNat
-      · have h := hN s (n - s ^ 2) hs4 hd hds hmod hp (by omega)
-        simpa [HasBoundedRepresentation] using h
-      · have hrepr : HasBoundedRepresentation (s ^ 2 + (n - s ^ 2)) := by
-          by_contra hno
-          exact hp (prime_shifted_remainder_of_not_boundedRepresentation hs4 hd hds hmod hno)
-        simpa [HasBoundedRepresentation] using hrepr
-    · exact boundedRepresentation_of_remainder_ne_two hs0 hs hnlt hmod
-
-/-- The prime-candidate reduction cannot be closed by proving that the
-candidate set is eventually empty: even the subfamily `d = 2` is unbounded.
-This does not assert that any of these candidates is a counterexample. -/
-theorem unbounded_prime_candidates (N : ℤ) :
-    ∃ s : ℤ, 4 ≤ s ∧ N ≤ s ^ 2 + 2 ∧ Nat.Prime (2 * s + 1).toNat := by
-  obtain ⟨p, hpN, hp⟩ := Nat.exists_infinite_primes (2 * (N.toNat + 5) + 1)
-  have hpodd : p % 2 = 1 := hp.eq_two_or_odd.resolve_left (by omega)
-  have hpdiv : 2 * (p / 2) + 1 = p := by omega
-  let s : ℤ := (p / 2 : ℕ)
-  have hs : (N.toNat : ℤ) + 5 ≤ s := by
-    have hnat : N.toNat + 5 ≤ p / 2 := by omega
-    dsimp [s]
-    exact_mod_cast hnat
-  have hs4 : 4 ≤ s := by omega
-  have hsp : 2 * s + 1 = (p : ℤ) := by
-    dsimp [s]
-    exact_mod_cast hpdiv
-  refine ⟨s, hs4, ?_, ?_⟩
-  · have hN : N ≤ (N.toNat : ℤ) := by omega
-    nlinarith [mul_nonneg (show 0 ≤ s by omega) (show 0 ≤ s - 1 by omega)]
-  · simpa only [hsp, Int.toNat_natCast] using hp
-
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/LocalRepresentation.lean` -/
 
@@ -30809,8 +28791,6 @@ bounds, and one of the two corrects any parity mismatch. Thus an unrestricted
 local existence theorem suffices for Erdős 1148. This module neither asserts
 nor assumes any equidistribution hypothesis.
 -/
-
-
 
 def discG {R : Type*} [CommRing R] (t : R × R × R) : R × R × R :=
   (t.1 - t.2.1 + t.2.2,
@@ -30853,36 +28833,6 @@ def paritySafeRegion : Set (ℝ × ℝ × ℝ) :=
 noncomputable def discCenter : ℝ × ℝ × ℝ :=
   (1 / Real.sqrt 5, -(1 / Real.sqrt 5), -(1 / Real.sqrt 5))
 
-lemma discG_center : discG discCenter = discCenter := by
-  dsimp [discG, discCenter]
-  ext <;> ring
-
-lemma discH_center : discH discCenter = -discCenter := by
-  dsimp [discH, discCenter]
-  ext <;> simp <;> ring
-
-lemma strictDiscBounds_neg (t : ℝ × ℝ × ℝ) :
-    StrictDiscBounds (-t) ↔ StrictDiscBounds t := by
-  dsimp [StrictDiscBounds]
-  simp only [neg_sub_neg, abs_sub_comm, abs_neg, ← neg_add]
-
-lemma discCenter_bounds : StrictDiscBounds discCenter := by
-  have hs : 0 < Real.sqrt (5 : ℝ) := Real.sqrt_pos.mpr (by norm_num)
-  have hs2 : (Real.sqrt (5 : ℝ)) ^ 2 = 5 := Real.sq_sqrt (by norm_num)
-  have hslt : 2 < Real.sqrt (5 : ℝ) := by nlinarith
-  dsimp [StrictDiscBounds, discCenter]
-  have hq0 : 0 ≤ 1 / Real.sqrt (5 : ℝ) := by positivity
-  have hq : 2 * (1 / Real.sqrt (5 : ℝ)) < 1 := by
-    have : (2 : ℝ) / Real.sqrt 5 < 1 := (div_lt_one hs).mpr hslt
-    convert this using 1
-    ring
-  rw [abs_of_nonneg (by linarith), abs_neg, abs_of_nonneg hq0]
-  constructor
-  · linarith
-  · constructor
-    · linarith
-    · simp
-
 lemma discCenter_discriminant :
     discCenter.2.1 ^ 2 - 4 * discCenter.1 * discCenter.2.2 = 1 := by
   have hs : Real.sqrt (5 : ℝ) ≠ 0 := ne_of_gt (Real.sqrt_pos.mpr (by norm_num))
@@ -30890,32 +28840,6 @@ lemma discCenter_discriminant :
   dsimp [discCenter]
   field_simp
   nlinarith
-
-lemma discCenter_mem_paritySafeRegion : discCenter ∈ paritySafeRegion := by
-  refine ⟨discCenter_bounds, ?_, ?_⟩
-  · rw [discG_center]
-    exact discCenter_bounds
-  · rw [discH_center, strictDiscBounds_neg]
-    exact discCenter_bounds
-
-lemma strictDiscBounds_isOpen : IsOpen {t : ℝ × ℝ × ℝ | StrictDiscBounds t} := by
-  have h₁ : IsOpen {t : ℝ × ℝ × ℝ | |t.1 - t.2.2| < 1} :=
-    isOpen_lt (by fun_prop) continuous_const
-  have h₂ : IsOpen {t : ℝ × ℝ × ℝ | |t.2.1| < 1} :=
-    isOpen_lt (by fun_prop) continuous_const
-  have h₃ : IsOpen {t : ℝ × ℝ × ℝ | |t.1 + t.2.2| < 1} :=
-    isOpen_lt (by fun_prop) continuous_const
-  exact h₁.inter (h₂.inter h₃)
-
-lemma paritySafeRegion_isOpen : IsOpen paritySafeRegion := by
-  have hg : Continuous (discG : (ℝ × ℝ × ℝ) → ℝ × ℝ × ℝ) := by
-    unfold discG
-    fun_prop
-  have hh : Continuous (discH : (ℝ × ℝ × ℝ) → ℝ × ℝ × ℝ) := by
-    unfold discH
-    fun_prop
-  exact strictDiscBounds_isOpen.inter
-    ((strictDiscBounds_isOpen.preimage hg).inter (strictDiscBounds_isOpen.preimage hh))
 
 lemma discCenter_small_ball_subset :
     Metric.ball discCenter (1 / 100) ⊆ paritySafeRegion := by
@@ -30934,10 +28858,6 @@ lemma discCenter_small_ball_subset :
   simp only [abs_lt]
   repeat' constructor
   all_goals linarith
-
-lemma exists_paritySafe_ball :
-    ∃ ε > 0, Metric.ball discCenter ε ⊆ paritySafeRegion :=
-  ⟨1 / 100, by norm_num, discCenter_small_ball_subset⟩
 
 noncomputable def normalizeDisc (n : ℤ) (t : ℤ × ℤ × ℤ) : ℝ × ℝ × ℝ :=
   ((t.1 : ℝ) / Real.sqrt (4 * (n : ℝ)),
@@ -31056,25 +28976,7 @@ theorem erdos_1148_of_fixed_ball_existence
   obtain ⟨t, hdisc, ht⟩ := hN n hn hsq
   exact ⟨t, hdisc, discCenter_small_ball_subset ht⟩
 
-/-- A single fixed positive radius is enough; an equidistribution theorem
-would supply the hypothesis. This is not an unconditional existence theorem. -/
-theorem exists_radius_sufficient_for_erdos_1148 :
-    ∃ ε > 0,
-      (∃ N : ℤ, ∀ n : ℤ, N ≤ n → ¬ IsSquare n →
-        ∃ t : ℤ × ℤ × ℤ, t.2.1 ^ 2 - 4 * t.1 * t.2.2 = 4 * n ∧
-          normalizeDisc n t ∈ Metric.ball discCenter ε) →
-      ∃ N : ℤ, ∀ n : ℤ, N ≤ n → ∃ x y z : ℤ,
-        n = x ^ 2 + y ^ 2 - z ^ 2 ∧ max (x ^ 2) (max (y ^ 2) (z ^ 2)) ≤ n := by
-  obtain ⟨ε, hε, hsub⟩ := exists_paritySafe_ball
-  refine ⟨ε, hε, ?_⟩
-  rintro ⟨N, hN⟩
-  apply erdos_1148_of_unrestricted_local_existence
-  refine ⟨N, fun n hn hsq ↦ ?_⟩
-  obtain ⟨t, hdisc, ht⟩ := hN n hn hsq
-  exact ⟨t, hdisc, hsub ht⟩
-
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos1148/PacketFormExistence.lean` -/
 
@@ -31135,13 +29037,10 @@ end DukeArithmetic
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148/UnconditionalLocalExistence.lean` -/
 
 section
 /-! # Unconditional integral discriminant points in the fixed parity-safe ball -/
-
-
 
 open DukeArithmetic
 open scoped MatrixGroups
@@ -31217,7 +29116,6 @@ theorem unconditional_fixed_ball_existence :
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos1148.lean` -/
 
 section
@@ -31246,37 +29144,15 @@ URLs:
 - https://github.com/ulamai/ulamai
 -/
 
-
-
 /-
 Lemma 2.1: Dictionary between ternary representations and discriminant points.
 If b^2 - 4ac = 4n, b is even, and a, c have the same parity, then x=(a-c)/2,
 y=b/2, z=(a+c)/2 are integers satisfying x^2+y^2-z^2=n.
 -/
-lemma lemma_dictionary (n : ℤ) (a b c : ℤ) (h_eq : b ^ 2 - 4 * a * c = 4 * n)
-    (hb : b % 2 = 0) (hac : a % 2 = c % 2) :
-    ((a - c) / 2) ^ 2 + (b / 2) ^ 2 - ((a + c) / 2) ^ 2 = n := by
-  have h4 : 4 * (((a - c) / 2) ^ 2 + (b / 2) ^ 2 - ((a + c) / 2) ^ 2) = 4 * n := by
-    have hx : a - c = 2 * ((a - c) / 2) := by
-      have : (a - c) % 2 = 0 := by omega
-      omega
-    have hy : b = 2 * (b / 2) := by omega
-    have hz : a + c = 2 * ((a + c) / 2) := by
-      have : (a + c) % 2 = 0 := by omega
-      omega
-    calc
-      4 * (((a - c) / 2) ^ 2 + (b / 2) ^ 2 - ((a + c) / 2) ^ 2)
-        = (2 * ((a - c) / 2)) ^ 2 + (2 * (b / 2)) ^ 2 - (2 * ((a + c) / 2)) ^ 2 := by ring
-      _ = (a - c) ^ 2 + b ^ 2 - (a + c) ^ 2 := by rw [← hx, ← hy, ← hz]
-      _ = b ^ 2 - 4 * a * c := by ring
-      _ = 4 * n := h_eq
-  exact mul_left_cancel₀ (by decide) h4
 
 /-
 Definition of R*_disc(d) from the paper.
 -/
-def R_star_disc (d : ℤ) : Set (ℤ × ℤ × ℤ) :=
-  { t | t.2.1 ^ 2 - 4 * t.1 * t.2.2 = d ∧ Int.gcd t.1 (Int.gcd t.2.1 t.2.2) = 1 }
 
 /-
 Definition of V_disc,+1(R) from the paper.
@@ -31290,160 +29166,18 @@ Definition of Omega_strict and proof that it is non-empty.
 def Omega_strict : Set (ℝ × ℝ × ℝ) :=
   { t | t ∈ V_disc_plus_1 ∧ |t.1 - t.2.2| < 1 ∧ |t.2.1| < 1 ∧ |t.1 + t.2.2| < 1 }
 
-theorem Omega_strict_nonempty : Omega_strict.Nonempty := by
-  use (-3/8, 1/2, 1/2)
-  dsimp [Omega_strict, V_disc_plus_1]
-  exact ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
-
 /-
 Projection to hyperboloid.
 -/
-noncomputable def project_to_hyperboloid (n : ℤ) (t : ℤ × ℤ × ℤ) : ℝ × ℝ × ℝ :=
-  let s := Real.sqrt (4 * (n : ℝ))
-  ((t.1 : ℝ) / s, (t.2.1 : ℝ) / s, (t.2.2 : ℝ) / s)
 
 /-
 Statement of Duke's Theorem adapted for Problem 1148.
 -/
-def DukeTheoremStatement : Prop :=
-  ∃ N : ℤ, ∀ n : ℤ, n ≥ N →
-  ∃ t ∈ R_star_disc (4 * n),
-    project_to_hyperboloid n t ∈ Omega_strict ∧
-    t.1 % 2 = t.2.2 % 2
 
 /-
 Main Theorem: Assuming Duke's Theorem, every sufficiently large integer n
 can be written as x ^ 2 + y ^ 2 - z ^ 2 with max(x ^ 2, y ^ 2, z ^ 2) <= n.
 -/
-theorem erdos_1148_of_duke (h_duke : (∃ N : ℤ, ∀ n : ℤ, n ≥ N →
-∃ t ∈ Erdos1148.R_star_disc (4 * n),
-  Erdos1148.project_to_hyperboloid n t ∈ Erdos1148.Omega_strict ∧
-  t.1 % 2 = t.2.2 % 2)) :
-  ∃ N : ℤ, ∀ n : ℤ, n ≥ N → ∃ x y z : ℤ, n = x^2 + y^2 - z^2 ∧ max (x^2) (max (y^2) (z^2)) ≤ n := by
-  rcases h_duke with ⟨N, hN⟩
-  use max N 1
-  intro n hn
-  have hnN : n ≥ N := le_trans (le_max_left N 1) hn
-  have hn1 : n ≥ 1 := le_trans (le_max_right N 1) hn
-  have hn_pos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast lt_of_lt_of_le zero_lt_one hn1
-  have hn_nonneg : 0 ≤ (n : ℝ) := le_of_lt hn_pos
-  rcases hN n hnN with ⟨⟨a, b, c⟩, ht_disc, ht_omega, ht_parity⟩
-  -- Reduce (a, b, c).1 → a, (a, b, c).2.2 → c, etc. so omega doesn't see extra division terms
-  dsimp at ht_disc ht_parity
-  let x := (a - c) / 2
-  let y := b / 2
-  let z := (a + c) / 2
-  use x, y, z
-  have h_eq : b ^ 2 - 4 * a * c = 4 * n := ht_disc.1
-  have hb_even : b % 2 = 0 := by
-    have h_parity : b % 2 = 0 ∨ b % 2 = 1 := by omega
-    rcases h_parity with h0 | h1
-    · exact h0
-    · exfalso
-      have hk : ∃ k, b = 2 * k + 1 := ⟨b / 2, by omega⟩
-      rcases hk with ⟨k, hk⟩
-      have h_eq2 : 4 * (k ^ 2 + k - a * c - n) = -1 := by
-        calc 4 * (k ^ 2 + k - a * c - n)
-            = (2 * k + 1) ^ 2 - 4 * a * c - 4 * n - 1 := by ring
-          _ = b ^ 2 - 4 * a * c - 4 * n - 1 := by rw [hk]
-          _ = 4 * n - 4 * n - 1 := by rw [h_eq]
-          _ = -1 := by ring
-      generalize k ^ 2 + k - a * c - n = X at h_eq2
-      omega
-  -- KEY: Prove the 2*w relationships BEFORE h_n, so omega never sees x^2, y^2, z^2
-  have hx_rel : a - c = 2 * x := by
-    have : (a - c) % 2 = 0 := by omega
-    change a - c = 2 * ((a - c) / 2)
-    omega
-  have hy_rel : b = 2 * y := by
-    change b = 2 * (b / 2)
-    omega
-  have hz_rel : a + c = 2 * z := by
-    have : (a + c) % 2 = 0 := by omega
-    change a + c = 2 * ((a + c) / 2)
-    omega
-  have h_n : x ^ 2 + y ^ 2 - z ^ 2 = n := by
-    exact lemma_dictionary n a b c h_eq hb_even ht_parity
-  refine ⟨h_n.symm, ?_⟩
-  have hs : Real.sqrt (4 * (n : ℝ)) = 2 * Real.sqrt (n : ℝ) := by
-    calc Real.sqrt (4 * (n : ℝ))
-        = Real.sqrt 4 * Real.sqrt (n : ℝ) := Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4) (n : ℝ)
-      _ = 2 * Real.sqrt (n : ℝ) := by norm_num
-  dsimp [Omega_strict, project_to_hyperboloid] at ht_omega
-  have h_omega1 : |(a : ℝ) / (2 * Real.sqrt (n : ℝ)) - (c : ℝ) / (2 * Real.sqrt (n : ℝ))| < 1 := by
-    have h := ht_omega.2.1
-    rwa [hs] at h
-  have h_omega2 : |(b : ℝ) / (2 * Real.sqrt (n : ℝ))| < 1 := by
-    have h := ht_omega.2.2.1
-    rwa [hs] at h
-  have h_omega3 : |(a : ℝ) / (2 * Real.sqrt (n : ℝ)) + (c : ℝ) / (2 * Real.sqrt (n : ℝ))| < 1 := by
-    have h := ht_omega.2.2.2
-    rwa [hs] at h
-  have sqrt_pos : 0 < 2 * Real.sqrt (n : ℝ) := by positivity
-  have h_bound1 : |((a - c : ℤ) : ℝ)| < 2 * Real.sqrt (n : ℝ) := by
-    have h_sub : (a : ℝ) / (2 * Real.sqrt (n : ℝ)) - (c : ℝ) / (2 * Real.sqrt (n : ℝ))
-        = ((a - c : ℤ) : ℝ) / (2 * Real.sqrt (n : ℝ)) := by
-      push_cast
-      ring
-    have h_omega1' : |((a - c : ℤ) : ℝ) / (2 * Real.sqrt (n : ℝ))| < 1 := by rwa [← h_sub]
-    rw [abs_div, abs_of_pos sqrt_pos, div_lt_iff₀ sqrt_pos] at h_omega1'
-    linarith
-  have h_bound2 : |((b : ℤ) : ℝ)| < 2 * Real.sqrt (n : ℝ) := by
-    have h_b : (b : ℝ) / (2 * Real.sqrt (n : ℝ))
-        = ((b : ℤ) : ℝ) / (2 * Real.sqrt (n : ℝ)) := by rfl
-    have h_omega2' : |((b : ℤ) : ℝ) / (2 * Real.sqrt (n : ℝ))| < 1 := by rwa [← h_b]
-    rw [abs_div, abs_of_pos sqrt_pos, div_lt_iff₀ sqrt_pos] at h_omega2'
-    linarith
-  have h_bound3 : |((a + c : ℤ) : ℝ)| < 2 * Real.sqrt (n : ℝ) := by
-    have h_add : (a : ℝ) / (2 * Real.sqrt (n : ℝ)) + (c : ℝ) / (2 * Real.sqrt (n : ℝ))
-        = ((a + c : ℤ) : ℝ) / (2 * Real.sqrt (n : ℝ)) := by
-      push_cast
-      ring
-    have h_omega3' : |((a + c : ℤ) : ℝ) / (2 * Real.sqrt (n : ℝ))| < 1 := by rwa [← h_add]
-    rw [abs_div, abs_of_pos sqrt_pos, div_lt_iff₀ sqrt_pos] at h_omega3'
-    linarith
-  have bound_helper : ∀ (w : ℤ), |(2 * w : ℝ)| < 2 * Real.sqrt (n : ℝ) → (w ^ 2 : ℤ) ≤ n := by
-    intro w hw
-    have hw2 : 2 * |(w : ℝ)| < 2 * Real.sqrt (n : ℝ) := by
-      calc 2 * |(w : ℝ)| = |(2 : ℝ)| * |(w : ℝ)| := by norm_num
-           _ = |(2 * w : ℝ)| := by rw [← abs_mul]
-           _ < 2 * Real.sqrt (n : ℝ) := hw
-    have hw3 : |(w : ℝ)| < Real.sqrt (n : ℝ) := by linarith
-    have hdiff : 0 < Real.sqrt (n : ℝ) - |(w : ℝ)| := sub_pos.mpr hw3
-    have hsum_pos : 0 < Real.sqrt (n : ℝ) + |(w : ℝ)| := by
-      have : 0 < Real.sqrt (n : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hn_pos)
-      positivity
-    have hprod : 0 < (Real.sqrt (n : ℝ)) ^ 2 - |(w : ℝ)| ^ 2 := by
-      calc 0
-          < (Real.sqrt (n : ℝ) - |(w : ℝ)|) *
-              (Real.sqrt (n : ℝ) + |(w : ℝ)|) := by
-            exact mul_pos hdiff hsum_pos
-        _ = (Real.sqrt (n : ℝ)) ^ 2 - |(w : ℝ)| ^ 2 := by ring
-    have h2 : |(w : ℝ)| ^ 2 < (Real.sqrt (n : ℝ)) ^ 2 := by linarith
-    rw [sq_abs, Real.sq_sqrt hn_nonneg] at h2
-    exact_mod_cast le_of_lt h2
-  have hx_bound : (x ^ 2 : ℤ) ≤ n := by
-    apply bound_helper
-    have : ((a - c : ℤ) : ℝ) = 2 * (x : ℝ) := by
-      rw [hx_rel]
-      push_cast
-      ring
-    rwa [this] at h_bound1
-  have hy_bound : (y ^ 2 : ℤ) ≤ n := by
-    apply bound_helper
-    have : ((b : ℤ) : ℝ) = 2 * (y : ℝ) := by
-      rw [hy_rel]
-      push_cast
-      ring
-    rwa [this] at h_bound2
-  have hz_bound : (z ^ 2 : ℤ) ≤ n := by
-    apply bound_helper
-    have : ((a + c : ℤ) : ℝ) = 2 * (z : ℝ) := by
-      rw [hz_rel]
-      push_cast
-      ring
-    rwa [this] at h_bound3
-  exact max_le hx_bound (max_le hy_bound hz_bound)
 
 end
 

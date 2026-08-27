@@ -31,7 +31,6 @@ did, so it no longer closes those goals; the statements proved are unchanged. Th
 `chebyshevPsi'` rename are the only deviations from upstream text.
 -/
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Basic.lean` -/
 
 section
@@ -373,19 +372,15 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos49/PNT/EulerMaclaurin.lean` -/
 
 section
-
-
 
 /-! We prove the 1st order Euler-Maclaurin formula by specialising Abel summation and manipulating integrals. -/
 
 section
 
 open Finset Interval MeasureTheory
-
 
 variable {𝕜 : Type*} [RCLike 𝕜] {f : ℝ → 𝕜} {a b : ℝ}
 
@@ -397,76 +392,15 @@ lemma _root_.aestronglyMeasurable_B1 : AEStronglyMeasurable B1 := by
   unfold B1
   fun_prop
 
-lemma _root_.abs_B1_le_half {x : ℝ} (hx : 0 ≤ x) : |B1 x| ≤ 1 / 2 := by
-  unfold B1
-  refine abs_le.mpr ⟨?_, ?_⟩
-  · grind [Nat.floor_le hx]
-  · grind [Nat.lt_succ_floor x]
-
-lemma _root_.integral_deriv_mul_add_const (c : 𝕜) (hab : a ≤ b) (h_int : IntervalIntegrable (deriv f) volume a b)
-    (hf_diff : ∀ t ∈ Set.Icc a b, DifferentiableAt ℝ f t) :
-    ∫ t in a..b, (t + c) * deriv f t = (b + c) * f b - (a + c) * f a - ∫ t in a..b, f t := by
-  rw [← Set.uIcc_of_le hab] at hf_diff
-  have : ∀ t ∈ [[a, b]], HasDerivAt (fun (t : ℝ) ↦ t + c) 1 t := by
-    intro t ht
-    simp only [hasDerivAt_add_const_iff]
-    convert! ContinuousLinearMap.hasDerivAt (RCLike.ofRealCLM (K := 𝕜)) using 1
-    simp
-  replace hf_diff := fun t ht ↦ (hf_diff t ht).hasDerivAt
-  rw [intervalIntegral.integral_mul_deriv_eq_deriv_mul this hf_diff (by simp) h_int]
-  simp
-
-lemma _root_.intervalIntegrable_deriv_mul_B1 (ha : 0 ≤ a) (hab : a ≤ b) (h_cont : ContinuousOn (deriv f) [[a, b]]) :
-    IntervalIntegrable (fun t ↦ deriv f t * B1 t) volume a b := by
-  refine IntervalIntegrable.continuousOn_mul ?_ h_cont
-  rw [intervalIntegrable_iff']
-  apply MeasureTheory.Measure.integrableOn_of_bounded (by simp) (by fun_prop) (M := 1 / 2)
-  filter_upwards [self_mem_ae_restrict (by measurability)] with x hx
-  rw [Set.uIcc_of_le hab, Set.mem_Icc] at hx
-  norm_cast
-  exact abs_B1_le_half (by linarith)
-
-lemma _root_.integral_deriv_mul_floor_add_one (ha : 0 ≤ a) (hab : a ≤ b)
-    (hf_diff : ∀ t ∈ Set.Icc a b, DifferentiableAt ℝ f t) (h_cont : ContinuousOn (deriv f) [[a, b]]) :
-    ∫ t in a..b, deriv f t * (⌊t⌋₊ + 1) = (b + 1 / 2) * f b - (a + 1 / 2) * f a - (∫ t in a..b, f t) - ∫ t in a..b, deriv f t * B1 t := by
-  calc
-  _ = ∫ t in a..b, (deriv f t * (t + 1 / 2) -deriv f t * B1 t) := by
-    congr
-    ext
-    simp only [B1]
-    push_cast
-    ring
-  _ = (∫ t in a..b, deriv f t * (t + 1 / 2)) - ∫ t in a..b, deriv f t * B1 t := by
-    exact intervalIntegral.integral_sub (ContinuousOn.intervalIntegrable (by fun_prop)) (intervalIntegrable_deriv_mul_B1 ha hab h_cont)
-  _ = _ := by
-    conv => lhs; arg 1; arg 1; ext; rw [mul_comm]
-    rw [integral_deriv_mul_add_const _ hab h_cont.intervalIntegrable hf_diff]
-
-theorem _root_.sum_eq_integral_add_integral_deriv (ha : 0 ≤ a) (hab : a ≤ b)
-    (hf_diff : ∀ t ∈ Set.Icc a b, DifferentiableAt ℝ f t)
-    (h_cont : ContinuousOn (deriv f) [[a, b]]) :
-    ∑ k ∈ Ioc ⌊a⌋₊ ⌊b⌋₊, f k =
-      f a * B1 a - f b * B1 b + (∫ t in a..b, f t) + ∫ t in a..b, deriv f t * B1 t  := by
-  have := sum_mul_eq_sub_sub_integral_mul (fun _ ↦ 1) ha hab hf_diff (Set.uIcc_of_le hab ▸ h_cont).integrableOn_Icc
-  simp only [mul_one, sum_const, Nat.card_Icc, tsub_zero, nsmul_eq_mul, Nat.cast_add,
-    Nat.cast_one] at this
-  rw [this, ← intervalIntegral.integral_of_le hab]
-  rw [integral_deriv_mul_floor_add_one ha hab hf_diff h_cont]
-  unfold B1
-  push_cast
-  ring
-
 end
 
 end
-
 
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos49/PNT/IEANTN/Mertens.lean` -/
 
 section
 
 theorem _root_.Filter.EventuallyEq.iff_eventually {α : Type _} {β : Type _} {l : Filter α} {f g : α → β} : f =ᶠ[l] g ↔ ∀ᶠ (x : α) in l, f x = g x := by rfl
-
 
 section
 open _root_.Real
@@ -477,10 +411,6 @@ theorem _root_.Real.inv_log_eq_o_one : (fun x ↦ 1 / log x) =o[atTop] (fun _ �
     rw [isLittleO_one_iff]
     convert tendsto_log_atTop.inv_tendsto_atTop using 1
     ext; simp
-
-theorem _root_.Real.one_eq_o_log_log : (fun _ ↦ (1:ℝ)) =o[atTop] (fun x ↦ log (log x)) := by
-    simp only [isLittleO_one_left_iff, norm_eq_abs]
-    exact tendsto_abs_atTop_atTop.comp (tendsto_log_atTop.comp tendsto_log_atTop)
 
 end
 
@@ -733,9 +663,6 @@ end Issue1584
 
 namespace Mertens
 
-
-
-
 open Real Finset Filter Asymptotics Topology
 open ArithmeticFunction hiding log
 
@@ -743,25 +670,6 @@ lemma sum_Ioc_one_eq_sum_Ioc_zero {f : ℕ → ℝ} {x : ℕ} (hx : 1 ≤ x) (hf
     ∑ n ∈ Ioc 1 x, f n = ∑ n ∈ Ioc 0 x, f n := by
   rw [(by rfl : Ioc 0 x = Icc 1 x), ← add_sum_Ioc_eq_sum_Icc hx]
   simpa
-
-
-theorem sum_log_eq {x : ℝ} (hx : 1 ≤ x) :
-    ∑ n ∈ Ioc 0 ⌊ x ⌋₊, log n =
-      x * log x - (x - ⌊x⌋₊ - 1 / 2) * log x - x + 1 + ∫ t in 1..x, (t - ⌊t⌋₊ - 1 / 2) / t := by
-  rw [← sum_Ioc_one_eq_sum_Ioc_zero (Nat.le_floor (by grind)) (by simp)]
-  have : 1 = ⌊(1 : ℝ)⌋₊ := by simp
-  nth_rw 1 [this]
-  rw [sum_eq_integral_add_integral_deriv (by norm_num) hx (fun _ _ ↦ (by fun_prop (disch := grind)))]
-  · simp only [log_one, B1, Nat.floor_one, Nat.cast_one, sub_self, zero_sub,
-    RCLike.ofReal_real_eq_id, id_eq, mul_neg, zero_mul, neg_zero, integral_log, mul_zero, sub_zero,
-    deriv_log']
-    ring_nf
-    congr
-    ext
-    ring
-  · simp only [deriv_log', Set.uIcc_of_le hx]
-    fun_prop (disch := grind)
-
 
 theorem sum_log_le {x : ℝ} (hx : 1 ≤ x) :
     ∑ n ∈ Ioc 0 ⌊ x ⌋₊, log n ≤ x * log x := by
@@ -776,7 +684,6 @@ theorem sum_log_le {x : ℝ} (hx : 1 ≤ x) :
     · exact log_nonneg hx
     · exact Nat.floor_le (by linarith)
 
-
 lemma integral_log_le {a b : ℝ} (ha : 1 ≤ a) (hab : a ≤ b) :
     ∫ t in a..b, log t ≤ log b * (b - a) := by
   apply le_of_abs_le
@@ -787,7 +694,6 @@ lemma integral_log_le {a b : ℝ} (ha : 1 ≤ a) (hab : a ≤ b) :
     gcongr <;> linarith
   grw [← norm_eq_abs, intervalIntegral.norm_integral_le_of_norm_le_const this,
     abs_of_nonneg (by linarith)]
-
 
 theorem sum_log_ge {x : ℝ} (hx : 1 ≤ x) :
     ∑ n ∈ Ioc 0 ⌊ x ⌋₊, log n ≥ x * log x - 2 * x := by
@@ -818,26 +724,15 @@ theorem sum_log_ge {x : ℝ} (hx : 1 ≤ x) :
     tsub_le_iff_right, sub_add_cancel, le_add_iff_nonneg_right, zero_le_one]
   _ ≥ _ := by linarith [log_le_self (by linarith : 0 ≤ x)]
 
-
-theorem sum_log_eq_log_factorial (x : ℝ) :
-    ∑ n ∈ Ioc 0 ⌊ x ⌋₊, log n = log (Nat.floor x).factorial := by
-    rw [←prod_Ico_id_eq_factorial, ←log_prod, prod_natCast]
-    · congr
-    intro x hx
-    simp at hx ⊢; grind
-
-
 theorem sum_log_eq_sum_mangoldt {x : ℝ} :
     ∑ n ∈ Ioc 0 ⌊x⌋₊, log n = ∑ d ∈ Ioc 0 ⌊x⌋₊, Λ d * ⌊x / d⌋₊ := by
   have : ∀ n : ℕ, log n = (Λ * zeta) n := by simp [vonMangoldt_mul_zeta]
   simp_rw [this, sum_Ioc_mul_zeta_eq_sum, ← Nat.floor_div_natCast]
 
-
 noncomputable abbrev E₁Λ (x : ℝ) : ℝ := ∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / d - log x
 
 theorem sum_mangoldt_div_eq (x : ℝ) : ∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / d = log x + E₁Λ x := by
     grind
-
 
 theorem E₁Λ.ge {x : ℝ} (hx : 1 ≤ x) :
     E₁Λ x  ≥ -2 := by
@@ -854,9 +749,6 @@ theorem E₁Λ.ge {x : ℝ} (hx : 1 ≤ x) :
   _ ≥ x * log x - 2 * x :=
     sum_log_eq_sum_mangoldt ▸ sum_log_ge hx
   _ = _ := by ring
-
-
-
 
 theorem E₁Λ.le {x : ℝ} (hx : 1 ≤ x) :
     E₁Λ x ≤ log 4 + 4 := by
@@ -879,7 +771,6 @@ theorem E₁Λ.le {x : ℝ} (hx : 1 ≤ x) :
     · exact Chebyshev.psi_le_const_mul_self (by linarith)
   _ = _ := by ring
 
-
 theorem sum_mangoldt_div_eq_log {x : ℝ} (hx : 1 ≤ x) :
     |∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / d - log x| ≤ log 4 + 4 := by
   grind [E₁Λ.le hx, E₁Λ.ge hx, log_nonneg]
@@ -887,30 +778,15 @@ theorem sum_mangoldt_div_eq_log {x : ℝ} (hx : 1 ≤ x) :
 theorem E₁Λ.bounded' : ∃ c > 0, ∀ x ≥ 1, |E₁Λ x| ≤ c := by
   exact ⟨log 4 + 4, (by positivity), fun x hx ↦ sum_mangoldt_div_eq_log hx⟩
 
-
-
-
 theorem E₁Λ.bounded : E₁Λ =O[atTop] (fun _ ↦ (1:ℝ)) := by
   simp only [isBigO_iff, norm_eq_abs, norm_one, mul_one,
     eventually_atTop]
   exact ⟨log 4 + 4, 1, fun _ hx ↦ sum_mangoldt_div_eq_log hx⟩
 
-theorem one_eq_o_log : (fun _ ↦ (1:ℝ)) =o[atTop] (fun x ↦ log x) := by
-    simp only [isLittleO_one_left_iff, norm_eq_abs]
-    exact tendsto_abs_atTop_atTop.comp tendsto_log_atTop
-
-
-theorem sum_mangoldt_div_eq_log' :
-    (fun x ↦ ∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / d) ~[atTop] (fun x ↦ log x) := by
-    apply IsLittleO.isEquivalent (IsBigO.trans_isLittleO _ one_eq_o_log)
-    convert! E₁Λ.bounded using 1
-
-
 noncomputable abbrev E₁p (x : ℝ) : ℝ := ∑ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (log p) / p - log x
 
 theorem sum_log_prime_div_eq (x : ℝ) : ∑ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (log p) / p = log x + E₁p x := by
     grind
-
 
 theorem E₁p.le_E₁Λ (x : ℝ) :
     E₁p x ≤ E₁Λ x := by
@@ -920,7 +796,6 @@ theorem E₁p.le_E₁Λ (x : ℝ) :
     · simp [vonMangoldt_apply_prime hp]
     have : 0 ≤ Λ p := vonMangoldt_nonneg
     positivity
-
 
 theorem E₁p.le {x : ℝ} (hx : 1 ≤ x) :
     E₁p x ≤ log 4 + 4 := by
@@ -934,7 +809,6 @@ lemma E₁.summand_nonneg (p : ℕ) : 0 ≤ if p.Prime then (log p) / (p*(p-1)) 
     suffices 1 ≤ (p : ℝ) by linarith
     exact_mod_cast h.one_le
   · rfl
-
 
 theorem E₁.summable : Summable (fun p : ℕ ↦ if p.Prime then (log p) / (p*(p-1)) else 0) := by
   refine (Real.summable_one_div_nat_rpow.mpr (by norm_num: 1 < (3 : ℝ) / 2)|>.const_div
@@ -1042,7 +916,6 @@ private lemma sum_log_div_sq_le :
   _ = _ := by
     exact integral_log_div_sq
 
-
 theorem E₁.le : E₁ ≤ (5 * log 2 + 3) / 4 := by
   unfold E₁
   calc
@@ -1068,10 +941,6 @@ theorem E₁.le : E₁ ≤ (5 * log 2 + 3) / 4 := by
     grw [sum_log_div_sq_le]
     ring_nf
     rfl
-
-theorem E₁.nonneg : E₁ ≥ 0 :=
-  tsum_nonneg E₁.summand_nonneg
-
 
 theorem E₁Λ.le_E₁p_add_E₁ {x : ℝ} (hx : 1 ≤ x) :
     E₁Λ x ≤ E₁p x + E₁ := by
@@ -1120,8 +989,6 @@ theorem E₁p.ge {x : ℝ} (hx : 1 ≤ x) :
     E₁p x ≥ -2 - E₁ := by
     linarith [E₁Λ.le_E₁p_add_E₁ hx, E₁Λ.ge hx]
 
-
-
 theorem sum_log_prime_div_eq_log {x : ℝ} (hx : 1 ≤ x) :
     |∑ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (log p) / p - log x| ≤ log 4 + 4 := by
     rw [abs_le']
@@ -1133,20 +1000,7 @@ theorem sum_log_prime_div_eq_log {x : ℝ} (hx : 1 ≤ x) :
 theorem E₁p.bounded : ∃ c > 0, ∀ x ≥ 1, |E₁p x| ≤ c := by
   exact ⟨log 4 + 4, (by positivity), fun _ hx ↦ sum_log_prime_div_eq_log  hx⟩
 
-
-theorem sum_log_prime_div_eq_log' : E₁p =O[atTop] (fun _ ↦ (1:ℝ)) := by
-    simp only [isBigO_iff, norm_eq_abs, one_mem, CStarRing.norm_of_mem_unitary, mul_one,
-      eventually_atTop, E₁p]
-    exact ⟨ log 4 + 4, 1, fun _ ↦ sum_log_prime_div_eq_log ⟩
-
-
-theorem sum_log_prime_div_eq_log'' : (fun x ↦ ∑ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (log p) / p) ~[atTop] (fun x ↦ log x) := by
-    apply IsLittleO.isEquivalent (IsBigO.trans_isLittleO _ one_eq_o_log)
-    convert! sum_log_prime_div_eq_log' using 1
-
-
 noncomputable abbrev γ : ℝ := (∫ t in Set.Ioi 2, E₁Λ t / (t * log t^2)) + 1 - log (log 2)
-
 
 noncomputable abbrev E₂Λ (x : ℝ) : ℝ := ∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / (d * log d) - log (log x) - γ
 
@@ -1154,7 +1008,6 @@ lemma sum_Ioc_one_eq_sum_Icc_zero {f : ℕ → ℝ} {x : ℕ} (hx : 1 ≤ x) (hf
     ∑ n ∈ Ioc 1 x, f n = ∑ n ∈ Icc 0 x, f n := by
   rw [sum_Ioc_one_eq_sum_Ioc_zero hx hf1, ← add_sum_Ioc_eq_sum_Icc (by linarith)]
   simpa
-
 
 private theorem sum_div_log_eq {x : ℝ} (hx : 2 ≤ x) (f : ℕ → ℝ) :
     ∑ n ∈ Ioc 1 ⌊ x ⌋₊, f n / log n =
@@ -1270,7 +1123,6 @@ lemma intervalIntegrable_one_div_mul_log {x : ℝ} (hx : 2 ≤ x) :
   have : log t ≠ 0 := by simp; grind
   fun_prop (disch := grind)
 
-
 theorem E₂Λ.eq {x : ℝ} (hx : 2 ≤ x) :
     E₂Λ x = E₁Λ x / log x - ∫ t in Set.Ioi x, E₁Λ t / (t * log t^2) := by
   unfold E₂Λ
@@ -1308,7 +1160,6 @@ private theorem integ_div_mul_log_sq {x : ℝ} (c : ℝ) (hx : 2 ≤ x) :
     convert! tendsto_log_atTop.inv_tendsto_atTop.const_mul (-c) using 1
     simp
 
-
 theorem E₂Λ.abs_le {x : ℝ} (hx : 2 ≤ x) :
     |E₂Λ x| ≤ (log 4 + 6) / log x := by
     have : 0 < log x := by apply log_pos; linarith
@@ -1339,8 +1190,6 @@ theorem E₂Λ.abs_le {x : ℝ} (hx : 2 ≤ x) :
     grw [this]
     grind
 
-
-
 theorem E₂Λ.bound : E₂Λ =O[atTop] (fun x ↦ 1 / log x) := by
     simp only [one_div, isBigO_iff, norm_eq_abs, norm_inv, eventually_atTop]
     use log 4 + 6, 2
@@ -1349,9 +1198,7 @@ theorem E₂Λ.bound : E₂Λ =O[atTop] (fun x ↦ 1 / log x) := by
     have : 0 < log x := by apply log_pos; linarith
     grind [abs_of_pos this]
 
-
 theorem E₂Λ.bound' : E₂Λ =o[atTop] (fun _ ↦ (1:ℝ)) := E₂Λ.bound.trans_isLittleO inv_log_eq_o_one
-
 
 theorem log_zeta_eq_sum (s : ℝ) (hs : 1 < s) :
     log (riemannZeta (s:ℂ)).re = ∑' n, Λ n / (n^s * log n) := by
@@ -1676,16 +1523,13 @@ theorem log_zeta_eq_integ_aux (s : ℝ) (hs : 1 < s) :
 end LogZetaInteg
 end
 
-
 private theorem log_zeta_eq_integ (s : ℝ) (hs : 1 < s) :
     log (riemannZeta (s:ℂ)).re = (s - 1) * ∫ x in .Ioi 1, (log (log x) + γ + E₂Λ x) * x^(-s) :=
   LogZetaInteg.log_zeta_eq_integ_aux s hs
 
-
 private theorem mul_integ_log_log_eq (s : ℝ) (hs : 1 < s) :
     (s - 1) * ∫ x in .Ioi 1, log (log x) * x^(-s) = - log (s - 1) + deriv Gamma 1 :=
   mul_integ_log_log_eq_aux s hs
-
 
 private theorem mul_integ_gamma_eq (s) (hs : 1 < s) : (s - 1) * ∫ x in .Ioi 1, γ * x^(-s) = γ := by
   rw [MeasureTheory.integral_const_mul γ (· ^ (-s)), @integral_Ioi_rpow_of_lt (-s), one_rpow] <;>
@@ -1803,7 +1647,6 @@ private theorem integrableOn_E₂Λ_mul_rpow (s : ℝ) (hs : 1 < s) :
       div_le_div_of_nonneg_left hc hlog2 (Real.log_le_log (by norm_num) (le_of_lt hx))
     exact (E₂Λ.abs_le (le_of_lt hx)).trans hb2
 
-
 private theorem log_zeta_eq (s : ℝ) (hs : 1 < s) :
     log (riemannZeta (s:ℂ)).re = - log (s - 1) + deriv Gamma 1 + γ + (s - 1) * ∫ x in Set.Ioi 1, E₂Λ x * x^(-s) := by
   -- Start from the integration-by-parts identity (#1583).
@@ -1847,7 +1690,6 @@ private lemma zeta_pole_mul_re_tendsto_one :
         (nhdsWithin 1 (Set.Ioi 1)) (nhds (1 : ℝ)) :=
     (Complex.continuous_re.tendsto (1 : ℂ)).comp hcomplex
   simpa [Complex.ofReal_sub, Complex.ofReal_mul] using hreal
-
 
 private theorem log_zeta_limit :
     Filter.Tendsto
@@ -2083,7 +1925,6 @@ private lemma sub_one_mul_integral_E₂Λ_tendsto :
 
 end
 
-
 theorem deriv_gamma_add_γ_eq_zero : deriv Gamma 1 + γ = 0 := by
   -- For `s > 1`, `log_zeta_eq` rearranges to a constant identity.
   have key : ∀ s : ℝ, 1 < s →
@@ -2108,36 +1949,7 @@ theorem deriv_gamma_add_γ_eq_zero : deriv Gamma 1 + γ = 0 := by
 theorem γ.eq_eulerMascheroni : γ = eulerMascheroniConstant := by
   linarith [Real.eulerMascheroniConstant_eq_neg_deriv, deriv_gamma_add_γ_eq_zero]
 
-theorem sum_mangoldt_div_log_eq (x : ℝ) : ∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / (d * log d) = log (log x) + eulerMascheroniConstant + E₂Λ x := by
-    grind [γ.eq_eulerMascheroni]
-
-
-theorem sum_mangoldt_div_log_eq_log_log : ∃ C, ∀ x, 2 ≤ x →
-    |∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / (d * log d) - log (log x)| ≤ C := by
-    use (log 4 + 6)/log 2 + |eulerMascheroniConstant|
-    intro x hx
-    rw [sum_mangoldt_div_log_eq]
-    calc
-      _ = |E₂Λ x + eulerMascheroniConstant| := by ring_nf
-      _ ≤ (log 4 + 6)/log x + |eulerMascheroniConstant| := by grw [abs_add_le, E₂Λ.abs_le hx]
-      _ ≤ _ := by gcongr
-
-
-theorem sum_mangoldt_div_log_eq_log_log' : (fun x ↦ ∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / (d * log d) - log (log x)) =O[atTop] (fun _ ↦ (1:ℝ)) := by
-    simp only [isBigO_iff, norm_eq_abs, one_mem, CStarRing.norm_of_mem_unitary, mul_one,
-      eventually_atTop]
-    obtain ⟨ C, _ ⟩ := sum_mangoldt_div_log_eq_log_log
-    use C, 2
-
-
-
-theorem sum_mangoldt_div_log_eq_log_log'' : (fun x ↦ ∑ d ∈ Ioc 0 ⌊ x ⌋₊, (Λ d) / (d * log d)) ~[atTop] (fun x ↦ log (log x)) := by
-    apply IsLittleO.isEquivalent (IsBigO.trans_isLittleO _ one_eq_o_log_log)
-    convert! sum_mangoldt_div_log_eq_log_log' using 1
-
-
 noncomputable def M : ℝ := (∫ t in Set.Ioi 2, E₁p t / (t * log t^2)) + 1 - log (log 2)
-
 
 theorem M.le : M ≤ (log 4 + 4) / log 2 + 1 - log (log 2) := calc
     _ ≤ (∫ t in Set.Ioi 2, (log 4 + 4) / (t * log t^2)) + 1 - log (log 2) := by
@@ -2149,7 +1961,6 @@ theorem M.le : M ≤ (log 4 + 4) / log 2 + 1 - log (log 2) := calc
       simp at hx; exact E₁p.le (by linarith)
     _ = _ := by rw [integ_div_mul_log_sq _ (by norm_num)]
 
-
 theorem M.ge : M ≥ (-2 - E₁) / log 2 + 1 - log (log 2) := calc
     _ ≥ (∫ t in Set.Ioi 2, (-2 - E₁) / (t * log t^2)) + 1 - log (log 2) := by
       unfold M; gcongr with x hx
@@ -2160,12 +1971,7 @@ theorem M.ge : M ≥ (-2 - E₁) / log 2 + 1 - log (log 2) := calc
       simp at hx; exact E₁p.ge (by linarith)
     _ = _ := by rw [integ_div_mul_log_sq _ (by norm_num)]
 
-
 noncomputable abbrev E₂p (x : ℝ) : ℝ := ∑ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (1:ℝ) / p - log (log x) - M
-
-theorem sum_prime_div_eq (x : ℝ) : ∑ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (1:ℝ) / p = log (log x) + M + E₂p x := by
-    ring
-
 
 theorem E₂p.eq {x : ℝ} (hx : 2 ≤ x) :
     E₂p x = E₁p x / log x - ∫ t in Set.Ioi x, E₁p t / (t * log t^2) := by
@@ -2197,7 +2003,6 @@ theorem E₂p.eq {x : ℝ} (hx : 2 ≤ x) :
   · rw [intervalIntegrable_iff, Set.uIoc_of_le hx]
     exact integrable_E₁p_div_mul_log_sq (x := 2) (by rfl)|>.mono (by grind) (by rfl)
 
-
 theorem E₂p.abs_le {x : ℝ} (hx : 2 ≤ x) :
     |E₂p x| ≤ (log 4 + 6 + E₁) / log x := by
     have : 0 < log x := by apply log_pos; linarith
@@ -2228,7 +2033,6 @@ theorem E₂p.abs_le {x : ℝ} (hx : 2 ≤ x) :
     grw [this]
     grind
 
-
 theorem E₂p.bound : E₂p =O[atTop] (fun x ↦ 1 / log x) := by
     simp only [one_div, isBigO_iff, norm_eq_abs, norm_inv, eventually_atTop]
     use log 4 + 6 + E₁, 2
@@ -2237,34 +2041,7 @@ theorem E₂p.bound : E₂p =O[atTop] (fun x ↦ 1 / log x) := by
     have : 0 < log x := by apply log_pos; linarith
     grind [abs_of_pos this]
 
-
 theorem E₂p.bound' : E₂p =o[atTop] (fun _ ↦ (1:ℝ)) := E₂p.bound.trans_isLittleO inv_log_eq_o_one
-
-
-theorem sum_prime_div_eq_log_log : ∃ C, ∀ x, 2 ≤ x →
-    |∑ p ∈ Ioc 0 ⌊x⌋₊ with p.Prime, (1:ℝ) / p - log (log x)| ≤ C := by
-    use |M| + (log 4 + 6 + E₁) / log 2
-    intro x hx
-    rw [sum_prime_div_eq]
-    calc
-      _ = |M + E₂p x| := by ring_nf
-      _ ≤ |M| + (log 4 + 6 + E₁) / log x := by grw [abs_add_le, E₂p.abs_le hx]
-      _ ≤ _ := by
-        gcongr
-        have : 0 < log 4 := by apply log_pos; norm_num
-        linarith [E₁.nonneg]
-
-
-theorem sum_prime_div_eq_log_log' : (fun x ↦ ∑ p ∈ Ioc 0 ⌊x⌋₊ with p.Prime, (1:ℝ) / p - log (log x)) =O[atTop] (fun _ ↦ (1:ℝ)) := by
-    simp only [isBigO_iff, norm_eq_abs, one_mem, CStarRing.norm_of_mem_unitary, mul_one,
-      eventually_atTop]
-    obtain ⟨ C, hC ⟩ := sum_prime_div_eq_log_log
-    use C, 2
-
-
-theorem sum_prime_div_eq_log_log'' : (fun x ↦ ∑ p ∈ Ioc 0 ⌊x⌋₊ with p.Prime, (1:ℝ) / p) ~[atTop] (fun x ↦ log (log x)) := by
-    apply IsLittleO.isEquivalent (IsBigO.trans_isLittleO _ one_eq_o_log_log)
-    convert! sum_prime_div_eq_log_log' using 1
 
 lemma HasSum_log_one_sub_one_div_prime {p : ℕ} (hp : p.Prime) :
     HasSum (fun n : ℕ ↦ (-1 : ℝ) / (( n + 1) * p ^ (n + 1))) (log (1 - 1 / p)) := by
@@ -2359,14 +2136,11 @@ lemma tsum_M_eq_f_eq_tsum :
       ring_nf
   · ring
 
-
 theorem M.eq : M = γ + ∑' p : ℕ, if p.Prime then log (1 - 1 / p) + 1 / p else 0 := by
   rw [← tsum_M_eq_f_eq_tsum, M_eq_f.HasSum.tsum_eq]
   ring
 
-
 noncomputable def E₃ (x : ℝ) : ℝ := ∑ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, log (1 - (1:ℝ) / p) + log (log x) + eulerMascheroniConstant
-
 
 theorem prod_one_minus_div_prime_eq {x : ℝ} (hx : 1 < x) :
     ∏ p ∈ Ioc 0 ⌊x⌋₊ with p.Prime, (1 - (1 : ℝ) / p) =
@@ -2462,7 +2236,6 @@ lemma sum_M_eq_summand_le' {x : ℝ} (hx : 2 ≤ x) :
   gcongr
   exact Nat.lt_floor_add_one _|>.le
 
-
 theorem E₃.abs_le : ∃ C, ∀ x, 2 ≤ x → |E₃ x| ≤ C / log x := by
   unfold E₃
   refine ⟨4 + (log 4 + 6 + E₁), fun x hx ↦ ?_⟩
@@ -2486,7 +2259,6 @@ theorem E₃.abs_le : ∃ C, ∀ x, 2 ≤ x → |E₃ x| ≤ C / log x := by
     grw [this]
     rw [← add_div]
 
-
 theorem E₃.bound : E₃ =O[atTop] (fun x ↦ 1 / log x) := by
     simp only [isBigO_iff, norm_eq_abs, eventually_atTop]
     obtain ⟨ C, hC ⟩ := E₃.abs_le
@@ -2496,9 +2268,7 @@ theorem E₃.bound : E₃ =O[atTop] (fun x ↦ 1 / log x) := by
     have : 0 < 1 / log x := by positivity
     grind [abs_of_pos this]
 
-
 theorem E₃.bound' : E₃ =o[atTop] (fun _ ↦ (1:ℝ)) := E₃.bound.trans_isLittleO inv_log_eq_o_one
-
 
 theorem E₃.bound'' : (fun x ↦ ∏ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (1 - (1:ℝ) / p)) ~[atTop] (fun x ↦ exp (-eulerMascheroniConstant) / log x) := by
    rw [isEquivalent_iff_tendsto_one]
@@ -2511,80 +2281,23 @@ theorem E₃.bound'' : (fun x ↦ ∏ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (1 
    simp only [ne_eq, div_eq_zero_iff, exp_ne_zero, log_eq_zero, eventually_atTop]; use 2
    grind
 
-
-theorem E₃.bound''' : (fun x ↦ ∏ p ∈ Ioc 0 ⌊ x ⌋₊ with p.Prime, (1 - (1:ℝ) / p) - exp (-eulerMascheroniConstant) / log x) =O[atTop] (fun x ↦ 1 / (log x)^2) := by
-  obtain ⟨c, hc⟩ := E₃.abs_le
-  rw [isBigO_iff]
-  refine ⟨exp (-eulerMascheroniConstant) * 2 * c, ?_⟩
-  filter_upwards [eventually_ge_atTop 2, eventually_ge_atTop c.exp] with x hx hx2
-  rw [prod_one_minus_div_prime_eq (by linarith)]
-  specialize hc x hx
-  rw [norm_eq_abs, norm_eq_abs]
-  calc
-  _ = |exp (-eulerMascheroniConstant) / log x * (exp (E₃ x) - 1)| := by ring_nf
-  _ = |exp (-eulerMascheroniConstant) / log x| * |exp (E₃ x) - 1| := by rw [abs_mul]
-  _ ≤ _ := by
-    have : |E₃ x| ≤ 1 := by
-      apply hc.trans
-      have := log_le_log (exp_pos _) hx2
-      rw [log_exp] at this
-      apply div_le_one_iff.mpr <| Or.inl ⟨log_pos (by linarith), this⟩
-    grw [abs_exp_sub_one_le this, hc]
-    apply le_of_eq
-    rw [abs_div, abs_div, abs_one, abs_of_nonneg (exp_nonneg _), abs_of_nonneg (log_nonneg (by linarith)), abs_of_nonneg (sq_nonneg _)]
-    ring
-
 end Mertens
 
 end
-
 
 /-! ### Upstream module `src/latest/Util/MertensProduct.lean` -/
 
 section
 
-
 open Filter Finset Real Asymptotics Topology
 
-/-- Mertens' product asymptotic, in reciprocal-product form. -/
-theorem _root_.mertens_product :
-    Tendsto
-      (fun y : ℝ =>
-        (∏ p ∈ Finset.filter Nat.Prime (Finset.Icc 1 ⌊y⌋₊), ((p : ℝ) / (p - 1))) /
-          (Real.exp Real.eulerMascheroniConstant * Real.log y))
-      atTop (𝓝 1) := by
-  have hprod (y : ℝ) :
-      (∏ p ∈ (Finset.Icc 1 ⌊y⌋₊).filter Nat.Prime, ((p : ℝ) / (p - 1))) =
-        (∏ p ∈ (Finset.Ioc 0 ⌊y⌋₊).filter Nat.Prime, (1 - (1 : ℝ) / p))⁻¹ := by
-    rw [← Finset.prod_inv_distrib]
-    apply Finset.prod_congr (by congr 1)
-    intro p hp
-    have hp0 : (p : ℝ) ≠ 0 := by
-      exact_mod_cast (Finset.mem_filter.mp hp).2.ne_zero
-    field_simp
-  have heq :
-      (fun y : ℝ => ∏ p ∈ (Finset.Icc 1 ⌊y⌋₊).filter Nat.Prime,
-        ((p : ℝ) / (p - 1))) ~[atTop]
-      (fun y : ℝ => Real.exp Real.eulerMascheroniConstant * Real.log y) := by
-    convert Mertens.E₃.bound''.inv using 1
-    · ext y
-      exact hprod y
-    · ext y
-      simp [Real.exp_neg, div_eq_mul_inv, mul_comm]
-  apply (isEquivalent_iff_tendsto_one ?_).mp heq
-  filter_upwards [eventually_gt_atTop (1 : ℝ)] with y hy
-  exact mul_ne_zero (Real.exp_ne_zero _) (Real.log_pos hy).ne'
-
 end
-
 
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Analytic.lean` -/
 
 section
 
-
 noncomputable section
-
 
 open Finset BigOperators Nat Real Filter Asymptotics
 open scoped Topology
@@ -3087,7 +2800,6 @@ lemma mean_estimate_fixed_A (A : ℝ) (hA : A > Real.log 2)
     · exact False.elim <| h_log_pos <| Real.log_pos <| by linarith [ le_max_left X₁ X₂, le_max_right X₁ X₂ ] ;
   · linarith [ le_max_left X₁ X₂, le_max_right X₁ X₂ ]
 
-
 /-- The only Chebyshev input required by the sieve. -/
 def ElementaryChebyshevBound : Prop :=
   ∃ T : ℝ, ∀ x : ℝ, T ≤ x → chebyshevPsi x ≤ (111 / 100) * x
@@ -3235,27 +2947,6 @@ theorem sieve_bound (hCheb : ElementaryChebyshevBound) (ε : ℝ) (hε : ε > 0)
                 field_simp
         _ ≤ ((111 / 100) * Real.exp γ + ε) * X * ∏ p ∈ P, (1 - 1 / (p : ℝ)) :=
           mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hcoeff hxpos.le) hPnonneg
-
-theorem sifted_bound_set (hCheb : ElementaryChebyshevBound) (ε : ℝ) (hε : ε > 0) (lam : ℝ) (hlam : 1 < lam) :
-    ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ k : ℕ, ∀ S : Finset ℕ, S ⊆ Finset.Icc 1 n →
-      ((S.card : ℝ) ≤ (((111 / 100) * Real.exp γ) + ε) * n * Pi_sieve n lam k S) := by
-  obtain ⟨ N₀, hN₀ ⟩ := sieve_bound hCheb ε hε;
-  refine ⟨ ⌈N₀⌉₊, fun n hn k S hS =>
-    le_trans ?_ ( hN₀ n ( Nat.le_of_ceil_le hn ) (P_sieve n lam k S) ?_ ) ⟩;
-  · refine mod_cast Finset.card_le_card ?_;
-    intro m hm;
-    have hmIcc := Finset.mem_Icc.mp ( hS hm );
-    refine Finset.mem_filter.mpr ⟨ ?_, hmIcc.1, ?_ ⟩;
-    · simpa using Nat.lt_succ_of_le hmIcc.2;
-    intro p hp hp_dvd;
-    exact ( Finset.mem_filter.mp hp |>.2 )
-      ⟨ m, Finset.mem_filter.mpr ⟨ hm, hp_dvd ⟩ ⟩;
-  · simp +zetaDelta at *;
-    intro p hp;
-    refine ⟨ ?_, ?_ ⟩;
-    · exact Finset.mem_filter.mp ( Finset.mem_filter.mp hp |>.1 ) |>.2;
-    · refine le_trans ( Finset.mem_Ioc.mp ( Finset.mem_filter.mp hp |>.1 |> Finset.mem_filter.mp |>.1 ) |>.2 ) ?_;
-      exact Nat.floor_le_of_le ( div_le_self ( Nat.cast_nonneg _ ) ( by exact le_trans ( by norm_num ) ( mul_le_mul_of_nonneg_left ( one_le_pow₀ hlam.le ) zero_le_two ) ) )
 
 theorem sifted_bound_union (hCheb : ElementaryChebyshevBound) (ε : ℝ) (hε : ε > 0) (lam : ℝ) (hlam : 1 < lam) :
     ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ k : ℕ, ∀ S : Finset ℕ, S ⊆ Finset.Icc 1 n →
@@ -3508,11 +3199,9 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/CommonProducts.lean` -/
 
 section
-
 
 noncomputable section
 open Finset BigOperators Nat Real
@@ -3584,7 +3273,6 @@ theorem euler_common_product (lam : ℝ) (hlam : 1 < lam) (m : ℕ → ℕ)
   · exact fun _ _ => Finset.prod_nonneg fun _ _ => inv_nonneg.2 <| sub_nonneg.2 <| div_le_self zero_le_one <| mod_cast Nat.Prime.pos <| by aesop;
   · apply_rules [ partial_prod_le_D_val ]
 
-
 theorem Pi_sieve_mul_le (lam : ℝ) (hlam : 1 < lam) (m : ℕ → ℕ)
   (hsumm : Summable (fun k => Real.log (E_val lam k (m k))))
   (n k : ℕ) (A B : Finset ℕ)
@@ -3622,7 +3310,6 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/Util/MertensThird.lean` -/
 
 section
@@ -3640,8 +3327,6 @@ https://github.com/yuta0x89/ErdosProblems/blob/9eebc7a51466e6ad1b57318302cdc821d
 The formalization of Mertens third theorem was obtained by Aristotle from Harmonic (aristotle-harmonic@harmonic.fun).
 
 -/
-
-
 
 open Finset ArithmeticFunction Real
 open scoped BigOperators
@@ -4162,10 +3847,6 @@ private lemma _root_.sumS_ge_log_sub_one (n : ℕ) (hn : 2 ≤ n) :
     rw [ Finset.Icc_eq_cons_Ioc ( by linarith ), Finset.sum_cons ] ; aesop
   nlinarith [ show ( n : ℝ ) ≥ 2 by norm_cast, Real.log_le_sub_one_of_pos ( by positivity : 0 < ( n : ℝ ) ), log_factorial_ge' n ( by linarith ) ]
 
-private lemma _root_.sumS_mono {a b : ℕ} (h : a ≤ b) : sumS a ≤ sumS b := by
-  exact Finset.sum_le_sum_of_subset_of_nonneg ( Finset.Icc_subset_Icc_right h ) fun _ _ _ ↦ div_nonneg ( by
-    exact_mod_cast ArithmeticFunction.vonMangoldt_nonneg ) ( by norm_cast; linarith [ Finset.mem_Icc.mp ‹_› ] )
-
 private lemma _root_.div_sub_le_log_sub' {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     (b - a) / b ≤ Real.log b - Real.log a := by
   have h_mul : b - a ≤ b * (Real.log b - Real.log a) := by
@@ -4406,14 +4087,11 @@ theorem _root_.mertens_third_theorem (n : ℕ) (hn : 3 ≤ n) :
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Dyadic.lean` -/
 
 section
 
-
 noncomputable section
-
 
 open Finset BigOperators Nat Real
 
@@ -4539,14 +4217,11 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Deletion.lean` -/
 
 section
 
-
 noncomputable section
-
 
 open Finset BigOperators
 
@@ -4675,14 +4350,11 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Rectangles.lean` -/
 
 section
 
-
 noncomputable section
-
 
 open Finset BigOperators
 
@@ -4790,11 +4462,9 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Counting.lean` -/
 
 section
-
 
 noncomputable section
 open Finset BigOperators Nat Real Filter
@@ -4887,7 +4557,6 @@ theorem small_interval_case (hCheb : ElementaryChebyshevBound) (ε : ℝ) (hε :
     ring
   ring
 
-
 theorem large_rectangle_case (hCheb : ElementaryChebyshevBound) (ε : ℝ) (hε : 0 < ε)
     (m : ℕ → ℕ) (g : ℕ → ℝ) (hg1 : ∀ k, 1 ≤ g k)
     (hgtop : Tendsto g atTop atTop)
@@ -4961,14 +4630,11 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Chebyshev.lean` -/
 
 section
 
-
 noncomputable section
-
 
 open Finset BigOperators Nat Real Filter
 open scoped Topology
@@ -5257,11 +4923,9 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Assembly.lean` -/
 
 section
-
 
 noncomputable section
 open Finset BigOperators Filter
@@ -5345,11 +5009,9 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Series.lean` -/
 
 section
-
 
 noncomputable section
 open Finset BigOperators Filter
@@ -5452,11 +5114,9 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/Parameters.lean` -/
 
 section
-
 
 noncomputable section
 open Finset BigOperators
@@ -5466,12 +5126,6 @@ def rectangleCap (k : ℕ) : ℝ := (4/5) / (geometricRatio^(k+1))^2
 
 def rectangleMultiplicity (k : ℕ) : ℕ :=
   if k < 16 then N_layer 2 k else min (N_layer 2 k) ⌊rectangleCap k⌋₊
-
-lemma rectangleMultiplicity_le (k : ℕ) : rectangleMultiplicity k ≤ N_layer 2 k := by
-  unfold rectangleMultiplicity
-  split_ifs
-  · rfl
-  · exact min_le_left _ _
 
 lemma rectangleMultiplicity_active (k : ℕ) (hk : rectangleMultiplicity k < N_layer 2 k) :
     16 ≤ k ∧ rectangleMultiplicity k = ⌊rectangleCap k⌋₊ := by
@@ -5536,12 +5190,9 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductCertificate.lean` -/
 
 section
-
-
 
 open Finset
 
@@ -5642,15 +5293,11 @@ theorem certificate_prefix_step {scale : ℝ} {n b v : ℕ} {ds : List ℕ}
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block00.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData000 : List ℕ :=
   [0, 0, 2, 0, 2, 0, 2, 3, 2, 0, 2, 0, 2, 3, 2, 0, 2, 0, 2, 3, 2, 0, 2, 5, 2, 3, 2, 0, 2, 0, 2, 3,
@@ -6086,15 +5733,11 @@ theorem productData015_length : productData015.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block01.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData016 : List ℕ :=
   [2, 5, 2, 7, 2, 3, 2, 59, 2, 13, 2, 3, 2, 29, 2, 0, 2, 3, 2, 43, 2, 5, 2, 3, 2, 0, 2, 0, 2, 3, 2, 5,
@@ -6530,15 +6173,11 @@ theorem productData031_length : productData031.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block02.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData032 : List ℕ :=
   [2, 7, 2, 3, 2, 37, 2, 13, 2, 3, 2, 19, 2, 23, 2, 3, 2, 47, 2, 5, 2, 3, 2, 61, 2, 0, 2, 3, 2, 5, 2, 0,
@@ -6974,15 +6613,11 @@ theorem productData047_length : productData047.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block03.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData048 : List ℕ :=
   [2, 3, 2, 47, 2, 13, 2, 3, 2, 23, 2, 67, 2, 3, 2, 0, 2, 5, 2, 3, 2, 17, 2, 73, 2, 3, 2, 5, 2, 11, 2, 3,
@@ -7418,15 +7053,11 @@ theorem productData063_length : productData063.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block04.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData064 : List ℕ :=
   [2, 0, 2, 13, 2, 3, 2, 73, 2, 0, 2, 3, 2, 0, 2, 5, 2, 3, 2, 0, 2, 11, 2, 3, 2, 5, 2, 0, 2, 3, 2, 0,
@@ -7862,15 +7493,11 @@ theorem productData079_length : productData079.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block05.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData080 : List ℕ :=
   [2, 13, 2, 3, 2, 71, 2, 53, 2, 3, 2, 0, 2, 5, 2, 3, 2, 43, 2, 107, 2, 3, 2, 5, 2, 17, 2, 3, 2, 179, 2, 0,
@@ -8306,15 +7933,11 @@ theorem productData095_length : productData095.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block06.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData096 : List ℕ :=
   [2, 3, 2, 0, 2, 11, 2, 3, 2, 211, 2, 5, 2, 3, 2, 0, 2, 0, 2, 3, 2, 5, 2, 0, 2, 3, 2, 11, 2, 137, 2, 3,
@@ -8750,15 +8373,11 @@ theorem productData111_length : productData111.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block07.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData112 : List ℕ :=
   [2, 0, 2, 0, 2, 3, 2, 83, 2, 5, 2, 3, 2, 41, 2, 19, 2, 3, 2, 5, 2, 0, 2, 3, 2, 103, 2, 0, 2, 3, 2, 181,
@@ -9194,15 +8813,11 @@ theorem productData127_length : productData127.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block08.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData128 : List ℕ :=
   [2, 0, 2, 3, 2, 0, 2, 5, 2, 3, 2, 11, 2, 0, 2, 3, 2, 5, 2, 0, 2, 3, 2, 53, 2, 0, 2, 3, 2, 173, 2, 7,
@@ -9638,15 +9253,11 @@ theorem productData143_length : productData143.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block09.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData144 : List ℕ :=
   [2, 3, 2, 11, 2, 5, 2, 3, 2, 19, 2, 37, 2, 3, 2, 5, 2, 29, 2, 3, 2, 0, 2, 131, 2, 3, 2, 0, 2, 7, 2, 3,
@@ -10082,15 +9693,11 @@ theorem productData159_length : productData159.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block10.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData160 : List ℕ :=
   [2, 17, 2, 5, 2, 3, 2, 0, 2, 0, 2, 3, 2, 5, 2, 0, 2, 3, 2, 67, 2, 0, 2, 3, 2, 19, 2, 7, 2, 3, 2, 0,
@@ -10526,15 +10133,11 @@ theorem productData175_length : productData175.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block11.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData176 : List ℕ :=
   [2, 5, 2, 3, 2, 227, 2, 0, 2, 3, 2, 5, 2, 0, 2, 3, 2, 193, 2, 173, 2, 3, 2, 23, 2, 7, 2, 3, 2, 109, 2, 5,
@@ -10970,15 +10573,11 @@ theorem productData191_length : productData191.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block12.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData192 : List ℕ :=
   [2, 3, 2, 37, 2, 17, 2, 3, 2, 5, 2, 0, 2, 3, 2, 0, 2, 0, 2, 3, 2, 0, 2, 7, 2, 3, 2, 107, 2, 5, 2, 3,
@@ -11414,15 +11013,11 @@ theorem productData207_length : productData207.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block13.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData208 : List ℕ :=
   [2, 281, 2, 0, 2, 3, 2, 5, 2, 73, 2, 3, 2, 43, 2, 11, 2, 3, 2, 29, 2, 7, 2, 3, 2, 37, 2, 5, 2, 3, 2, 307,
@@ -11858,15 +11453,11 @@ theorem productData223_length : productData223.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block14.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData224 : List ℕ :=
   [2, 0, 2, 3, 2, 5, 2, 11, 2, 3, 2, 23, 2, 19, 2, 3, 2, 251, 2, 7, 2, 3, 2, 0, 2, 5, 2, 3, 2, 11, 2, 89,
@@ -12302,15 +11893,11 @@ theorem productData239_length : productData239.length = 512 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ProductData/Block15.lean` -/
 
 section
 
-
 /-! Generated proper-divisor data. Every certificate is kernel checked. -/
-
-
 
 def productData240 : List ℕ :=
   [2, 3, 2, 5, 2, 0, 2, 3, 2, 0, 2, 17, 2, 3, 2, 59, 2, 7, 2, 3, 2, 11, 2, 5, 2, 3, 2, 89, 2, 19, 2, 3,
@@ -12746,12 +12333,9 @@ theorem productData255_length : productData255.length = 511 := by decide
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/PrimeProductBound.lean` -/
 
 section
-
-
 
 theorem reciprocalPrefix_131071_lt : reciprocalPrefix 131071 < (211 / 10 : ℝ) := by
   have h0 : (1000000000000 : ℝ) * reciprocalPrefix 0 ≤ 1000000000000 := by
@@ -13273,11 +12857,9 @@ theorem reciprocalPrefix_131071_lt : reciprocalPrefix 131071 < (211 / 10 : ℝ) 
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/EulerBounds.lean` -/
 
 section
-
 
 noncomputable section
 open Finset BigOperators
@@ -13397,11 +12979,9 @@ end
 
 end
 
-
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490/ParameterProduct.lean` -/
 
 section
-
 
 noncomputable section
 open Finset BigOperators
@@ -13526,7 +13106,6 @@ lemma rectangle_constant_lt :
 end
 
 end
-
 
 /-! ### Upstream module `src/latest/ErdosProblems/Erdos490.lean` -/
 

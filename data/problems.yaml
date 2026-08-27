@@ -475,15 +475,16 @@
   proof:
     path: "problems/237/"
     theorem: "Erdos237.erdos_237"
-    state: "axiomatic"
-    last_update: "2026-05-25"
-    lean_toolchain: "leanprover/lean4:v4.28.0"
-    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    extra_axioms: ["Erdos237.maynard_prime_tuples"]
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/237#post-5240"
       - "https://gist.github.com/pitmonticone/8ea0d1cdb963b6213ac639b11d33f811#file-erdos237-lean"
       - "https://github.com/Woett/Lean-files/blob/main/MertensThird.lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos237b.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "246"
   proof:
     path: "problems/246/"
@@ -1869,14 +1870,15 @@
   proof:
     path: "problems/964/"
     theorem: "Erdos964.erdos_964"
-    state: "axiomatic"
-    extra_axioms: ["Erdos964.goldston_graham_pintz_yildirim"]
-    last_update: "2026-06-06"
-    lean_toolchain: "leanprover/lean4:v4.24.0"
-    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/964#post-4280"
       - "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos964.lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos964.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "966"
   proof:
     path: "problems/966/"

@@ -44,8 +44,6 @@ Original formalization posted by paws on 4 May 2026:
 https://www.erdosproblems.com/forum/thread/750#post-6255
 -/
 
-
-
 open SimpleGraph Filter
 open scoped NNReal
 
@@ -119,10 +117,6 @@ def genMyc (s : ℕ) {V : Type u} (G : SimpleGraph V) : SimpleGraph (MycVerts s 
   symm := MycAdj_symm s G
   loopless := MycAdj_irrefl s G
 
-/-- Projection of a vertex set in `Mₛ(G)` back to `V(G)`. The apex is ignored. -/
-def proj {s : ℕ} {V : Type u} (X : Set (MycVerts s V)) : Set V :=
-  { v | ∃ i : Fin s, lvl s i v ∈ X }
-
 /-! ## §3. Odd-cycle transversal number `oct` -/
 
 /--
@@ -190,33 +184,6 @@ lemma oct_eq_zero_iff {V : Type u} [DecidableEq V] (G : SimpleGraph V) (X : Fins
   rw [Finset.coe_empty]
   exact induce_empty_isBipartite G
 
-/-- Trivial bound: `oct G X ≤ |X|` (delete everything). -/
-lemma oct_le_card {V : Type u} [DecidableEq V] (G : SimpleGraph V) (X : Finset V) :
-    oct G X ≤ X.card := by
-  refine oct_le_of_delete (subset_refl _) (le_refl _) ?_
-  rw [show ((↑X : Set V) \ (↑X : Set V)) = (∅ : Set V) from Set.sdiff_self]
-  exact induce_empty_isBipartite G
-
-/-- **Edge-monotonicity.** Adding edges to a graph only increases its OCT. Equivalently,
-removing edges (passing to a sub-graph on the same vertex set) only decreases OCT.
-
-This bridges the gap between the PDF's "every finite subgraph `F ⊆ G[X]`" formulation
-and our induced-subgraph form: any `H ≤ G` (i.e., `H.Adj ⊆ G.Adj`) satisfies
-`oct H X ≤ oct G X`, so an OCT bound on the induced graph yields one on every subgraph. -/
-lemma oct_mono_edges {V : Type u} [DecidableEq V] {H G : SimpleGraph V}
-    (hsub : H ≤ G) (X : Finset V) :
-    oct H X ≤ oct G X := by
-  obtain ⟨T, hT, hTcard, hbipG⟩ := oct_witness G X
-  -- The same deletion `T` works for `H`: `H.induce S` is a subgraph of `G.induce S`,
-  -- and `Colorable 2` is monotone in the subgraph relation.
-  refine oct_le_of_delete hT hTcard.le ?_
-  -- `(H.induce ((↑X) \ (↑T))).IsBipartite`
-  have hsubInd : (H.induce ((↑X : Set V) \ (↑T : Set V))) ≤
-      (G.induce ((↑X : Set V) \ (↑T : Set V))) := by
-    intro a b hab
-    exact hsub hab
-  exact hbipG.mono_left hsubInd
-
 /-! ## Recursive generalized Mycielski graphs -/
 
 /--
@@ -235,7 +202,6 @@ def IsRecursivelyBuiltMr : ∀ (_r : ℕ) {_V : Type u} (_G : SimpleGraph _V), P
       1 ≤ s ∧ IsRecursivelyBuiltMr (r + 2) H ∧ Nonempty (G ≃g genMyc s H)
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos750/Conditional.lean` -/
 
@@ -258,7 +224,6 @@ universe u v
 def StiebitzLowerBound : Prop :=
   ∀ {V : Type} (G : SimpleGraph V) (r : ℕ),
     IsRecursivelyBuiltMr r G → (r : ℕ∞) ≤ G.chromaticNumber
-
 
 /-! ## §3. Key combinatorial lemmas -/
 
@@ -478,33 +443,6 @@ theorem oct_genMyc_le {V : Type u} [DecidableEq V]
   refine oct_le_of_delete (liftedDeletion_subset X T) hcard ?_
   exact liftedDeletion_survivor_isBipartite G X T hTsub hTbip
 
-/--
-**Sub-lemma for Lemma 3.2.** `Mₛ(B)` minus the apex is bipartite when `B` is.
-The bipartition is inherited "vertically" — every level uses `B`'s bipartition,
-because every edge of `Mₛ(B)` not incident to the apex projects to a `B`-edge,
-hence joins different sides.
--/
-lemma genMyc_minus_apex_isBipartite {V : Type u} (s : ℕ) (B : SimpleGraph V)
-    (hB : B.IsBipartite) :
-    ((genMyc s B).induce {a : MycVerts s V | a ≠ apex s V}).IsBipartite := by
-  classical
-  obtain ⟨c⟩ := hB
-  refine ⟨Coloring.mk (fun a => Sum.casesOn (motive := fun x => x ≠ apex s V → Fin 2)
-    a.val
-    (fun p => fun _ => c p.2)
-    (fun _ => fun ha => absurd rfl ha) a.prop) ?_⟩
-  rintro ⟨a, ha⟩ ⟨b, hb⟩ hab
-  -- (genMyc s B).Adj a b
-  have hab' : (genMyc s B).Adj a b := hab
-  match a, b, ha, hb, hab' with
-  | Sum.inl ⟨i, u⟩, Sum.inl ⟨j, v⟩, _, _, h =>
-      have huv : B.Adj u v := by
-        rcases h with ⟨_, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ <;> exact h
-      simp only
-      exact c.valid huv
-  | Sum.inl _, Sum.inr (), _, hb, _ => exact absurd rfl hb
-  | Sum.inr (), _, ha, _, _ => exact absurd rfl ha
-
 /-- **Height** of a vertex in `Mₛ(G)`: the apex sits at height `s`, every level-`i`
 vertex sits at height `i.val < s`. Each edge changes height by at most `1`, with edges
 that *preserve* height existing only at height `0` (level-0 internal edges). -/
@@ -526,29 +464,6 @@ lemma height_diff_le_one {V : Type u} {s : ℕ} {G : SimpleGraph V}
   | Sum.inr (), Sum.inl (i, _), h =>
       simp only [genMyc, MycAdj] at h
       simp only [height]; omega
-  | Sum.inr (), Sum.inr (), h =>
-      simp only [genMyc, MycAdj] at h
-
-/-- An edge that preserves height has both endpoints at height 0 (level-0 internal edge). -/
-lemma height_eq_of_adj {V : Type u} {s : ℕ} {G : SimpleGraph V}
-    {a b : MycVerts s V} (hab : (genMyc s G).Adj a b)
-    (heq : height s a = height s b) :
-    height s a = 0 := by
-  match a, b, hab with
-  | Sum.inl (i, _), Sum.inl (j, _), h =>
-      simp only [height] at heq ⊢
-      rcases h with ⟨hi, _, _⟩ | ⟨hji, _⟩ | ⟨hij, _⟩
-      · exact hi
-      · omega
-      · omega
-  | Sum.inl (i, _), Sum.inr (), h =>
-      simp only [genMyc, MycAdj] at h
-      simp only [height] at heq
-      omega
-  | Sum.inr (), Sum.inl (i, _), h =>
-      simp only [genMyc, MycAdj] at h
-      simp only [height] at heq
-      omega
   | Sum.inr (), Sum.inr (), h =>
       simp only [genMyc, MycAdj] at h
 
@@ -736,20 +651,6 @@ theorem genMyc_oddClosedWalk_through_apex_long {V : Type u} {s : ℕ} (_hs : 1 �
   have heven : Even w'.length := (c'.even_length_iff_congr w').mpr ⟨id, id⟩
   rw [hlen] at heven
   exact Nat.not_odd_iff_even.mpr heven hodd
-
-/--
-**Lemma 3.2 (Cycle form, as in the PDF).** Special case of
-`genMyc_oddClosedWalk_through_apex_long`: every odd cycle of `Mₛ(B)` containing the
-apex has length at least `2*s + 1`. The bipartite hypothesis on `B` is not used by
-the length bound — it is what guarantees that *every* odd cycle of `Mₛ(B)` contains
-the apex (via `genMyc_minus_apex_isBipartite`), but the length bound itself works
-for any `G`.
--/
-theorem genMyc_oddCycle_through_apex_long {V : Type u} (s : ℕ) (hs : 1 ≤ s)
-    (B : SimpleGraph V) (_hB : B.IsBipartite) :
-    ∀ (c : (genMyc s B).Walk (apex s V) (apex s V)),
-      c.IsCycle → Odd c.length → 2 * s + 1 ≤ c.length := fun c _ hodd =>
-  genMyc_oddClosedWalk_through_apex_long hs B c hodd
 
 /-! ## §4. Finite local-oct profile -/
 
@@ -1327,61 +1228,6 @@ theorem finite_oct_profile (g : ℕ → ℕ) (hg_mono : Monotone g)
           -- Apply Lemma 3.2.
           have := genMyc_oddClosedWalk_through_apex_long hs_ge_one G_inner wApex hwApexOdd
           omega
-
-/-- **Chromatic upper bound for recursively built `Mᵣ`-graphs.** By induction on the
-recursive construction: `K₂` has chromatic number `2`, and each `genMyc s` step
-contributes at most `+1` to the chromatic number (`genMyc_chromaticNumber_le_succ`).
-The matching lower bound `(r : ℕ∞) ≤ G.chromaticNumber` is `stiebitz_lower_bound`,
-giving `χ(G) = r` exactly when combined. -/
-private lemma chromaticNumber_le_of_isRecursivelyBuiltMr :
-    ∀ (r : ℕ) {V : Type u} (G : SimpleGraph V),
-      IsRecursivelyBuiltMr r G → G.chromaticNumber ≤ (r : ℕ∞) := by
-  intro r
-  induction r using Nat.strong_induction_on with
-  | _ r ih =>
-    intro V G hRec
-    match r, hRec with
-    | 0, h => exact h.elim
-    | 1, h => exact h.elim
-    | 2, ⟨iso⟩ =>
-        -- G ≃g K₂. K₂.chromaticNumber = 2.
-        have hK2 : (completeGraph (Fin 2)).chromaticNumber = 2 := by
-          rw [chromaticNumber_top]; simp
-        have hhom : G →g (completeGraph (Fin 2)) := iso.toHom
-        calc G.chromaticNumber ≤ (completeGraph (Fin 2)).chromaticNumber :=
-              chromaticNumber_mono_of_hom hhom
-          _ = 2 := hK2
-          _ = ((2 : ℕ) : ℕ∞) := by norm_cast
-    | r + 3, ⟨W, H, s, _hs, hRecH, ⟨iso⟩⟩ =>
-        have hH : H.chromaticNumber ≤ ((r + 2 : ℕ) : ℕ∞) :=
-          ih (r + 2) (by omega) H hRecH
-        have hgM : (genMyc s H).chromaticNumber ≤ ((r + 3 : ℕ) : ℕ∞) := by
-          have h1 := genMyc_chromaticNumber_le_succ s H
-          calc (genMyc s H).chromaticNumber
-              ≤ H.chromaticNumber + 1 := h1
-            _ ≤ ((r + 2 : ℕ) : ℕ∞) + 1 := by gcongr
-            _ = ((r + 3 : ℕ) : ℕ∞) := by push_cast; ring
-        have hhom : G →g (genMyc s H) := iso.toHom
-        exact (chromaticNumber_mono_of_hom hhom).trans hgM
-
-/-- **Corollary of `finite_oct_profile` and Stiebitz.** Strengthens `finite_oct_profile`
-to additionally assert `G.chromaticNumber = r` exactly. The chromatic-number equality
-uses `stiebitz_lower_bound` (lower bound) combined with
-`chromaticNumber_le_of_isRecursivelyBuiltMr` (upper bound), so this corollary depends
-on the Stiebitz hypothesis. The OCT profile itself does not need that hypothesis. -/
-theorem finite_oct_profile_with_chromatic (stiebitz_lower_bound : StiebitzLowerBound)
-    (g : ℕ → ℕ) (hg_mono : Monotone g)
-    (hg_top : Tendsto g atTop atTop) (r : ℕ) (hr : 2 ≤ r) :
-    ∃ (V : Type) (_ : Fintype V) (_ : DecidableEq V) (G : SimpleGraph V),
-      IsRecursivelyBuiltMr r G ∧
-      G.chromaticNumber = (r : ℕ∞) ∧
-      ∀ X : Finset V, X.Nonempty → oct G X ≤ g X.card := by
-  obtain ⟨V, instFin, instDec, G, hRec, hOct⟩ :=
-    finite_oct_profile g hg_mono hg_top r hr
-  refine ⟨V, instFin, instDec, G, hRec, ?_, hOct⟩
-  exact le_antisymm
-    (chromaticNumber_le_of_isRecursivelyBuiltMr r G hRec)
-    (stiebitz_lower_bound G r hRec)
 
 /-! ## §5. Infinite construction -/
 
@@ -1999,29 +1845,9 @@ theorem erdos_750_independence_FC_form (stiebitz_lower_bound : StiebitzLowerBoun
   · -- 0 ≤ (I.ncard : ℝ)
     exact_mod_cast Nat.zero_le _
 
-/--
-**`formal-conjectures` upstream form (`True ↔ ...`).** Discharges
-[`FormalConjectures/ErdosProblems/750.lean`](https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/750.lean)
-under `answer := True`. The body matches FC's `erdos_750` essentially literally:
-`f : ℕ → ℝ≥0`, `atTop.Tendsto f atTop`, and `m / 2 - f m ≤ I.ncard` elaborates as
-`(↑m : ℝ≥0) / 2 - f m` (NNReal real division and truncated subtraction).
-
-The witness is stated in `Type`, as in the imported proof, because its concrete
-vertex type is `ℕ × ℕ`.
-
-Forward direction is `erdos_750_independence_FC_form`; backward direction is
-trivial. -/
-theorem erdos_750_FC (stiebitz_lower_bound : StiebitzLowerBound) :
-    True ↔ ∀ (f : ℕ → ℝ≥0) (_hf : atTop.Tendsto f atTop),
-      ∃ (V : Type) (G : SimpleGraph V), G.chromaticNumber = ⊤ ∧
-        ∀ (m : ℕ) (S : Set V), 0 < m → S.ncard = m →
-          ∃ I ⊆ S, G.IsIndepSet I ∧ m / 2 - f m ≤ I.ncard :=
-  ⟨fun _ => erdos_750_independence_FC_form stiebitz_lower_bound, fun _ => trivial⟩
-
 end Conditional
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/SourceFlags.lean` -/
 
@@ -2280,32 +2106,7 @@ the fresh singleton. -/
 def freshFill (v : α) (J : α → α) : Chain α →ₗ[ℤ] Chain α :=
   cone v J - prism id J
 
-theorem boundary_freshFill_add_freshFill_boundary
-    (v : α) (J : α → α) (c : Chain α) :
-    boundary (freshFill v J c) + freshFill v J (boundary c) = c := by
-  rw [show freshFill v J c = cone v J c - prism id J c by rfl]
-  rw [show freshFill v J (boundary c) =
-      cone v J (boundary c) - prism id J (boundary c) by rfl]
-  have hc := boundary_cone v J c
-  have hp := boundary_prism_add_prism_boundary id J c
-  simp only [map_sub]
-  simp only [mapVertices_id_apply] at hp
-  calc
-    boundary (cone v J c) - boundary (prism id J c) +
-        (cone v J (boundary c) - prism id J (boundary c)) =
-      (boundary (cone v J c) + cone v J (boundary c)) -
-        (boundary (prism id J c) + prism id J (boundary c)) := by module
-    _ = mapVertices J c - (mapVertices J c - c) := by rw [hc, hp]
-    _ = c := by module
-
-theorem boundary_freshFill_of_cycle
-    (v : α) (J : α → α) (c : Chain α) (hc : boundary c = 0) :
-    boundary (freshFill v J c) = c := by
-  have h := boundary_freshFill_add_freshFill_boundary v J c
-  simpa [hc] using h
-
 /- Strict order-complex flags. -/
-def IsFlag (r : α → α → Prop) (l : List α) : Prop := l.Pairwise r
 
 /- The group action on chains is just pointwise action on flag vertices. -/
 section Action
@@ -2319,10 +2120,6 @@ def act (g : G) : Chain α →ₗ[ℤ] Chain α :=
     act G g (basis l) = basis (l.map (g • ·)) := by
   simp [act]
 
-theorem boundary_act (g : G) (c : Chain α) :
-    boundary (act G g c) = act G g (boundary c) :=
-  boundary_mapVertices _ _
-
 end Action
 
 /- Abstract recursion underlying the generalized-sphere chains.  It is
@@ -2332,36 +2129,6 @@ section Recursion
 
 variable (A B F : Chain α →ₗ[ℤ] Chain α)
 
-def alternatingOp (i : ℕ) : Chain α →ₗ[ℤ] Chain α :=
-  if i % 2 = 0 then B else A
-
-def sphereChain (x0 : Chain α) : ℕ → Chain α
-  | 0 => x0
-  | i + 1 => F (alternatingOp A B (i + 1) (sphereChain x0 i))
-
-theorem fill_operator_of_cycle
-    (hF : ∀ c, boundary (F c) + F (boundary c) = c)
-    {c : Chain α} (hc : boundary c = 0) : boundary (F c) = c := by
-  simpa [hc] using hF c
-
-theorem alternating_step_A
-    (hF : ∀ c, boundary (F c) + F (boundary c) = c)
-    (hA : ∀ c, boundary (A c) = A (boundary c))
-    (hAB : ∀ c, A (B c) = 0)
-    {x y : Chain α} (hy : boundary y = B x) :
-    boundary (F (A y)) = A y := by
-  apply fill_operator_of_cycle F hF
-  rw [hA, hy, hAB]
-
-theorem alternating_step_B
-    (hF : ∀ c, boundary (F c) + F (boundary c) = c)
-    (hB : ∀ c, boundary (B c) = B (boundary c))
-    (hBA : ∀ c, B (A c) = 0)
-    {x y : Chain α} (hy : boundary y = A x) :
-    boundary (F (B y)) = B y := by
-  apply fill_operator_of_cycle F hF
-  rw [hB, hy, hBA]
-
 end Recursion
 
 end
@@ -2369,7 +2136,6 @@ end
 end SourceFlags
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/ZpTuckerDefs.lean` -/
 
@@ -2454,17 +2220,6 @@ theorem SignedVector.Nonzero.shift {p n : ℕ} {x : SignedVector p n}
   · exact (hi h).elim
   · simp [SignedVector.shift, h]
 
-theorem SignedVector.shift_mono {p n : ℕ} {x y : SignedVector p n}
-    (hxy : x ≤ y) (a : ZMod p) : x.shift a ≤ y.shift a := by
-  intro i g hi
-  rcases hxi : x i with _ | b
-  · simp [SignedVector.shift, hxi] at hi
-  · simp only [SignedVector.shift, hxi, Option.map_some] at hi
-    have hab : a + b = g := Option.some.inj hi
-    change (y i).map (a + ·) = some g
-    rw [hxy i _ hxi, ← hab]
-    rfl
-
 abbrev NonzeroSignedVector (p n : ℕ) :=
   {x : SignedVector p n // x.Nonzero}
 
@@ -2482,39 +2237,9 @@ instance {p n : ℕ} : PartialOrder (NonzeroSignedVector p n) :=
     (x : NonzeroSignedVector p n) :
     (x.shift a : SignedVector p n) = x.1.shift a := rfl
 
-theorem NonzeroSignedVector.shift_mono {p n : ℕ} {x y : NonzeroSignedVector p n}
-    (hxy : x ≤ y) (a : ZMod p) : x.shift a ≤ y.shift a :=
-  SignedVector.shift_mono hxy a
-
-/-- A fully signed chain: a strictly increasing p-chain whose labels have one
-common second coordinate and every element of `ZMod p` occurs as a first coordinate. -/
-def FullySignedChain {p n m : ℕ}
-    (lab : NonzeroSignedVector p n → ZMod p × Fin m) : Prop :=
-  ∃ x : Fin p → NonzeroSignedVector p n,
-    StrictMono x ∧
-    (∃ j : Fin m, ∀ i, (lab (x i)).2 = j) ∧
-    Function.Surjective (fun i => (lab (x i)).1)
-
-/-- Equivariance for the cyclic shift action. -/
-def IsEquivariant {p n m : ℕ}
-    (lab : NonzeroSignedVector p n → ZMod p × Fin m) : Prop :=
-  ∀ a x, lab (x.shift a) = (a + (lab x).1, (lab x).2)
-
-/-- The two hypotheses of the alpha-split Z_p-Tucker lemma. Indices below
-`alpha` have only one sign along a chain; indices at least `alpha` never see
-all p signs on a p-chain. -/
-def IsAlphaAdmissible {p n m : ℕ} (alpha : ℕ)
-    (lab : NonzeroSignedVector p n → ZMod p × Fin m) : Prop :=
-  (∀ ⦃x y⦄, x ≤ y → (lab x).2 = (lab y).2 →
-      (lab x).2.val < alpha → (lab x).1 = (lab y).1) ∧
-  (∀ (x : Fin p → NonzeroSignedVector p n), Monotone x →
-      (∃ j : Fin m, alpha ≤ j.val ∧ ∀ i, (lab (x i)).2 = j) →
-      ¬ Function.Surjective (fun i => (lab (x i)).1))
-
 end ZpTuckerScratch
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/SignedSphere.lean` -/
 
@@ -2577,14 +2302,6 @@ theorem supported_neg {P : List α → Prop} {c : Chain α}
 theorem supported_sub {P : List α → Prop} {c d : Chain α}
     (hc : Supported P c) (hd : Supported P d) : Supported P (c - d) := by
   exact supported_add hc (supported_neg hd)
-
-theorem supported_smul {P : List α → Prop} {c : Chain α} (z : ℤ)
-    (hc : Supported P c) : Supported P (z • c) := by
-  intro l hl
-  apply hc l
-  intro h
-  apply hl
-  simp [h]
 
 theorem supported_sum {ι : Type*} {P : List α → Prop} {s : Finset ι}
     {c : ι → Chain α} (hc : ∀ i ∈ s, Supported P (c i)) :
@@ -2663,200 +2380,6 @@ def rawAdjoin {p n : ℕ} (q : Fin n) (a : ZMod p)
 def adjoin {p n : ℕ} (q : Fin n) (a : ZMod p) (x : Vertex p n) : Vertex p n :=
   ⟨rawAdjoin q a x.1, ⟨q, by simp⟩⟩
 
-def FreshAt {p n : ℕ} (q : Fin n) (x : Vertex p n) : Prop := x.1 q = none
-
-theorem le_adjoin_of_fresh {p n : ℕ} {q : Fin n} {a : ZMod p} {x : Vertex p n}
-    (hx : FreshAt q x) : x ≤ adjoin q a x := by
-  intro j g hj
-  by_cases h : j = q
-  · subst j
-    rw [hx] at hj
-    contradiction
-  · simpa [adjoin, rawAdjoin, h] using hj
-
-theorem lt_adjoin_of_fresh {p n : ℕ} {q : Fin n} {a : ZMod p} {x : Vertex p n}
-    (hx : FreshAt q x) : x < adjoin q a x := by
-  refine lt_of_le_of_ne (le_adjoin_of_fresh hx) ?_
-  intro heq
-  have hq := congrArg (fun z : Vertex p n => z.1 q) heq
-  simp only [adjoin, rawAdjoin_same] at hq
-  rw [hx] at hq
-  contradiction
-
-theorem unit_le_adjoin {p n : ℕ} (q : Fin n) (a : ZMod p) (x : Vertex p n) :
-    unit q a ≤ adjoin q a x := by
-  intro j g hj
-  by_cases h : j = q
-  · subst j
-    simpa [unit, adjoin] using hj
-  · simp [unit, rawUnit, h] at hj
-
-theorem unit_lt_adjoin_of_fresh {p n : ℕ} {q : Fin n} {a : ZMod p}
-    {x : Vertex p n} (hx : FreshAt q x) : unit q a < adjoin q a x := by
-  refine lt_of_le_of_ne (unit_le_adjoin q a x) ?_
-  intro heq
-  obtain ⟨j, hj⟩ := x.2
-  have hjq : j ≠ q := by
-    intro h
-    subst j
-    exact hj hx
-  have hval := congrArg (fun z : Vertex p n => z.1 j) heq
-  simp [unit, adjoin, rawUnit, rawAdjoin, hjq] at hval
-  exact hj hval.symm
-
-theorem adjoin_mono {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {x y : Vertex p n} (hxy : x ≤ y) : adjoin q a x ≤ adjoin q a y := by
-  intro j g hj
-  by_cases h : j = q
-  · subst j
-    simpa [adjoin] using hj
-  · simpa [adjoin, rawAdjoin, h] using hxy j g (by simpa [adjoin, rawAdjoin, h] using hj)
-
-theorem adjoin_injective_on_fresh {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {x y : Vertex p n} (hx : FreshAt q x) (hy : FreshAt q y)
-    (h : adjoin q a x = adjoin q a y) : x = y := by
-  apply Subtype.ext
-  funext j
-  by_cases hj : j = q
-  · subst j
-    exact hx.trans hy.symm
-  · have hv := congrArg (fun z : Vertex p n => z.1 j) h
-    simpa [adjoin, rawAdjoin, hj] using hv
-
-theorem adjoin_lt_adjoin {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {x y : Vertex p n} (hx : FreshAt q x) (hy : FreshAt q y) (hxy : x < y) :
-    adjoin q a x < adjoin q a y := by
-  refine lt_of_le_of_ne (adjoin_mono q a hxy.le) ?_
-  exact fun h => hxy.ne (adjoin_injective_on_fresh q a hx hy h)
-
-theorem lt_adjoin_of_lt {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {x y : Vertex p n} (hy : FreshAt q y) (hxy : x < y) :
-    x < adjoin q a y :=
-  lt_of_lt_of_le hxy (le_adjoin_of_fresh hy)
-
-def IsStrictFlag {p n : ℕ} (l : List (Vertex p n)) : Prop :=
-  l.Pairwise (· < ·)
-
-def AllFresh {p n : ℕ} (q : Fin n) (l : List (Vertex p n)) : Prop :=
-  ∀ x ∈ l, FreshAt q x
-
-def RaisedFrom {p n : ℕ} (q : Fin n) (a : ZMod p)
-    (l : List (Vertex p n)) (z : Vertex p n) : Prop :=
-  z ∈ l ∨ ∃ x ∈ l, z = adjoin q a x
-
-def MixedFlag {p n : ℕ} (q : Fin n) (a : ZMod p)
-    (source out : List (Vertex p n)) : Prop :=
-  IsStrictFlag out ∧ ∀ z ∈ out, RaisedFrom q a source z
-
-theorem pairwise_adjoin {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {l : List (Vertex p n)} (hflag : IsStrictFlag l) (hfresh : AllFresh q l) :
-    IsStrictFlag (l.map (adjoin q a)) := by
-  rw [IsStrictFlag, List.pairwise_map]
-  apply hflag.imp_of_mem
-  intro x y hx hy hxy
-  exact adjoin_lt_adjoin q a (hfresh x hx) (hfresh y hy) hxy
-
-/-- The actual descriptor for filler terms also admits the new cone vertex. -/
-def FillVertex {p n : ℕ} (q : Fin n) (a : ZMod p)
-    (l : List (Vertex p n)) (z : Vertex p n) : Prop :=
-  z = unit q a ∨ RaisedFrom q a l z
-
-def FilledFlag {p n : ℕ} (q : Fin n) (a : ZMod p)
-    (source out : List (Vertex p n)) : Prop :=
-  IsStrictFlag out ∧ ∀ z ∈ out, FillVertex q a source z
-
-theorem coneList_filled {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {l : List (Vertex p n)} (hflag : IsStrictFlag l) (hfresh : AllFresh q l) :
-    FilledFlag q a l (unit q a :: l.map (adjoin q a)) := by
-  constructor
-  · rw [IsStrictFlag, List.pairwise_cons]
-    constructor
-    · intro z hz
-      obtain ⟨x, hx, rfl⟩ := List.mem_map.mp hz
-      exact unit_lt_adjoin_of_fresh (hfresh x hx)
-    · exact pairwise_adjoin q a hflag hfresh
-  · intro z hz
-    simp only [List.mem_cons] at hz
-    rcases hz with rfl | hz
-    · exact Or.inl rfl
-    · obtain ⟨x, hx, rfl⟩ := List.mem_map.mp hz
-      exact Or.inr (Or.inr ⟨x, hx, rfl⟩)
-
-theorem prismBasis_filled {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {l : List (Vertex p n)} (hflag : IsStrictFlag l) (hfresh : AllFresh q l) :
-    Supported (MixedFlag q a l) (prism id (adjoin q a) (basis l)) := by
-  induction l with
-  | nil =>
-      simp [prismBasis, supported_zero]
-  | cons x xs ih =>
-      have hpair := List.pairwise_cons.mp hflag
-      have hxxs : ∀ z ∈ xs, x < z := hpair.1
-      have hxsflag : IsStrictFlag xs := hpair.2
-      have hxfresh : FreshAt q x := hfresh x (by simp)
-      have hxsfresh : AllFresh q xs := by
-        intro z hz
-        exact hfresh z (by simp [hz])
-      rw [prism_basis, prismBasis_cons]
-      apply supported_sub
-      · apply supported_basis
-        constructor
-        · rw [IsStrictFlag, List.pairwise_cons]
-          constructor
-          · intro z hz
-            simp only [List.mem_cons] at hz
-            rcases hz with rfl | hz
-            · exact lt_adjoin_of_fresh hxfresh
-            · obtain ⟨w, hw, rfl⟩ := List.mem_map.mp hz
-              exact lt_adjoin_of_lt q a (hxsfresh w hw) (hxxs w hw)
-          · rw [List.pairwise_cons]
-            constructor
-            · intro z hz
-              obtain ⟨w, hw, rfl⟩ := List.mem_map.mp hz
-              exact adjoin_lt_adjoin q a hxfresh (hxsfresh w hw) (hxxs w hw)
-            · exact pairwise_adjoin q a hxsflag hxsfresh
-        · intro z hz
-          simp only [List.mem_cons] at hz
-          rcases hz with rfl | hz
-          · exact Or.inl (by simp)
-          · rcases hz with rfl | hz
-            · exact Or.inr ⟨x, by simp, rfl⟩
-            · obtain ⟨w, hw, rfl⟩ := List.mem_map.mp hz
-              exact Or.inr ⟨w, by simp [hw], rfl⟩
-      · have hrec := ih hxsflag hxsfresh
-        rw [show prismBasis id (adjoin q a) xs =
-          prism id (adjoin q a) (basis xs) by simp]
-        simp only [id_eq]
-        apply supported_prepend
-          (P := MixedFlag q a xs) (Q := MixedFlag q a (x :: xs)) x _ hrec
-        intro out hout
-        constructor
-        · rw [IsStrictFlag, List.pairwise_cons]
-          constructor
-          · intro z hz
-            rcases hout.2 z hz with hzorig | ⟨w, hw, rfl⟩
-            · exact hxxs z hzorig
-            · exact lt_adjoin_of_lt q a (hxsfresh w hw) (hxxs w hw)
-          · exact hout.1
-        · intro z hz
-          simp only [List.mem_cons] at hz
-          rcases hz with rfl | hz
-          · exact Or.inl (by simp)
-          · rcases hout.2 z hz with hzorig | ⟨w, hw, rfl⟩
-            · exact Or.inl (by simp [hzorig])
-            · exact Or.inr ⟨w, by simp [hw], rfl⟩
-
-theorem freshFill_basis_filled {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {l : List (Vertex p n)} (hflag : IsStrictFlag l) (hfresh : AllFresh q l) :
-    Supported (FilledFlag q a l)
-      (freshFill (unit q a) (adjoin q a) (basis l)) := by
-  rw [show freshFill (unit q a) (adjoin q a) (basis l) =
-      cone (unit q a) (adjoin q a) (basis l) -
-        prism id (adjoin q a) (basis l) by rfl]
-  apply supported_sub
-  · simpa [cone] using supported_basis (coneList_filled q a hflag hfresh)
-  · exact (prismBasis_filled q a hflag hfresh).mono
-      (fun out hout => ⟨hout.1, fun z hz => Or.inr (hout.2 z hz)⟩)
-
 theorem supported_linearMap {P : List α → Prop} {Q : List β → Prop}
     (L : Chain α →ₗ[ℤ] Chain β)
     (hL : ∀ l, P l → Supported Q (L (basis l))) {c : Chain α}
@@ -2872,21 +2395,6 @@ theorem supported_linearMap {P : List α → Prop} {Q : List β → Prop}
   rw [← heq_all c]
   exact supported_linearOfBasis (fun l => L (basis l)) hL hc
 
-theorem freshFill_supported {p n : ℕ} (q : Fin n) (a : ZMod p)
-    {P : List (Vertex p n) → Prop} {c : SChain p n}
-    (hc : Supported P c)
-    (hgood : ∀ l, P l → IsStrictFlag l ∧ AllFresh q l) :
-    Supported (fun out => IsStrictFlag out ∧
-      ∃ source, P source ∧ ∀ z ∈ out, FillVertex q a source z)
-      (freshFill (unit q a) (adjoin q a) c) := by
-  apply supported_linearMap (P := P)
-    (Q := fun out => IsStrictFlag out ∧
-      ∃ source, P source ∧ ∀ z ∈ out, FillVertex q a source z)
-    (freshFill (unit q a) (adjoin q a)) _ hc
-  intro l hl
-  have hfill := freshFill_basis_filled q a (hgood l hl).1 (hgood l hl).2
-  exact hfill.mono (fun out hout => ⟨hout.1, l, hl, hout.2⟩)
-
 /-! ## The cyclic operators -/
 
 @[simp] theorem vertex_shift_zero {p n : ℕ} (x : Vertex p n) : x.shift 0 = x := by
@@ -2897,14 +2405,6 @@ theorem freshFill_supported {p n : ℕ} (q : Fin n) (a : ZMod p)
     (x.shift b).shift a = x.shift (a + b) := by
   apply Subtype.ext
   exact SignedVector.shift_add a b x.1
-
-theorem vertex_shift_lt {p n : ℕ} (a : ZMod p) {x y : Vertex p n} (hxy : x < y) :
-    x.shift a < y.shift a := by
-  refine lt_of_le_of_ne (NonzeroSignedVector.shift_mono hxy.le a) ?_
-  intro heq
-  have hback := congrArg (fun z : Vertex p n => z.shift (-a)) heq
-  simp [vertex_shift_add] at hback
-  exact hxy.ne hback
 
 def shiftChain {p n : ℕ} (a : ZMod p) : SChain p n →ₗ[ℤ] SChain p n :=
   mapVertices (NonzeroSignedVector.shift a)
@@ -2919,15 +2419,6 @@ def shiftChain {p n : ℕ} (a : ZMod p) : SChain p n →ₗ[ℤ] SChain p n :=
   | single l z =>
       rw [show Finsupp.single l z = z • basis l by simp [basis]]
       simp [shiftChain, hshift]
-
-theorem shiftChain_add {p n : ℕ} (a b : ZMod p) (c : SChain p n) :
-    shiftChain a (shiftChain b c) = shiftChain (a + b) c := by
-  induction c using Finsupp.induction_linear with
-  | zero => simp
-  | add c d hc hd => simp only [map_add, hc, hd]
-  | single l z =>
-      rw [show Finsupp.single l z = z • basis l by simp [basis]]
-      simp [shiftChain, List.map_map, Function.comp_def, vertex_shift_add]
 
 def tau {p n : ℕ} : SChain p n →ₗ[ℤ] SChain p n :=
   shiftChain 1 - LinearMap.id
@@ -2947,159 +2438,12 @@ theorem boundary_norm {p n : ℕ} [NeZero p] (c : SChain p n) :
     boundary (norm c) = norm (boundary c) := by
   simp [norm, boundary_shiftChain]
 
-theorem sum_shiftChain_add_left {p n : ℕ} [NeZero p]
-    (b : ZMod p) (c : SChain p n) :
-    (∑ a : ZMod p, shiftChain (b + a) c) = ∑ a : ZMod p, shiftChain a c := by
-  exact Fintype.sum_equiv (Equiv.addLeft b)
-    (fun a => shiftChain (b + a) c) (fun a => shiftChain a c) (fun _ => rfl)
-
-theorem sum_shiftChain_add_right {p n : ℕ} [NeZero p]
-    (b : ZMod p) (c : SChain p n) :
-    (∑ a : ZMod p, shiftChain (a + b) c) = ∑ a : ZMod p, shiftChain a c := by
-  exact Fintype.sum_equiv (Equiv.addRight b)
-    (fun a => shiftChain (a + b) c) (fun a => shiftChain a c) (fun _ => rfl)
-
-theorem tau_norm {p n : ℕ} [NeZero p] (c : SChain p n) : tau (norm c) = 0 := by
-  rw [tau, norm]
-  simp only [LinearMap.sub_apply, LinearMap.id_apply, LinearMap.sum_apply]
-  rw [map_sum]
-  simp_rw [shiftChain_add]
-  rw [sum_shiftChain_add_left]
-  simp
-
-theorem norm_tau {p n : ℕ} [NeZero p] (c : SChain p n) : norm (tau c) = 0 := by
-  rw [norm, tau]
-  simp only [LinearMap.sum_apply, LinearMap.sub_apply, LinearMap.id_apply, map_sub,
-    shiftChain_add, Finset.sum_sub_distrib]
-  rw [sum_shiftChain_add_right]
-  simp
-
-theorem shiftChain_supported {p n : ℕ} (a : ZMod p)
-    {P : Vertex p n → Prop} {c : SChain p n}
-    (hc : Supported (fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x) c)
-    (hP : ∀ x, P x → P (x.shift a)) :
-    Supported (fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x) (shiftChain a c) := by
-  apply supported_mapVertices
-    (P := fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x)
-    (Q := fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x)
-    (NonzeroSignedVector.shift a) _ hc
-  intro l hl
-  constructor
-  · rw [IsStrictFlag, List.pairwise_map]
-    exact hl.1.imp (vertex_shift_lt a)
-  · intro z hz
-    obtain ⟨x, hx, rfl⟩ := List.mem_map.mp hz
-    exact hP x (hl.2 x hx)
-
-theorem tau_supported {p n : ℕ} {P : Vertex p n → Prop} {c : SChain p n}
-    (hc : Supported (fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x) c)
-    (hP : ∀ x, P x → P (x.shift (1 : ZMod p))) :
-    Supported (fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x) (tau c) := by
-  exact supported_sub (shiftChain_supported 1 hc hP) hc
-
-theorem norm_supported {p n : ℕ} [NeZero p] {P : Vertex p n → Prop} {c : SChain p n}
-    (hc : Supported (fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x) c)
-    (hP : ∀ a x, P x → P (x.shift a)) :
-    Supported (fun l => IsStrictFlag l ∧ ∀ x ∈ l, P x) (norm c) := by
-  rw [norm]
-  simp only [LinearMap.sum_apply]
-  exact supported_sum (s := Finset.univ) (c := fun a => shiftChain a c)
-    (fun a _ => shiftChain_supported a hc (hP a))
-
 /-! ## Recursive sphere chains -/
-
-/-- A signed vector is supported in the first `d` coordinates. -/
-def Below {p n : ℕ} (d : ℕ) (x : Vertex p n) : Prop :=
-  ∀ q : Fin n, d ≤ q.val → x.1 q = none
-
-def GoodFlag {p n : ℕ} (d : ℕ) (l : List (Vertex p n)) : Prop :=
-  IsStrictFlag l ∧ ∀ x ∈ l, Below d x
-
-theorem below_mono {p n d e : ℕ} {x : Vertex p n} (hde : d ≤ e)
-    (hx : Below d x) : Below e x := by
-  intro q hq
-  exact hx q (hde.trans hq)
-
-theorem below_shift {p n d : ℕ} {x : Vertex p n} (hx : Below d x) (a : ZMod p) :
-    Below d (x.shift a) := by
-  intro q hq
-  rw [NonzeroSignedVector.coe_shift, SignedVector.shift_apply, hx q hq]
-  rfl
-
-theorem unit_below_succ {p n d : ℕ} (q : Fin n) (hq : q.val = d) (a : ZMod p) :
-    Below (d + 1) (unit q a) := by
-  intro r hr
-  have hrq : r ≠ q := by
-    intro h
-    subst r
-    omega
-  simp [unit, rawUnit, hrq]
-
-theorem adjoin_below_succ {p n d : ℕ} (q : Fin n) (hq : q.val = d) (a : ZMod p)
-    {x : Vertex p n} (hx : Below d x) : Below (d + 1) (adjoin q a x) := by
-  intro r hr
-  have hrq : r ≠ q := by
-    intro h
-    subst r
-    omega
-  rw [show (adjoin q a x : SignedVector p n) r = x.1 r by
-    simp [adjoin, rawAdjoin, hrq]]
-  exact hx r (by omega)
-
-theorem fill_below_supported {p n d : ℕ} (q : Fin n) (hq : q.val = d)
-    (a : ZMod p) {c : SChain p n} (hc : Supported (GoodFlag d) c) :
-    Supported (GoodFlag (d + 1)) (freshFill (unit q a) (adjoin q a) c) := by
-  have hf := freshFill_supported q a hc (fun l hl => by
-    refine ⟨hl.1, ?_⟩
-    intro x hx
-    exact hl.2 x hx q (by omega))
-  apply Supported.mono
-    (P := fun out => IsStrictFlag out ∧
-      ∃ source, GoodFlag d source ∧ ∀ z ∈ out, FillVertex q a source z)
-    (Q := GoodFlag (d + 1)) hf
-  intro out hout
-  constructor
-  · exact hout.1
-  · obtain ⟨source, hsource, hverts⟩ := hout.2
-    intro z hz
-    rcases hverts z hz with rfl | hzraised
-    · exact unit_below_succ q hq a
-    · rcases hzraised with hzorig | ⟨x, hx, rfl⟩
-      · exact below_mono (by omega) (hsource.2 z hzorig)
-      · exact adjoin_below_succ q hq a (hsource.2 x hx)
 
 /-- The differential used at positive degree in the periodic cyclic
 resolution: `tau` in odd degree and the norm in even degree. -/
 def periodicOp {p n : ℕ} [NeZero p] (i : ℕ) : SChain p n →ₗ[ℤ] SChain p n :=
   if i % 2 = 1 then tau else norm
-
-theorem boundary_periodicOp {p n : ℕ} [NeZero p] (i : ℕ) (c : SChain p n) :
-    boundary (periodicOp i c) = periodicOp i (boundary c) := by
-  by_cases hi : i % 2 = 1
-  · simp [periodicOp, hi, boundary_tau]
-  · simp [periodicOp, hi, boundary_norm]
-
-theorem periodicOp_supported {p n d : ℕ} [NeZero p] (i : ℕ) {c : SChain p n}
-    (hc : Supported (GoodFlag d) c) : Supported (GoodFlag d) (periodicOp i c) := by
-  have hshift : ∀ (a : ZMod p) (x : Vertex p n), Below d x → Below d (x.shift a) :=
-    fun a x hx => below_shift hx a
-  by_cases hi : i % 2 = 1
-  · rw [periodicOp, if_pos hi]
-    exact tau_supported hc (hshift 1)
-  · rw [periodicOp, if_neg hi]
-    exact norm_supported hc hshift
-
-theorem periodicOp_next_cycle {p n : ℕ} [NeZero p] (i : ℕ)
-    {x y : SChain p n} (hy : boundary y = periodicOp i x) :
-    boundary (periodicOp (i + 1) y) = 0 := by
-  have hi01 : i % 2 = 0 ∨ i % 2 = 1 := Nat.mod_two_eq_zero_or_one i
-  rcases hi01 with hi | hi
-  · have hnext : (i + 1) % 2 = 1 := by omega
-    rw [periodicOp, if_pos hnext, boundary_tau, hy, periodicOp, if_neg (by omega)]
-    exact tau_norm x
-  · have hnext : (i + 1) % 2 ≠ 1 := by omega
-    rw [periodicOp, if_neg hnext, boundary_norm, hy, periodicOp, if_pos hi]
-    exact norm_tau x
 
 @[simp] theorem shiftChain_empty {p n : ℕ} (a : ZMod p) :
     shiftChain a (basis ([] : List (Vertex p n))) = basis [] := by
@@ -3119,73 +2463,11 @@ def y (p n : ℕ) [NeZero p] : ℕ → SChain p n
         (periodicOp (i + 1) (y p n i))
     else 0
 
-theorem y_zero {p n : ℕ} [NeZero p] (hn : 0 < n) :
-    y p n 0 = basis [unit ⟨0, hn⟩ 0] := by
-  simp [y, hn]
-
-theorem y_succ {p n : ℕ} [NeZero p] {i : ℕ} (hi : i + 1 < n) :
-    y p n (i + 1) =
-      freshFill (unit ⟨i + 1, hi⟩ 0) (adjoin ⟨i + 1, hi⟩ 0)
-        (periodicOp (i + 1) (y p n i)) := by
-  simp [y, hi]
-
-/-- The degree-zero chain has augmentation one.  In the augmented complex
-this is exactly the assertion that its boundary is the empty simplex. -/
-theorem boundary_y_zero {p n : ℕ} [NeZero p] (hn : 0 < n) :
-    boundary (y p n 0) = basis ([] : List (Vertex p n)) := by
-  rw [y_zero hn]
-  simp [boundaryBasis]
-
-theorem y_zero_coefficient {p n : ℕ} [NeZero p] (hn : 0 < n) :
-    y p n 0 [unit ⟨0, hn⟩ 0] = 1 := by
-  rw [y_zero hn]
-  simp [basis]
-
-/-- Boundary recurrence for all valid positive degrees. -/
-theorem boundary_y_succ {p n : ℕ} [NeZero p] {i : ℕ} (hi : i + 1 < n) :
-    boundary (y p n (i + 1)) = periodicOp (i + 1) (y p n i) := by
-  induction i with
-  | zero =>
-      rw [y_succ hi]
-      apply boundary_freshFill_of_cycle
-      rw [periodicOp, if_pos (by decide), boundary_tau, boundary_y_zero (by omega)]
-      exact tau_empty
-  | succ i ih =>
-      rw [y_succ hi]
-      apply boundary_freshFill_of_cycle
-      apply periodicOp_next_cycle (i + 1)
-      exact ih (by omega)
-
-/-- Every basis list occurring in `y i` is a strict flag and is supported
-in the first `i+1` coordinates. -/
-theorem y_supported_good {p n : ℕ} [NeZero p] {i : ℕ} (hi : i < n) :
-    Supported (GoodFlag (i + 1)) (y p n i) := by
-  induction i with
-  | zero =>
-      rw [y_zero hi]
-      apply supported_basis
-      constructor
-      · simp [IsStrictFlag]
-      · intro x hx
-        simp only [List.mem_singleton] at hx
-        subst x
-        exact unit_below_succ ⟨0, hi⟩ rfl 0
-  | succ i ih =>
-      rw [y_succ hi]
-      apply fill_below_supported ⟨i + 1, hi⟩ rfl 0
-      exact periodicOp_supported (i + 1) (ih (by omega))
-
-/-- In particular, no non-flag basis list occurs in a valid sphere chain. -/
-theorem y_supported_strictFlags {p n : ℕ} [NeZero p] {i : ℕ} (hi : i < n) :
-    Supported IsStrictFlag (y p n i) :=
-  (y_supported_good hi).mono (fun _ h => h.1)
-
 end
 
 end SignedSphere
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/SignedSphereLength.lean` -/
 
@@ -3217,23 +2499,6 @@ theorem boundaryBasis_supported_terms (l : List α) :
             ⟨hq.1.cons_cons x, by simp [hq.2]⟩
         · exact ih
 
-def ExactStrictFlag {p n : ℕ} (k : ℕ) (l : List (Vertex p n)) : Prop :=
-  IsStrictFlag l ∧ l.length = k
-
-theorem boundary_supported_exact_flags {p n k : ℕ} {c : SChain p n}
-    (hc : Supported (ExactStrictFlag k) c) :
-    Supported (ExactStrictFlag (k - 1)) (boundary c) := by
-  apply supported_linearOfBasis
-    (P := ExactStrictFlag k) (Q := ExactStrictFlag (k - 1)) boundaryBasis
-  · intro l hl q hq
-    have ht := boundaryBasis_supported_terms l q hq
-    constructor
-    · exact hl.1.sublist ht.1
-    · have hlen_l : l.length = k := hl.2
-      have hlen_q : q.length + 1 = l.length := ht.2
-      omega
-  · exact hc
-
 theorem prismBasis_supported_length (f : α → β) (g : α → β) (l : List α) :
     Supported (fun q : List β => q.length = l.length + 1)
       (prism f g (basis l)) := by
@@ -3251,132 +2516,17 @@ theorem prismBasis_supported_length (f : α → β) (g : α → β) (l : List α
           simp [hq]
         · exact ih
 
-theorem freshFill_basis_supported_length (v : α) (J : α → α) (l : List α) :
-    Supported (fun q : List α => q.length = l.length + 1)
-      (freshFill v J (basis l)) := by
-  rw [show freshFill v J (basis l) =
-      cone v J (basis l) - prism id J (basis l) by rfl]
-  apply supported_sub
-  · simpa [cone] using
-      (supported_basis (P := fun q : List α => q.length = l.length + 1) (by simp))
-  · exact prismBasis_supported_length id J l
-
-def FreshExactFlag {p n : ℕ} (q : Fin n) (k : ℕ)
-    (l : List (Vertex p n)) : Prop :=
-  ExactStrictFlag k l ∧ AllFresh q l
-
-theorem freshFill_supported_exact {p n k : ℕ} (q : Fin n) (a : ZMod p)
-    {c : SChain p n} (hc : Supported (FreshExactFlag q k) c) :
-    Supported (ExactStrictFlag (k + 1))
-      (freshFill (unit q a) (adjoin q a) c) := by
-  apply supported_linearMap
-    (P := FreshExactFlag q k) (Q := ExactStrictFlag (k + 1))
-    (freshFill (unit q a) (adjoin q a)) _ hc
-  intro l hl out hout
-  have hfill := freshFill_basis_filled q a hl.1.1 hl.2 out hout
-  have hlength := freshFill_basis_supported_length
-    (unit q a) (adjoin q a) l out hout
-  have hlk : l.length = k := hl.1.2
-  exact ⟨hfill.1, by omega⟩
-
-theorem alternatingOp_supported
-    (A B : Chain α →ₗ[ℤ] Chain α) (P : List α → Prop)
-    (hA : ∀ c, Supported P c → Supported P (A c))
-    (hB : ∀ c, Supported P c → Supported P (B c))
-    (i : ℕ) {c : Chain α} (hc : Supported P c) :
-    Supported P (alternatingOp A B i c) := by
-  simp only [alternatingOp]
-  split
-  · exact hB c hc
-  · exact hA c hc
-
-theorem sphereChain_supported_exact
-    {p n : ℕ} (A B F : SChain p n →ₗ[ℤ] SChain p n) (x0 : SChain p n)
-    (hx0 : Supported (ExactStrictFlag 1) x0)
-    (hA : ∀ k c, Supported (ExactStrictFlag k) c →
-      Supported (ExactStrictFlag k) (A c))
-    (hB : ∀ k c, Supported (ExactStrictFlag k) c →
-      Supported (ExactStrictFlag k) (B c))
-    (hF : ∀ k c, Supported (ExactStrictFlag k) c →
-      Supported (ExactStrictFlag (k + 1)) (F c)) :
-    ∀ i, Supported (ExactStrictFlag (i + 1)) (sphereChain A B F x0 i) := by
-  intro i
-  induction i with
-  | zero => simpa [sphereChain] using hx0
-  | succ i ih =>
-      rw [sphereChain]
-      apply hF (i + 1)
-      exact alternatingOp_supported A B (ExactStrictFlag (i + 1))
-        (hA (i + 1)) (hB (i + 1)) (i + 1) ih
-
 theorem supported_and {P Q : List α → Prop} {c : Chain α}
     (hP : Supported P c) (hQ : Supported Q c) :
     Supported (fun l => P l ∧ Q l) c := by
   intro l hl
   exact ⟨hP l hl, hQ l hl⟩
 
-theorem shiftChain_supported_exact {p n k : ℕ} (a : ZMod p) {c : SChain p n}
-    (hc : Supported (ExactStrictFlag k) c) :
-    Supported (ExactStrictFlag k) (shiftChain a c) := by
-  apply supported_mapVertices
-    (P := ExactStrictFlag k) (Q := ExactStrictFlag k)
-    (NonzeroSignedVector.shift a) _ hc
-  intro l hl
-  constructor
-  · rw [IsStrictFlag, List.pairwise_map]
-    exact hl.1.imp (vertex_shift_lt a)
-  · simp [hl.2]
-
-theorem tau_supported_exact {p n k : ℕ} {c : SChain p n}
-    (hc : Supported (ExactStrictFlag k) c) :
-    Supported (ExactStrictFlag k) (tau c) := by
-  exact supported_sub (shiftChain_supported_exact 1 hc) hc
-
-theorem norm_supported_exact {p n k : ℕ} [NeZero p] {c : SChain p n}
-    (hc : Supported (ExactStrictFlag k) c) :
-    Supported (ExactStrictFlag k) (norm c) := by
-  rw [norm]
-  simp only [LinearMap.sum_apply]
-  exact supported_sum (s := Finset.univ) (c := fun a => shiftChain a c)
-    (fun a _ => shiftChain_supported_exact a hc)
-
-theorem periodicOp_supported_exact {p n k : ℕ} [NeZero p] (i : ℕ)
-    {c : SChain p n} (hc : Supported (ExactStrictFlag k) c) :
-    Supported (ExactStrictFlag k) (periodicOp i c) := by
-  by_cases hi : i % 2 = 1
-  · rw [periodicOp, if_pos hi]
-    exact tau_supported_exact hc
-  · rw [periodicOp, if_neg hi]
-    exact norm_supported_exact hc
-
-/-- The concrete recursive generalized-sphere chain in degree `i` consists
-only of strict flags with exactly `i+1` vertices. -/
-theorem y_supported_exact {p n : ℕ} [NeZero p] {i : ℕ} (hi : i < n) :
-    Supported (ExactStrictFlag (i + 1)) (y p n i) := by
-  induction i with
-  | zero =>
-      rw [y_zero hi]
-      exact supported_basis ⟨by simp [IsStrictFlag], by simp⟩
-  | succ i ih =>
-      rw [y_succ hi]
-      apply freshFill_supported_exact ⟨i + 1, hi⟩ 0
-      have hexact := periodicOp_supported_exact (i + 1) (ih (by omega))
-      have hbase : Supported (GoodFlag (i + 1)) (y p n i) :=
-        y_supported_good (p := p) (n := n) (i := i) (by omega)
-      have hgood := periodicOp_supported (p := p) (n := n) (d := i + 1)
-        (i + 1) hbase
-      intro l hl
-      constructor
-      · exact hexact l hl
-      · intro x hx
-        exact (hgood l hl).2 x hx ⟨i + 1, hi⟩ (by simp)
-
 end
 
 end SignedSphere
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos750/Chains.lean` -/
 
@@ -3415,10 +2565,6 @@ def Face (G : SimpleGraph V) (l : List (Signed V)) : Prop :=
 
 def Good (G : SimpleGraph V) (k : ℕ) (l : List (Signed V)) : Prop :=
   Face G l ∧ l.length = k
-
-lemma Face.sublist {G : SimpleGraph V} {l q : List (Signed V)}
-    (hl : Face G l) (hq : q.Sublist l) : Face G q :=
-  fun a ha b hb hab => hl a (hq.subset ha) b (hq.subset hb) hab
 
 lemma Face.map_flip {G : SimpleGraph V} {l : List (Signed V)}
     (hl : Face G l) : Face G (l.map flip) := by
@@ -3489,9 +2635,6 @@ lemma resolution_cycle {d : ℕ}
 
 def signedMap (f : V → W) (x : Signed V) : Signed W := (x.1, f x.2)
 
-lemma signedMap_flip (f : V → W) (x : Signed V) :
-    signedMap f (flip x) = flip (signedMap f x) := rfl
-
 lemma map_op (f : V → W) (i : ℕ) (c : Chain (Signed V)) :
     mapVertices (signedMap f) (op i c) = op i (mapVertices (signedMap f) c) := by
   have hs : mapVertices (signedMap f) (swap c) =
@@ -3547,7 +2690,6 @@ end
 end Chains
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos750/MycielskiChains.lean` -/
 
@@ -3837,7 +2979,6 @@ end Chains
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos780/External/TargetChains.lean` -/
 
 section
@@ -4111,29 +3252,11 @@ theorem toExterior_map_single {W : Type v} [Fintype W] [LinearOrder W]
       ExteriorAlgebra.map (vertexMap f) (exteriorBasis R V s) := by
   simp
 
-theorem map_single_eq_zero_of_not_injective {W : Type v} [Fintype W] [LinearOrder W]
-    (f : V → W) (s : Finset V)
-    (h : ¬ Function.Injective
-      ((vertexMap (R := R) f) ∘ (vertexBasis R V) ∘
-        Set.powersetCard.ofFinEmbEquiv.symm
-          (Set.powersetCard.prodEquiv.symm s).2)) :
-    map (R := R) f (Finsupp.single s (1 : R)) = 0 := by
-  apply (toExterior R W).injective
-  rw [map_zero, toExterior_map_single]
-  change ExteriorAlgebra.map (vertexMap f)
-      ((vertexBasis R V).ExteriorAlgebra s) = 0
-  rw [ExteriorAlgebra.basis_apply]
-  dsimp only [ExteriorAlgebra.ιMulti_family]
-  rw [ExteriorAlgebra.map_apply_ιMulti]
-  apply ExteriorAlgebra.ιMulti_eq_zero_of_not_inj
-  exact h
-
 end FiniteVertices
 
 end TargetChains
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/TargetBridge.lean` -/
 
@@ -4261,7 +3384,6 @@ end TargetBridge
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos780/External/PositiveTarget.lean` -/
 
 section
@@ -4304,56 +3426,6 @@ theorem iota_single_eq_exteriorBasis_singleton (v : V) :
   rw [ExteriorAlgebra.ιMulti_succ_apply]
   simp [vertexBasis, Set.powersetCard.ofFinEmbEquiv_symm_apply,
     Finset.orderEmbOfFin_singleton]
-
-theorem wedgePrepend_apply_empty (v : V) (c : FullChain ℤ V) :
-    TargetBridge.wedgePrepend v c ∅ = 0 := by
-  induction c using Finsupp.induction_linear with
-  | zero => simp
-  | add c d hc hd => simpa only [map_add, Finsupp.add_apply, hc, hd, add_zero]
-  | single s z =>
-      rw [show Finsupp.single s z = z • Finsupp.single s (1 : ℤ) by
-        simp]
-      simp only [map_smul, Finsupp.smul_apply, smul_eq_mul]
-      suffices TargetBridge.wedgePrepend v (Finsupp.single s (1 : ℤ)) ∅ = 0 by
-        rw [this, mul_zero]
-      by_cases hvs : v ∈ s
-      · have hprod : exteriorBasis ℤ V {v} * exteriorBasis ℤ V s = 0 := by
-          let sv : Set.powersetCard V 1 := ⟨{v}, by simp⟩
-          let ss : Set.powersetCard V s.card := ⟨s, rfl⟩
-          apply ExteriorAlgebra.basis_mul_of_not_disjoint (vertexBasis ℤ V) sv ss
-          simpa [sv, ss, Finset.disjoint_singleton_left]
-        have hw : TargetBridge.wedgePrepend v
-            (Finsupp.single s (1 : ℤ)) = 0 := by
-          apply (toExterior ℤ V).injective
-          rw [map_zero, TargetBridge.toExterior_wedgePrepend,
-            toExterior_single, one_smul,
-            iota_single_eq_exteriorBasis_singleton, hprod]
-        rw [hw]
-        rfl
-      · let sv : Set.powersetCard V 1 := ⟨{v}, by simp⟩
-        let ss : Set.powersetCard V s.card := ⟨s, rfl⟩
-        have hd : Disjoint sv.val ss.val := by
-          simpa [sv, ss, Finset.disjoint_singleton_left]
-        let u : Finset V := (Set.powersetCard.disjUnion hd).val
-        have hu : u ≠ ∅ := by
-          intro hu0
-          have hvu : v ∈ u := by
-            change v ∈ (Set.powersetCard.disjUnion hd).val
-            simp [Set.powersetCard.disjUnion, sv, ss]
-          simpa [hu0] using hvu
-        have hw : TargetBridge.wedgePrepend v
-            (Finsupp.single s (1 : ℤ)) =
-            (Set.powersetCard.permOfDisjoint hd).sign •
-              Finsupp.single u (1 : ℤ) := by
-          apply (toExterior ℤ V).injective
-          rw [TargetBridge.toExterior_wedgePrepend, toExterior_single, one_smul,
-            iota_single_eq_exteriorBasis_singleton]
-          change (vertexBasis ℤ V).ExteriorAlgebra sv.val *
-              (vertexBasis ℤ V).ExteriorAlgebra ss.val = _
-          rw [ExteriorAlgebra.basis_mul_of_disjoint (vertexBasis ℤ V) sv ss hd]
-          simp [u, exteriorBasis]
-        rw [hw]
-        simp [hu]
 
 theorem fullBoundary_singleton (v : V) :
     TargetChains.boundary R V (Finsupp.single {v} 1) =
@@ -4438,22 +3510,8 @@ theorem labelLists_basis (lab : X → V) (l : List X) :
       projectPositive ℤ V (TargetBridge.labelList lab l) := by
   simp [labelLists]
 
-theorem labelList_apply_empty_of_nonempty (lab : X → V)
-    (l : List X) (hl : l ≠ []) :
-    TargetBridge.labelList lab l ∅ = 0 := by
-  obtain ⟨x, xs, rfl⟩ := List.exists_cons_of_ne_nil hl
-  exact wedgePrepend_apply_empty (V := V) (v := lab x)
-    (TargetBridge.labelList lab xs)
-
 /- On every actual (nonempty) source flag, projection does nothing: the
 reduced label map is literally the pre-existing exterior-algebra label. -/
-theorem positiveInclusion_labelLists_basis_of_nonempty (lab : X → V)
-    (l : List X) (hl : l ≠ []) :
-    positiveInclusion ℤ V (labelLists lab (SourceFlags.basis l)) =
-      TargetBridge.labelList lab l := by
-  rw [labelLists_basis, positiveInclusion_projectPositive]
-  rw [labelList_apply_empty_of_nonempty lab l hl]
-  simp
 
 theorem labelLists_boundary (lab : X → V) (c : SourceFlags.Chain X) :
     boundary ℤ V (labelLists lab c) =
@@ -4474,7 +3532,6 @@ end
 end PositiveTarget
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/AllowedFaces.lean` -/
 
@@ -4508,12 +3565,6 @@ signs at a high index. -/
 def IsAllowed {p m : ℕ} (alpha : ℕ) (s : Finset (Label p m)) : Prop :=
   ∀ j : Fin m, (fiber s j).card ≤ capacity p alpha j
 
-theorem isAllowed_iff {p m alpha : ℕ} {s : Finset (Label p m)} :
-    IsAllowed alpha s ↔
-      ∀ j : Fin m, (fiber s j).card ≤
-        if j.val < alpha then 1 else p - 1 :=
-  Iff.rfl
-
 /-- Allowed faces are closed downward. -/
 theorem IsAllowed.mono {p m alpha : ℕ} {s t : Finset (Label p m)}
     (hs : IsAllowed alpha s) (hts : t ⊆ s) : IsAllowed alpha t := by
@@ -4524,50 +3575,6 @@ theorem IsAllowed.mono {p m alpha : ℕ} {s t : Finset (Label p m)}
     IsAllowed (p := p) (m := m) alpha ∅ := by
   intro j
   simp [fiber]
-
-/-- Sum of all alpha-split coordinate capacities. -/
-theorem sum_capacity {p m alpha : ℕ} (halpha : alpha ≤ m) :
-    (∑ j : Fin m, capacity p alpha j) =
-      alpha + (m - alpha) * (p - 1) := by
-  change (∑ j : Fin m, if j.val < alpha then 1 else p - 1) = _
-  rw [Fin.sum_univ_eq_sum_range
-    (fun j : ℕ ↦ if j < alpha then 1 else p - 1)]
-  have hm : m = alpha + (m - alpha) := by omega
-  rw [hm, Finset.sum_range_add]
-  have hlow :
-      (∑ x ∈ Finset.range alpha,
-        if x < alpha then 1 else p - 1) = alpha := by
-    calc
-      _ = ∑ x ∈ Finset.range alpha, 1 := by
-        apply Finset.sum_congr rfl
-        intro x hx
-        simp [Finset.mem_range.1 hx]
-      _ = alpha := by simp
-  have hhigh :
-      (∑ x ∈ Finset.range (m - alpha),
-        if alpha + x < alpha then 1 else p - 1) =
-        (m - alpha) * (p - 1) := by
-    calc
-      _ = ∑ x ∈ Finset.range (m - alpha), (p - 1) := by
-        refine Finset.sum_congr rfl ?_
-        intro x hx
-        simp
-      _ = (m - alpha) * (p - 1) := by simp
-  rw [hlow, hhigh]
-  simp
-
-/-- Every allowed face has at most the advertised number of vertices. -/
-theorem IsAllowed.card_le {p m alpha : ℕ} {s : Finset (Label p m)}
-    (hs : IsAllowed alpha s) (halpha : alpha ≤ m) :
-    s.card ≤ alpha + (m - alpha) * (p - 1) := by
-  rw [Finset.card_eq_sum_card_fiberwise
-    (s := s) (t := Finset.univ) (f := Prod.snd) (by simp)]
-  calc
-    (∑ j ∈ Finset.univ, (s.filter fun v ↦ v.2 = j).card) ≤
-        ∑ j ∈ Finset.univ, capacity p alpha j := by
-          exact Finset.sum_le_sum fun j _ ↦ hs j
-    _ = alpha + (m - alpha) * (p - 1) := by
-      simpa using sum_capacity (p := p) halpha
 
 /-- The set of allowed exterior-basis indices. -/
 def allowedFaceSet (p m alpha : ℕ) : Set (Finset (Label p m)) :=
@@ -4594,51 +3601,9 @@ theorem allowedChains_eq_span {R : Type*} [CommRing R] (p m alpha : ℕ) :
           allowedFaceSet p m alpha) := by
   exact Finsupp.supported_eq_span_single R (allowedFaceSet p m alpha)
 
-/-- Basis of the allowed submodule, indexed by allowed faces. -/
-noncomputable def allowedBasis {R : Type*} [CommRing R] (p m alpha : ℕ) :
-    Module.Basis {s : Finset (Label p m) // IsAllowed alpha s}
-      R (allowedChains R p m alpha) :=
-  Finsupp.basisSingleOne.map
-    (Finsupp.supportedEquivFinsupp
-      (allowedFaceSet p m alpha)).symm
-
-/-- The homogeneous degree-`q` part, where chain degree `q` means basis
-faces of cardinality `q + 1`. -/
-def allowedDegreeChains (R : Type*) [CommRing R]
-    (p m alpha q : ℕ) :
-    Submodule R (TargetChains.FullChain R (Label p m)) :=
-  Finsupp.supported R R
-    {s | IsAllowed alpha s ∧ s.card = q + 1}
-
-/-- At the first degree above the target dimension, the allowed homogeneous
-chain group is zero.  Here `Q` is the maximum allowed face cardinality, so
-chain degree `Q` consists of faces of cardinality `Q + 1`. -/
-theorem allowedDegreeChains_Q_eq_bot {R : Type*} [CommRing R]
-    {p m alpha : ℕ} (halpha : alpha ≤ m) :
-    allowedDegreeChains R p m alpha
-      (alpha + (m - alpha) * (p - 1)) = ⊥ := by
-  apply le_antisymm
-  · intro c hc
-    change c ∈ Finsupp.supported R R
-      {s : Finset (Label p m) |
-        IsAllowed alpha s ∧
-          s.card = alpha + (m - alpha) * (p - 1) + 1} at hc
-    rw [Finsupp.mem_supported] at hc
-    rw [Submodule.mem_bot]
-    ext s
-    by_cases hcs : s ∈ c.support
-    · have hs := hc hcs
-      have hle := hs.1.card_le halpha
-      have hcard := hs.2
-      have : ¬ s.card ≤ alpha + (m - alpha) * (p - 1) := by omega
-      exact (this hle).elim
-    · exact Finsupp.notMem_support_iff.mp hcs
-  · exact bot_le
-
 end AllowedFaces
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/LabelAllowed.lean` -/
 
@@ -4656,143 +3621,18 @@ variable {p n m alpha : ℕ}
 abbrev Vertex := NonzeroSignedVector p n
 abbrev Label := ZMod p × Fin m
 
-def labelAt (lab : Vertex (p := p) (n := n) → Label (p := p) (m := m))
-    (l : List (Vertex (p := p) (n := n))) (i : Fin l.length) :
-    Label (p := p) (m := m) :=
-  lab (l.get i)
-
-def labelFace (lab : Vertex (p := p) (n := n) → Label (p := p) (m := m))
-    (l : List (Vertex (p := p) (n := n))) : Finset (Label (p := p) (m := m)) :=
-  Finset.univ.image (labelAt lab l)
-
-def indexFiber (lab : Vertex (p := p) (n := n) → Label (p := p) (m := m))
-    (l : List (Vertex (p := p) (n := n))) (j : Fin m) : Finset (Fin l.length) :=
-  Finset.univ.filter fun i => (labelAt lab l i).2 = j
-
-theorem fiber_labelFace (lab : Vertex (p := p) (n := n) → Label (p := p) (m := m))
-    (l : List (Vertex (p := p) (n := n))) (j : Fin m) :
-    fiber (labelFace lab l) j = (indexFiber lab l j).image (labelAt lab l) := by
-  ext v
-  simp only [fiber, labelFace, indexFiber, Finset.mem_filter, Finset.mem_image,
-    Finset.mem_univ, true_and]
-  constructor
-  · rintro ⟨⟨i, hi⟩, hv⟩
-    refine ⟨i, ?_, hi⟩
-    rw [hi]
-    exact hv
-  · rintro ⟨i, hi, hiv⟩
-    refine ⟨⟨i, hiv⟩, ?_⟩
-    rw [← hiv]
-    exact hi
-
-theorem comparable_get (l : List (Vertex (p := p) (n := n)))
-    (hl : IsStrictFlag l) (i k : Fin l.length) :
-    l.get i ≤ l.get k ∨ l.get k ≤ l.get i := by
-  rcases lt_trichotomy i k with hik | rfl | hki
-  · exact Or.inl (hl.rel_get_of_lt hik).le
-  · exact Or.inl le_rfl
-  · exact Or.inr (hl.rel_get_of_lt hki).le
-
-theorem low_fiber_card_le_one
-    (lab : Vertex (p := p) (n := n) → Label (p := p) (m := m))
-    (hadm : IsAlphaAdmissible alpha lab)
-    (l : List (Vertex (p := p) (n := n))) (hl : IsStrictFlag l)
-    (j : Fin m) (hj : j.val < alpha) :
-    (fiber (labelFace lab l) j).card ≤ 1 := by
-  rw [Finset.card_le_one]
-  intro a ha b hb
-  simp only [fiber, Finset.mem_filter] at ha hb
-  have ha' : ∃ i ∈ (Finset.univ : Finset (Fin l.length)), labelAt lab l i = a := by
-    exact Finset.mem_image.mp ha.1
-  have hb' : ∃ i ∈ (Finset.univ : Finset (Fin l.length)), labelAt lab l i = b := by
-    exact Finset.mem_image.mp hb.1
-  let i := Classical.choose ha'
-  let k := Classical.choose hb'
-  have hia : lab (l.get i) = a := (Classical.choose_spec ha').2
-  have hkb : lab (l.get k) = b := (Classical.choose_spec hb').2
-  have hia2 : (lab (l.get i)).2 = j := (congrArg Prod.snd hia).trans ha.2
-  have hkb2 : (lab (l.get k)).2 = j := (congrArg Prod.snd hkb).trans hb.2
-  rcases comparable_get l hl i k with hik | hki
-  · have hlowi : (lab (l.get i)).2.val < alpha := by
-      rw [hia2]
-      exact hj
-    have hsign := hadm.1 hik (hia2.trans hkb2.symm) hlowi
-    calc
-      a = lab (l.get i) := hia.symm
-      _ = lab (l.get k) := Prod.ext hsign (hia2.trans hkb2.symm)
-      _ = b := hkb
-  · have hlowk : (lab (l.get k)).2.val < alpha := by
-      rw [hkb2]
-      exact hj
-    have hsign := hadm.1 hki (hkb2.trans hia2.symm) hlowk
-    calc
-      a = lab (l.get i) := hia.symm
-      _ = lab (l.get k) := Prod.ext hsign.symm (hia2.trans hkb2.symm)
-      _ = b := hkb
-
-theorem high_fiber_card_le
-    (hp : p.Prime)
-    (lab : Vertex (p := p) (n := n) → Label (p := p) (m := m))
-    (hadm : IsAlphaAdmissible alpha lab)
-    (l : List (Vertex (p := p) (n := n))) (hl : IsStrictFlag l)
-    (hinj : Function.Injective (labelAt lab l))
-    (j : Fin m) (hj : alpha ≤ j.val) :
-    (fiber (labelFace lab l) j).card ≤ p - 1 := by
-  letI : NeZero p := ⟨hp.ne_zero⟩
-  rw [fiber_labelFace, Finset.card_image_of_injective _ hinj]
-  by_contra hnot
-  have hp_le : p ≤ (indexFiber lab l j).card := by omega
-  obtain ⟨u, huI, hucard⟩ := Finset.exists_subset_card_eq hp_le
-  let e : Fin p ≃o (u : Finset (Fin l.length)) := Finset.orderIsoOfFin u hucard
-  let x : Fin p → Vertex (p := p) (n := n) := fun a => l.get (e a).1
-  have hxmono : Monotone x := by
-    intro a b hab
-    by_cases hab' : a = b
-    · subst b
-      exact le_rfl
-    · have halt : a < b := lt_of_le_of_ne hab hab'
-      exact (hl.rel_get_of_lt (e.strictMono halt)).le
-  have hxj : ∀ a, (lab (x a)).2 = j := by
-    intro a
-    have hmemI : (e a).1 ∈ indexFiber lab l j := huI (e a).2
-    exact (Finset.mem_filter.mp hmemI).2
-  have hsign_inj : Function.Injective (fun a => (lab (x a)).1) := by
-    intro a b hab
-    have hlab : lab (x a) = lab (x b) := Prod.ext hab ((hxj a).trans (hxj b).symm)
-    have hidx : (e a).1 = (e b).1 := hinj hlab
-    exact e.injective (Subtype.ext hidx)
-  have hcard : Fintype.card (Fin p) = Fintype.card (ZMod p) := by simp [ZMod.card]
-  have hsign_surj : Function.Surjective (fun a => (lab (x a)).1) :=
-    (Fintype.bijective_iff_injective_and_card _).2 ⟨hsign_inj, hcard⟩ |>.2
-  exact hadm.2 x hxmono ⟨j, hj, hxj⟩ hsign_surj
-
-theorem labelFace_isAllowed
-    (hp : p.Prime)
-    (lab : Vertex (p := p) (n := n) → Label (p := p) (m := m))
-    (hadm : IsAlphaAdmissible alpha lab)
-    (l : List (Vertex (p := p) (n := n))) (hl : IsStrictFlag l)
-    (hinj : Function.Injective (labelAt lab l)) :
-    IsAllowed alpha (labelFace lab l) := by
-  intro j
-  by_cases hj : j.val < alpha
-  · simpa [capacity, hj] using low_fiber_card_le_one lab hadm l hl j hj
-  · simpa [capacity, hj] using high_fiber_card_le hp lab hadm l hl hinj j (by omega)
-
 end
 
 end LabelAllowed
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos780/External/FinsetOrientation.lean` -/
 
 section
 open Finset
 
-
 open Function
-
 
 section ImageOrientation
 
@@ -4803,42 +3643,6 @@ noncomputable def _root_.Finset.orientationPerm [LinearOrder V] [LinearOrder W] 
     (s : Finset V) (t : Finset W) (hs : s.card = n) (ht : t.card = n)
     (e : s ≃ t) : Equiv.Perm (Fin n) :=
   (s.orderIsoOfFin hs).toEquiv |>.trans e |>.trans (t.orderIsoOfFin ht).symm.toEquiv
-
-/-- The sign of an equivalence relative to the increasing orientations on its finsets. -/
-noncomputable def _root_.Finset.orientationSign [LinearOrder V] [LinearOrder W] {n : ℕ}
-    (s : Finset V) (t : Finset W) (hs : s.card = n) (ht : t.card = n)
-    (e : s ≃ t) : ℤˣ :=
-  Equiv.Perm.sign (orientationPerm s t hs ht e)
-
-/-- The auxiliary common cardinal and its equality witnesses do not affect the sign. -/
-theorem _root_.Finset.orientationSign_card_congr [LinearOrder V] [LinearOrder W] {n m : ℕ}
-    (s : Finset V) (t : Finset W)
-    (hsn : s.card = n) (htn : t.card = n) (hsm : s.card = m) (htm : t.card = m)
-    (e : s ≃ t) :
-    orientationSign s t hsn htn e = orientationSign s t hsm htm e := by
-  subst n
-  subst m
-  rfl
-
-theorem _root_.Finset.orientationPerm_trans [LinearOrder V] [LinearOrder W] [LinearOrder U] {n : ℕ}
-    (s : Finset V) (t : Finset W) (u : Finset U)
-    (hs : s.card = n) (ht : t.card = n) (hu : u.card = n)
-    (e : s ≃ t) (d : t ≃ u) :
-    orientationPerm s u hs hu (e.trans d) =
-      (orientationPerm s t hs ht e).trans (orientationPerm t u ht hu d) := by
-  ext i
-  simp [orientationPerm]
-
-/-- Orientation signs multiply under composition (the second map's sign is the left factor,
-matching `Equiv.Perm.sign_trans`). -/
-theorem _root_.Finset.orientationSign_trans [LinearOrder V] [LinearOrder W] [LinearOrder U] {n : ℕ}
-    (s : Finset V) (t : Finset W) (u : Finset U)
-    (hs : s.card = n) (ht : t.card = n) (hu : u.card = n)
-    (e : s ≃ t) (d : t ≃ u) :
-    orientationSign s u hs hu (e.trans d) =
-      orientationSign t u ht hu d * orientationSign s t hs ht e := by
-  rw [orientationSign, orientationPerm_trans, Equiv.Perm.sign_trans]
-  rfl
 
 /-- An injective map on a finset is an equivalence with its finset image. -/
 noncomputable def _root_.Finset.imageEquiv [DecidableEq W] (s : Finset V) (f : V → W)
@@ -4872,47 +3676,6 @@ noncomputable def _root_.Finset.imageSign [LinearOrder V] [LinearOrder W]
     (s : Finset V) (f : V → W) (hf : Set.InjOn f s) : ℤˣ :=
   Equiv.Perm.sign (imagePerm s f hf)
 
-/-- Functoriality of image orientation before normalizing the iterated image with
-`Finset.image_image`. This form avoids dependent casts and is often the easiest one to rewrite. -/
-theorem _root_.Finset.imageSign_trans_nested [LinearOrder V] [LinearOrder W] [LinearOrder U]
-    (s : Finset V) (f : V → W) (g : W → U)
-    (hf : Set.InjOn f s) (hg : Set.InjOn g (s.image f)) :
-    orientationSign s ((s.image f).image g) rfl
-        ((card_image_of_injOn hg).trans (card_image_of_injOn hf))
-        ((imageEquiv s f hf).trans (imageEquiv (s.image f) g hg)) =
-      imageSign (s.image f) g hg * imageSign s f hf := by
-  change _ =
-    orientationSign (s.image f) ((s.image f).image g) rfl
-        (card_image_of_injOn hg) (imageEquiv (s.image f) g hg) *
-      orientationSign s (s.image f) rfl
-        (card_image_of_injOn hf) (imageEquiv s f hf)
-  rw [orientationSign_trans s (s.image f) ((s.image f).image g)
-    rfl (card_image_of_injOn hf)
-    ((card_image_of_injOn hg).trans (card_image_of_injOn hf))
-    (imageEquiv s f hf) (imageEquiv (s.image f) g hg)]
-  exact congrArg₂ (· * ·)
-    (orientationSign_card_congr
-      (s.image f) ((s.image f).image g)
-      (card_image_of_injOn hf)
-      ((card_image_of_injOn hg).trans (card_image_of_injOn hf))
-      rfl (card_image_of_injOn hg)
-      (imageEquiv (s.image f) g hg))
-    rfl
-
-/-- A map which preserves the strict order on `s` has positive image orientation. -/
-@[simp] theorem imageSign_eq_one_of_strictMonoOn [LinearOrder V] [LinearOrder W]
-    (s : Finset V) (f : V → W) (hf : StrictMonoOn f s) :
-    imageSign s f hf.injOn = 1 := by
-  suffices imagePerm s f hf.injOn = 1 by simp [imageSign, this]
-  have hp : StrictMono (imagePerm s f hf.injOn) := by
-    intro i j hij
-    rw [imagePerm_apply, imagePerm_apply]
-    apply ((s.image f).orderIsoOfFin (card_image_of_injOn hf.injOn)).symm.strictMono
-    exact hf (s.orderIsoOfFin rfl i).2 (s.orderIsoOfFin rfl j).2
-      ((s.orderIsoOfFin rfl).strictMono hij)
-  apply Equiv.ext
-  exact congrFun hp.eq_id
-
 /-- The normalized coefficient for the image of an ordered finite set: it is its canonical
 orientation sign if `f` is injective on `s`, and zero otherwise. -/
 noncomputable def _root_.Finset.imageCoeff [LinearOrder V] [LinearOrder W] [Ring R]
@@ -4932,7 +3695,6 @@ noncomputable def _root_.Finset.imageCoeff [LinearOrder V] [LinearOrder W] [Ring
 end ImageOrientation
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/SignedMap.lean` -/
 
@@ -4987,7 +3749,6 @@ theorem map_single_of_injOn (f : V → W) (s : Finset V)
 end TargetChains
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/LabelChainMap.lean` -/
 
@@ -5097,83 +3858,6 @@ def leftWedge (v : TargetVertex p m) : TargetChain p m →ₗ[ℤ] TargetChain p
         TargetChains.toExterior ℤ (TargetVertex p m) c := by
   simp [leftWedge]
 
-theorem normalizedMap_prepend
-    (lab : SourceVertex p n → TargetVertex p m)
-    (x : SourceVertex p n) (c : SourceFlags.Chain (SourceVertex p n)) :
-    normalizedMap lab (SourceFlags.prepend x c) =
-      leftWedge (lab x) (normalizedMap lab c) := by
-  induction c using Finsupp.induction_linear with
-  | zero => simp
-  | add c d hc hd => simp only [map_add, hc, hd]
-  | single l z =>
-      rw [show Finsupp.single l z = z • SourceFlags.basis l by
-        simp [SourceFlags.basis]]
-      apply (TargetChains.toExterior ℤ (TargetVertex p m)).injective
-      simp [exteriorFlag]
-
-theorem boundary_leftWedge
-    (v : TargetVertex p m) (c : TargetChain p m) :
-    TargetChains.boundary ℤ (TargetVertex p m) (leftWedge v c) =
-      c - leftWedge v
-        (TargetChains.boundary ℤ (TargetVertex p m) c) := by
-  apply (TargetChains.toExterior ℤ (TargetVertex p m)).injective
-  simp only [TargetChains.toExterior_boundary, toExterior_leftWedge, map_sub]
-  change CliffordAlgebra.contractLeft
-      (TargetChains.augmentation ℤ (TargetVertex p m))
-      (ExteriorAlgebra.ι ℤ (Finsupp.single v 1) *
-        TargetChains.toExterior ℤ (TargetVertex p m) c) =
-      TargetChains.toExterior ℤ (TargetVertex p m) c -
-        ExteriorAlgebra.ι ℤ (Finsupp.single v 1) *
-          CliffordAlgebra.contractLeft
-            (TargetChains.augmentation ℤ (TargetVertex p m))
-            (TargetChains.toExterior ℤ (TargetVertex p m) c)
-  rw [CliffordAlgebra.contractLeft_ι_mul]
-  simp [TargetChains.augmentation_single]
-
-theorem normalizedBasis_cons
-    (lab : SourceVertex p n → TargetVertex p m)
-    (x : SourceVertex p n) (xs : List (SourceVertex p n)) :
-    normalizedBasis lab (x :: xs) =
-      leftWedge (lab x) (normalizedBasis lab xs) := by
-  apply (TargetChains.toExterior ℤ (TargetVertex p m)).injective
-  simp [exteriorFlag]
-
-theorem boundary_normalizedMap_basis
-    (lab : SourceVertex p n → TargetVertex p m)
-    (l : List (SourceVertex p n)) :
-    TargetChains.boundary ℤ (TargetVertex p m)
-        (normalizedMap lab (SourceFlags.basis l)) =
-      normalizedMap lab (SourceFlags.boundary (SourceFlags.basis l)) := by
-  induction l with
-  | nil =>
-      apply (TargetChains.toExterior ℤ (TargetVertex p m)).injective
-      simp [SourceFlags.boundaryBasis, exteriorFlag,
-        TargetChains.exteriorContraction,
-        CliffordAlgebra.contractLeft_algebraMap]
-  | cons x xs ih =>
-      simp only [normalizedMap_basis, SourceFlags.boundary_basis,
-        SourceFlags.boundaryBasis_cons, map_sub, normalizedMap_prepend]
-      rw [normalizedBasis_cons]
-      rw [boundary_leftWedge]
-      rw [SourceFlags.boundary_basis] at ih
-      simpa only [normalizedMap_basis] using congrArg
-        (fun c => normalizedBasis lab xs - leftWedge (lab x) c) ih
-
-/-- The normalized labeling map is a map of augmented chain complexes. -/
-theorem boundary_normalizedMap
-    (lab : SourceVertex p n → TargetVertex p m)
-    (c : SourceFlags.Chain (SourceVertex p n)) :
-    TargetChains.boundary ℤ (TargetVertex p m) (normalizedMap lab c) =
-      normalizedMap lab (SourceFlags.boundary c) := by
-  induction c using Finsupp.induction_linear with
-  | zero => simp
-  | add c d hc hd => simp only [map_add, hc, hd]
-  | single l z =>
-      rw [show Finsupp.single l z = z • SourceFlags.basis l by
-        simp [SourceFlags.basis]]
-      simp only [map_smul]
-      rw [boundary_normalizedMap_basis]
-
 /-- The target cyclic shift on vertices. -/
 def targetShift (a : ZMod p) (v : TargetVertex p m) : TargetVertex p m :=
   (a + v.1, v.2)
@@ -5182,235 +3866,13 @@ def targetShift (a : ZMod p) (v : TargetVertex p m) : TargetVertex p m :=
 def targetAct (a : ZMod p) : TargetChain p m →ₗ[ℤ] TargetChain p m :=
   TargetChains.map (targetShift a)
 
-theorem exteriorFlag_shift
-    (lab : SourceVertex p n → TargetVertex p m)
-    (heq : IsEquivariant lab) (a : ZMod p)
-    (l : List (SourceVertex p n)) :
-    exteriorFlag lab (l.map (NonzeroSignedVector.shift a)) =
-      ExteriorAlgebra.map (TargetChains.vertexMap (targetShift a))
-        (exteriorFlag lab l) := by
-  induction l with
-  | nil => simp [exteriorFlag]
-  | cons x xs ih =>
-      simp only [List.map_cons, exteriorFlag_cons, map_mul,
-        ExteriorAlgebra.map_apply_ι, TargetChains.vertexMap_single, ih]
-      rw [heq a x]
-      rfl
-
-/-- Cyclic equivariance of the exterior normalized map. -/
-theorem normalizedMap_equivariant
-    (lab : SourceVertex p n → TargetVertex p m)
-    (heq : IsEquivariant lab) (a : ZMod p)
-    (c : SourceFlags.Chain (SourceVertex p n)) :
-    normalizedMap lab
-        (SourceFlags.mapVertices (NonzeroSignedVector.shift a) c) =
-      targetAct a (normalizedMap lab c) := by
-  induction c using Finsupp.induction_linear with
-  | zero => simp
-  | add c d hc hd => simp only [map_add, hc, hd]
-  | single l z =>
-      rw [show Finsupp.single l z = z • SourceFlags.basis l by
-        simp [SourceFlags.basis]]
-      apply (TargetChains.toExterior ℤ (TargetVertex p m)).injective
-      simp only [map_smul, SourceFlags.mapVertices_basis, normalizedMap_basis,
-        toExterior_normalizedBasis, targetAct, TargetChains.toExterior_map]
-      rw [exteriorFlag_shift lab heq]
-
-/-- A one-vertex source flag maps to the exterior generator of its target
-label, with coefficient one. -/
-theorem toExterior_normalizedMap_singleton
-    (lab : SourceVertex p n → TargetVertex p m)
-    (x : SourceVertex p n) :
-    TargetChains.toExterior ℤ (TargetVertex p m)
-        (normalizedMap lab (SourceFlags.basis [x])) =
-      ExteriorAlgebra.ι ℤ (Finsupp.single (lab x) 1) := by
-  simp [exteriorFlag]
-
-/-- The mapped singleton has augmentation one. -/
-theorem augmentation_normalizedMap_singleton
-    (lab : SourceVertex p n → TargetVertex p m)
-    (x : SourceVertex p n) :
-    CliffordAlgebra.contractLeft
-        (TargetChains.augmentation ℤ (TargetVertex p m))
-        (TargetChains.toExterior ℤ (TargetVertex p m)
-          (normalizedMap lab (SourceFlags.basis [x]))) = 1 := by
-  rw [toExterior_normalizedMap_singleton,
-    CliffordAlgebra.contractLeft_ι]
-  simp [TargetChains.augmentation_single]
-
 /-! ## The alpha-split target subcomplex -/
-
-/-- An alpha-split allowed target face: below `alpha`, each absolute label
-has only one sign; at and above `alpha`, at least one cyclic sign is absent. -/
-def IsAllowedFace (alpha : ℕ) (s : Finset (TargetVertex p m)) : Prop :=
-  (∀ ⦃u v⦄, u ∈ s → v ∈ s → u.2 = v.2 → u.2.val < alpha →
-      u.1 = v.1) ∧
-  (∀ j : Fin m, alpha ≤ j.val → ∃ g : ZMod p, (g, j) ∉ s)
-
-/-- Exterior products of ordered presentations of allowed faces.  This is
-the oriented allowed-face span; repetitions automatically represent zero. -/
-def allowedFaceSpan (alpha : ℕ) : Submodule ℤ (TargetChain p m) :=
-  Submodule.span ℤ
-    {c | ∃ l : List (TargetVertex p m),
-      IsAllowedFace (p := p) alpha l.toFinset ∧
-      c = (TargetChains.toExterior ℤ (TargetVertex p m)).symm
-        (exteriorFlag (fun x => x) l)}
-
-theorem comparable_of_flag
-    {l : List (SourceVertex p n)}
-    (hl : SourceFlags.IsFlag (fun x y => x < y) l)
-    {x y : SourceVertex p n} (hx : x ∈ l) (hy : y ∈ l) :
-    x ≤ y ∨ y ≤ x := by
-  induction l with
-  | nil => simp at hx
-  | cons a l ih =>
-      change List.Pairwise (fun x y => x < y) (a :: l) at hl
-      rw [List.pairwise_cons] at hl
-      simp only [List.mem_cons] at hx hy
-      rcases hx with rfl | hx
-      · rcases hy with rfl | hy
-        · exact Or.inl le_rfl
-        · exact Or.inl (hl.1 _ hy).le
-      · rcases hy with rfl | hy
-        · exact Or.inr (hl.1 _ hx).le
-        · exact ih hl.2 hx hy
-
-theorem labels_low_allowed
-    (lab : SourceVertex p n → TargetVertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    {l : List (SourceVertex p n)}
-    (hl : SourceFlags.IsFlag (fun x y => x < y) l) :
-    ∀ ⦃u v⦄, u ∈ (l.map lab).toFinset → v ∈ (l.map lab).toFinset →
-      u.2 = v.2 → u.2.val < alpha → u.1 = v.1 := by
-  intro u v hu hv huv hj
-  simp only [List.mem_toFinset, List.mem_map] at hu hv
-  obtain ⟨x, hx, rfl⟩ := hu
-  obtain ⟨y, hy, rfl⟩ := hv
-  rcases comparable_of_flag hl hx hy with hxy | hyx
-  · exact hadm.1 hxy huv hj
-  · exact (hadm.1 hyx huv.symm (by simpa [huv] using hj)).symm
-
-theorem labels_high_allowed
-    (hp : p.Prime)
-    (lab : SourceVertex p n → TargetVertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    {l : List (SourceVertex p n)}
-    (hl : SourceFlags.IsFlag (fun x y => x < y) l) :
-    ∀ j : Fin m, alpha ≤ j.val →
-      ∃ g : ZMod p, (g, j) ∉ (l.map lab).toFinset := by
-  intro j hj
-  by_contra hmissing
-  push_neg at hmissing
-  let e : Fin p ≃ ZMod p := (ZMod.finEquiv p).toEquiv
-  have hex (i : Fin p) :
-      ∃ x ∈ l, lab x = (e i, j) := by
-    have hi := hmissing (e i)
-    simp only [List.mem_toFinset, List.mem_map] at hi
-    obtain ⟨x, hx, hxl⟩ := hi
-    exact ⟨x, hx, hxl⟩
-  choose pick hpick_mem hpick_lab using hex
-  have hpick_inj : Function.Injective pick := by
-    intro i k hik
-    apply e.injective
-    have h := congrArg (fun x => (lab x).1) hik
-    rw [hpick_lab i, hpick_lab k] at h
-    exact h
-  let pos (i : Fin p) : Fin l.length :=
-    ⟨l.idxOf (pick i), List.idxOf_lt_length_iff.mpr (hpick_mem i)⟩
-  have hget_pos (i : Fin p) : l.get (pos i) = pick i := by
-    simpa only [List.get_eq_getElem, pos] using
-      (List.getElem_idxOf
-        (List.idxOf_lt_length_iff.mpr (hpick_mem i)))
-  have hpos_inj : Function.Injective pos := by
-    intro i k hik
-    apply hpick_inj
-    rw [← hget_pos i, ← hget_pos k, hik]
-  let s : Finset (Fin l.length) := Finset.univ.image pos
-  have hs_card : s.card = p := by
-    dsimp [s]
-    rw [Finset.card_image_of_injective _ hpos_inj, Finset.card_univ,
-      Fintype.card_fin]
-  let ord : Fin p ≃o s := Finset.orderIsoOfFin s hs_card
-  let chain (i : Fin p) : SourceVertex p n := l.get (ord i).1
-  have hl_le : List.Pairwise (fun x y : SourceVertex p n => x ≤ y) l := by
-    exact hl.imp (fun h => h.le)
-  have hchain_mono : Monotone chain := by
-    intro i k hik
-    apply hl_le.rel_get_of_le
-    exact ord.monotone hik
-  have hchain_eq_of_ord_eq (i k : Fin p)
-      (hik : (ord i).1 = pos k) : chain i = pick k := by
-    change l.get (ord i).1 = pick k
-    rw [hik]
-    exact hget_pos k
-  have hsecond : ∀ i, (lab (chain i)).2 = j := by
-    intro i
-    have hi : (ord i).1 ∈ s := (ord i).2
-    obtain ⟨k, _hk, hk⟩ := Finset.mem_image.mp hi
-    rw [hchain_eq_of_ord_eq i k hk.symm, hpick_lab]
-  have hsign_surj : Function.Surjective (fun i => (lab (chain i)).1) := by
-    intro g
-    let k : Fin p := e.symm g
-    have hk_mem : pos k ∈ s := by
-      exact Finset.mem_image.mpr ⟨k, Finset.mem_univ _, rfl⟩
-    obtain ⟨i, hi⟩ := ord.surjective ⟨pos k, hk_mem⟩
-    refine ⟨i, ?_⟩
-    have hix : chain i = pick k :=
-      hchain_eq_of_ord_eq i k (congrArg Subtype.val hi)
-    change (lab (chain i)).1 = g
-    rw [hix, hpick_lab]
-    exact e.apply_symm_apply g
-  exact (hadm.2 chain hchain_mono ⟨j, hj, hsecond⟩) hsign_surj
-
-theorem labels_allowed
-    (hp : p.Prime)
-    (lab : SourceVertex p n → TargetVertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    {l : List (SourceVertex p n)}
-    (hl : SourceFlags.IsFlag (fun x y => x < y) l) :
-    IsAllowedFace (p := p) alpha (l.map lab).toFinset := by
-  exact ⟨labels_low_allowed lab hadm hl,
-    labels_high_allowed hp lab hadm hl⟩
-
-theorem exteriorFlag_map
-    {ι : Type*} (lab : ι → TargetVertex p m) (l : List ι) :
-    exteriorFlag (fun x => x) (l.map lab) = exteriorFlag lab l := by
-  induction l with
-  | nil => rfl
-  | cons x xs ih => simp [exteriorFlag, ih]
-
-/-- Every strict source flag is carried into the oriented alpha-split
-allowed-face span. -/
-theorem normalizedBasis_mem_allowedFaceSpan
-    (hp : p.Prime)
-    (lab : SourceVertex p n → TargetVertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    {l : List (SourceVertex p n)}
-    (hl : SourceFlags.IsFlag (fun x y => x < y) l) :
-    normalizedBasis lab l ∈ allowedFaceSpan (p := p) (m := m) alpha := by
-  apply Submodule.subset_span
-  refine ⟨l.map lab, labels_allowed hp lab hadm hl, ?_⟩
-  apply (TargetChains.toExterior ℤ (TargetVertex p m)).injective
-  simp only [toExterior_normalizedBasis, LinearEquiv.apply_symm_apply]
-  exact (exteriorFlag_map lab l).symm
-
-theorem normalizedMap_basis_mem_allowedFaceSpan
-    (hp : p.Prime)
-    (lab : SourceVertex p n → TargetVertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    {l : List (SourceVertex p n)}
-    (hl : SourceFlags.IsFlag (fun x y => x < y) l) :
-    normalizedMap lab (SourceFlags.basis l) ∈
-      allowedFaceSpan (p := p) (m := m) alpha := by
-  rw [normalizedMap_basis]
-  exact normalizedBasis_mem_allowedFaceSpan hp lab hadm hl
 
 end
 
 end LabelChainMap
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/PositiveAllowed.lean` -/
 
@@ -5493,64 +3955,11 @@ theorem labelList_eq_signed_single_general {X : Type*}
 
 /- The exterior label of a list is the normalized finite-image map from
 the canonically ordered `Fin l.length` simplex. -/
-theorem labelList_eq_map_univ
-    (lab : SourceVertex (p := p) (n := n) → TargetVertex (p := p) (m := m))
-    (l : List (SourceVertex (p := p) (n := n))) :
-    TargetBridge.labelList lab l =
-      TargetChains.map (LabelAllowed.labelAt lab l)
-        (Finsupp.single (Finset.univ : Finset (Fin l.length)) 1) := by
-  apply (TargetChains.toExterior ℤ (TargetVertex (p := p) (m := m))).injective
-  rw [TargetBridge.labelList_eq_ιMulti,
-    TargetChains.toExterior_map_single]
-  change ExteriorAlgebra.ιMulti ℤ l.length
-      (fun i ↦ Finsupp.single (lab (l.get i)) 1) =
-    ExteriorAlgebra.map (TargetChains.vertexMap (LabelAllowed.labelAt lab l))
-      ((TargetChains.vertexBasis ℤ (Fin l.length)).ExteriorAlgebra Finset.univ)
-  have hcard : (Finset.univ : Finset (Fin l.length)).card = l.length := by simp
-  rw [ExteriorAlgebra.basis_apply_ofCard
-      (TargetChains.vertexBasis ℤ (Fin l.length)) hcard,
-    ExteriorAlgebra.map_apply_ιMulti]
-  congr 1
-  funext i
-  simp only [Function.comp_apply, TargetChains.vertexBasis,
-    Finsupp.coe_basisSingleOne, TargetChains.vertexMap_single,
-    LabelAllowed.labelAt]
-  congr 1
-  apply congrArg lab
-  apply congrArg l.get
-  apply Fin.ext
-  simp [Set.powersetCard.ofFinEmbEquiv_symm_apply,
-    Finset.orderEmbOfFin_apply, Fin.sort_univ]
 
 /- A repeated target label kills the exterior simplex. -/
-theorem labelList_eq_zero_of_not_injective
-    (lab : SourceVertex (p := p) (n := n) → TargetVertex (p := p) (m := m))
-    (l : List (SourceVertex (p := p) (n := n)))
-    (hinj : ¬ Function.Injective (LabelAllowed.labelAt lab l)) :
-    TargetBridge.labelList lab l = 0 := by
-  exact TargetBridge.labelList_eq_zero_of_repeated lab l hinj
 
 /- In the injective case the exterior label is one oriented copy of its
 finite label image. -/
-theorem labelList_eq_signed_single_of_injective
-    (lab : SourceVertex (p := p) (n := n) → TargetVertex (p := p) (m := m))
-    (l : List (SourceVertex (p := p) (n := n)))
-    (hinj : Function.Injective (LabelAllowed.labelAt lab l)) :
-    TargetBridge.labelList lab l =
-      Finsupp.single (LabelAllowed.labelFace lab l)
-        ((Finset.imageSign (Finset.univ : Finset (Fin l.length))
-          (LabelAllowed.labelAt lab l) hinj.injOn : ℤˣ) : ℤ) := by
-  rw [labelList_eq_map_univ]
-  let img : Finset (TargetVertex (p := p) (m := m)) :=
-    @Finset.image (Fin l.length) (TargetVertex (p := p) (m := m))
-      (@LinearOrder.toDecidableEq _ targetOrder)
-      (LabelAllowed.labelAt lab l) Finset.univ
-  have himg : img = LabelAllowed.labelFace lab l := by
-    ext v
-    simp [img, LabelAllowed.labelFace]
-  rw [← himg]
-  exact TargetChains.map_single_of_injOn (LabelAllowed.labelAt lab l)
-    (Finset.univ : Finset (Fin l.length)) hinj.injOn
 
 /-! ## The positive allowed submodules -/
 
@@ -5562,127 +3971,6 @@ def allowedPositiveChains (p m alpha : ℕ) [NeZero p] :
 
 abbrev Chain (p m alpha : ℕ) [NeZero p] :=
   allowedPositiveChains p m alpha
-
-def allowedPositiveDegree (p m alpha q : ℕ) [NeZero p] :
-    Submodule ℤ
-      (PositiveTarget.Chain ℤ (TargetVertex (p := p) (m := m))) :=
-  (AllowedFaces.allowedDegreeChains ℤ p m alpha q).comap
-    (TargetChains.positiveInclusion ℤ (TargetVertex (p := p) (m := m)))
-
-theorem labelLists_basis_mem_allowedPositive
-    (hp : p.Prime)
-    (lab : SourceVertex (p := p) (n := n) → TargetVertex (p := p) (m := m))
-    (hadm : IsAlphaAdmissible alpha lab)
-    (l : List (SourceVertex (p := p) (n := n)))
-    (hl : IsStrictFlag l) (hlne : l ≠ []) :
-    PositiveTarget.labelLists lab (SourceFlags.basis l) ∈
-      allowedPositiveChains p m alpha := by
-  change TargetChains.positiveInclusion ℤ (TargetVertex (p := p) (m := m))
-      (PositiveTarget.labelLists lab (SourceFlags.basis l)) ∈
-        AllowedFaces.allowedChains ℤ p m alpha
-  rw [PositiveTarget.positiveInclusion_labelLists_basis_of_nonempty lab l hlne]
-  by_cases hinj : Function.Injective (LabelAllowed.labelAt lab l)
-  · rw [labelList_eq_signed_single_of_injective lab l hinj]
-    rw [AllowedFaces.mem_allowedChains]
-    intro s hs
-    by_cases hsf : s = LabelAllowed.labelFace lab l
-    · subst s
-      exact LabelAllowed.labelFace_isAllowed hp lab hadm l hl hinj
-    · exfalso
-      apply (Finsupp.mem_support_iff.mp hs)
-      simp [Finsupp.single_apply, hsf]
-  · rw [labelList_eq_zero_of_not_injective lab l hinj]
-    exact (AllowedFaces.allowedChains ℤ p m alpha).zero_mem
-
-theorem labelLists_basis_mem_allowedPositiveDegree
-    (hp : p.Prime)
-    (lab : SourceVertex (p := p) (n := n) → TargetVertex (p := p) (m := m))
-    (hadm : IsAlphaAdmissible alpha lab)
-    (l : List (SourceVertex (p := p) (n := n)))
-    (hl : SignedSphere.ExactStrictFlag k l) :
-    PositiveTarget.labelLists lab (SourceFlags.basis l) ∈
-      allowedPositiveDegree p m alpha (k - 1) := by
-  by_cases hlne : l = []
-  · subst l
-    simp only [PositiveTarget.labelLists_empty]
-    exact (allowedPositiveDegree p m alpha (k - 1)).zero_mem
-  · change TargetChains.positiveInclusion ℤ
-        (TargetVertex (p := p) (m := m))
-        (PositiveTarget.labelLists lab (SourceFlags.basis l)) ∈
-          AllowedFaces.allowedDegreeChains ℤ p m alpha (k - 1)
-    rw [PositiveTarget.positiveInclusion_labelLists_basis_of_nonempty lab l hlne]
-    by_cases hinj : Function.Injective (LabelAllowed.labelAt lab l)
-    · rw [labelList_eq_signed_single_of_injective lab l hinj]
-      change Finsupp.single (LabelAllowed.labelFace lab l) _ ∈
-        Finsupp.supported ℤ ℤ
-          {s : Finset (TargetVertex (p := p) (m := m)) |
-            IsAllowed alpha s ∧ s.card = k - 1 + 1}
-      rw [Finsupp.mem_supported]
-      intro s hs
-      by_cases hsf : s = LabelAllowed.labelFace lab l
-      · subst s
-        constructor
-        · exact LabelAllowed.labelFace_isAllowed hp lab hadm l hl.1 hinj
-        · rw [LabelAllowed.labelFace,
-              Finset.card_image_of_injective _ hinj]
-          simp only [Finset.card_univ, Fintype.card_fin]
-          have hlen := hl.2
-          have hpos : 0 < l.length := Nat.pos_of_ne_zero (by
-            intro hzero
-            apply hlne
-            exact List.length_eq_zero_iff.mp hzero)
-          omega
-      · exfalso
-        apply (Finsupp.mem_support_iff.mp hs)
-        simp [Finsupp.single_apply, hsf]
-    · rw [labelList_eq_zero_of_not_injective lab l hinj]
-      exact (AllowedFaces.allowedDegreeChains ℤ p m alpha (k - 1)).zero_mem
-
-theorem labelLists_mem_allowedPositive_of_supported
-    (hp : p.Prime)
-    (lab : SourceVertex (p := p) (n := n) → TargetVertex (p := p) (m := m))
-    (hadm : IsAlphaAdmissible alpha lab)
-    {c : SourceFlags.Chain (SourceVertex (p := p) (n := n))}
-    (hc : SignedSphere.Supported
-      (fun l ↦ IsStrictFlag l ∧ l ≠ []) c) :
-    PositiveTarget.labelLists lab c ∈ allowedPositiveChains p m alpha := by
-  let P : List (SourceVertex (p := p) (n := n)) → Prop :=
-    fun l ↦ IsStrictFlag l ∧ l ≠ []
-  have hc' : c ∈ Finsupp.supported ℤ ℤ {l | P l} := by
-    rw [Finsupp.mem_supported]
-    intro l hl
-    exact hc l (Finsupp.mem_support_iff.mp hl)
-  have hle : Finsupp.supported ℤ ℤ {l | P l} ≤
-      (allowedPositiveChains p m alpha).comap
-        (PositiveTarget.labelLists lab) := by
-    rw [Finsupp.supported_eq_span_single]
-    apply Submodule.span_le.2
-    rintro _ ⟨l, hl, rfl⟩
-    exact labelLists_basis_mem_allowedPositive hp lab hadm l hl.1 hl.2
-  exact hle hc'
-
-theorem labelLists_mem_allowedPositiveDegree_of_supported_exact
-    (hp : p.Prime)
-    (lab : SourceVertex (p := p) (n := n) → TargetVertex (p := p) (m := m))
-    (hadm : IsAlphaAdmissible alpha lab)
-    {c : SourceFlags.Chain (SourceVertex (p := p) (n := n))}
-    (hc : SignedSphere.Supported (SignedSphere.ExactStrictFlag k) c) :
-    PositiveTarget.labelLists lab c ∈
-      allowedPositiveDegree p m alpha (k - 1) := by
-  have hc' : c ∈ Finsupp.supported ℤ ℤ
-      {l | SignedSphere.ExactStrictFlag k l} := by
-    rw [Finsupp.mem_supported]
-    intro l hl
-    exact hc l (Finsupp.mem_support_iff.mp hl)
-  have hle : Finsupp.supported ℤ ℤ
-        {l | SignedSphere.ExactStrictFlag k l} ≤
-      (allowedPositiveDegree p m alpha (k - 1)).comap
-        (PositiveTarget.labelLists lab) := by
-    rw [Finsupp.supported_eq_span_single]
-    apply Submodule.span_le.2
-    rintro _ ⟨l, hl, rfl⟩
-    exact labelLists_basis_mem_allowedPositiveDegree hp lab hadm l hl
-  exact hle hc'
 
 /-! ## Boundary closure of the allowed target complex -/
 
@@ -5976,23 +4264,11 @@ theorem targetAct_coe (a : ZMod p) (c : Chain p m alpha) :
       PositiveTarget.map (targetShift (m := m) a) c :=
   rfl
 
-theorem targetAct_boundary (a : ZMod p) (c : Chain p m alpha) :
-    targetAct (alpha := alpha) a (boundary p m alpha c) =
-      boundary p m alpha (targetAct (alpha := alpha) a c) := by
-  apply Subtype.ext
-  change TargetChains.reducedMap (targetShift (m := m) a)
-      (TargetChains.reducedBoundary ℤ (TargetVertex (p := p) (m := m)) c.1) =
-    TargetChains.reducedBoundary ℤ (TargetVertex (p := p) (m := m))
-      (TargetChains.reducedMap (targetShift (m := m) a) c.1)
-  exact TargetChains.reducedMap_reducedBoundary
-    (targetShift (m := m) a) c.1
-
 end
 
 end PositiveAllowed
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/CyclicAlgebra.lean` -/
 
@@ -6033,21 +4309,6 @@ def augmentation [NeZero p] [Fintype ι] : FreeCyclic p ι →+ ℤ where
 
 @[simp] theorem N_apply [NeZero p] (x : FreeCyclic p ι) (i : ι) (a : ZMod p) :
     N x i a = ∑ b : ZMod p, x i b := rfl
-
-theorem D_comp_N [NeZero p] :
-    (D : FreeCyclic p ι →+ FreeCyclic p ι).comp N = 0 := by
-  ext x i a
-  simp
-
-theorem N_comp_D [NeZero p] :
-    (N : FreeCyclic p ι →+ FreeCyclic p ι).comp D = 0 := by
-  ext x i a
-  simp only [AddMonoidHom.comp_apply, N_apply, D_apply, AddMonoidHom.zero_apply]
-  rw [Finset.sum_sub_distrib]
-  have hshift : (∑ b : ZMod p, x i (b + 1)) = ∑ b : ZMod p, x i b := by
-    exact Fintype.sum_equiv (Equiv.addRight 1) _ _ (fun _ => rfl)
-  rw [hshift, sub_self]
-  rfl
 
 @[simp] theorem augmentation_N [NeZero p] [Fintype ι] (x : FreeCyclic p ι) :
     augmentation (N x) = (p : ℤ) * augmentation x := by
@@ -6147,44 +4408,9 @@ theorem exists_D_of_N_eq_zero [NeZero p] {x : FreeCyclic p ι} (hx : N x = 0) :
       simp only [Finset.sum_range_zero, zero_sub]
       omega
 
-theorem op_period_two [NeZero p] (n : ℕ) :
-    (op (n + 2) : FreeCyclic p ι →+ FreeCyclic p ι) = op n := by
-  have hiff : Odd (n + 2) ↔ Odd n := by
-    rw [show n + 2 = (n + 1) + 1 by omega, Nat.odd_add_one, Nat.odd_add_one]
-    simp
-  by_cases hn : Odd n
-  · have hn2 : Odd (n + 2) := hiff.mpr hn
-    simp [op, hn, hn2]
-  · have hn2 : ¬ Odd (n + 2) := fun h => hn (hiff.mp h)
-    simp [op, hn, hn2]
-
-theorem adjacent_ops_comp [NeZero p] (n : ℕ) :
-    (op (n + 1) : FreeCyclic p ι →+ FreeCyclic p ι).comp (op n) = 0 := by
-  rcases Nat.even_or_odd n with hn | hn
-  · have hno : ¬ Odd n := Nat.not_odd_iff_even.mpr hn
-    have hs : Odd (n + 1) := hn.add_one
-    simp [op, hno, hs, D_comp_N]
-  · have hs : ¬ Odd (n + 1) := Nat.not_odd_iff_even.mpr hn.add_one
-    simp [op, hn, hs, N_comp_D]
-
-theorem augmentation_contradiction [NeZero p] [Fintype ι] (hp : 1 < p)
-    (boundary : FreeCyclic p κ →+ FreeCyclic p ι)
-    (hboundary : ∀ z, augmentation (boundary z) = 0)
-    (c0 : FreeCyclic p ι) (hc0 : augmentation c0 = 1)
-    (b1 : FreeCyclic p κ) (b0 : FreeCyclic p ι)
-    (hdecomp : c0 = boundary b1 + N b0) : False := by
-  have h : (1 : ℤ) = (p : ℤ) * augmentation b0 := by
-    rw [← hc0, hdecomp, map_add, hboundary, augmentation_N, zero_add]
-  have hp0 : (p : ℤ) ≠ 0 := by omega
-  have hdivZ : (p : ℤ) ∣ 1 := ⟨augmentation b0, h⟩
-  have hdivN : p ∣ 1 := by exact_mod_cast hdivZ
-  have hle := Nat.le_of_dvd (by omega : 0 < 1) hdivN
-  omega
-
 end CyclicAlgebra
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/TargetOrbits.lean` -/
 
@@ -6524,68 +4750,6 @@ noncomputable def normOp {p m alpha q : ℕ} (hp : p.Prime) :
       (CyclicAlgebra.N (chainCoords hp c))) = _
   rw [(chainCoords hp).apply_symm_apply]
 
-theorem exists_normOp_of_tau_eq_zero {p m alpha q : ℕ} (hp : p.Prime)
-    {c : FaceChain p m alpha q} (hc : tau hp c = 0) :
-    ∃ d, normOp hp d = c := by
-  letI : NeZero p := ⟨hp.ne_zero⟩
-  have hD : CyclicAlgebra.D (chainCoords hp c) = 0 := by
-    rw [← chainCoords_tau]
-    simp [hc]
-  obtain ⟨y, hy⟩ := CyclicAlgebra.exists_N_of_D_eq_zero hD
-  refine ⟨(chainCoords hp).symm y, ?_⟩
-  apply (chainCoords hp).injective
-  rw [chainCoords_normOp, (chainCoords hp).apply_symm_apply, hy]
-
-theorem exists_tau_of_normOp_eq_zero {p m alpha q : ℕ} (hp : p.Prime)
-    {c : FaceChain p m alpha q} (hc : normOp hp c = 0) :
-    ∃ d, tau hp d = c := by
-  letI : NeZero p := ⟨hp.ne_zero⟩
-  have hN : CyclicAlgebra.N (chainCoords hp c) = 0 := by
-    rw [← chainCoords_normOp]
-    simp [hc]
-  obtain ⟨y, hy⟩ := CyclicAlgebra.exists_D_of_N_eq_zero hN
-  refine ⟨(chainCoords hp).symm y, ?_⟩
-  apply (chainCoords hp).injective
-  rw [chainCoords_tau, (chainCoords hp).apply_symm_apply, hy]
-
-theorem ker_tau_eq_range_normOp {p m alpha q : ℕ} (hp : p.Prime) :
-    AddMonoidHom.ker (tau (m := m) (alpha := alpha) (q := q) hp) =
-      AddMonoidHom.range (normOp (m := m) (alpha := alpha) (q := q) hp) := by
-  ext c
-  constructor
-  · intro hc
-    exact exists_normOp_of_tau_eq_zero hp hc
-  · rintro ⟨d, rfl⟩
-    change tau hp (normOp hp d) = 0
-    apply (chainCoords hp).injective
-    letI : NeZero p := ⟨hp.ne_zero⟩
-    rw [map_zero, chainCoords_tau, chainCoords_normOp]
-    have h := congrArg
-      (fun f : CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) →+
-          CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) ↦
-        f (chainCoords hp d))
-      (CyclicAlgebra.D_comp_N (p := p) (ι := FaceOrbit p m alpha q))
-    simpa using h
-
-theorem ker_normOp_eq_range_tau {p m alpha q : ℕ} (hp : p.Prime) :
-    AddMonoidHom.ker (normOp (m := m) (alpha := alpha) (q := q) hp) =
-      AddMonoidHom.range (tau (m := m) (alpha := alpha) (q := q) hp) := by
-  ext c
-  constructor
-  · intro hc
-    exact exists_tau_of_normOp_eq_zero hp hc
-  · rintro ⟨d, rfl⟩
-    change normOp hp (tau hp d) = 0
-    apply (chainCoords hp).injective
-    letI : NeZero p := ⟨hp.ne_zero⟩
-    rw [map_zero, chainCoords_normOp, chainCoords_tau]
-    have h := congrArg
-      (fun f : CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) →+
-          CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) ↦
-        f (chainCoords hp d))
-      (CyclicAlgebra.N_comp_D (p := p) (ι := FaceOrbit p m alpha q))
-    simpa using h
-
 /-! ## One positive allowed module containing every degree
 
 The sigma index excludes the empty face because every `AllowedFace ... q` has
@@ -6717,7 +4881,6 @@ end TargetOrbits
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos780/External/TargetOrientation.lean` -/
 
 section
@@ -6728,10 +4891,6 @@ namespace TargetOrientation
 open TargetChains TargetOrbits LabelChainMap
 
 variable {p m : ℕ} [NeZero p]
-
-/-- The one shared order used by the exterior target and the orbit signs. -/
-@[instance_reducible] noncomputable def sharedTargetOrder : LinearOrder (Label p m) :=
-  LabelChainMap.targetLinearOrder
 
 noncomputable local instance : LinearOrder (Label p m) :=
   LabelChainMap.targetLinearOrder
@@ -6946,24 +5105,6 @@ noncomputable def actualFaceAct :
   exact congrFun ((Finsupp.linearEquivFunOnFinite ℤ ℤ
     (AllowedFace p m alpha q)).apply_symm_apply f) t
 
-theorem actualFaceAct_single_one (s : AllowedFace p m alpha q) :
-    actualFaceAct (Finsupp.single s 1) =
-      Finsupp.single (shiftFace 1 s) (targetOrientation 1 s.1 : ℤ) := by
-  apply Finsupp.ext
-  intro t
-  rw [actualFaceAct_apply]
-  by_cases h : t = shiftFace 1 s
-  · subst t
-    have hs : shiftFace (-1) (shiftFace 1 s) = s := by simp
-    rw [hs]
-    simp
-  · have hne : shiftFace (-1) t ≠ s := by
-      intro he
-      apply h
-      rw [← he]
-      simp
-    simp [h, hne]
-
 /-- Forget the cardinality/allowedness witness and regard a fixed-degree
 allowed-face chain as an ordinary exterior target chain. -/
 noncomputable def faceInclusion :
@@ -6974,21 +5115,6 @@ noncomputable def faceInclusion :
     faceInclusion (p := p) (m := m) (alpha := alpha) (q := q)
         (Finsupp.single s z) = Finsupp.single s.1 z := by
   simp [faceInclusion]
-
-/-- The coefficientwise action above really is the restriction of the
-concrete exterior action used by `LabelChainMap`. -/
-theorem faceInclusion_actualFaceAct (c : FaceChain p m alpha q) :
-    faceInclusion (actualFaceAct c) =
-      LabelChainMap.targetAct 1 (faceInclusion c) := by
-  induction c using Finsupp.induction_linear with
-  | zero => simp
-  | add c d hc hd => simp only [map_add, hc, hd]
-  | single s z =>
-      rw [show Finsupp.single s z = z • Finsupp.single s 1 by simp]
-      simp only [map_smul]
-      rw [actualFaceAct_single_one, faceInclusion_single,
-        faceInclusion_single, targetAct_single_one]
-      rfl
 
 /-- **Actual-action conjugacy.**  With orbit parameter reversed and each
 canonical face reoriented by its exterior permutation sign, the concrete
@@ -7054,78 +5180,11 @@ noncomputable def actualNorm (hp : p.Prime) :
       (CyclicAlgebra.N (orientedChainCoords hp c))) = _
   rw [(orientedChainCoords hp).apply_symm_apply]
 
-theorem exists_actualNorm_of_actualTau_eq_zero (hp : p.Prime)
-    {c : FaceChain p m alpha q} (hc : actualTau c = 0) :
-    ∃ d, actualNorm hp d = c := by
-  have hD : CyclicAlgebra.D (orientedChainCoords hp c) = 0 := by
-    rw [← orientedChainCoords_actualTau]
-    simp [hc]
-  obtain ⟨y, hy⟩ := CyclicAlgebra.exists_N_of_D_eq_zero hD
-  refine ⟨(orientedChainCoords hp).symm y, ?_⟩
-  apply (orientedChainCoords hp).injective
-  rw [orientedChainCoords_actualNorm,
-    (orientedChainCoords hp).apply_symm_apply, hy]
-
-theorem exists_actualTau_of_actualNorm_eq_zero (hp : p.Prime)
-    {c : FaceChain p m alpha q} (hc : actualNorm hp c = 0) :
-    ∃ d, actualTau d = c := by
-  have hN : CyclicAlgebra.N (orientedChainCoords hp c) = 0 := by
-    rw [← orientedChainCoords_actualNorm]
-    simp [hc]
-  obtain ⟨y, hy⟩ := CyclicAlgebra.exists_D_of_N_eq_zero hN
-  refine ⟨(orientedChainCoords hp).symm y, ?_⟩
-  apply (orientedChainCoords hp).injective
-  rw [orientedChainCoords_actualTau,
-    (orientedChainCoords hp).apply_symm_apply, hy]
-
-theorem ker_actualTau_eq_range_actualNorm (hp : p.Prime) :
-    AddMonoidHom.ker
-        (actualTau (p := p) (m := m) (alpha := alpha) (q := q)) =
-      AddMonoidHom.range
-        (actualNorm (m := m) (alpha := alpha) (q := q) hp) := by
-  ext c
-  constructor
-  · intro hc
-    exact exists_actualNorm_of_actualTau_eq_zero hp hc
-  · rintro ⟨d, rfl⟩
-    change actualTau (actualNorm hp d) = 0
-    apply (orientedChainCoords hp).injective
-    rw [map_zero, orientedChainCoords_actualTau,
-      orientedChainCoords_actualNorm]
-    have h := congrArg
-      (fun f : CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) →+
-          CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) ↦
-        f (orientedChainCoords hp d))
-      (CyclicAlgebra.D_comp_N (p := p) (ι := FaceOrbit p m alpha q))
-    simpa using h
-
-theorem ker_actualNorm_eq_range_actualTau (hp : p.Prime) :
-    AddMonoidHom.ker
-        (actualNorm (m := m) (alpha := alpha) (q := q) hp) =
-      AddMonoidHom.range
-        (actualTau (p := p) (m := m) (alpha := alpha) (q := q)) := by
-  ext c
-  constructor
-  · intro hc
-    exact exists_actualTau_of_actualNorm_eq_zero hp hc
-  · rintro ⟨d, rfl⟩
-    change actualNorm hp (actualTau d) = 0
-    apply (orientedChainCoords hp).injective
-    rw [map_zero, orientedChainCoords_actualNorm,
-      orientedChainCoords_actualTau]
-    have h := congrArg
-      (fun f : CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) →+
-          CyclicAlgebra.FreeCyclic p (FaceOrbit p m alpha q) ↦
-        f (orientedChainCoords hp d))
-      (CyclicAlgebra.N_comp_D (p := p) (ι := FaceOrbit p m alpha q))
-    simpa using h
-
 end FixedDegree
 
 end TargetOrientation
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/SignedTargetOrbits.lean` -/
 
@@ -7655,52 +5714,9 @@ theorem exists_actualTotalTau_of_actualTotalNorm_eq_zero (hp : p.Prime)
   rw [orientedTotalCoords_actualTotalTau,
     (orientedTotalCoords hp).apply_symm_apply, hy]
 
-theorem ker_actualTotalTau_eq_range_actualTotalNorm (hp : p.Prime) :
-    AddMonoidHom.ker
-        (actualTotalTau (p := p) (m := m) (alpha := alpha)) =
-      AddMonoidHom.range
-        (actualTotalNorm (m := m) (alpha := alpha) hp) := by
-  ext c
-  constructor
-  · intro hc
-    exact exists_actualTotalNorm_of_actualTotalTau_eq_zero hp hc
-  · rintro ⟨d, rfl⟩
-    change actualTotalTau (actualTotalNorm hp d) = 0
-    apply (orientedTotalCoords hp).injective
-    rw [map_zero, orientedTotalCoords_actualTotalTau,
-      orientedTotalCoords_actualTotalNorm]
-    have h := congrArg
-      (fun f : CyclicAlgebra.FreeCyclic p (TotalOrbit p m alpha) →+
-          CyclicAlgebra.FreeCyclic p (TotalOrbit p m alpha) ↦
-        f (orientedTotalCoords hp d))
-      (CyclicAlgebra.D_comp_N (p := p) (ι := TotalOrbit p m alpha))
-    simpa using h
-
-theorem ker_actualTotalNorm_eq_range_actualTotalTau (hp : p.Prime) :
-    AddMonoidHom.ker
-        (actualTotalNorm (m := m) (alpha := alpha) hp) =
-      AddMonoidHom.range
-        (actualTotalTau (p := p) (m := m) (alpha := alpha)) := by
-  ext c
-  constructor
-  · intro hc
-    exact exists_actualTotalTau_of_actualTotalNorm_eq_zero hp hc
-  · rintro ⟨d, rfl⟩
-    change actualTotalNorm hp (actualTotalTau d) = 0
-    apply (orientedTotalCoords hp).injective
-    rw [map_zero, orientedTotalCoords_actualTotalNorm,
-      orientedTotalCoords_actualTotalTau]
-    have h := congrArg
-      (fun f : CyclicAlgebra.FreeCyclic p (TotalOrbit p m alpha) →+
-          CyclicAlgebra.FreeCyclic p (TotalOrbit p m alpha) ↦
-        f (orientedTotalCoords hp d))
-      (CyclicAlgebra.N_comp_D (p := p) (ι := TotalOrbit p m alpha))
-    simpa using h
-
 end SignedTargetOrbits
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/ReducedLabelEquivariance.lean` -/
 
@@ -7715,62 +5731,9 @@ variable {p n m : ℕ} [NeZero p]
 noncomputable local instance : LinearOrder (LabelChainMap.TargetVertex p m) :=
   LabelChainMap.targetLinearOrder
 
-theorem normalizedBasis_eq_labelList
-    (lab : LabelChainMap.SourceVertex p n → LabelChainMap.TargetVertex p m)
-    (l : List (LabelChainMap.SourceVertex p n)) :
-    LabelChainMap.normalizedBasis lab l = TargetBridge.labelList lab l := by
-  apply (TargetChains.toExterior ℤ (LabelChainMap.TargetVertex p m)).injective
-  rw [LabelChainMap.toExterior_normalizedBasis]
-  induction l with
-  | nil => simp [LabelChainMap.exteriorFlag]
-  | cons x xs ih =>
-      rw [TargetBridge.toExterior_labelList_cons]
-      simp only [LabelChainMap.exteriorFlag_cons, ih]
-
-theorem normalizedMap_eq_labelLists
-    (lab : LabelChainMap.SourceVertex p n → LabelChainMap.TargetVertex p m)
-    (c : SourceFlags.Chain (LabelChainMap.SourceVertex p n)) :
-    LabelChainMap.normalizedMap lab c = TargetBridge.labelLists lab c := by
-  induction c using Finsupp.induction_linear with
-  | zero => simp
-  | add c d hc hd => simpa only [map_add, hc, hd]
-  | single l z =>
-      rw [show Finsupp.single l z = z • SourceFlags.basis l by
-        simp [SourceFlags.basis]]
-      simp only [map_smul, LabelChainMap.normalizedMap_basis,
-        TargetBridge.labelLists_basis, normalizedBasis_eq_labelList]
-
-theorem positiveLabelLists_eq_projectNormalized
-    (lab : LabelChainMap.SourceVertex p n → LabelChainMap.TargetVertex p m)
-    (c : SourceFlags.Chain (LabelChainMap.SourceVertex p n)) :
-    PositiveTarget.labelLists lab c =
-      TargetChains.projectPositive ℤ (LabelChainMap.TargetVertex p m)
-        (LabelChainMap.normalizedMap lab c) := by
-  apply Subtype.ext
-  simp only [PositiveTarget.labelLists, LinearMap.comp_apply,
-    normalizedMap_eq_labelLists]
-
-/-- The reduced exterior labeling map is equivariant for the literal
-positive target action. -/
-theorem positiveLabelLists_equivariant
-    (lab : LabelChainMap.SourceVertex p n → LabelChainMap.TargetVertex p m)
-    (heq : IsEquivariant lab) (a : ZMod p)
-    (c : SourceFlags.Chain (LabelChainMap.SourceVertex p n)) :
-    PositiveTarget.labelLists lab
-        (SourceFlags.mapVertices (NonzeroSignedVector.shift a) c) =
-      SignedTargetOrbits.targetAct a (PositiveTarget.labelLists lab c) := by
-  rw [positiveLabelLists_eq_projectNormalized,
-    positiveLabelLists_eq_projectNormalized,
-    LabelChainMap.normalizedMap_equivariant lab heq]
-  apply Subtype.ext
-  exact congrArg Subtype.val
-    (TargetChains.projectPositive_map_projectPositive
-      (LabelChainMap.targetShift a) (LabelChainMap.normalizedMap lab c)).symm
-
 end ReducedLabelEquivariance
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/AllowedComplex.lean` -/
 
@@ -8001,7 +5964,6 @@ end AllowedComplex
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos780/External/PeriodicDescent.lean` -/
 
 section
@@ -8089,7 +6051,6 @@ end Datum
 end PeriodicDescent
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/CyclicExactness.lean` -/
 
@@ -8181,114 +6142,9 @@ theorem exists_cyclicPrimitive_of_N_eq_zero [NeZero p]
     ∃ y, D y = x :=
   ⟨cyclicPrimitive x, D_cyclicPrimitive_of_N_eq_zero hx⟩
 
-/-- The kernel of the cyclic difference is contained in the range of the norm. -/
-theorem ker_D_le_range_N [NeZero p] :
-    (D : FreeCyclic p ι →+ FreeCyclic p ι).ker ≤
-      (N : FreeCyclic p ι →+ FreeCyclic p ι).range := by
-  intro x hx
-  obtain ⟨y, hy⟩ := exists_N_of_D_eq_zero hx
-  exact ⟨y, hy⟩
-
-/-- The kernel of the norm is contained in the range of the cyclic difference.
-
-The witness in `exists_cyclicPrimitive_of_N_eq_zero` is the explicit cyclic partial-sum
-primitive.  Thus this statement does not use a choice of representatives or
-any divisibility argument in `ℤ`.
--/
-theorem ker_N_le_range_D [NeZero p] :
-    (N : FreeCyclic p ι →+ FreeCyclic p ι).ker ≤
-      (D : FreeCyclic p ι →+ FreeCyclic p ι).range := by
-  intro x hx
-  obtain ⟨y, hy⟩ := exists_cyclicPrimitive_of_N_eq_zero hx
-  exact ⟨y, hy⟩
-
-theorem range_N_le_ker_D [NeZero p] :
-    (N : FreeCyclic p ι →+ FreeCyclic p ι).range ≤
-      (D : FreeCyclic p ι →+ FreeCyclic p ι).ker := by
-  rintro x ⟨y, rfl⟩
-  have h := congrArg
-    (fun f : FreeCyclic p ι →+ FreeCyclic p ι => f y)
-    (D_comp_N (p := p) (ι := ι))
-  simpa using h
-
-theorem range_D_le_ker_N [NeZero p] :
-    (D : FreeCyclic p ι →+ FreeCyclic p ι).range ≤
-      (N : FreeCyclic p ι →+ FreeCyclic p ι).ker := by
-  rintro x ⟨y, rfl⟩
-  have h := congrArg
-    (fun f : FreeCyclic p ι →+ FreeCyclic p ι => f y)
-    (N_comp_D (p := p) (ι := ι))
-  simpa using h
-
-/-- Exactness at the `D` term of the two-periodic cyclic resolution. -/
-theorem ker_D_eq_range_N [NeZero p] :
-    (D : FreeCyclic p ι →+ FreeCyclic p ι).ker =
-      (N : FreeCyclic p ι →+ FreeCyclic p ι).range :=
-  le_antisymm ker_D_le_range_N range_N_le_ker_D
-
-/-- Exactness at the `N` term of the two-periodic cyclic resolution. -/
-theorem ker_N_eq_range_D [NeZero p] :
-    (N : FreeCyclic p ι →+ FreeCyclic p ι).ker =
-      (D : FreeCyclic p ι →+ FreeCyclic p ι).range :=
-  le_antisymm ker_N_le_range_D range_D_le_ker_N
-
 /-! ## Augmentation -/
 
-/-- Cyclic differences have augmentation zero. -/
-@[simp] theorem augmentation_D [NeZero p] [Fintype ι] (x : FreeCyclic p ι) :
-    augmentation (D x) = 0 := by
-  simp only [augmentation, AddMonoidHom.coe_mk, ZeroHom.coe_mk, D_apply]
-  apply Finset.sum_eq_zero
-  intro i _hi
-  rw [Finset.sum_sub_distrib]
-  have hshift : (∑ a : ZMod p, x i (a + 1)) = ∑ a : ZMod p, x i a := by
-    exact Fintype.sum_equiv (Equiv.addRight 1) _ _ (fun _ => rfl)
-  rw [hshift, sub_self]
-
-theorem augmentation_eq_zero_of_mem_range_D [NeZero p] [Fintype ι]
-    {x : FreeCyclic p ι}
-    (hx : x ∈ (D : FreeCyclic p ι →+ FreeCyclic p ι).range) :
-    augmentation x = 0 := by
-  obtain ⟨y, rfl⟩ := hx
-  exact augmentation_D y
-
-theorem augmentation_eq_zero_of_N_eq_zero [NeZero p] [Fintype ι]
-    {x : FreeCyclic p ι} (hx : N x = 0) : augmentation x = 0 := by
-  apply augmentation_eq_zero_of_mem_range_D
-  exact ker_N_le_range_D hx
-
-/-- The norm has augmentation divisible by the orbit size. -/
-theorem orbitSize_dvd_augmentation_N [NeZero p] [Fintype ι]
-    (x : FreeCyclic p ι) : (p : ℤ) ∣ augmentation (N x) := by
-  rw [augmentation_N]
-  exact dvd_mul_right _ _
-
 /-! ## Packaging for `PeriodicDescent` -/
-
-/-- Package the explicit cyclic exactness identities as a
-`PeriodicDescent.Datum`.  The boundary-specific hypotheses are deliberately
-arguments: exactness of `D,N` is independent of the chain boundary.
--/
-def periodicDatum [NeZero p]
-    (boundary : FreeCyclic p ι →+ FreeCyclic p ι)
-    (boundary_sq : ∀ x, boundary (boundary x) = 0)
-    (boundary_D : ∀ x, boundary (D x) = D (boundary x))
-    (boundary_N : ∀ x, boundary (N x) = N (boundary x)) :
-    PeriodicDescent.Datum (FreeCyclic p ι) where
-  boundary := boundary
-  tau := D
-  normOp := N
-  boundary_sq := boundary_sq
-  boundary_tau := boundary_D
-  boundary_norm := boundary_N
-  ker_tau := fun {_x} hx => exists_N_of_D_eq_zero hx
-  ker_norm := fun {_x} hx => exists_cyclicPrimitive_of_N_eq_zero hx
-
-/-- The cyclic periodic datum with zero chain boundary, useful for testing the
-resolution independently of a geometric chain complex. -/
-def zeroBoundaryDatum [NeZero p] :
-    PeriodicDescent.Datum (FreeCyclic p ι) :=
-  periodicDatum 0 (by simp) (by simp) (by simp)
 
 end CyclicAlgebra
 
@@ -8337,48 +6193,10 @@ theorem ker_norm {x : A} (hx : T.normOp x = 0) : ∃ y, T.tau y = x := by
   refine ⟨T.equiv.symm z, T.equiv.injective ?_⟩
   rw [T.equiv_tau, T.equiv.apply_symm_apply, hz]
 
-/-- The ambient norm multiplies augmentation by the orbit size. -/
-@[simp] theorem augmentation_norm (x : A) :
-    T.augmentation (T.normOp x) = (p : ℤ) * T.augmentation x := by
-  rw [T.augmentation_equiv, T.equiv_norm, CyclicAlgebra.augmentation_N,
-    ← T.augmentation_equiv]
-
-/-- The transported cyclic difference has augmentation zero. -/
-@[simp] theorem augmentation_tau (x : A) :
-    T.augmentation (T.tau x) = 0 := by
-  rw [T.augmentation_equiv, T.equiv_tau, CyclicAlgebra.augmentation_D]
-
-/-- Install the transported exactness equations directly into the descent
-datum.  Only the usual boundary-square and equivariance laws remain as
-arguments. -/
-def toPeriodicDatum
-    (boundary : A →+ A)
-    (boundary_sq : ∀ x, boundary (boundary x) = 0)
-    (boundary_tau : ∀ x, boundary (T.tau x) = T.tau (boundary x))
-    (boundary_norm : ∀ x, boundary (T.normOp x) = T.normOp (boundary x)) :
-    PeriodicDescent.Datum A where
-  boundary := boundary
-  tau := T.tau
-  normOp := T.normOp
-  boundary_sq := boundary_sq
-  boundary_tau := boundary_tau
-  boundary_norm := boundary_norm
-  ker_tau := T.ker_tau
-  ker_norm := T.ker_norm
-
-/-- Both exactness implications and the norm-augmentation identity, as one
-projection-free theorem. -/
-theorem exactness_and_augmentation :
-    (∀ {x : A}, T.tau x = 0 → ∃ y, T.normOp y = x) ∧
-    (∀ {x : A}, T.normOp x = 0 → ∃ y, T.tau y = x) ∧
-    (∀ x : A, T.augmentation (T.normOp x) = (p : ℤ) * T.augmentation x) :=
-  ⟨fun hx ↦ T.ker_tau hx, fun hx ↦ T.ker_norm hx, T.augmentation_norm⟩
-
 end Transport
 end CyclicExactness
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos780/External/AllowedDescent.lean` -/
 
@@ -8425,11 +6243,6 @@ noncomputable def positiveBoundary : PA (p := p) (m := m) (alpha := alpha) →�
       apply Submodule.sub_mem
       · exact PositiveAllowed.boundary_mem_allowed c.2
       · exact single_empty_mem_allowed _)
-
-theorem positiveBoundary_sq (c : PA (p := p) (m := m) (alpha := alpha)) :
-    positiveBoundary (positiveBoundary c) = 0 := by
-  apply Subtype.ext
-  exact PositiveTarget.boundary_boundary ℤ (Vertex (p := p) (m := m)) c.1
 
 noncomputable def totalBoundary : Total (p := p) (m := m) (alpha := alpha) →ₗ[ℤ]
     Total (p := p) (m := m) (alpha := alpha) :=
@@ -8585,7 +6398,6 @@ end AllowedDescent
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos780/External/Erdos780Core.lean` -/
 
 section
@@ -8650,204 +6462,6 @@ theorem augmentation_targetAct [NeZero p] (a : ZMod p)
   augmentation_map (LabelChainMap.targetShift a)
     (SignedTargetOrbits.targetShift_injective a) c
 
-noncomputable def liftSphere [NeZero p]
-    (hp : p.Prime)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (i : ℕ) (hi : i < n) : Total p m alpha :=
-  (AllowedComplex.totalChainEquivPositiveAllowed
-    (p := p) (m := m) (alpha := alpha)).symm
-      ⟨PositiveTarget.labelLists lab (SignedSphere.y p n i), by
-        exact PositiveAllowed.labelLists_mem_allowedPositive_of_supported
-          hp lab hadm ((SignedSphere.y_supported_exact hi).mono (by
-            intro l hl
-            refine ⟨hl.1, ?_⟩
-            intro hnil
-            subst l
-            simp [SignedSphere.ExactStrictFlag] at hl))⟩
-
-theorem totalInclusion_liftSphere [NeZero p]
-    (hp : p.Prime)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (i : ℕ) (hi : i < n) :
-    SignedTargetOrbits.totalInclusion
-        (liftSphere hp lab hadm i hi) =
-      PositiveTarget.labelLists lab (SignedSphere.y p n i) := by
-  rw [← AllowedDescent.equiv_coe_eq_totalInclusion]
-  simp [liftSphere]
-
-theorem totalInclusion_tau_liftSphere [NeZero p]
-    (hp : p.Prime)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (heq : IsEquivariant lab)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (i : ℕ) (hi : i < n) :
-    SignedTargetOrbits.totalInclusion
-        (SignedTargetOrbits.actualTotalTau (liftSphere hp lab hadm i hi)) =
-      PositiveTarget.labelLists lab
-        (SignedSphere.tau (SignedSphere.y p n i)) := by
-  change SignedTargetOrbits.totalInclusion
-      (SignedTargetOrbits.actualTotalAct (liftSphere hp lab hadm i hi) -
-        liftSphere hp lab hadm i hi) = _
-  rw [map_sub, SignedTargetOrbits.totalInclusion_actualTotalAct,
-    totalInclusion_liftSphere]
-  rw [SignedSphere.tau]
-  simp only [LinearMap.sub_apply, LinearMap.id_apply, map_sub]
-  exact congrArg (fun z => z - PositiveTarget.labelLists lab
-      (SignedSphere.y p n i))
-    (ReducedLabelEquivariance.positiveLabelLists_equivariant
-      lab heq 1 (SignedSphere.y p n i)).symm
-
-theorem totalInclusion_norm_liftSphere [NeZero p]
-    (hp : p.Prime)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (heq : IsEquivariant lab)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (i : ℕ) (hi : i < n) :
-    SignedTargetOrbits.totalInclusion
-        (SignedTargetOrbits.actualTotalNorm hp (liftSphere hp lab hadm i hi)) =
-      PositiveTarget.labelLists lab
-        (SignedSphere.norm (SignedSphere.y p n i)) := by
-  rw [SignedTargetOrbits.actualTotalNorm_eq_geometricTotalNorm hp]
-  change SignedTargetOrbits.totalInclusion
-      (SignedTargetOrbits.geometricTotalNorm (liftSphere hp lab hadm i hi)) = _
-  simp only [SignedTargetOrbits.geometricTotalNorm, SignedSphere.norm,
-    LinearMap.sum_apply]
-  rw [map_sum, map_sum]
-  apply Finset.sum_congr rfl
-  intro a ha
-  rw [SignedTargetOrbits.totalInclusion_targetAct,
-    totalInclusion_liftSphere]
-  exact (ReducedLabelEquivariance.positiveLabelLists_equivariant
-    lab heq a (SignedSphere.y p n i)).symm
-
-theorem boundary_liftSphere_succ [NeZero p]
-    (hp : p.Prime)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (heq : IsEquivariant lab)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (i : ℕ) (hi : i + 1 < n) :
-    AllowedDescent.totalBoundary (liftSphere hp lab hadm (i + 1) hi) =
-      (AllowedDescent.datum hp).op (i + 1)
-        (liftSphere hp lab hadm i (by omega)) := by
-  apply SignedTargetOrbits.totalInclusion_injective
-  rw [AllowedDescent.totalInclusion_boundary,
-    totalInclusion_liftSphere,
-    PositiveTarget.labelLists_boundary,
-    SignedSphere.boundary_y_succ hi]
-  by_cases hodd : Odd (i + 1)
-  · rw [PeriodicDescent.Datum.op, if_pos hodd,
-      SignedSphere.periodicOp, if_pos (Nat.odd_iff.mp hodd)]
-    exact (totalInclusion_tau_liftSphere hp lab heq hadm i (by omega)).symm
-  · rw [PeriodicDescent.Datum.op, if_neg hodd,
-      SignedSphere.periodicOp, if_neg (by
-        intro hmod
-        exact hodd (Nat.odd_iff.mpr hmod))]
-    exact (totalInclusion_norm_liftSphere hp lab heq hadm i (by omega)).symm
-
-theorem liftSphere_top_eq_zero [NeZero p]
-    (hp : p.Prime) (halpha : alpha ≤ m)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (hQn : alpha + (m - alpha) * (p - 1) < n) :
-    liftSphere hp lab hadm
-        (alpha + (m - alpha) * (p - 1)) hQn = 0 := by
-  apply SignedTargetOrbits.totalInclusion_injective
-  rw [totalInclusion_liftSphere]
-  let Q := alpha + (m - alpha) * (p - 1)
-  have hm := PositiveAllowed.labelLists_mem_allowedPositiveDegree_of_supported_exact
-    hp lab hadm (SignedSphere.y_supported_exact hQn)
-  change TargetChains.positiveInclusion ℤ (Vertex p m)
-      (PositiveTarget.labelLists lab (SignedSphere.y p n Q)) ∈
-    AllowedFaces.allowedDegreeChains ℤ p m alpha ((Q + 1) - 1) at hm
-  have hdeg : (Q + 1) - 1 = Q := by omega
-  rw [hdeg, AllowedFaces.allowedDegreeChains_Q_eq_bot halpha] at hm
-  have hz : TargetChains.positiveInclusion ℤ (Vertex p m)
-      (PositiveTarget.labelLists lab (SignedSphere.y p n Q)) = 0 :=
-    (Submodule.mem_bot ℤ).mp hm
-  apply Subtype.ext
-  exact hz
-
-noncomputable def resolutionSequence [NeZero p]
-    (hp : p.Prime)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (hQn : alpha + (m - alpha) * (p - 1) < n) :
-    ℕ → Total p m alpha := fun i =>
-  if hi : i ≤ alpha + (m - alpha) * (p - 1) then
-    liftSphere hp lab hadm i (hi.trans_lt hQn)
-  else 0
-
-theorem resolutionSequence_rel [NeZero p]
-    (hp : p.Prime) (halpha : alpha ≤ m)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (heq : IsEquivariant lab)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (hQn : alpha + (m - alpha) * (p - 1) < n) (i : ℕ) :
-    (AllowedDescent.datum hp).boundary
-        (resolutionSequence hp lab hadm hQn (i + 1)) =
-      (AllowedDescent.datum hp).op (i + 1)
-        (resolutionSequence hp lab hadm hQn i) := by
-  let Q := alpha + (m - alpha) * (p - 1)
-  by_cases hs : i + 1 ≤ Q
-  · have hi : i ≤ Q := by omega
-    have hsucc : resolutionSequence hp lab hadm hQn (i + 1) =
-        liftSphere hp lab hadm (i + 1) (hs.trans_lt hQn) := by
-      rw [resolutionSequence, dif_pos hs]
-    have hcur : resolutionSequence hp lab hadm hQn i =
-        liftSphere hp lab hadm i (hi.trans_lt hQn) := by
-      rw [resolutionSequence, dif_pos hi]
-    rw [hsucc, hcur]
-    exact boundary_liftSphere_succ hp lab heq hadm i
-      ((show i + 1 ≤ Q from hs).trans_lt hQn)
-  · have hsucc : resolutionSequence hp lab hadm hQn (i + 1) = 0 := by
-      rw [resolutionSequence, dif_neg hs]
-    rw [hsucc, map_zero]
-    by_cases hi : i ≤ Q
-    · have hiQ : i = Q := by omega
-      subst i
-      rw [show resolutionSequence hp lab hadm hQn Q =
-          liftSphere hp lab hadm Q hQn by
-            rw [resolutionSequence, dif_pos (le_refl Q)]]
-      rw [liftSphere_top_eq_zero hp halpha lab hadm hQn, map_zero]
-    · rw [show resolutionSequence hp lab hadm hQn i = 0 by
-          rw [resolutionSequence, dif_neg hi], map_zero]
-
-theorem resolutionSequence_top [NeZero p]
-    (hp : p.Prime) (halpha : alpha ≤ m)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (hQn : alpha + (m - alpha) * (p - 1) < n) :
-    resolutionSequence hp lab hadm hQn
-        (alpha + (m - alpha) * (p - 1)) = 0 := by
-  rw [show resolutionSequence hp lab hadm hQn
-      (alpha + (m - alpha) * (p - 1)) =
-      liftSphere hp lab hadm
-        (alpha + (m - alpha) * (p - 1)) hQn by
-    rw [resolutionSequence, dif_pos (le_refl _)]]
-  exact liftSphere_top_eq_zero hp halpha lab hadm hQn
-
-theorem augmentation_liftSphere_zero [NeZero p]
-    (hp : p.Prime)
-    (lab : NonzeroSignedVector p n → Vertex p m)
-    (hadm : IsAlphaAdmissible alpha lab)
-    (hn : 0 < n) :
-    PositiveTarget.augmentation ℤ (Vertex p m)
-        (SignedTargetOrbits.totalInclusion
-          (liftSphere hp lab hadm 0 hn)) = 1 := by
-  rw [totalInclusion_liftSphere, SignedSphere.y_zero hn]
-  let x : NonzeroSignedVector p n := SignedSphere.unit ⟨0, hn⟩ 0
-  change PositiveTarget.augmentation ℤ (Vertex p m)
-      (PositiveTarget.labelLists lab (SourceFlags.basis [x])) = 1
-  change TargetChains.boundary ℤ (Vertex p m)
-      (TargetChains.positiveInclusion ℤ (Vertex p m)
-        (PositiveTarget.labelLists lab (SourceFlags.basis [x]))) ∅ = 1
-  rw [PositiveTarget.positiveInclusion_labelLists_basis_of_nonempty
-    lab [x] (by simp)]
-  rw [TargetBridge.boundary_labelList]
-  simp [SourceFlags.boundaryBasis, PositiveTarget.labelList_nil_eq_single_empty]
-
 theorem augmentation_totalNorm [NeZero p] (hp : p.Prime)
     (c : Total p m alpha) :
     PositiveTarget.augmentation ℤ (Vertex p m)
@@ -8867,51 +6481,11 @@ theorem augmentation_totalNorm [NeZero p] (hp : p.Prime)
     augmentation_targetAct]
   simp
 
-theorem zpTucker_alpha
-    {p n m alpha : ℕ} (hp : p.Prime) (halpha : alpha ≤ m)
-    (lab : NonzeroSignedVector p n → ZMod p × Fin m)
-    (heq : IsEquivariant lab)
-    (hadm : IsAlphaAdmissible alpha lab) :
-    n ≤ alpha + (m - alpha) * (p - 1) := by
-  by_contra hle
-  have hQn : alpha + (m - alpha) * (p - 1) < n := by omega
-  letI : NeZero p := ⟨hp.ne_zero⟩
-  let seq := resolutionSequence hp lab hadm hQn
-  obtain ⟨z₁, z₀, hdecomp⟩ :=
-    (AllowedDescent.datum hp).bottom_decomposition seq
-      (resolutionSequence_rel hp halpha lab heq hadm hQn)
-      (alpha + (m - alpha) * (p - 1))
-      (resolutionSequence_top hp halpha lab hadm hQn)
-  have haug0 : PositiveTarget.augmentation ℤ (Vertex p m)
-      (SignedTargetOrbits.totalInclusion (seq 0)) = 1 := by
-    change PositiveTarget.augmentation ℤ (Vertex p m)
-      (SignedTargetOrbits.totalInclusion
-        (resolutionSequence hp lab hadm hQn 0)) = 1
-    rw [show resolutionSequence hp lab hadm hQn 0 =
-        liftSphere hp lab hadm 0 (by omega) by
-      simp [resolutionSequence]]
-    exact augmentation_liftSphere_zero hp lab hadm (by omega)
-  have h : (1 : ℤ) = (p : ℤ) *
-      PositiveTarget.augmentation ℤ (Vertex p m)
-        (SignedTargetOrbits.totalInclusion z₀) := by
-    change seq 0 = AllowedDescent.totalBoundary z₁ +
-      SignedTargetOrbits.actualTotalNorm hp z₀ at hdecomp
-    rw [← haug0, hdecomp, map_add, map_add,
-      AllowedDescent.totalInclusion_boundary,
-      PositiveTarget.augmentation_boundary,
-      zero_add, augmentation_totalNorm hp]
-  have hdivZ : (p : ℤ) ∣ 1 := ⟨_, h⟩
-  have hdivN : p ∣ 1 := by exact_mod_cast hdivZ
-  have hp2 : 2 ≤ p := hp.two_le
-  have hple := Nat.le_of_dvd (by decide : 0 < 1) hdivN
-  omega
-
 end
 
 end Erdos780Core
 
 end
-
 
 /-! ### Upstream module `ErdosProblems/Erdos750/ColorObstruction.lean` -/
 
@@ -9168,7 +6742,6 @@ end Chains
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos750/Stiebitz.lean` -/
 
 section
@@ -9179,8 +6752,6 @@ The lower bound is proved by integral signed-biclique chains. The cylinder
 contraction extends the chain invariant at each step, and cyclic-resolution
 exactness gives the obstruction to a coloring with too few colors.
 -/
-
-
 
 open SimpleGraph Chains
 
@@ -9220,7 +6791,6 @@ theorem stiebitz_lower_bound {V : Type u} (G : SimpleGraph V) (r : ℕ)
 
 end
 
-
 /-! ### Upstream module `ErdosProblems/Erdos750.lean` -/
 
 section
@@ -9237,20 +6807,8 @@ The originally assumed Stiebitz bound is replaced here by the theorem proved in
 the `Stiebitz` module above. No computational limits are increased.
 -/
 
-
-
 open SimpleGraph Filter
 open scoped NNReal
-
-/-- Finite generalized Mycielski graphs with the prescribed local OCT profile
-and exactly the requested chromatic number. -/
-theorem finite_oct_profile_with_chromatic
-    (g : ℕ → ℕ) (hg_mono : Monotone g)
-    (hg_top : Tendsto g atTop atTop) (r : ℕ) (hr : 2 ≤ r) :
-    ∃ (V : Type) (_ : Fintype V) (_ : DecidableEq V) (G : SimpleGraph V),
-      IsRecursivelyBuiltMr r G ∧ G.chromaticNumber = (r : ℕ∞) ∧
-      ∀ X : Finset V, X.Nonempty → oct G X ≤ g X.card :=
-  Conditional.finite_oct_profile_with_chromatic stiebitz_lower_bound g hg_mono hg_top r hr
 
 /-- The stronger OCT form: every nondecreasing unbounded profile occurs in
 a graph of infinite chromatic number. -/

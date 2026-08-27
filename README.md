@@ -21,8 +21,8 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 202 `complete`
-- 8 `axiomatic`
+- 204 `complete`
+- 6 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -69,7 +69,7 @@ lake build
 | [226](https://www.erdosproblems.com/226) | `complete` | [problems/226/](problems/226/) | |
 | [229](https://www.erdosproblems.com/229) | `complete` | [problems/229/](problems/229/) | |
 | [231](https://www.erdosproblems.com/231) | `complete` | [problems/231/](problems/231/) | |
-| [237](https://www.erdosproblems.com/237) | `axiomatic` | [problems/237/](problems/237/) | assumes an intermediate result on page 7 in the proof of Theorem 1.1 of [Maynard](https://jayyhk.github.io/papers/maynard2015.pdf) (`maynard_prime_tuples`) |
+| [237](https://www.erdosproblems.com/237) | `complete` | [problems/237/](problems/237/) | |
 | [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
 | [258](https://www.erdosproblems.com/258) | `complete` | [problems/258/](problems/258/) | |
 | [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
@@ -195,7 +195,7 @@ lake build
 | [927](https://www.erdosproblems.com/927) | `complete` | [problems/927/](problems/927/) | |
 | [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) | |
 | [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) | |
-| [964](https://www.erdosproblems.com/964) | `axiomatic` | [problems/964/](problems/964/) | assumes Theorem 1 of [Eberhard](https://jayyhk.github.io/papers/eberhard2025.pdf) (`goldston_graham_pintz_yildirim`) |
+| [964](https://www.erdosproblems.com/964) | `complete` | [problems/964/](problems/964/) | |
 | [966](https://www.erdosproblems.com/966) | `complete` | [problems/966/](problems/966/) | |
 | [967](https://www.erdosproblems.com/967) | `complete` | [problems/967/](problems/967/) | |
 | [974](https://www.erdosproblems.com/974) | `complete` | [problems/974/](problems/974/) | |
