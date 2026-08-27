@@ -905,14 +905,15 @@
   proof:
     path: "problems/427/"
     theorem: "Erdos427.erdos_427"
-    state: "axiomatic"
-    last_update: "2026-05-28"
-    lean_toolchain: "leanprover/lean4:v4.28.0"
-    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
-    extra_axioms: ["Erdos427.shiu_consecutive_primes"]
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/427#post-5920"
       - "https://gist.github.com/JohnEdwardJennings/e2c6ef0daab55857b7cc9d340de7af84#file-erdos427-lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos427.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "429"
   proof:
     path: "problems/429/"
@@ -1925,14 +1926,15 @@
   proof:
     path: "problems/997/"
     theorem: "Erdos997.erdos_997"
-    state: "axiomatic"
-    extra_axioms: ["Erdos997.maynardTaoBFT"]
-    last_update: "2026-06-07"
-    lean_toolchain: "leanprover/lean4:v4.28.1"
-    mathlib_revision: "1f9fffd5ff0b854b8a1f1f69adc11c61f05f2515"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/997#post-5189"
       - "https://gist.github.com/pitmonticone/016f2ed66b4cd1c4c4b9998095170e60#file-erdos997-lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos997.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "1000"
   proof:
     path: "problems/1000/"

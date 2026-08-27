@@ -21,8 +21,8 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 204 `complete`
-- 6 `axiomatic`
+- 206 `complete`
+- 4 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -108,7 +108,7 @@ lake build
 | [418](https://www.erdosproblems.com/418) | `complete` | [problems/418/](problems/418/) | |
 | [419](https://www.erdosproblems.com/419) | `complete` | [problems/419/](problems/419/) | |
 | [426](https://www.erdosproblems.com/426) | `complete` | [problems/426/](problems/426/) | |
-| [427](https://www.erdosproblems.com/427) | `axiomatic` | [problems/427/](problems/427/) | assumes Theorem 1 of [Shiu](https://jayyhk.github.io/papers/shiu2000.pdf) (`shiu_consecutive_primes`) |
+| [427](https://www.erdosproblems.com/427) | `complete` | [problems/427/](problems/427/) | |
 | [429](https://www.erdosproblems.com/429) | `complete` | [problems/429/](problems/429/) | |
 | [433](https://www.erdosproblems.com/433) | `complete` | [problems/433/](problems/433/) | |
 | [434](https://www.erdosproblems.com/434) | `complete` | [problems/434/](problems/434/) | |
@@ -200,7 +200,7 @@ lake build
 | [967](https://www.erdosproblems.com/967) | `complete` | [problems/967/](problems/967/) | |
 | [974](https://www.erdosproblems.com/974) | `complete` | [problems/974/](problems/974/) | |
 | [990](https://www.erdosproblems.com/990) | `complete` | [problems/990/](problems/990/) | |
-| [997](https://www.erdosproblems.com/997) | `axiomatic` | [problems/997/](problems/997/) | assumes Corollary 3 of [Banks–Freiberg–Turnage-Butterbaugh](https://jayyhk.github.io/papers/banks-freiberg-turnage-butterbaugh2015.pdf) (`maynardTaoBFT`) |
+| [997](https://www.erdosproblems.com/997) | `complete` | [problems/997/](problems/997/) | |
 | [1000](https://www.erdosproblems.com/1000) | `complete` | [problems/1000/](problems/1000/) | |
 | [1007](https://www.erdosproblems.com/1007) | `complete` | [problems/1007/](problems/1007/) | |
 | [1008](https://www.erdosproblems.com/1008) | `complete` | [problems/1008/](problems/1008/) | |
