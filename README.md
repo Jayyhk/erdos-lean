@@ -21,8 +21,8 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 207 `complete`
-- 3 `axiomatic`
+- 208 `complete`
+- 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -151,7 +151,7 @@ lake build
 | [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
 | [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
 | [658](https://www.erdosproblems.com/658) | `complete` | [problems/658/](problems/658/) | |
-| [659](https://www.erdosproblems.com/659) | `axiomatic` | [problems/659/](problems/659/) | assumes Theorems 1 and 2 on page 92 of [Bernays](https://jayyhk.github.io/papers/bernays1912.pdf) (`bernays`) |
+| [659](https://www.erdosproblems.com/659) | `complete` | [problems/659/](problems/659/) | |
 | [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) | |
 | [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
 | [678](https://www.erdosproblems.com/678) | `complete` | [problems/678/](problems/678/) | |

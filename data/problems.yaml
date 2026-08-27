@@ -1381,14 +1381,13 @@
   proof:
     path: "problems/659/"
     theorem: "Erdos659.erdos_659"
-    state: "axiomatic"
-    extra_axioms: ["Erdos659.bernays"]
-    last_update: "2026-05-30"
-    lean_toolchain: "leanprover/lean4:v4.24.0"
-    mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://www.erdosproblems.com/forum/thread/659#post-3156"
-      - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos659.lean"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos659.lean"
 - number: "666"
   proof:
     path: "problems/666/"
