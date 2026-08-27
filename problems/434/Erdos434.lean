@@ -1,6 +1,7 @@
 import Mathlib
 
 set_option linter.mathlibStandardSet false
+set_option linter.dupNamespace false
 
 namespace Erdos434
 
@@ -674,7 +675,6 @@ lemma inter_mul_sub_card_le {a : α} {s t C : Finset α} (has : a ∈ s)
       rw [← hxyd]
       exact mul_mem_mul (mem_inter.mpr ⟨hyst, hyC⟩) hd
 
-set_option linter.dupNamespace false in
 @[to_additive]
 private lemma card_mul_add_card_lt (hC : C.Nonempty) (hs : s' ⊆ s) (ht : t' ⊆ t)
     (hCst : C ⊆ s * t) (hCst' : Disjoint C (s' * t')) :

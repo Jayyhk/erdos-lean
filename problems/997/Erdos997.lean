@@ -1,5 +1,7 @@
 import Mathlib
 
+set_option linter.constructorNameAsVariable false
+
 namespace Erdos997
 
 /-
@@ -49554,7 +49556,6 @@ theorem reciprocalTotientTupleWeight_eq_one_div_product
   unfold BoundedGaps.Maynard.reciprocalTotientTupleWeight
   simp only [one_div, Finset.prod_inv_distrib]
 
-set_option linter.constructorNameAsVariable false in
 theorem largeTupleYDiagonal_eq_tupleMaynardDiagonal
     (alpha : ℝ) (n : ℕ) :
     largeTupleYDiagonal alpha n =

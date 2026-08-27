@@ -1,5 +1,8 @@
 import Mathlib
 
+set_option linter.unusedSectionVars false
+set_option linter.unusedVariables false
+
 namespace Erdos775
 
 /-!
@@ -68,7 +71,6 @@ def IsComplete (H : KUniformHypergraph α k) (S : Finset α) : Prop :=
 def IsClique (H : KUniformHypergraph α k) (S : Finset α) : Prop :=
   H.IsComplete S ∧ ∀ T : Finset α, S ⊂ T → ¬H.IsComplete T
 
-set_option linter.unusedSectionVars false in
 /-- Subsets of complete sets are complete. -/
 lemma IsComplete.mono {H : KUniformHypergraph α k} {S T : Finset α}
     (hST : S ⊆ T) (hT : H.IsComplete T) : H.IsComplete S :=
@@ -677,7 +679,6 @@ lemma card_children_of_rootChildren (T : OrderedRootedTree t) :
 Each child of root 0 in the contraction has image under φ
     in the set of children of root children.
 -/
-set_option linter.unusedVariables false in
 lemma contraction_children_zero_inject (T : OrderedRootedTree t)
     (hm : T.numChildren ⟨0, Nat.zero_lt_succ t⟩ ≤ t) :
     let m := T.numChildren ⟨0, Nat.zero_lt_succ t⟩
@@ -1386,7 +1387,6 @@ lemma clParent_iterate_injective {n : ℕ} (X : ℕ → Finset (Fin n)) (r : ℕ
 walkDownAux from u returns a descendant of u: u appears as an iterated parent
     of the result. Proof by induction on fuel.
 -/
-set_option linter.unusedVariables false in
 lemma walkDownAux_result_descendant {n : ℕ} (X : ℕ → Finset (Fin n))
     (b : ℕ) (u : ℕ) (hu : u < b) (fuel : ℕ) :
     ∃ d : ℕ, (clParent X)^[d]
@@ -1435,7 +1435,6 @@ lemma ancestor_chain_squeeze {n : ℕ} (X : ℕ → Finset (Fin n))
     within the walk's range, the intermediate matching holds.
     Proof by induction on fuel.
 -/
-set_option linter.unusedVariables false in
 lemma walkDownAux_ancestors_matching {n : ℕ} (X : ℕ → Finset (Fin n))
     (b : ℕ) (u : ℕ) (hu : u < b) (fuel : ℕ)
     (h_gt : u < (walkDownAux X (fun j hj => clTreeState X j) u hu fuel).val)

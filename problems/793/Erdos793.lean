@@ -1,6 +1,7 @@
 import Mathlib
 
 set_option linter.style.header false
+set_option linter.unusedTactic false
 
 namespace Erdos793
 
@@ -5261,7 +5262,6 @@ lemma prod_range_getD_take (l : List ℕ) (r : ℕ) :
 If at least three prime factors of `m` (counted with multiplicity) exceed
 `n^{1/5}`, then there are three primes `p ≥ q ≥ r > n^{1/5}` with `p*q*r ∣ m`.
 -/
-set_option linter.unusedTactic false in
 lemma exists_three_large_factors (n m : ℕ) (hm1 : 1 ≤ m)
     (hcount : 3 ≤ ((Nat.primeFactorsList m).filter
       (fun p => (n:ℝ) ^ ((1:ℝ)/5) < (p:ℝ))).length) :

@@ -12,6 +12,8 @@ The May 3 2026 proof (GPT-5.5 Pro, cleaned up by Liam Price; Kevin Barreto notic
 -/
 import Mathlib
 
+set_option linter.unusedVariables false
+
 namespace Erdos351
 
 /-! =============================================================
@@ -4161,7 +4163,6 @@ lemma int_poly_eval_congr (P : ℤ[X]) {M x y : ℤ}
     rw [Polynomial.eval_monomial, Polynomial.eval_monomial]
     exact (Int.ModEq.refl c).mul (hxy.pow n)
 
-set_option linter.unusedVariables false in
 /-- **Lemma 5 (PDF §1).** If `B p(x) ∈ ℤ[x]` and `x ≡ y (mod m B)`, then
 `p(x) ≡ p(y) (mod m)`. So `m B` is a period of the integer values of `p` modulo
 `m`. -/
@@ -4791,7 +4792,6 @@ noncomputable def switchValueSet (p : ℚ[X]) (hp : IntValued p) : Set ℤ :=
       z = (∑ e ∈ E, intEval p hp ((e * n : ℕ) : ℤ))
             - intEval p hp ((n : ℕ) : ℤ) }
 
-set_option linter.unusedVariables false in
 /-- **Lemma 6 (PDF §1, corrected).** If `p` has degree `≥ 1`, positive leading
 coefficient, and no fixed divisor on positive integers, then the integer values
 of all switching polynomials `Q_E(n)` (over Egyptian patterns `E` and positive
@@ -6804,7 +6804,6 @@ lemma chooseMainChoice (α : ℚ) (hα : 0 < α) (L : ℕ) (p : ℚ[X]) (hp : In
             apply Nat.mul_le_mul_right; omega
     omega
 
-set_option linter.unusedVariables false in
 /-- Constructor for `MainGCDData`: given a fixed `MainChoice md` (so `J` is
 chosen and `A(D j) > 0` for `j ≥ J`), extract the gcd `g` of the integer
 values `A(D j) : j ≥ J` (as the natAbs of the generator of
@@ -9704,7 +9703,6 @@ def mainQuot_no_prime_fixed_stmt (md : MainChoice α L p hp) (g : ℕ)
 
 end MainQuotBridge
 
-set_option linter.unusedVariables false in
 /-- **Main theorem (PDF Theorem 1).** For `α ∈ ℚ_{>0}`, `L ≥ 1`, and a polynomial
 `p ∈ ℚ[x]` integer-valued with positive leading coefficient and no fixed
 divisor on positive integers, all sufficiently large integers `m` admit an

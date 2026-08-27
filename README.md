@@ -20,12 +20,13 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 208 `complete`
+219 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 217 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
+| [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) | |
 | [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
 | [24](https://www.erdosproblems.com/24) | `complete` | [problems/24/](problems/24/) | |
 | [26](https://www.erdosproblems.com/26) | `complete` | [problems/26/](problems/26/) | |
@@ -48,6 +49,7 @@ lake build
 | [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
 | [146](https://www.erdosproblems.com/146) | `complete` | [problems/146/](problems/146/) | |
 | [150](https://www.erdosproblems.com/150) | `complete` | [problems/150/](problems/150/) | |
+| [152](https://www.erdosproblems.com/152) | `complete` | [problems/152/](problems/152/) | |
 | [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) | |
 | [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) | |
 | [178](https://www.erdosproblems.com/178) | `complete` | [problems/178/](problems/178/) | |
@@ -71,10 +73,12 @@ lake build
 | [231](https://www.erdosproblems.com/231) | `complete` | [problems/231/](problems/231/) | |
 | [237](https://www.erdosproblems.com/237) | `complete` | [problems/237/](problems/237/) | |
 | [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
+| [253](https://www.erdosproblems.com/253) | `complete` | [problems/253/](problems/253/) | |
 | [258](https://www.erdosproblems.com/258) | `complete` | [problems/258/](problems/258/) | |
 | [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
 | [268](https://www.erdosproblems.com/268) | `complete` | [problems/268/](problems/268/) | |
 | [275](https://www.erdosproblems.com/275) | `complete` | [problems/275/](problems/275/) | |
+| [277](https://www.erdosproblems.com/277) | `complete` | [problems/277/](problems/277/) | |
 | [280](https://www.erdosproblems.com/280) | `complete` | [problems/280/](problems/280/) | |
 | [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
 | [283](https://www.erdosproblems.com/283) | `complete` | [problems/283/](problems/283/) | |
@@ -121,6 +125,7 @@ lake build
 | [464](https://www.erdosproblems.com/464) | `complete` | [problems/464/](problems/464/) | |
 | [469](https://www.erdosproblems.com/469) | `complete` | [problems/469/](problems/469/) | |
 | [476](https://www.erdosproblems.com/476) | `complete` | [problems/476/](problems/476/) | |
+| [480](https://www.erdosproblems.com/480) | `complete` | [problems/480/](problems/480/) | |
 | [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) | |
 | [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) | |
 | [487](https://www.erdosproblems.com/487) | `complete` | [problems/487/](problems/487/) | |
@@ -138,6 +143,7 @@ lake build
 | [540](https://www.erdosproblems.com/540) | `complete` | [problems/540/](problems/540/) | |
 | [541](https://www.erdosproblems.com/541) | `complete` | [problems/541/](problems/541/) | |
 | [582](https://www.erdosproblems.com/582) | `complete` | [problems/582/](problems/582/) | |
+| [594](https://www.erdosproblems.com/594) | `complete` | [problems/594/](problems/594/) | |
 | [608](https://www.erdosproblems.com/608) | `complete` | [problems/608/](problems/608/) | |
 | [610](https://www.erdosproblems.com/610) | `axiomatic` | [problems/610/](problems/610/) | assumes Corollary 2 of [Joret–Micek–Reed–Smid](https://jayyhk.github.io/papers/joret-micek-reed-smid2021.pdf) (`jmrs_corollary2`) |
 | [613](https://www.erdosproblems.com/613) | `complete` | [problems/613/](problems/613/) | |
@@ -187,6 +193,7 @@ lake build
 | [884](https://www.erdosproblems.com/884) | `complete` | [problems/884/](problems/884/) | |
 | [897](https://www.erdosproblems.com/897) | `complete` | [problems/897/](problems/897/) | |
 | [898](https://www.erdosproblems.com/898) | `complete` | [problems/898/](problems/898/) | |
+| [899](https://www.erdosproblems.com/899) | `complete` | [problems/899/](problems/899/) | |
 | [904](https://www.erdosproblems.com/904) | `complete` | [problems/904/](problems/904/) | |
 | [905](https://www.erdosproblems.com/905) | `complete` | [problems/905/](problems/905/) | |
 | [907](https://www.erdosproblems.com/907) | `complete` | [problems/907/](problems/907/) | |
@@ -219,6 +226,7 @@ lake build
 | [1051](https://www.erdosproblems.com/1051) | `complete` | [problems/1051/](problems/1051/) | |
 | [1067](https://www.erdosproblems.com/1067) | `complete` | [problems/1067/](problems/1067/) | |
 | [1071](https://www.erdosproblems.com/1071) | `complete` | [problems/1071/](problems/1071/) | |
+| [1077](https://www.erdosproblems.com/1077) | `complete` | [problems/1077/](problems/1077/) | |
 | [1080](https://www.erdosproblems.com/1080) | `complete` | [problems/1080/](problems/1080/) | |
 | [1090](https://www.erdosproblems.com/1090) | `complete` | [problems/1090/](problems/1090/) | |
 | [1098](https://www.erdosproblems.com/1098) | `complete` | [problems/1098/](problems/1098/) | |
@@ -227,6 +235,7 @@ lake build
 | [1121](https://www.erdosproblems.com/1121) | `complete` | [problems/1121/](problems/1121/) | |
 | [1125](https://www.erdosproblems.com/1125) | `complete` | [problems/1125/](problems/1125/) | |
 | [1126](https://www.erdosproblems.com/1126) | `complete` | [problems/1126/](problems/1126/) | |
+| [1128](https://www.erdosproblems.com/1128) | `complete` | [problems/1128/](problems/1128/) | |
 | [1134](https://www.erdosproblems.com/1134) | `complete` | [problems/1134/](problems/1134/) | |
 | [1136](https://www.erdosproblems.com/1136) | `complete` | [problems/1136/](problems/1136/) | |
 | [1138](https://www.erdosproblems.com/1138) | `complete` | [problems/1138/](problems/1138/) | |
