@@ -21,8 +21,8 @@ lake build
 
 <!-- TABLE:START -->
 210 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 206 `complete`
-- 4 `axiomatic`
+- 207 `complete`
+- 3 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -157,7 +157,7 @@ lake build
 | [678](https://www.erdosproblems.com/678) | `complete` | [problems/678/](problems/678/) | |
 | [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
 | [694](https://www.erdosproblems.com/694) | `complete` | [problems/694/](problems/694/) | |
-| [696](https://www.erdosproblems.com/696) | `axiomatic` | [problems/696/](problems/696/) | assumes equation 22 of [Walfisz](https://jayyhk.github.io/papers/walfisz1936.pdf) (`siegel_walfisz`) |
+| [696](https://www.erdosproblems.com/696) | `complete` | [problems/696/](problems/696/) | |
 | [698](https://www.erdosproblems.com/698) | `complete` | [problems/698/](problems/698/) | |
 | [707](https://www.erdosproblems.com/707) | `complete` | [problems/707/](problems/707/) | |
 | [716](https://www.erdosproblems.com/716) | `complete` | [problems/716/](problems/716/) | |
