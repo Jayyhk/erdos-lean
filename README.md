@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-219 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 217 `complete`
+222 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 220 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -44,6 +44,7 @@ lake build
 | [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
 | [105](https://www.erdosproblems.com/105) | `complete` | [problems/105/](problems/105/) | |
 | [115](https://www.erdosproblems.com/115) | `complete` | [problems/115/](problems/115/) | |
+| [119](https://www.erdosproblems.com/119) | `complete` | [problems/119/](problems/119/) | |
 | [123](https://www.erdosproblems.com/123) | `complete` | [problems/123/](problems/123/) | |
 | [125](https://www.erdosproblems.com/125) | `complete` | [problems/125/](problems/125/) | |
 | [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
@@ -173,6 +174,7 @@ lake build
 | [750](https://www.erdosproblems.com/750) | `complete` | [problems/750/](problems/750/) | |
 | [751](https://www.erdosproblems.com/751) | `complete` | [problems/751/](problems/751/) | |
 | [753](https://www.erdosproblems.com/753) | `complete` | [problems/753/](problems/753/) | |
+| [755](https://www.erdosproblems.com/755) | `complete` | [problems/755/](problems/755/) | |
 | [756](https://www.erdosproblems.com/756) | `complete` | [problems/756/](problems/756/) | |
 | [760](https://www.erdosproblems.com/760) | `complete` | [problems/760/](problems/760/) | |
 | [762](https://www.erdosproblems.com/762) | `complete` | [problems/762/](problems/762/) | |
@@ -203,6 +205,7 @@ lake build
 | [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) | |
 | [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) | |
 | [964](https://www.erdosproblems.com/964) | `complete` | [problems/964/](problems/964/) | |
+| [965](https://www.erdosproblems.com/965) | `complete` | [problems/965/](problems/965/) | |
 | [966](https://www.erdosproblems.com/966) | `complete` | [problems/966/](problems/966/) | |
 | [967](https://www.erdosproblems.com/967) | `complete` | [problems/967/](problems/967/) | |
 | [974](https://www.erdosproblems.com/974) | `complete` | [problems/974/](problems/974/) | |

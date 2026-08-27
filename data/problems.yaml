@@ -193,6 +193,16 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/115#post-4555"
+- number: "119"
+  proof:
+    path: "problems/119/"
+    theorem: "Erdos119.erdos_119"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos119.lean"
 - number: "123"
   proof:
     path: "problems/123/"
@@ -1619,6 +1629,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/753#post-5373"
       - "https://gist.github.com/madeve-unipi/80eaf8008c7c798b4f7b5baeb8c1812b#file-erdos753-lean"
+- number: "755"
+  proof:
+    path: "problems/755/"
+    theorem: "Erdos755.erdos_755"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos755.lean"
 - number: "756"
   proof:
     path: "problems/756/"
@@ -1950,6 +1970,16 @@
       - "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos964.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos964.lean"
       - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
+- number: "965"
+  proof:
+    path: "problems/965/"
+    theorem: "Erdos965.erdos_965"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos965.lean"
 - number: "966"
   proof:
     path: "problems/966/"
