@@ -31,8 +31,7 @@ end-of-file scopes closed explicitly. Declarations keep their upstream names. Th
 rather than nested. The outer `Erdos696` namespace is stripped from the modules that carry
 it, since the whole file is wrapped in it once. Names declared in more than one upstream
 module — legal there because they are `private` and so module-scoped — are suffixed
-`_v1`/`_v2`/... here. Upstream `#print axioms` lines are dropped in favour of the single
-one below. No mathematical content is changed.
+`_v1`/`_v2`/... here. No mathematical content is changed.
 -/
 
 /-! ### Upstream module `ErdosProblems/Erdos696/Defs.lean` -/

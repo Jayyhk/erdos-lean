@@ -27,8 +27,7 @@ this repository already had it; the vendored `BoundedGaps`, `BoundedGaps.Maynard
 `Erdos248` and `Erdos697.PrimeHarmonic` namespaces are kept and nest beneath it. One name,
 `squarefreeCoprimeInvTotientMean_nonneg`, is declared in two modules — legal upstream
 because both are `private` and so module-scoped — and the second is suffixed `_v2` here.
-Upstream `#print axioms` lines are dropped in favour of the single one below. No
-mathematical content is changed.
+No mathematical content is changed.
 -/
 
 /-! ### Upstream module `ErdosProblems/Erdos248/Core.lean` -/

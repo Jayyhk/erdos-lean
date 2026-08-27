@@ -30,8 +30,7 @@ since the whole file is wrapped once in `Erdos237`, so that the final theorem is
 namespaces nest beneath it. Names declared in more than one upstream module — legal there
 because they are `private` and so module-scoped, except one that is public in a single
 declarer — are suffixed `_v1`/`_v2`/... here, with the public declarer keeping the bare
-name. Upstream `#print axioms` lines are dropped in favour of the single one below. No
-mathematical content is changed.
+name. No mathematical content is changed.
 -/
 
 /-! ### Upstream module `BoundedGaps: BoundedGaps/Arithmetic/SquarefreeReciprocalCoefficient.lean` -/
