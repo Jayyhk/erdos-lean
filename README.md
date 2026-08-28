@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-236 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 234 `complete`
+237 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 235 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -222,6 +222,7 @@ lake build
 | [966](https://www.erdosproblems.com/966) | `complete` | [problems/966/](problems/966/) | |
 | [967](https://www.erdosproblems.com/967) | `complete` | [problems/967/](problems/967/) | |
 | [974](https://www.erdosproblems.com/974) | `complete` | [problems/974/](problems/974/) | |
+| [987](https://www.erdosproblems.com/987) | `complete` | [problems/987/](problems/987/) | |
 | [990](https://www.erdosproblems.com/990) | `complete` | [problems/990/](problems/990/) | |
 | [997](https://www.erdosproblems.com/997) | `complete` | [problems/997/](problems/997/) | |
 | [1000](https://www.erdosproblems.com/1000) | `complete` | [problems/1000/](problems/1000/) | |
