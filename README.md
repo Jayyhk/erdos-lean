@@ -20,13 +20,14 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-233 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 231 `complete`
+236 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 234 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
 | [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) | |
+| [13](https://www.erdosproblems.com/13) | `complete` | [problems/13/](problems/13/) | |
 | [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
 | [22](https://www.erdosproblems.com/22) | `complete` | [problems/22/](problems/22/) | |
 | [24](https://www.erdosproblems.com/24) | `complete` | [problems/24/](problems/24/) | |
@@ -44,6 +45,7 @@ lake build
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
 | [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
 | [105](https://www.erdosproblems.com/105) | `complete` | [problems/105/](problems/105/) | |
+| [109](https://www.erdosproblems.com/109) | `complete` | [problems/109/](problems/109/) | |
 | [115](https://www.erdosproblems.com/115) | `complete` | [problems/115/](problems/115/) | |
 | [119](https://www.erdosproblems.com/119) | `complete` | [problems/119/](problems/119/) | |
 | [123](https://www.erdosproblems.com/123) | `complete` | [problems/123/](problems/123/) | |
@@ -196,6 +198,7 @@ lake build
 | [844](https://www.erdosproblems.com/844) | `complete` | [problems/844/](problems/844/) | |
 | [845](https://www.erdosproblems.com/845) | `complete` | [problems/845/](problems/845/) | |
 | [846](https://www.erdosproblems.com/846) | `complete` | [problems/846/](problems/846/) | |
+| [847](https://www.erdosproblems.com/847) | `complete` | [problems/847/](problems/847/) | |
 | [862](https://www.erdosproblems.com/862) | `complete` | [problems/862/](problems/862/) | |
 | [865](https://www.erdosproblems.com/865) | `complete` | [problems/865/](problems/865/) | |
 | [867](https://www.erdosproblems.com/867) | `complete` | [problems/867/](problems/867/) | |
