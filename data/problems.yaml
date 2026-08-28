@@ -1091,6 +1091,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/435#post-4173"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos435.lean"
+- number: "442"
+  proof:
+    path: "problems/442/"
+    theorem: "Erdos442.erdos_442"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos442.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "443"
   proof:
     path: "problems/443/"
