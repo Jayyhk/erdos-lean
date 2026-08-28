@@ -35,15 +35,15 @@ the repository's previous proof, which obtained arbitrarily long witnesses from 
 85-uniform morphism and needed `native_decide`; `erdos_231` now depends on Lean's standard
 foundations alone.
 
-The decision procedures, their correctness lemmas, and the witness are vendored from plby
-(github.com/plby/lean-proofs), `src/latest/ErdosProblems/Erdos231.lean` and
-`src/latest/ErdosProblems/Erdos231/Proof.lean`, concatenated with the project-internal
-import removed so that `Mathlib` is the only import. Two changes: the witness is the full
-sixteen-symbol string rather than its fifteen-symbol prefix, and `erdos_231` is stated in
-the half-length `Perm` form the repository already used, bridged by
-`isAbelianSquare_of_perm`. Those upstream files are in turn taken from AxiomProver / Axiom
-Math, github.com/AxiomMath/erdos-public, `Erdos/Erdos231/solution.lean`, under the MIT
-licence reproduced here:
+The decision procedures, their correctness lemmas, and the witness are vendored from
+plby (github.com/plby/lean-proofs), `src/latest/ErdosProblems/Erdos231.lean` and
+`src/latest/ErdosProblems/Erdos231/Proof.lean`, concatenated with the
+project-internal import removed so that `Mathlib` is the only import. Two changes:
+the witness is the full sixteen-symbol string rather than its fifteen-symbol prefix,
+and `erdos_231` is stated in the half-length `Perm` form the repository already used,
+bridged by `isAbelianSquare_of_perm`. Those upstream files are in turn taken from
+AxiomProver / Axiom Math, github.com/AxiomMath/erdos-public,
+`Erdos/Erdos231/solution.lean`, under the MIT licence reproduced here:
 
   MIT License
 
