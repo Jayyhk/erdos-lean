@@ -19,7 +19,6 @@ set_option linter.unusedVariables false
 
 namespace Erdos283
 
-
 /-! =============================================================
     Section from: Erdos/P283/RSG/CompleteSequences.lean
     ============================================================= -/
@@ -30,7 +29,6 @@ Copyright (c) 2026
 Basic complete-sequence infrastructure for Graham's theorem on complete
 sequences of polynomial values.
 -/
-
 
 namespace Erdos.P283.RSG
 
@@ -80,14 +78,6 @@ def CoversResidues (s : ℕ → ℤ) (m : ℕ) : Prop :=
 
 /-! ## Elementary API for `FS` and `SignedFS` -/
 
-lemma fs_empty (s : ℕ → ℤ) : (0 : ℤ) ∈ FS s := by
-  refine ⟨∅, ?_⟩
-  simp
-
-lemma fs_singleton (s : ℕ → ℤ) (i : ℕ) : s i ∈ FS s := by
-  refine ⟨{i}, ?_⟩
-  simp
-
 lemma fsOf_subset_fs (s : ℕ → ℤ) (A : Finset ℕ) :
     FSOf s A ⊆ FS s := by
   intro x hx
@@ -96,12 +86,6 @@ lemma fsOf_subset_fs (s : ℕ → ℤ) (A : Finset ℕ) :
 
 lemma fsOf_empty (s : ℕ → ℤ) : (0 : ℤ) ∈ FSOf s ∅ := by
   refine ⟨∅, ?_, ?_⟩
-  · simp
-  · simp
-
-lemma fsOf_singleton (s : ℕ → ℤ) (i : ℕ) :
-    s i ∈ FSOf s {i} := by
-  refine ⟨{i}, ?_, ?_⟩
   · simp
   · simp
 
@@ -145,38 +129,6 @@ lemma fsOf_add_of_disjoint {s : ℕ → ℤ} {A B : Finset ℕ} {x y : ℤ}
     · exact Or.inr (hJB hi)
   · rw [Finset.sum_union hIJ, ← hI, ← hJ]
 
-lemma finset_subset_range_sup_succ (A : Finset ℕ) :
-    A ⊆ Finset.range (A.sup id + 1) := by
-  intro i hi
-  rw [Finset.mem_range]
-  exact Nat.lt_succ_of_le (Finset.le_sup (s := A) (f := id) hi)
-
-/-- A predicate that occurs arbitrarily far out has finite subsets of arbitrary
-cardinality all of whose elements satisfy the predicate. -/
-lemma exists_finset_card_eq_of_frequently_atTop {P : ℕ → Prop}
-    (hP : ∀ N : ℕ, ∃ n : ℕ, N ≤ n ∧ P n) :
-    ∀ k : ℕ, ∃ A : Finset ℕ, A.card = k ∧ ∀ n ∈ A, P n := by
-  classical
-  intro k
-  induction k with
-  | zero =>
-      exact ⟨∅, by simp, by simp⟩
-  | succ k ih =>
-      obtain ⟨A, hAcard, hAP⟩ := ih
-      obtain ⟨n, hn_ge, hnP⟩ := hP (A.sup id + 1)
-      have hn_not_mem : n ∉ A := by
-        intro hnA
-        have hn_lt : n < A.sup id + 1 :=
-          Finset.mem_range.mp ((finset_subset_range_sup_succ A) hnA)
-        exact (not_lt_of_ge hn_ge) hn_lt
-      refine ⟨insert n A, ?_, ?_⟩
-      · rw [Finset.card_insert_of_notMem hn_not_mem, hAcard]
-      · intro a ha
-        rw [Finset.mem_insert] at ha
-        rcases ha with rfl | ha
-        · exact hnP
-        · exact hAP a ha
-
 lemma disjoint_range_of_forall_le {A : Finset ℕ} {N : ℕ}
     (hA : ∀ a ∈ A, N ≤ a) :
     Disjoint (Finset.range N) A := by
@@ -186,18 +138,6 @@ lemma disjoint_range_of_forall_le {A : Finset ℕ} {N : ℕ}
   have hle : N ≤ a := hA a hA_mem
   omega
 
-lemma fs_add_of_disjoint_witness {s : ℕ → ℤ} (I J : Finset ℕ)
-    (hdisj : Disjoint I J) :
-    (∑ i ∈ I, s i) + (∑ j ∈ J, s j) ∈ FS s := by
-  classical
-  refine ⟨I ∪ J, ?_⟩
-  rw [Finset.sum_union hdisj]
-
-lemma signedFS_zero (s : ℕ → ℤ) : (0 : ℤ) ∈ SignedFS s := by
-  refine ⟨∅, ∅, ?_, ?_⟩
-  · simp
-  · simp
-
 lemma signedFSOf_subset_signedFS (s : ℕ → ℤ) (A : Finset ℕ) :
     SignedFSOf s A ⊆ SignedFS s := by
   intro x hx
@@ -206,24 +146,6 @@ lemma signedFSOf_subset_signedFS (s : ℕ → ℤ) (A : Finset ℕ) :
 
 lemma signedFSOf_empty (s : ℕ → ℤ) : (0 : ℤ) ∈ SignedFSOf s ∅ := by
   refine ⟨∅, ∅, ?_, ?_, ?_, ?_⟩ <;> simp
-
-lemma fs_subset_signedFS (s : ℕ → ℤ) : FS s ⊆ SignedFS s := by
-  intro x hx
-  rcases hx with ⟨I, rfl⟩
-  refine ⟨I, ∅, ?_, ?_⟩
-  · simp
-  · simp
-
-lemma signedFS_neg {s : ℕ → ℤ} {x : ℤ} (hx : x ∈ SignedFS s) :
-    -x ∈ SignedFS s := by
-  rcases hx with ⟨I, J, hIJ, rfl⟩
-  refine ⟨J, I, hIJ.symm, ?_⟩
-  abel
-
-lemma signedFS_sub_of_disjoint_witness {s : ℕ → ℤ} (I J : Finset ℕ)
-    (hdisj : Disjoint I J) :
-    (∑ i ∈ I, s i) - (∑ j ∈ J, s j) ∈ SignedFS s := by
-  exact ⟨I, J, hdisj, rfl⟩
 
 /-- A list of signed `±1` terms with no repeated indices gives a bounded
 signed finite subset sum. -/
@@ -440,22 +362,6 @@ lemma Complete.of_fs_subset {S T : ℕ → ℤ}
   intro x hx
   exact hsub (hC x hx)
 
-/-- Completeness transfers from an injective subsequence to the ambient
-sequence. -/
-lemma Complete.of_injective_subsequence
-    {s t : ℕ → ℤ}
-    (φ : ℕ → ℕ)
-    (hφ : Function.Injective φ)
-    (ht : ∀ n, t n = s (φ n))
-    (hcomp : Complete t) :
-    Complete s := by
-  rcases hcomp with ⟨C, hC⟩
-  refine ⟨C, ?_⟩
-  intro x hx
-  rcases hC x hx with ⟨I, hI⟩
-  rw [hI]
-  exact fs_map_of_eq_on (fun _ _ _ _ h => hφ h) (fun i _ => ht i)
-
 /-! ## Simple sequence combinators -/
 
 /-- Interleave two sequences, taking `S 0, T 0, S 1, T 1, ...`. -/
@@ -481,15 +387,6 @@ def interleave (S T : ℕ → ℤ) (n : ℕ) : ℤ :=
     have h := Nat.mul_add_div (m := 2) (by decide : 2 > 0) n 1
     simpa using h
   simp [interleave, hdiv]
-
-/-- Prefix a finite list in front of a sequence. This is useful for Graham's
-finite residue prefix followed by a tail. -/
-def prefixSeq (pref : List ℤ) (tail : ℕ → ℤ) : ℕ → ℤ :=
-  fun n =>
-    if h : n < pref.length then
-      pref.get ⟨n, h⟩
-    else
-      tail (n - pref.length)
 
 /-- The tail of a sequence starting at offset `N`. -/
 def tail (S : ℕ → ℤ) (N : ℕ) : ℕ → ℤ :=
@@ -635,11 +532,6 @@ lemma fs_tail_subset (S : ℕ → ℤ) (N : ℕ) :
   exact fs_map_of_eq_on (φ := fun n => N + n)
     (fun _ _ _ _ h => Nat.add_left_cancel h) (fun _ _ => rfl)
 
-lemma signedFS_tail_subset (S : ℕ → ℤ) (N : ℕ) :
-    SignedFS (tail S N) ⊆ SignedFS S :=
-  signedFS_map_of_injective (s := S) (t := tail S N)
-    (φ := fun n => N + n) (fun _ _ h => Nat.add_left_cancel h) (fun _ => rfl)
-
 /-- A later tail has fewer available terms, so its signed finite sums are also
 signed finite sums of any earlier tail. -/
 lemma signedFS_tail_mono {S : ℕ → ℤ} {N M : ℕ} (hNM : N ≤ M) :
@@ -782,13 +674,6 @@ lemma arbitrary_APs_of_signed_tail_difference {S : ℕ → ℤ} {m : ℤ}
   intro j _hj1 hjk
   exact fsOf_subset_fs S (Finset.range B) (hAP j hjk)
 
-/-- Completeness of a tail implies completeness of the original sequence. -/
-lemma Complete.of_tail {S : ℕ → ℤ} (N : ℕ)
-    (hcomp : Complete (tail S N)) :
-    Complete S :=
-  Complete.of_injective_subsequence (s := S) (t := tail S N)
-    (fun n => N + n) (fun _ _ h => Nat.add_left_cancel h) (fun _ => rfl) hcomp
-
 /-! ## Residue-cover API -/
 
 lemma exists_eq_add_mul_of_zmod_eq {m : ℕ} {x y : ℤ}
@@ -809,16 +694,6 @@ lemma CoversResidues.of_fs_subset {S T : ℕ → ℤ} {m : ℕ}
   intro r
   rcases hcov r with ⟨x, hx, hxmod⟩
   exact ⟨x, hsub hx, hxmod⟩
-
-lemma CoversResidues.of_tail {S : ℕ → ℤ} {m : ℕ} (N : ℕ)
-    (hcov : CoversResidues (tail S N) m) :
-    CoversResidues S m :=
-  CoversResidues.of_fs_subset (fs_tail_subset S N) hcov
-
-lemma coversResidues_one (S : ℕ → ℤ) : CoversResidues S 1 := by
-  intro r
-  refine ⟨0, fs_empty S, ?_⟩
-  exact Subsingleton.elim _ _
 
 lemma zmod_addSubgroup_eq_top_of_one_mem {m : ℕ} [NeZero m]
     {H : AddSubgroup (ZMod m)}
@@ -1133,92 +1008,6 @@ lemma coversResidues_of_frequent_zsmul_eq_one {S : ℕ → ℤ} {w m : ℕ}
     (zmod_closure_range_eq_top_of_sum_zsmul_eq_one ρ a ha)
     hfreq
 
-/-- If at least `m` distinct terms have the same unit residue modulo `m`, then
-their subset sums cover every residue class. This is the finite cyclic-group
-core used in Graham's residue-system lemma. -/
-lemma coversResidues_of_constant_unit_residue {S : ℕ → ℤ} {m : ℕ}
-    (hm : 0 < m) {u : ZMod m} (hu : IsUnit u) {A : Finset ℕ}
-    (hcard : m ≤ A.card)
-    (hA : ∀ i ∈ A, ((S i : ℤ) : ZMod m) = u) :
-    CoversResidues S m := by
-  classical
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
-  intro r
-  let v : ZMod m := (↑hu.unit⁻¹ : ZMod m) * r
-  have hv_mul : v * u = r := by
-    change ((↑hu.unit⁻¹ : ZMod m) * r) * u = r
-    have hucoe : (hu.unit : ZMod m) = u := hu.unit_spec
-    calc
-      ((↑hu.unit⁻¹ : ZMod m) * r) * u =
-          ((↑hu.unit⁻¹ : ZMod m) * r) * (↑hu.unit : ZMod m) :=
-        congrArg (fun a : ZMod m => ((↑hu.unit⁻¹ : ZMod m) * r) * a) hucoe.symm
-      _ = r := by
-        calc
-          ((↑hu.unit⁻¹ : ZMod m) * r) * (↑hu.unit : ZMod m) =
-              ((↑hu.unit⁻¹ : ZMod m) * (↑hu.unit : ZMod m)) * r := by ring
-          _ = r := by simp
-  have hv_le_card : v.val ≤ A.card :=
-    (Nat.le_of_lt v.val_lt).trans hcard
-  rcases Finset.exists_subset_card_eq hv_le_card with ⟨K, hKA, hKcard⟩
-  refine ⟨∑ i ∈ K, S i, ⟨K, rfl⟩, ?_⟩
-  calc
-    (((∑ i ∈ K, S i : ℤ) : ℤ) : ZMod m)
-        = ∑ i ∈ K, ((S i : ℤ) : ZMod m) := by norm_cast
-    _ = ∑ _i ∈ K, u := by
-      exact Finset.sum_congr rfl (fun i hi => hA i (hKA hi))
-    _ = (K.card : ℕ) • u := by simp
-    _ = (v.val : ℕ) • u := by rw [hKcard]
-    _ = (v.val : ZMod m) * u := by simp [nsmul_eq_mul]
-    _ = v * u := by rw [ZMod.natCast_zmod_val]
-    _ = r := hv_mul
-
-/-- If at least `m * m` terms are units modulo `m`, then some unit residue
-appears at least `m` times, so finite subset sums cover all residues modulo
-`m`. This is a finite pigeonhole wrapper around
-`coversResidues_of_constant_unit_residue`. -/
-lemma coversResidues_of_many_unit_terms {S : ℕ → ℤ} {m : ℕ}
-    (hm : 0 < m) {A : Finset ℕ}
-    (hcard : m * m ≤ A.card)
-    (hA : ∀ i ∈ A, IsUnit (((S i : ℤ) : ZMod m))) :
-    CoversResidues S m := by
-  classical
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
-  let f : ℕ → ZMod m := fun i => ((S i : ℤ) : ZMod m)
-  have hmap : ∀ i ∈ A, f i ∈ (Finset.univ : Finset (ZMod m)) := by
-    intro i hi
-    simp
-  have huniv_nonempty : (Finset.univ : Finset (ZMod m)).Nonempty :=
-    Finset.univ_nonempty
-  have hcard' : (Finset.univ : Finset (ZMod m)).card * m ≤ A.card := by
-    simpa [ZMod.card] using hcard
-  obtain ⟨u, _hu_mem, hu_card⟩ :=
-    Finset.exists_le_card_fiber_of_mul_le_card_of_maps_to
-      (s := A) (t := (Finset.univ : Finset (ZMod m))) (f := f)
-      hmap huniv_nonempty hcard'
-  let K : Finset ℕ := A.filter fun i => f i = u
-  have hKcard : m ≤ K.card := by
-    simpa [K] using hu_card
-  have hK_nonempty : K.Nonempty :=
-    Finset.card_pos.mp (hm.trans_le hKcard)
-  obtain ⟨i, hiK⟩ := hK_nonempty
-  have hiA : i ∈ A := (Finset.mem_filter.mp hiK).1
-  have hi_eq : f i = u := (Finset.mem_filter.mp hiK).2
-  have hu : IsUnit u := by
-    simpa [f, ← hi_eq] using hA i hiA
-  exact coversResidues_of_constant_unit_residue hm hu hKcard
-    (by
-      intro j hj
-      exact (Finset.mem_filter.mp hj).2)
-
-/-- A frequently occurring unit residue condition implies residue coverage. -/
-lemma coversResidues_of_frequently_unit_terms {S : ℕ → ℤ} {m : ℕ}
-    (hm : 0 < m)
-    (hunit : ∀ N : ℕ, ∃ n : ℕ, N ≤ n ∧ IsUnit (((S n : ℤ) : ZMod m))) :
-    CoversResidues S m := by
-  obtain ⟨A, hAcard, hA⟩ :=
-    exists_finset_card_eq_of_frequently_atTop hunit (m * m)
-  exact coversResidues_of_many_unit_terms hm (by simp [hAcard]) hA
-
 /-- If all residue classes are covered by arbitrary finite subset sums, then a
 single finite prefix already contains witnesses for every residue class. -/
 lemma CoversResidues.exists_prefix {S : ℕ → ℤ} {m : ℕ}
@@ -1258,18 +1047,6 @@ lemma fsOf_range_subset_finitePrefixSeq (S : ℕ → ℤ) (N : ℕ) :
       have hiN : i < N := Finset.mem_range.mp (hI_sub hi)
       simp [finitePrefixSeq, hiN])
 
-lemma fs_finitePrefixSeq_subset (S : ℕ → ℤ) (N : ℕ) :
-    FS (finitePrefixSeq S N) ⊆ FS S := by
-  classical
-  exact fs_subset_of_eq_zero_or_subsequence (s := S) (t := finitePrefixSeq S N)
-    (fun n => n)
-    (fun _ _ _ _ h => h)
-    (fun i hi0 => by
-      by_cases hiN : i < N
-      · simp [finitePrefixSeq, hiN]
-      · exfalso
-        exact hi0 (by simp [finitePrefixSeq, hiN]))
-
 lemma fs_finitePrefixSeq_mono (S : ℕ → ℤ) {N M : ℕ} (hNM : N ≤ M) :
     FS (finitePrefixSeq S N) ⊆ FS (finitePrefixSeq S M) := by
   classical
@@ -1299,44 +1076,6 @@ lemma CoversResidues.finitePrefixSeq_mono {S : ℕ → ℤ} {m N M : ℕ}
     (hcov : CoversResidues (finitePrefixSeq S N) m) :
     CoversResidues (finitePrefixSeq S M) m :=
   CoversResidues.of_fs_subset (fs_finitePrefixSeq_mono S hNM) hcov
-
-lemma fs_interleave_left_subset (S T : ℕ → ℤ) :
-    FS S ⊆ FS (interleave S T) := by
-  intro x hx
-  rcases hx with ⟨I, hI⟩
-  refine ⟨I.image (fun n => 2 * n), ?_⟩
-  rw [hI, Finset.sum_image]
-  · apply Finset.sum_congr rfl
-    intro n _
-    simp
-  · intro a _ b _ hab
-    exact Nat.mul_left_cancel (by decide : 0 < 2) hab
-
-lemma fs_interleave_right_subset (S T : ℕ → ℤ) :
-    FS T ⊆ FS (interleave S T) := by
-  intro x hx
-  rcases hx with ⟨I, hI⟩
-  refine ⟨I.image (fun n => 2 * n + 1), ?_⟩
-  rw [hI, Finset.sum_image]
-  · apply Finset.sum_congr rfl
-    intro n _
-    simp
-  · intro a _ b _ hab
-    have h2add : 2 * a + 1 = 2 * b + 1 := hab
-    have hsucc : Nat.succ (2 * a) = Nat.succ (2 * b) := by
-      simpa [Nat.succ_eq_add_one] using h2add
-    have h2 : 2 * a = 2 * b := Nat.succ.inj hsucc
-    exact Nat.mul_left_cancel (by decide : 0 < 2) h2
-
-lemma CoversResidues.interleave_left {S T : ℕ → ℤ} {m : ℕ}
-    (hcov : CoversResidues S m) :
-    CoversResidues (interleave S T) m :=
-  CoversResidues.of_fs_subset (fs_interleave_left_subset S T) hcov
-
-lemma CoversResidues.interleave_right {S T : ℕ → ℤ} {m : ℕ}
-    (hcov : CoversResidues T m) :
-    CoversResidues (interleave S T) m :=
-  CoversResidues.of_fs_subset (fs_interleave_right_subset S T) hcov
 
 lemma even_odd_images_disjoint (I J : Finset ℕ) :
     Disjoint (I.image fun n => 2 * n) (J.image fun n => 2 * n + 1) := by
@@ -1648,7 +1387,6 @@ Finite-difference operators used in Graham's proof of complete polynomial
 sequences.
 -/
 
-
 namespace Erdos.P283.RSG
 
 open Polynomial
@@ -1747,10 +1485,6 @@ lemma deltaTerms_offset_even {k : ℕ} {p : ℤ × ℕ}
         ring
       · exact ih (p := q) hq
 
-lemma deltaTerms_first_branch_offset_ge (k : ℕ) (p : ℤ × ℕ) :
-    2 * 4 ^ k ≤ (2 * 4 ^ k + p.2 : ℕ) := by
-  omega
-
 lemma deltaTerms_second_branch_offset_lt_half {k : ℕ} {p : ℤ × ℕ}
     (hp : p ∈ deltaTerms k) :
     p.2 < 2 * 4 ^ k := by
@@ -1818,21 +1552,6 @@ lemma deltaTerms_offset_injective_on {k : ℕ} :
           omega
         · have hpq₀ : p₀ = q₀ := ih hp₀ hq₀ hpq
           simp [hpq₀]
-
-lemma deltaTerms_offsets_nodup (k : ℕ) :
-    ((deltaTerms k).map fun p : ℤ × ℕ => p.2).Nodup := by
-  refine (deltaTerms_nodup k).map_on ?_
-  intro p hp q hq hpq
-  exact deltaTerms_offset_injective_on hp hq hpq
-
-lemma deltaTerms_signed_sum_mem_signedFS (k : ℕ) (s : ℕ → ℤ) :
-    ((deltaTerms k).map fun p : ℤ × ℕ => p.1 * s p.2).sum ∈ SignedFS s := by
-  exact signedFSOf_subset_signedFS s _
-    (signedFSOf_list_sum
-      (s := s)
-      (l := deltaTerms k)
-      (fun p hp => deltaTerms_sign_eq_one_or_neg_one hp)
-      (deltaTerms_offsets_nodup k))
 
 @[simp] lemma Delta_zero (f : ℚ[X]) : Delta 0 f = f := by
   rfl
@@ -1947,32 +1666,6 @@ lemma Delta_top_eq_C (f : ℚ[X]) :
   Polynomial.eq_C_of_natDegree_eq_zero (Delta_top_natDegree_eq_zero f)
 
 /-! ## Standard forward-difference helpers from Mathlib -/
-
-/-- Mathlib's top forward-difference theorem specialized to rational polynomial
-evaluation. -/
-lemma fwdDiff_top_eval (f : ℚ[X]) (x : ℚ) :
-    (fwdDiff (1 : ℚ))^[f.natDegree] f.eval x =
-      f.leadingCoeff * (Nat.factorial f.natDegree : ℚ) := by
-  have h := congr_fun (Polynomial.fwdDiff_iter_degree_eq_factorial f) x
-  simpa [Pi.smul_apply, smul_eq_mul] using h
-
-lemma fwdDiff_top_eval_pos (f : ℚ[X]) (x : ℚ)
-    (hlead : 0 < f.leadingCoeff) :
-    0 < (fwdDiff (1 : ℚ))^[f.natDegree] f.eval x := by
-  rw [fwdDiff_top_eval]
-  exact mul_pos hlead (by exact_mod_cast Nat.factorial_pos f.natDegree)
-
-/-- Explicit signed expansion of the top standard forward difference. This is
-often the easiest way to connect finite differences to signed finite subset
-sums. -/
-lemma fwdDiff_top_eval_eq_sum_shift (f : ℚ[X]) (x : ℚ) :
-    (fwdDiff (1 : ℚ))^[f.natDegree] f.eval x =
-      ∑ k ∈ Finset.range (f.natDegree + 1),
-        (((-1 : ℤ) ^ (f.natDegree - k) * f.natDegree.choose k : ℤ) : ℚ) *
-          f.eval (x + k) := by
-  have h :=
-    fwdDiff_iter_eq_sum_shift (h := (1 : ℚ)) (f := f.eval) (n := f.natDegree) (y := x)
-  simpa [zsmul_eq_mul, nsmul_eq_mul, one_nsmul] using h
 
 @[simp] lemma Delta1_eval (f : ℚ[X]) (x : ℚ) :
     (Delta1 f).eval x = f.eval (4 * x + 2) - f.eval (4 * x) := by
@@ -2143,41 +1836,6 @@ lemma Delta_eval_eq_deltaTerms (k : ℕ) (f : ℚ[X]) (x : ℚ) :
       rw [hpos_map, hneg_map, ← List.sum_neg]
       ring
 
-/-- If all polynomial values in the explicit `Delta` expansion are represented
-by an integer sequence `s`, then any integer representative of the difference is
-a signed finite subset sum of `s`. -/
-lemma Delta_eval_integer_mem_signedFS
-    (k : ℕ) (f : ℚ[X]) (x : ℚ) (s : ℕ → ℤ) (z : ℤ)
-    (hvals :
-      ∀ p ∈ deltaTerms k,
-        (s p.2 : ℚ) = f.eval ((4 ^ k : ℚ) * x + (p.2 : ℚ)))
-    (hz : (z : ℚ) = (Delta k f).eval x) :
-    z ∈ SignedFS s := by
-  let y : ℤ := ((deltaTerms k).map fun p : ℤ × ℕ => p.1 * s p.2).sum
-  have hy_mem : y ∈ SignedFS s := by
-    exact deltaTerms_signed_sum_mem_signedFS k s
-  have hmap :
-      (deltaTerms k).map (fun p : ℤ × ℕ => ((p.1 * s p.2 : ℤ) : ℚ)) =
-        (deltaTerms k).map (deltaTermValue k f x) := by
-    apply List.map_congr_left
-    intro p hp
-    simp [deltaTermValue, hvals p hp]
-  have hy_eval : (y : ℚ) = (Delta k f).eval x := by
-    rw [Delta_eval_eq_deltaTerms]
-    dsimp [y]
-    norm_cast
-    rw [List.map_map]
-    change
-      ((deltaTerms k).map (fun p : ℤ × ℕ => ((p.1 * s p.2 : ℤ) : ℚ))).sum =
-        ((deltaTerms k).map (deltaTermValue k f x)).sum
-    rw [hmap]
-  have hcast : (z : ℚ) = (y : ℚ) := by
-    rw [hz, hy_eval]
-  have hzy : z = y := by
-    exact_mod_cast hcast
-  rw [hzy]
-  exact hy_mem
-
 /-! ## Polynomial ratio limits -/
 
 /-- Equal-degree rational polynomials with the same nonzero leading coefficient
@@ -2229,7 +1887,6 @@ Copyright (c) 2026
 Denominator-clearing and residue lemmas for Graham's complete polynomial
 sequence theorem.
 -/
-
 
 namespace Erdos.P283.RSG
 
@@ -2333,59 +1990,6 @@ theorem polynomial_periodicity_of_integral_values
 
 /-! ## Infinitely many nonzero prime residues -/
 
-/-- If every prime misses at least one positive integer value of `p`, then every
-prime misses arbitrarily late positive integer values of `p`. This is the
-denominator-clearing periodicity step in Graham's residue-cover argument. -/
-theorem infinite_nondivisibility_of_no_fixed_prime
-    (p : ℚ[X])
-    (h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ))
-    (h_gcd_one :
-      ∀ ℓ : ℕ, ℓ.Prime →
-        ∃ n : ℕ, 1 ≤ n ∧ ∃ z : ℤ,
-          (z : ℚ) = p.eval (n : ℚ) ∧ ¬ ((ℓ : ℤ) ∣ z)) :
-    ∀ ℓ : ℕ, ℓ.Prime →
-      ∀ N : ℕ, ∃ n ≥ N,
-        ∃ z : ℤ, (z : ℚ) = p.eval (n : ℚ) ∧ ¬ ((ℓ : ℤ) ∣ z) := by
-  intro ℓ hℓ N
-  obtain ⟨B, hBpos, hB⟩ := exists_integral_multiple p
-  obtain ⟨n₀, hn₀, z₀, hz₀, hz₀_ndvd⟩ := h_gcd_one ℓ hℓ
-  let step : ℕ := ℓ * B
-  let n : ℕ := n₀ + (N + 1) * step
-  have hstep_pos : 0 < step := by
-    exact Nat.mul_pos hℓ.pos (lt_of_lt_of_le Nat.zero_lt_one hBpos)
-  have hn_pos : 1 ≤ n := by
-    dsimp [n]
-    exact hn₀.trans (Nat.le_add_right _ _)
-  have hn_ge : N ≤ n := by
-    have hmul : N + 1 ≤ (N + 1) * step :=
-      Nat.le_mul_of_pos_right _ hstep_pos
-    have hN_mul : N ≤ (N + 1) * step :=
-      (Nat.le_succ N).trans hmul
-    dsimp [n]
-    exact hN_mul.trans (Nat.le_add_left _ _)
-  obtain ⟨z, _hz_pos, hz⟩ := h_int_pos n hn_pos
-  refine ⟨n, hn_ge, z, hz, ?_⟩
-  have hxy : (n : ℤ) ≡ (n₀ : ℤ) [ZMOD ((ℓ * B : ℕ) : ℤ)] := by
-    refine Int.modEq_iff_dvd.mpr ?_
-    refine ⟨-((N + 1 : ℕ) : ℤ), ?_⟩
-    dsimp [n, step]
-    ring
-  have hz_int : (z : ℚ) = p.eval (((n : ℤ) : ℚ)) := by
-    simpa using hz
-  have hz₀_int : (z₀ : ℚ) = p.eval (((n₀ : ℤ) : ℚ)) := by
-    simpa using hz₀
-  have hper : z ≡ z₀ [ZMOD ((ℓ : ℕ) : ℤ)] :=
-    polynomial_periodicity_of_integral_values p B hBpos hB ℓ hℓ.one_le
-      (n : ℤ) (n₀ : ℤ) z z₀ hz_int hz₀_int hxy
-  intro hz_dvd
-  have hdiff : (ℓ : ℤ) ∣ z₀ - z := hper.dvd
-  have hz₀_dvd : (ℓ : ℤ) ∣ z₀ := by
-    have hsum : (ℓ : ℤ) ∣ (z₀ - z) + z := dvd_add hdiff hz_dvd
-    simpa [sub_eq_add_neg, add_assoc] using hsum
-  exact hz₀_ndvd hz₀_dvd
-
 end Erdos.P283.RSG
 
 /-! =============================================================
@@ -2398,7 +2002,6 @@ Copyright (c) 2026
 Integer-valued polynomial value sequences for Graham's complete polynomial
 sequence theorem.
 -/
-
 
 namespace Erdos.P283.RSG
 
@@ -2449,26 +2052,6 @@ lemma eq_polyValueSeq_of_eval {p : ℚ[X]}
     hz.trans (polyValueSeq_eval p h_int_pos i).symm
   exact_mod_cast hz'
 
-/-- A finite subset sum of the chosen integer value sequence is the corresponding
-rational finite subset sum of polynomial evaluations. -/
-lemma polyValueSeq_fs_eval {p : ℚ[X]}
-    {h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ)}
-    {x : ℤ}
-    (hx : x ∈ FS (polyValueSeq p h_int_pos)) :
-    ∃ I : Finset ℕ,
-      x = ∑ i ∈ I, polyValueSeq p h_int_pos i ∧
-      (x : ℚ) = ∑ i ∈ I, p.eval ((i + 1 : ℕ) : ℚ) := by
-  rcases hx with ⟨I, rfl⟩
-  refine ⟨I, rfl, ?_⟩
-  calc
-    ((∑ i ∈ I, polyValueSeq p h_int_pos i : ℤ) : ℚ)
-        = ∑ i ∈ I, (polyValueSeq p h_int_pos i : ℚ) := by norm_cast
-    _ = ∑ i ∈ I, p.eval ((i + 1 : ℕ) : ℚ) := by
-      exact Finset.sum_congr rfl
-        (fun i _hi => polyValueSeq_eval p h_int_pos i)
-
 /-- Completeness of the chosen integer value sequence unwraps to the rational
 subset-sum conclusion used by the P283 theorem. -/
 lemma complete_polyValueSeq_to_eval_subsets {p : ℚ[X]}
@@ -2490,36 +2073,6 @@ lemma complete_polyValueSeq_to_eval_subsets {p : ℚ[X]}
     _ = ∑ i ∈ I, p.eval ((i + 1 : ℕ) : ℚ) := by
       exact Finset.sum_congr rfl
         (fun i _hi => polyValueSeq_eval p h_int_pos i)
-
-/-- The positive-input no-fixed-prime condition gives arbitrarily late
-nondivisible terms in the chosen value sequence. -/
-theorem polyValueSeq_infinite_nondivisibility_of_no_fixed_prime
-    (p : ℚ[X])
-    (h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ))
-    (h_gcd_one :
-      ∀ ℓ : ℕ, ℓ.Prime →
-        ∃ n : ℕ, 1 ≤ n ∧ ∃ z : ℤ,
-          (z : ℚ) = p.eval (n : ℚ) ∧ ¬ ((ℓ : ℤ) ∣ z)) :
-    ∀ ℓ : ℕ, ℓ.Prime →
-      ∀ N : ℕ, ∃ i ≥ N, ¬ ((ℓ : ℤ) ∣ polyValueSeq p h_int_pos i) := by
-  intro ℓ hℓ N
-  obtain ⟨n, hn_ge, z, hz_eval, hz_ndvd⟩ :=
-    infinite_nondivisibility_of_no_fixed_prime p h_int_pos h_gcd_one ℓ hℓ (N + 1)
-  have hn_pos : 1 ≤ n :=
-    (Nat.succ_le_succ (Nat.zero_le N)).trans hn_ge
-  refine ⟨n - 1, Nat.le_sub_one_of_lt (Nat.lt_of_succ_le hn_ge), ?_⟩
-  have hn_sub : n - 1 + 1 = n := Nat.sub_add_cancel hn_pos
-  have hseq_eval :
-      (polyValueSeq p h_int_pos (n - 1) : ℚ) = p.eval (n : ℚ) := by
-    simpa [hn_sub] using polyValueSeq_eval p h_int_pos (n - 1)
-  have hz_eq : z = polyValueSeq p h_int_pos (n - 1) := by
-    have hz' : (z : ℚ) = (polyValueSeq p h_int_pos (n - 1) : ℚ) :=
-      hz_eval.trans hseq_eval.symm
-    exact_mod_cast hz'
-  intro hdiv
-  exact hz_ndvd (by simpa [hz_eq] using hdiv)
 
 /-- Every residue attained by the chosen polynomial value sequence recurs
 arbitrarily far out modulo any positive modulus. This is the denominator-cleared
@@ -2829,23 +2382,6 @@ lemma Delta_constant_mem_signedFS_evenValueSeq_tail
     exact hdelta
   exact signedFS_tail_mono hM_ge hM
 
-/-- Constant top-difference signed tails, together with residue coverage by a
-second sequence, give Graham near-completeness. -/
-lemma nearlyComplete_evenValueSeq_of_Delta_constant_and_residues
-    (k : ℕ) (hk : 0 < k) (p : ℚ[X])
-    (h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ))
-    (m : ℕ) (hm : 0 < m)
-    (hm_eval :
-      ∀ x : ℕ, 1 ≤ x → ((m : ℤ) : ℚ) = (Delta k p).eval (x : ℚ))
-    {T : ℕ → ℤ} (hres : CoversResidues T m) :
-    NearlyComplete (interleave (evenValueSeq p h_int_pos) T) :=
-  nearlyComplete_of_signed_tail_and_residues hm
-    (Delta_constant_mem_signedFS_evenValueSeq_tail
-      k hk p h_int_pos (m := (m : ℤ)) hm_eval)
-    hres
-
 /-- Tail version of the even-value near-completeness lemma. This is the form
 used after a finite residue prefix has been separated from the later odd/even
 tails. -/
@@ -2946,33 +2482,6 @@ lemma polyValueSeq_odd_tail_sigmaSeq
   · simpa using polyValueSeq_odd_tail_eventually_doubling p h_int_pos hlead r
 
 /-! ## Conditional Graham assembly -/
-
-/-- Conditional assembly of Graham's final complete sequence from the two
-remaining mathematical inputs: a positive constant top difference and residue
-coverage. This packages the already-formalized Sigma/near-complete glue. -/
-lemma complete_interleaved_values_of_Delta_constant_and_residues
-    (k : ℕ) (hk : 0 < k) (p : ℚ[X])
-    (h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ))
-    (hlead : 0 < p.leadingCoeff)
-    (m : ℕ) (hm : 0 < m)
-    (hm_eval :
-      ∀ x : ℕ, 1 ≤ x → ((m : ℤ) : ℚ) = (Delta k p).eval (x : ℚ))
-    {T : ℕ → ℤ} (hres : CoversResidues T m) :
-    Complete
-      (interleave
-        (fun n : ℕ => polyValueSeq p h_int_pos (2 * n))
-        (interleave (evenValueSeq p h_int_pos) T)) := by
-  have hsigma :
-      SigmaSeq (fun n : ℕ => polyValueSeq p h_int_pos (2 * n)) := by
-    exact SigmaSeq.congr
-      (fun n => by simp)
-      (polyValueSeq_odd_tail_sigmaSeq p h_int_pos hlead 0)
-  exact complete_of_sigma_nearly
-    hsigma
-    (nearlyComplete_evenValueSeq_of_Delta_constant_and_residues
-      k hk p h_int_pos m hm hm_eval hres)
 
 /-- Shifted conditional assembly: a finite prefix can be reserved for residue
 witnesses, while Graham's odd/even tails begin after that prefix. -/
@@ -3087,29 +2596,6 @@ lemma exists_complete_polyValueSeq_of_residues
   exact complete_polyValueSeq_of_residues
     p.natDegree hdeg p h_int_pos hlead m hm_pos hm_eval hres
 
-/-- Final assembly in Graham's frequent-generator language, transferred to the
-original polynomial value sequence. This is the target interface for the
-remaining residue-cover proof. -/
-lemma exists_complete_polyValueSeq_of_frequent_generators
-    (p : ℚ[X])
-    (h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ))
-    (hdeg : 0 < p.natDegree)
-    (hlead : 0 < p.leadingCoeff) :
-    ∃ m : ℕ, 0 < m ∧
-      ∀ {w : ℕ} (ρ : Fin w → ZMod m),
-        AddSubgroup.closure (Set.range ρ) = ⊤ →
-        (∀ i : Fin w, ∀ N : ℕ,
-          ∃ n : ℕ, N ≤ n ∧
-            ((polyValueSeq p h_int_pos n : ℤ) : ZMod m) = ρ i) →
-        Complete (polyValueSeq p h_int_pos) := by
-  obtain ⟨m, hm_pos, hcomplete⟩ :=
-    exists_complete_polyValueSeq_of_residues p h_int_pos hdeg hlead
-  refine ⟨m, hm_pos, ?_⟩
-  intro w ρ hgen hfreq
-  exact hcomplete (coversResidues_of_frequent_generators (by omega) ρ hgen hfreq)
-
 /-- Final assembly reduced to a finite Bezout combination of actual polynomial
 value residues. Periodicity supplies the required frequent recurrence of each
 chosen residue. -/
@@ -3218,57 +2704,6 @@ theorem graham_complete_polynomial_values
     (complete_polyValueSeq_of_no_fixed_prime
       f h_int_pos h_nonconst h_lead_pos h_gcd_one)
 
-/-- The same conditional assembly with Graham's positive top-difference
-constant chosen from the polynomial. The only remaining external input is
-residue coverage modulo that chosen constant. -/
-lemma exists_complete_interleaved_values_of_residues
-    (p : ℚ[X])
-    (h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ))
-    (hdeg : 0 < p.natDegree)
-    (hlead : 0 < p.leadingCoeff) :
-    ∃ m : ℕ, 0 < m ∧
-      ∀ {T : ℕ → ℤ}, CoversResidues T m →
-        Complete
-          (interleave
-            (fun n : ℕ => polyValueSeq p h_int_pos (2 * n))
-            (interleave (evenValueSeq p h_int_pos) T)) := by
-  obtain ⟨m, hm_pos, hm_eval⟩ :=
-    Delta_top_positive_integer_constant p h_int_pos hlead
-  refine ⟨m, hm_pos, ?_⟩
-  intro T hres
-  exact complete_interleaved_values_of_Delta_constant_and_residues
-    p.natDegree hdeg p h_int_pos hlead m hm_pos hm_eval hres
-
-/-- Conditional final assembly phrased in Graham's residue-generator language.
-Once the top-difference modulus is fixed, it is enough to find finitely many
-frequently occurring residues whose additive closure is all of `ZMod m`. -/
-lemma exists_complete_interleaved_values_of_frequent_generators
-    (p : ℚ[X])
-    (h_int_pos :
-      ∀ n : ℕ, 1 ≤ n →
-        ∃ z : ℤ, 0 < z ∧ (z : ℚ) = p.eval (n : ℚ))
-    (hdeg : 0 < p.natDegree)
-    (hlead : 0 < p.leadingCoeff) :
-    ∃ m : ℕ, 0 < m ∧
-      ∀ {w : ℕ} (ρ : Fin w → ZMod m),
-        AddSubgroup.closure (Set.range ρ) = ⊤ →
-        (∀ i : Fin w, ∀ N : ℕ,
-          ∃ n : ℕ, N ≤ n ∧
-            ((polyValueSeq p h_int_pos n : ℤ) : ZMod m) = ρ i) →
-        Complete
-          (interleave
-            (fun n : ℕ => polyValueSeq p h_int_pos (2 * n))
-            (interleave (evenValueSeq p h_int_pos) (polyValueSeq p h_int_pos))) := by
-  obtain ⟨m, hm_pos, hcomplete⟩ :=
-    exists_complete_interleaved_values_of_residues p h_int_pos hdeg hlead
-  refine ⟨m, hm_pos, ?_⟩
-  intro w ρ hgen hfreq
-  exact hcomplete
-    (T := polyValueSeq p h_int_pos)
-    (coversResidues_of_frequent_generators (by omega) ρ hgen hfreq)
-
 end Erdos.P283.RSG
 
 /-! =============================================================
@@ -3291,7 +2726,6 @@ Predicates and helpers used throughout the formalization:
 
 This file is imported by every other P283 file.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -3450,7 +2884,6 @@ Internal helper lemmas (broken out for clarity):
                                                     lengths.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Finset
@@ -3464,17 +2897,6 @@ lemma egyptian_split_identity (y : ℕ) (hy : 1 ≤ y) :
   have hy1 : ((y : ℚ) + 1) ≠ 0 := by positivity
   push_cast
   field_simp
-
-/-- After a split at the largest denominator `y`, the new denominators
-`y + 1` and `y(y+1)` are both larger than `y`. -/
-lemma egyptian_split_lower_bound (y : ℕ) (hy : 1 ≤ y) :
-    y < y + 1 ∧ y < y * (y + 1) := by
-  refine ⟨Nat.lt_succ_self y, ?_⟩
-  have h_le : y * 1 ≤ y * (y + 1) := Nat.mul_le_mul_left y (by omega)
-  have h_pos : y * 1 < y * (y + 1) ∨ y * 1 = y * (y + 1) := lt_or_eq_of_le h_le
-  rcases h_pos with h | h
-  · simpa using h
-  · exfalso; have := (Nat.mul_left_cancel hy h); omega
 
 /-! ## Lemma 3 — Egyptian expansion existence and arbitrary length -/
 
@@ -4156,7 +3578,6 @@ The proof goes via denominator clearing: pick `B` with `B p ∈ ℤ[X]`, get the
 ℤ-version periodicity, and divide back by `B` using integer-valuedness.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Polynomial
@@ -4255,7 +3676,6 @@ Erdős Problems 283 + 351 — §1 Egyptian switches, switching polynomials & Lem
 Lemma 6 uses Lemmas 4, 5 and `IntValued p`.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Polynomial Finset
@@ -4313,15 +3733,6 @@ lemma scaledPatternDenoms_sum_recip
   · exact IsEgyptianPattern.sum_scaled_recip hE c hc
   · intro e _ e' _ heq
     exact Nat.eq_of_mul_eq_mul_right hc heq
-
-lemma scaledPatternDenoms_eval_sum
-    (p : ℚ[X]) (E : Finset ℕ) {c : ℕ} (hc : 0 < c) :
-    (∑ n ∈ scaledPatternDenoms E c, p.eval ((n : ℕ) : ℚ)) =
-      ∑ e ∈ E, p.eval (((e * c : ℕ) : ℕ) : ℚ) := by
-  unfold scaledPatternDenoms
-  rw [Finset.sum_image]
-  intro e _ e' _ heq
-  exact Nat.eq_of_mul_eq_mul_right hc heq
 
 lemma scaledPatternDenoms_intEval_sum
     (p : ℚ[X]) (hp : IntValued p) (E : Finset ℕ) {c : ℕ} (hc : 0 < c) :
@@ -5050,7 +4461,6 @@ This file declares the construction objects and proves the supporting
 lemmas; the `theorem_1` assembly lives in `Theorem1.lean`.
 -/
 
-
 namespace PolynomialEgyptianSums
 
 open Polynomial Finset
@@ -5070,22 +4480,6 @@ def D (j : ℕ) : ℕ := u j * u (j + 1)
 sum and provides a (v₂, v₃) = (2, 2) signature distinct from main slots. -/
 def tau (N : ℕ) : ℕ := P * u (N + 1)
 
-/-- `u j = 36j + 1` is strictly increasing. -/
-lemma u_strictMono : StrictMono u := by
-  intro a b h
-  unfold u P
-  omega
-
-/-- Main denominators are positive. -/
-lemma D_pos (j : ℕ) : 0 < D j := by
-  unfold D u P
-  positivity
-
-/-- Endpoint denominators are positive. -/
-lemma tau_pos (N : ℕ) : 0 < tau N := by
-  unfold tau u P
-  positivity
-
 /-- `D j = u_j u_{j+1}` is strictly increasing. -/
 lemma D_strictMono : StrictMono D := by
   intro a b h
@@ -5101,10 +4495,6 @@ lemma tau_strictMono : StrictMono tau := by
   intro a b h
   unfold tau u P
   omega
-
-/-- `τ` is injective. -/
-lemma tau_injective : Function.Injective tau :=
-  tau_strictMono.injective
 
 /-- The base Egyptian pattern `{2, 3, 6}` underlying the `1/x = 1/(2x) + 1/(3x)
 + 1/(6x)` switch identity. -/
@@ -5397,26 +4787,6 @@ lemma A_comp_Dpoly_natDegree (p : ℚ[X]) (J : ℕ)
       Dpoly_natDegree]
   ring
 
-/-- `Dpoly J` is integer-valued (its coefficients are rationals but evaluate to ℤ
-on ℤ inputs since each linear factor is `P·X + integer`). -/
-lemma Dpoly_intValued (J : ℕ) : IntValued (Dpoly J) := by
-  intro z
-  refine ⟨((P : ℤ) * (z + (J : ℤ) - 1) + 1) * ((P : ℤ) * (z + (J : ℤ)) + 1), ?_⟩
-  unfold Dpoly
-  simp only [Polynomial.eval_mul, Polynomial.eval_add, Polynomial.eval_sub,
-             Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_one]
-  push_cast
-  ring
-
-/-- The composition `(A p).comp (Dpoly J)` is integer-valued whenever `p` is. -/
-lemma A_comp_Dpoly_intValued (p : ℚ[X]) (hp : IntValued p) (J : ℕ) :
-    IntValued ((A p).comp (Dpoly J)) := by
-  intro z
-  obtain ⟨k_D, hk_D⟩ := Dpoly_intValued J z
-  obtain ⟨k_A, hk_A⟩ := A_intValued p hp k_D
-  refine ⟨k_A, ?_⟩
-  rw [Polynomial.eval_comp, ← hk_D, hk_A]
-
 /-- Leading coefficient of the composition: `lc(p) · Θ_r · P^{2r}`. -/
 lemma A_comp_Dpoly_leadingCoeff (p : ℚ[X]) (J : ℕ)
     (h_nonconst : 1 ≤ p.natDegree) (h_lead_pos : 0 < p.leadingCoeff) :
@@ -5429,27 +4799,6 @@ lemma A_comp_Dpoly_leadingCoeff (p : ℚ[X]) (J : ℕ)
     rw [← pow_mul]
   · -- Goal: (Dpoly J).natDegree ≠ 0
     rw [Dpoly_natDegree]; norm_num
-
-/-- `0 < ((A p).comp (Dpoly J)).natDegree` whenever `1 ≤ p.natDegree`,
-`lc(p) > 0`. (RSG's `0 < f.natDegree` hypothesis after `g`-division.) -/
-lemma A_comp_Dpoly_natDegree_pos (p : ℚ[X]) (J : ℕ)
-    (h_nonconst : 1 ≤ p.natDegree) (h_lead_pos : 0 < p.leadingCoeff) :
-    0 < ((A p).comp (Dpoly J)).natDegree := by
-  rw [A_comp_Dpoly_natDegree p J h_nonconst h_lead_pos]
-  omega
-
-/-- `0 < ((A p).comp (Dpoly J)).leadingCoeff` whenever `1 ≤ p.natDegree`,
-`lc(p) > 0`. (RSG's `0 < f.leadingCoeff` hypothesis after `g`-division.) -/
-lemma A_comp_Dpoly_leadingCoeff_pos (p : ℚ[X]) (J : ℕ)
-    (h_nonconst : 1 ≤ p.natDegree) (h_lead_pos : 0 < p.leadingCoeff) :
-    0 < ((A p).comp (Dpoly J)).leadingCoeff := by
-  rw [A_comp_Dpoly_leadingCoeff p J h_nonconst h_lead_pos]
-  have hθ : 0 < theta p.natDegree := by
-    have := theta_gt_one _ h_nonconst; linarith
-  have hP : (0 : ℚ) < (P : ℚ) ^ (2 * p.natDegree) := by
-    have : (0 : ℚ) < (P : ℚ) := by unfold P; norm_num
-    exact pow_pos this _
-  positivity
 
 /-- `(A p).comp (Dpoly J)` evaluated at a positive integer `t` equals the
 integer value `intEval (A p) (D (J + t - 1))`. This is the bridge between the
@@ -5564,7 +4913,6 @@ collection of switches are pairwise distinct. The argument uses
 The pairwise-distinctness theorem `all_denominators_distinct_after_switches`
 is the goal; sub-lemmas formalize the per-pair valuation argument.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -5863,7 +5211,6 @@ Two main supporting results:
 
 Plus the bookkeeping for `B_*`, `R_c`, `C_0`.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -6609,7 +5956,6 @@ Sub-results:
 The RSG input is supplied by the proved `roth_szekeres_graham` wrapper in
 `Basic.lean`.
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -7719,13 +7065,6 @@ noncomputable def Bstar {α : ℚ} {L : ℕ} (p : ℚ[X]) (hp : IntValued p)
     (corr : CorrectionData p hp gcd) : ℤ :=
   ∑ ν : Fin corr.t, corr.b ν
 
-lemma Bstar_nonneg {α : ℚ} {L : ℕ} (p : ℚ[X]) (hp : IntValued p)
-    {md : MainChoice α L p hp} {gcd : MainGCDData p hp md}
-    (corr : CorrectionData p hp gcd) :
-    0 ≤ Bstar p hp corr := by
-  unfold Bstar
-  exact Finset.sum_nonneg (fun ν _ => (corr.hb_pos ν).le)
-
 /-- Use the correction-slot subset-sum cover to choose a subset whose increment
 puts an arbitrary integer `z` into the `g`-divisible residue class. -/
 lemma correction_subset_dvd {α : ℚ} {L : ℕ} (p : ℚ[X]) (hp : IntValued p)
@@ -7771,12 +7110,6 @@ undivided main-slot scale. -/
 def M0 {α : ℚ} {L : ℕ} (p : ℚ[X]) (hp : IntValued p)
     {md : MainChoice α L p hp} (gcd : MainGCDData p hp md) (X_q : ℤ) : ℤ :=
   max 0 ((gcd.g : ℤ) * X_q)
-
-lemma M0_nonneg {α : ℚ} {L : ℕ} (p : ℚ[X]) (hp : IntValued p)
-    {md : MainChoice α L p hp} (gcd : MainGCDData p hp md) (X_q : ℤ) :
-    0 ≤ M0 p hp gcd X_q := by
-  unfold M0
-  exact le_max_left _ _
 
 lemma M0_ge_g_mul_Xq {α : ℚ} {L : ℕ} (p : ℚ[X]) (hp : IntValued p)
     {md : MainChoice α L p hp} (gcd : MainGCDData p hp md) (X_q : ℤ) :
@@ -8496,48 +7829,6 @@ correction slot, then replaces selected slots by their Egyptian-pattern
 multiples. These definitions keep the concrete final `Finset ℕ` separate from
 the indexed sum identities below. -/
 
-def mainUnswitchedDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]} {hp : IntValued p}
-    (md : MainChoice α L p hp) (N : ℕ) (S : Finset ℕ) : Finset ℕ :=
-  (Finset.Icc md.J N \ S).image D
-
-def mainSwitchedDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]} {hp : IntValued p}
-    (_md : MainChoice α L p hp) (_N : ℕ) (S : Finset ℕ) : Finset ℕ :=
-  S.biUnion fun j => scaledPatternDenoms E0 (D j)
-
-def mainDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]} {hp : IntValued p}
-    (md : MainChoice α L p hp) (N : ℕ) (S : Finset ℕ) : Finset ℕ :=
-  mainUnswitchedDenoms md N S ∪ mainSwitchedDenoms md N S ∪ {tau N}
-
-def correctionUnswitchedDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]}
-    {hp : IntValued p} {md : MainChoice α L p hp}
-    {gcd : MainGCDData p hp md} (corr : CorrectionData p hp gcd)
-    (T : Finset (Fin corr.t)) : Finset ℕ :=
-  ((Finset.univ : Finset (Fin corr.t)) \ T).image corr.c
-
-def correctionSwitchedDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]}
-    {hp : IntValued p} {md : MainChoice α L p hp}
-    {gcd : MainGCDData p hp md} (corr : CorrectionData p hp gcd)
-    (T : Finset (Fin corr.t)) : Finset ℕ :=
-  T.biUnion fun ν => scaledPatternDenoms (corr.G ν) (corr.c ν)
-
-def correctionDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]}
-    {hp : IntValued p} {md : MainChoice α L p hp}
-    {gcd : MainGCDData p hp md} (corr : CorrectionData p hp gcd)
-    (T : Finset (Fin corr.t)) : Finset ℕ :=
-  correctionUnswitchedDenoms corr T ∪ correctionSwitchedDenoms corr T
-
-def fillerDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]} {hp : IntValued p}
-    {md : MainChoice α L p hp} {gcd : MainGCDData p hp md}
-    {corr : CorrectionData p hp gcd} (fill : FillerData p hp corr) :
-    Finset ℕ :=
-  fill.F.image fun f => fill.Λ * f
-
-def finalDenoms {α : ℚ} {L : ℕ} {p : ℚ[X]} {hp : IntValued p}
-    {md : MainChoice α L p hp} {gcd : MainGCDData p hp md}
-    (corr : CorrectionData p hp gcd) (fill : FillerData p hp corr)
-    (N : ℕ) (S : Finset ℕ) (T : Finset (Fin corr.t)) : Finset ℕ :=
-  mainDenoms md N S ∪ correctionDenoms corr T ∪ fillerDenoms fill
-
 abbrev MainUnswitchedIndex {α : ℚ} {L : ℕ} {p : ℚ[X]} {hp : IntValued p}
     (md : MainChoice α L p hp) (N : ℕ) (S : Finset ℕ) :=
   {j : ℕ // j ∈ Finset.Icc md.J N \ S}
@@ -8732,14 +8023,6 @@ lemma mainSwitchedIndex_denom_injective (S : Finset ℕ) :
   subst jb
   subst nb
   rfl
-
-lemma mainUnswitchedIndex_denom_injective {α : ℚ} {L : ℕ} {p : ℚ[X]}
-    {hp : IntValued p} (md : MainChoice α L p hp) (N : ℕ)
-    (S : Finset ℕ) :
-    Function.Injective (fun j : MainUnswitchedIndex md N S => D j.1) := by
-  intro a b hab
-  apply Subtype.ext
-  exact D_injective hab
 
 lemma fillerIndex_denom_injective {α : ℚ} {L : ℕ} {p : ℚ[X]}
     {hp : IntValued p} {md : MainChoice α L p hp}
@@ -9403,15 +8686,6 @@ lemma select_subsets_from_rsg_interval {α : ℚ} {L : ℕ} (p : ℚ[X])
   intro M hM0 hMle hdiv
   exact main_window_integer_subset p hp gcd X_q hX_q N hJN U h_tail M hM0 hMle hdiv
 
-lemma intEval_finset_sum_cast (p : ℚ[X]) (hp : IntValued p) (E : Finset ℕ) :
-    ((∑ n ∈ E, intEval p hp ((n : ℕ) : ℤ) : ℤ) : ℚ) =
-      ∑ n ∈ E, p.eval ((n : ℕ) : ℚ) := by
-  push_cast
-  apply Finset.sum_congr rfl
-  intro n _
-  rw [intEval_spec]
-  rfl
-
 lemma witness_of_denominator_finset (α : ℚ) (L m : ℕ) (p : ℚ[X])
     (E : Finset ℕ) (hE_nonempty : E.Nonempty)
     (hE_gt_L : ∀ n ∈ E, L < n)
@@ -9708,15 +8982,6 @@ section MainQuotBridge
 
 variable {α : ℚ} {L : ℕ} (p : ℚ[X]) (hp : IntValued p)
 
-/-- Statement-shape for the quotient-gcd bridge proved inside
-`chooseMainGCDData`. -/
-def mainQuot_no_prime_fixed_stmt (md : MainChoice α L p hp) (g : ℕ)
-    (_ : 1 ≤ g) : Prop :=
-  ∀ ℓ : ℕ, ℓ.Prime →
-    ∃ t : ℕ, 1 ≤ t ∧ ∃ z : ℤ,
-      (z : ℚ) = (qPoly p md.J g).eval (t : ℚ) ∧
-      ¬ ((ℓ : ℤ) ∣ z)
-
 end MainQuotBridge
 
 /-- **Main theorem (PDF Theorem 1).** For `α ∈ ℚ_{>0}`, `L ≥ 1`, and a polynomial
@@ -9928,7 +9193,6 @@ Three cases:
                                                    (optional; FC #351 doesn't
                                                    need it).
 -/
-
 
 namespace PolynomialEgyptianSums
 
@@ -11006,17 +10270,6 @@ theorem not_strongly_complete_of_neg_leadingCoeff
 
 /-! ## Combined corollary 7 statement -/
 
-/-- **Corollary 7 (PDF, combined).** If `p = 0` or `p` has positive leading
-coefficient, `A_p = {p(n) + 1/n}` is strongly complete. (Includes positive
-constants — `p = C c` with `c > 0` — in addition to nonconstant positive-leading
-polynomials. FC #351 separately requires `0 < natDegree p`.) -/
-theorem corollary_7 (p : ℚ[X])
-    (h : p = 0 ∨ 0 < p.leadingCoeff) :
-    IsStronglyComplete (imageSet p) := by
-  rcases h with rfl | hl
-  · exact corollary_7_zero
-  · exact corollary_7_pos_leading p hl
-
 end PolynomialEgyptianSums
 
 /-! =============================================================
@@ -11032,7 +10285,6 @@ from the core `PolynomialEgyptianSums` development (`theorem_1`, with `α = 1`,
 `L = 1`). The `nᵢ` are indexed by `Fin (k+1)` with sentinel `n 0 = 0`, and the
 sums run over `Finset.Icc 1 (Fin.last k)`.
 -/
-
 
 /-! ## #283 -/
 

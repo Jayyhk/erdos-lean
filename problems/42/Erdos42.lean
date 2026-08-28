@@ -67,11 +67,6 @@ def IsSidonNat (A : Finset ℕ) : Prop :=
   ∀ ⦃a₁⦄, a₁ ∈ A → ∀ ⦃a₂⦄, a₂ ∈ A → ∀ ⦃a₃⦄, a₃ ∈ A → ∀ ⦃a₄⦄, a₄ ∈ A →
     a₁ + a₂ = a₃ + a₄ → (a₁ = a₃ ∧ a₂ = a₄) ∨ (a₁ = a₄ ∧ a₂ = a₃)
 
-/-- A `Finset (ZMod p)` is Sidon under the same rule. -/
-def IsSidonZMod {p : ℕ} (A : Finset (ZMod p)) : Prop :=
-  ∀ ⦃a₁⦄, a₁ ∈ A → ∀ ⦃a₂⦄, a₂ ∈ A → ∀ ⦃a₃⦄, a₃ ∈ A → ∀ ⦃a₄⦄, a₄ ∈ A →
-    a₁ + a₂ = a₃ + a₄ → (a₁ = a₃ ∧ a₂ = a₄) ∨ (a₁ = a₄ ∧ a₂ = a₃)
-
 lemma isSidonInt_empty : IsSidonInt ∅ := by
   intro a₁ ha₁
   simp at ha₁
@@ -192,19 +187,6 @@ lemma diffFinset_erase_zero_card_le_offDiag_card (A : Finset ℤ) :
     _ ≤ A.offDiag.card := Finset.card_image_le
     _ = A.card * A.card - A.card := by rw [Finset.offDiag_card]
 
-lemma diffFinset_self_symmetric (A : Finset ℤ) :
-    SymmetricFinset (DiffFinset A A) := by
-  intro x
-  simp only [mem_diffFinset]
-  constructor
-  · rintro ⟨a, ha, b, hb, rfl⟩; exact ⟨b, hb, a, ha, by ring⟩
-  · rintro ⟨a, ha, b, hb, h⟩; exact ⟨b, hb, a, ha, by linarith⟩
-
-lemma zero_mem_diffFinset_self {A : Finset ℤ} (hA : A.Nonempty) :
-    (0 : ℤ) ∈ DiffFinset A A := by
-  obtain ⟨a, ha⟩ := hA
-  exact mem_diffFinset.mpr ⟨a, ha, a, ha, by ring⟩
-
 /-
 Erdős Problem 42 — finite-Fourier predicates used in the routes.
 
@@ -257,13 +239,6 @@ lemma normalizedDftFunction_eq_sum {p : ℕ} [NeZero p]
   rw [normalizedDftFunction, ZMod.dft_apply]
   simp [smul_eq_mul]
 
-lemma normalizedDftFunction_zero_eq_average {p : ℕ} [NeZero p]
-    (f : ZMod p → ℂ) :
-    normalizedDftFunction f 0 =
-      ((p : ℂ)⁻¹) * ∑ x : ZMod p, f x := by
-  rw [normalizedDftFunction_eq_sum]
-  simp
-
 @[simp] lemma normalizedDftFunction_zero_fun {p : ℕ} [NeZero p]
     (r : ZMod p) :
     normalizedDftFunction (fun _ : ZMod p => 0) r = 0 := by
@@ -290,13 +265,6 @@ lemma normalizedDftFunction_sub {p : ℕ} [NeZero p]
     normalizedDftFunction (fun x => f x - g x) r =
       normalizedDftFunction f r - normalizedDftFunction g r := by
   simp [sub_eq_add_neg, normalizedDftFunction_add, normalizedDftFunction_neg]
-
-lemma normalizedDftFunction_const_mul {p : ℕ} [NeZero p]
-    (c : ℂ) (f : ZMod p → ℂ) (r : ZMod p) :
-    normalizedDftFunction (fun x => c * f x) r =
-      c * normalizedDftFunction f r := by
-  rw [normalizedDftFunction_eq_sum, normalizedDftFunction_eq_sum]
-  simp [Finset.mul_sum, mul_comm, mul_left_comm, mul_assoc]
 
 lemma normalizedDftCoeff_eq_sum {p : ℕ} [NeZero p]
     (T : Finset (ZMod p)) (r : ZMod p) :
@@ -328,14 +296,6 @@ lemma function_eq_sum_normalizedDftFunction {p : ℕ} [NeZero p]
           simpa [ZMod.invDFT_apply, smul_eq_mul] using h.symm
     _ = ∑ r : ZMod p, ZMod.stdAddChar (r * x) * normalizedDftFunction f r := by
           simp [normalizedDftFunction, Finset.mul_sum, mul_comm, mul_left_comm]
-
-/-- Fourier inversion in the normalization used by the compact-Cayley route. -/
-lemma indicatorC_eq_sum_normalizedDftCoeff {p : ℕ} [NeZero p]
-    (T : Finset (ZMod p)) (x : ZMod p) :
-    indicatorC T x =
-      ∑ r : ZMod p, ZMod.stdAddChar (r * x) * normalizedDftCoeff T r := by
-  simpa [normalizedDftCoeff] using
-    function_eq_sum_normalizedDftFunction (p := p) (indicatorC T) x
 
 lemma sum_stdAddChar_neg_mul_eq_zero_of_ne_zero
     {p : ℕ} [Fact p.Prime] [NeZero p] {r : ZMod p} (hr : r ≠ 0) :
@@ -1016,11 +976,6 @@ lemma sum_product_stdAddChar_neg_diff
   norm_num
   ring_nf
 
-lemma sum_diag_stdAddChar_diff
-    {p : ℕ} [NeZero p] (A : Finset ℤ) (r : ZMod p) :
-    ∑ a ∈ A, ZMod.stdAddChar (-((((a - a : ℤ) : ZMod p) * r))) = (A.card : ℂ) := by
-  simp
-
 lemma sum_offDiagDiffSetMod_stdAddChar_eq
     {p N : ℕ} [NeZero p] (hbig : 4 * N < p)
     (A : Finset ℤ)
@@ -1450,25 +1405,6 @@ theorem compactCayleyCliqueStatement_from_explicit
   have hp : p.Prime := Fact.out
   exact hp₀ p hp hpgt T hsym hzero hdens (by simpa using hfourier)
 
-/-- Conversely, the original typeclass-shaped compact-Cayley statement implies
-the explicit-prime formulation used for contradiction extraction. -/
-theorem explicit_of_compactCayleyCliqueStatement
-    {ℓ : ℕ} {η : ℝ}
-    (h : ∃ ε : ℝ, 0 < ε ∧
-      ∃ p₀ : ℕ, ∀ p : ℕ, [Fact p.Prime] → p₀ < p →
-      ∀ T : Finset (ZMod p),
-        SymmetricFinset T →
-        (0 : ZMod p) ∉ T →
-        η * (p : ℝ) ≤ (T.card : ℝ) →
-        FourierUpperIndicator T ε →
-        ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C) :
-    CompactCayleyCliqueStatementExplicit ℓ η := by
-  rcases h with ⟨ε, hε, p₀, hp₀⟩
-  refine ⟨ε, hε, p₀, ?_⟩
-  intro p hp hpgt T hsym hzero hdens hfourier
-  haveI : Fact p.Prime := ⟨hp⟩
-  exact hp₀ p hpgt T hsym hzero hdens (by simpa using hfourier)
-
 /-- A sequence of finite Cayley-graph counterexamples with Fourier upper bias
 tending to zero. This is the exact starting point for Lemmas 2.2–2.7 in the
 compact-Cayley PDF. -/
@@ -1488,16 +1424,6 @@ structure CayleyCounterSeq (ℓ : ℕ) (η : ℝ) where
     FourierUpperIndicator (T n) (eps n)
   no_clique : ∀ n,
     ¬ ∃ C : Finset (ZMod (p n)), C.card = ℓ ∧ CliqueInCayley (T n) C
-
-lemma CayleyCounterSeq.tendsto_p_atTop {ℓ : ℕ} {η : ℝ}
-    (S : CayleyCounterSeq ℓ η) :
-    Tendsto S.p atTop atTop :=
-  tendsto_atTop_mono (fun n => le_of_lt (S.p_gt n)) tendsto_id
-
-lemma CayleyCounterSeq.tendsto_p_natCast_atTop {ℓ : ℕ} {η : ℝ}
-    (S : CayleyCounterSeq ℓ η) :
-    Tendsto (fun n => (S.p n : ℝ)) atTop atTop :=
-  tendsto_natCast_atTop_atTop.comp S.tendsto_p_atTop
 
 /-- Failure of the explicit compact-Cayley statement produces the standard
 contradiction sequence with `ε_n = 1 / (n + 1)` and `p_n > n`. -/
@@ -1600,16 +1526,6 @@ theorem exists_clique_of_cliqueTuple
       exact hyz (by simp [hij])
     exact hx i j hij
 
-/-- Contrapositive form: a zero-free Cayley graph with no `ℓ`-clique has no
-ordered clique tuple of length `ℓ`. -/
-lemma not_cliqueTuple_of_no_clique
-    {p ℓ : ℕ} {T : Finset (ZMod p)} (hT0 : (0 : ZMod p) ∉ T)
-    (hNoClique : ¬ ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C)
-    (x : Fin ℓ → ZMod p) :
-    ¬ CliqueTuple T x := by
-  intro hx
-  exact hNoClique (exists_clique_of_cliqueTuple hT0 hx)
-
 /-- Boolean-valued indicator for ordered clique tuples, useful when connecting
 finite homomorphism densities to actual cliques. -/
 noncomputable def cliqueTupleIndicator {p ℓ : ℕ}
@@ -1617,15 +1533,6 @@ noncomputable def cliqueTupleIndicator {p ℓ : ℕ}
   by
     classical
     exact if CliqueTuple T x then 1 else 0
-
-lemma cliqueTupleIndicator_eq_zero_of_no_clique
-    {p ℓ : ℕ} {T : Finset (ZMod p)} (hT0 : (0 : ZMod p) ∉ T)
-    (hNoClique : ¬ ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C)
-    (x : Fin ℓ → ZMod p) :
-    cliqueTupleIndicator T x = 0 := by
-  classical
-  unfold cliqueTupleIndicator
-  simp [not_cliqueTuple_of_no_clique hT0 hNoClique x]
 
 /-- The finite set of ordered `ℓ`-tuples forming a clique in the Cayley graph. -/
 noncomputable def cliqueTupleFinset {p ℓ : ℕ} [NeZero p]
@@ -1761,15 +1668,6 @@ noncomputable def cliqueTupleCount {p ℓ : ℕ} [NeZero p]
     (T : Finset (ZMod p)) : ℂ :=
   ∑ x : Fin ℓ → ZMod p, cliqueTupleIndicator T x
 
-lemma cliqueTupleCount_eq_zero_of_no_clique
-    {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
-    (hT0 : (0 : ZMod p) ∉ T)
-    (hNoClique : ¬ ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C) :
-    cliqueTupleCount (ℓ := ℓ) T = 0 := by
-  classical
-  unfold cliqueTupleCount
-  simp [cliqueTupleIndicator_eq_zero_of_no_clique hT0 hNoClique]
-
 lemma cliqueTupleCount_eq_card_cliqueTupleFinset
     {p ℓ : ℕ} [NeZero p] (T : Finset (ZMod p)) :
     cliqueTupleCount (ℓ := ℓ) T =
@@ -1794,10 +1692,6 @@ lemma cliqueTupleDensity_eq_card_cliqueTupleFinset
       ((Fintype.card (Fin ℓ → ZMod p) : ℂ)⁻¹) *
         ((cliqueTupleFinset (ℓ := ℓ) T).card : ℂ) := by
   simp [cliqueTupleDensity, cliqueTupleCount_eq_card_cliqueTupleFinset]
-
-lemma card_fun_fin_zmod (p ℓ : ℕ) [NeZero p] :
-    Fintype.card (Fin ℓ → ZMod p) = p ^ ℓ := by
-  simp [ZMod.card]
 
 lemma cliqueTupleDensity_re_eq_card_div
     {p ℓ : ℕ} [NeZero p] (T : Finset (ZMod p)) :
@@ -1848,51 +1742,6 @@ lemma cliqueKernelDensity_eq_cliqueTupleDensity_of_symmetric
   classical
   simp [cliqueKernelDensity, cliqueTupleDensity, cliqueTupleCount,
     cliqueKernelWeight_eq_cliqueTupleIndicator_of_symmetric hTsym]
-
-lemma cliqueTupleDensity_eq_zero_of_no_clique
-    {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
-    (hT0 : (0 : ZMod p) ∉ T)
-    (hNoClique : ¬ ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C) :
-    cliqueTupleDensity (ℓ := ℓ) T = 0 := by
-  simp [cliqueTupleDensity, cliqueTupleCount_eq_zero_of_no_clique hT0 hNoClique]
-
-/-- Nonzero ordered clique-tuple count yields an actual finite clique. -/
-theorem exists_clique_of_cliqueTupleCount_ne_zero
-    {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
-    (hT0 : (0 : ZMod p) ∉ T)
-    (hcount : cliqueTupleCount (ℓ := ℓ) T ≠ 0) :
-    ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C := by
-  by_contra hNoClique
-  exact hcount (cliqueTupleCount_eq_zero_of_no_clique hT0 hNoClique)
-
-/-- Nonzero normalized ordered `K_ℓ` density yields an actual finite clique. -/
-theorem exists_clique_of_cliqueTupleDensity_ne_zero
-    {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
-    (hT0 : (0 : ZMod p) ∉ T)
-    (hdensity : cliqueTupleDensity (ℓ := ℓ) T ≠ 0) :
-    ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C := by
-  by_contra hNoClique
-  exact hdensity (cliqueTupleDensity_eq_zero_of_no_clique hT0 hNoClique)
-
-/-- The form used at the end of the compactness proof: once counting
-convergence gives a strictly positive real part for the finite `K_ℓ` density,
-the finite Cayley graph contains an `ℓ`-clique. -/
-theorem exists_clique_of_cliqueTupleDensity_re_pos
-    {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
-    (hT0 : (0 : ZMod p) ∉ T)
-    (hdensity : 0 < (cliqueTupleDensity (ℓ := ℓ) T).re) :
-    ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C := by
-  refine exists_clique_of_cliqueTupleDensity_ne_zero hT0 ?_
-  intro hzero
-  exact (ne_of_gt hdensity) (by simp [hzero])
-
-lemma cliqueKernelDensity_eq_zero_of_no_clique
-    {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
-    (hTsym : SymmetricFinset T) (hT0 : (0 : ZMod p) ∉ T)
-    (hNoClique : ¬ ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C) :
-    cliqueKernelDensity (ℓ := ℓ) T = 0 := by
-  rw [cliqueKernelDensity_eq_cliqueTupleDensity_of_symmetric hTsym]
-  exact cliqueTupleDensity_eq_zero_of_no_clique hT0 hNoClique
 
 lemma cliqueKernelDensity_re_pos_iff_exists_clique
     {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
@@ -1951,24 +1800,6 @@ over tests bounded by `1`. -/
 noncomputable def cayleyCutFunctional {p : ℕ} [NeZero p]
     (a φ ψ : ZMod p → ℂ) : ℂ :=
   avgZMod fun x => avgZMod fun y => a (x - y) * φ x * ψ y
-
-/-- The Cayley convolution operator `Aψ(x) = E_y a(x-y)ψ(y)` from the proof of
-compact-Cayley Lemma 2.5. -/
-noncomputable def cayleyConvolution {p : ℕ} [NeZero p]
-    (a ψ : ZMod p → ℂ) (x : ZMod p) : ℂ :=
-  avgZMod fun y => a (x - y) * ψ y
-
-lemma cayleyCutFunctional_eq_avg_convolution {p : ℕ} [NeZero p]
-    (a φ ψ : ZMod p → ℂ) :
-    cayleyCutFunctional a φ ψ =
-      avgZMod fun x => cayleyConvolution a ψ x * φ x := by
-  unfold cayleyCutFunctional cayleyConvolution
-  congr 1
-  funext x
-  rw [← avgZMod_mul_const]
-  congr 1
-  funext y
-  ring
 
 /-- The left test Fourier factor appearing after expanding the Cayley kernel. -/
 noncomputable def leftFourierTest {p : ℕ} [NeZero p]
@@ -2154,102 +1985,6 @@ lemma stdAddChar_mul_sub {p : ℕ} [NeZero p] (r x y : ZMod p) :
   rw [← ZMod.stdAddChar.map_add_eq_mul]
   congr 1
   ring
-
-lemma sum_stdAddChar_mul_eq_zero_of_ne_zero
-    {p : ℕ} [NeZero p] {t : ZMod p} (ht : t ≠ 0) :
-    ∑ r : ZMod p, ZMod.stdAddChar (r * t) = 0 := by
-  classical
-  have hnontrivial :
-      AddChar.mulShift (ZMod.stdAddChar (N := p)) t ≠ 1 :=
-    (ZMod.isPrimitive_stdAddChar p) ht
-  have hsum :
-      ∑ r : ZMod p, AddChar.mulShift (ZMod.stdAddChar (N := p)) t r = 0 :=
-    AddChar.sum_eq_zero_of_ne_one hnontrivial
-  simpa [AddChar.mulShift_apply, mul_comm, mul_left_comm, mul_assoc] using hsum
-
-/-- Orthogonality of the standard additive characters on `ZMod p`, in the
-summation direction needed for Parseval. -/
-lemma sum_stdAddChar_mul_sub_eq_card_if {p : ℕ} [NeZero p] (x y : ZMod p) :
-    ∑ r : ZMod p, ZMod.stdAddChar (r * (x - y)) =
-      if x = y then (p : ℂ) else 0 := by
-  classical
-  by_cases hxy : x = y
-  · simp [hxy, ZMod.card]
-  · have hsub : x - y ≠ 0 := sub_ne_zero.mpr hxy
-    simp [hxy, sum_stdAddChar_mul_eq_zero_of_ne_zero (p := p) hsub]
-
-/-- Characters diagonalize the finite Cayley convolution operator. -/
-lemma cayleyConvolution_stdAddChar {p : ℕ} [NeZero p]
-    (a : ZMod p → ℂ) (r x : ZMod p) :
-    cayleyConvolution a (fun y => ZMod.stdAddChar (r * y)) x =
-      normalizedDftFunction a r * ZMod.stdAddChar (r * x) := by
-  classical
-  unfold cayleyConvolution avgZMod
-  rw [normalizedDftFunction_eq_sum]
-  have hchange :
-      (∑ y : ZMod p, a (x - y) * ZMod.stdAddChar (r * y)) =
-        ∑ z : ZMod p, a z * ZMod.stdAddChar (r * (x - z)) := by
-    refine Fintype.sum_equiv (Equiv.subLeft x) _ _ ?_
-    intro y
-    simp [Equiv.subLeft_apply]
-  rw [hchange]
-  calc
-    ((p : ℂ)⁻¹) * (∑ z : ZMod p, a z * ZMod.stdAddChar (r * (x - z))) =
-        ((p : ℂ)⁻¹) *
-          (ZMod.stdAddChar (r * x) *
-            ∑ z : ZMod p, ZMod.stdAddChar (-(z * r)) * a z) := by
-          congr 1
-          rw [Finset.mul_sum]
-          refine Finset.sum_congr rfl ?_
-          intro z _
-          rw [stdAddChar_mul_sub]
-          have hrz : -(r * z) = -(z * r) := by ring
-          rw [hrz]
-          ring
-    _ = (((p : ℂ)⁻¹) * ∑ z : ZMod p, ZMod.stdAddChar (-(z * r)) * a z) *
-          ZMod.stdAddChar (r * x) := by
-          ring
-
-/-- Fourier diagonalization of the Cayley convolution operator on an arbitrary
-test function. -/
-lemma cayleyConvolution_eq_fourier_sum {p : ℕ} [NeZero p]
-    (a ψ : ZMod p → ℂ) (x : ZMod p) :
-    cayleyConvolution a ψ x =
-      ∑ r : ZMod p,
-        normalizedDftFunction ψ r * normalizedDftFunction a r *
-          ZMod.stdAddChar (r * x) := by
-  classical
-  unfold cayleyConvolution
-  simp_rw [function_eq_sum_normalizedDftFunction (p := p) ψ]
-  calc
-    avgZMod
-        (fun y : ZMod p =>
-          a (x - y) *
-            ∑ r : ZMod p, ZMod.stdAddChar (r * y) * normalizedDftFunction ψ r) =
-        avgZMod
-          (fun y : ZMod p =>
-            ∑ r : ZMod p,
-              normalizedDftFunction ψ r *
-                (a (x - y) * ZMod.stdAddChar (r * y))) := by
-          congr 1
-          funext y
-          rw [Finset.mul_sum]
-          refine Finset.sum_congr rfl ?_
-          intro r _
-          ring
-    _ = ∑ r : ZMod p,
-        normalizedDftFunction ψ r * normalizedDftFunction a r *
-          ZMod.stdAddChar (r * x) := by
-          rw [avgZMod_sum]
-          refine Finset.sum_congr rfl ?_
-          intro r _
-          rw [avgZMod_const_mul]
-          change normalizedDftFunction ψ r *
-              cayleyConvolution a (fun y => ZMod.stdAddChar (r * y)) x =
-            normalizedDftFunction ψ r * normalizedDftFunction a r *
-              ZMod.stdAddChar (r * x)
-          rw [cayleyConvolution_stdAddChar]
-          ring
 
 /-- Fourier inversion applied to the Cayley kernel `a(x-y)`, in the exact
 factorized form used by the spectral-cut argument. -/
@@ -2476,12 +2211,6 @@ lemma norm_avgFinite_le {α : Type*} [Fintype α] [Nonempty α]
     _ = M := by
       rw [norm_inv, Complex.norm_natCast]
       field_simp [ne_of_gt hcard_pos]
-
-lemma norm_avgZMod_le {p : ℕ} [NeZero p] {f : ZMod p → ℂ} {M : ℝ}
-    (hf : ∀ x, ‖f x‖ ≤ M) :
-    ‖avgZMod f‖ ≤ M := by
-  simpa [avgFinite, avgZMod, ZMod.card] using
-    norm_avgFinite_le (α := ZMod p) (f := f) hf
 
 /-- Averaging Cayley cut functionals over a nonempty finite parameter set does
 not increase a uniform Cayley cut bound.  This is the reusable analytic estimate
@@ -2829,12 +2558,6 @@ noncomputable def finiteCliqueKernelDensityEdge {p ℓ : ℕ} [NeZero p]
   ((Fintype.card (Fin ℓ → ZMod p) : ℂ)⁻¹) *
     ∑ x : Fin ℓ → ZMod p, finiteCliqueKernelWeightEdge F x
 
-lemma finiteCliqueKernelWeightEdge_const
-    {p ℓ : ℕ} (f : ZMod p → ℂ) (x : Fin ℓ → ZMod p) :
-    finiteCliqueKernelWeightEdge (fun _ => f) x =
-      finiteCliqueKernelWeight f x := by
-  rfl
-
 lemma finiteCliqueKernelDensityEdge_const
     {p ℓ : ℕ} [NeZero p] (f : ZMod p → ℂ) :
     finiteCliqueKernelDensityEdge (ℓ := ℓ) (fun _ => f) =
@@ -2857,16 +2580,6 @@ lemma EdgeKernelBoundedByOne.const {p ℓ : ℕ} {f : ZMod p → ℂ}
     EdgeKernelBoundedByOne (ℓ := ℓ) (fun _ => f) := by
   intro _ z
   exact hf z
-
-lemma EdgeKernelBoundedByOne.replace {p ℓ : ℕ}
-    {F : (Fin ℓ × Fin ℓ) → ZMod p → ℂ} {e₀ : Fin ℓ × Fin ℓ}
-    {g : ZMod p → ℂ} (hF : EdgeKernelBoundedByOne F)
-    (hg : ∀ z, ‖g z‖ ≤ 1) :
-    EdgeKernelBoundedByOne (replaceEdgeKernel F e₀ g) := by
-  intro e z
-  by_cases h : e = e₀
-  · simp [replaceEdgeKernel, h, hg z]
-  · simp [replaceEdgeKernel, h, hF e z]
 
 lemma norm_remainingLeftTest_le_one {p ℓ : ℕ} [NeZero p]
     {F : (Fin ℓ × Fin ℓ) → ZMod p → ℂ} (hF : EdgeKernelBoundedByOne F)
@@ -2921,25 +2634,6 @@ lemma norm_remainingConstFactor_mul_leftTest_le_one {p ℓ : ℕ} [NeZero p]
   have hln : 0 ≤ ‖remainingLeftTest F e₀ r u‖ := norm_nonneg _
   nlinarith
 
-lemma norm_finiteCliqueKernelWeightEdge_le_one
-    {p ℓ : ℕ} {F : (Fin ℓ × Fin ℓ) → ZMod p → ℂ}
-    (hF : EdgeKernelBoundedByOne F) (x : Fin ℓ → ZMod p) :
-    ‖finiteCliqueKernelWeightEdge F x‖ ≤ 1 := by
-  classical
-  rw [finiteCliqueKernelWeightEdge, norm_prod]
-  exact Finset.prod_le_one
-    (fun e _he => norm_nonneg (F e (x e.1 - x e.2)))
-    (fun e _he => hF e (x e.1 - x e.2))
-
-lemma norm_finiteCliqueKernelWeight_le_one
-    {p ℓ : ℕ} {f : ZMod p → ℂ} (hf : ∀ z, ‖f z‖ ≤ 1)
-    (x : Fin ℓ → ZMod p) :
-    ‖finiteCliqueKernelWeight f x‖ ≤ 1 := by
-  simpa [finiteCliqueKernelWeightEdge_const] using
-    norm_finiteCliqueKernelWeightEdge_le_one
-      (F := fun _ : Fin ℓ × Fin ℓ => f)
-      (EdgeKernelBoundedByOne.const (ℓ := ℓ) hf) x
-
 lemma finiteCliqueKernelWeightEdge_eq_single_mul
     {p ℓ : ℕ} {F : (Fin ℓ × Fin ℓ) → ZMod p → ℂ}
     {e₀ : Fin ℓ × Fin ℓ} (he₀ : e₀ ∈ cliqueEdgePairs ℓ)
@@ -2969,17 +2663,6 @@ lemma finiteCliqueKernelWeightEdge_replace_eq_single_mul
       intro h
       exact (Finset.mem_sdiff.mp he).2 (by simp [h])
     simp [replaceEdgeKernel, hne]
-
-lemma norm_remainingCliqueEdgeProduct_le_one
-    {p ℓ : ℕ} {F : (Fin ℓ × Fin ℓ) → ZMod p → ℂ}
-    (hF : EdgeKernelBoundedByOne F) (e₀ : Fin ℓ × Fin ℓ)
-    (x : Fin ℓ → ZMod p) :
-    ‖∏ e ∈ cliqueEdgePairs ℓ \ {e₀}, F e (x e.1 - x e.2)‖ ≤ 1 := by
-  classical
-  rw [norm_prod]
-  exact Finset.prod_le_one
-    (fun e _he => norm_nonneg (F e (x e.1 - x e.2)))
-    (fun e _he => hF e (x e.1 - x e.2))
 
 /-- Pointwise single-edge replacement identity, used by the telescoping proof of
 finite counting convergence. -/
@@ -3252,19 +2935,6 @@ lemma norm_finiteCliqueKernelDensityEdge_sub_le_card_mul_cutBound {p ℓ : ℕ} 
     (F := F) (G := G) (M := M) hF hG hcut (cliqueEdgePairs ℓ) (by intro x hx; exact hx)
   rwa [finiteCliqueKernelDensityEdge_patch_all] at h
 
-lemma norm_finiteCliqueKernelDensityEdge_sub_le_card_mul_spectralBound
-    {p ℓ : ℕ} [NeZero p]
-    {F G : (Fin ℓ × Fin ℓ) → ZMod p → ℂ} {M : ℝ}
-    (hMnonneg : 0 ≤ M)
-    (hF : EdgeKernelBoundedByOne F) (hG : EdgeKernelBoundedByOne G)
-    (hspec : ∀ e ∈ cliqueEdgePairs ℓ,
-      SpectralBound (fun z => G e z - F e z) M) :
-    ‖finiteCliqueKernelDensityEdge G - finiteCliqueKernelDensityEdge F‖ ≤
-      ((cliqueEdgePairs ℓ).card : ℝ) * M := by
-  exact norm_finiteCliqueKernelDensityEdge_sub_le_card_mul_cutBound hF hG
-    (fun e he => cayleyCutBound_of_spectralBound
-      (a := fun z => G e z - F e z) hMnonneg (hspec e he))
-
 lemma norm_finiteCliqueKernelDensity_sub_le_card_mul_cutBound
     {p ℓ : ℕ} [NeZero p] {f g : ZMod p → ℂ} {M : ℝ}
     (hf : ∀ z, ‖f z‖ ≤ 1) (hg : ∀ z, ‖g z‖ ≤ 1)
@@ -3297,52 +2967,11 @@ lemma indicatorC_norm_le_one {p : ℕ} (T : Finset (ZMod p)) (z : ZMod p) :
   · simp [indicatorC, h]
   · simp [indicatorC, h]
 
-lemma finiteCliqueKernelWeight_indicatorC
-    {p ℓ : ℕ} (T : Finset (ZMod p)) (x : Fin ℓ → ZMod p) :
-    finiteCliqueKernelWeight (indicatorC T) x = cliqueKernelWeight T x := by
-  rfl
-
 lemma finiteCliqueKernelDensity_indicatorC
     {p ℓ : ℕ} [NeZero p] (T : Finset (ZMod p)) :
     finiteCliqueKernelDensity (ℓ := ℓ) (indicatorC T) =
       cliqueKernelDensity (ℓ := ℓ) T := by
   rfl
-
-lemma finiteCliqueKernelDensity_indicatorC_eq_zero_of_no_clique
-    {p ℓ : ℕ} [NeZero p] {T : Finset (ZMod p)}
-    (hTsym : SymmetricFinset T) (hT0 : (0 : ZMod p) ∉ T)
-    (hNoClique : ¬ ∃ C : Finset (ZMod p), C.card = ℓ ∧ CliqueInCayley T C) :
-    finiteCliqueKernelDensity (ℓ := ℓ) (indicatorC T) = 0 := by
-  rw [finiteCliqueKernelDensity_indicatorC]
-  exact cliqueKernelDensity_eq_zero_of_no_clique hTsym hT0 hNoClique
-
-lemma CayleyCounterSeq.finiteCliqueKernelDensity_indicatorC_eq_zero
-    {ℓ : ℕ} {η : ℝ} (S : CayleyCounterSeq ℓ η) (n : ℕ) :
-    (letI : NeZero (S.p n) := ⟨(S.prime n).ne_zero⟩;
-      finiteCliqueKernelDensity (ℓ := ℓ) (indicatorC (S.T n))) = 0 := by
-  letI : NeZero (S.p n) := ⟨(S.prime n).ne_zero⟩
-  exact finiteCliqueKernelDensity_indicatorC_eq_zero_of_no_clique
-    (S.T_sym n) (S.T_zero n) (S.no_clique n)
-
-lemma CayleyCounterSeq.finiteCliqueKernelDensity_indicatorC_tendsto_zero
-    {ℓ : ℕ} {η : ℝ} (S : CayleyCounterSeq ℓ η) :
-    Tendsto
-      (fun n =>
-        letI : NeZero (S.p n) := ⟨(S.prime n).ne_zero⟩;
-        finiteCliqueKernelDensity (ℓ := ℓ) (indicatorC (S.T n)))
-      atTop (𝓝 0) := by
-  have hzero : ∀ n,
-      (letI : NeZero (S.p n) := ⟨(S.prime n).ne_zero⟩;
-        finiteCliqueKernelDensity (ℓ := ℓ) (indicatorC (S.T n))) = 0 :=
-    S.finiteCliqueKernelDensity_indicatorC_eq_zero
-  have heq :
-      (fun n =>
-        letI : NeZero (S.p n) := ⟨(S.prime n).ne_zero⟩;
-        finiteCliqueKernelDensity (ℓ := ℓ) (indicatorC (S.T n))) = fun _ => (0 : ℂ) := by
-    funext n
-    exact hzero n
-  rw [heq]
-  exact tendsto_const_nhds
 
 /-- Indicator-specialized finite generic density is positive exactly when the
 finite Cayley graph contains a clique. -/
@@ -3479,15 +3108,6 @@ def CayleyCounterSeq.subseq
     (φ : ℕ → ℕ) (hφ : StrictMono φ) (n : ℕ) :
     (S.subseq φ hφ).eps n = S.eps (φ n) := rfl
 
-/-- The epsilon bias still tends to zero after passing to a strictly monotone
-subsequence. -/
-lemma CayleyCounterSeq.subseq_tendsto_eps_zero
-    {ℓ : ℕ} {η : ℝ}
-    (S : CayleyCounterSeq ℓ η)
-    (φ : ℕ → ℕ) (hφ : StrictMono φ) :
-    Tendsto (fun n => S.eps (φ n)) atTop (𝓝 0) := by
-  exact S.eps_tendsto_zero.comp hφ.tendsto_atTop
-
 end CompactCayley
 
 /-
@@ -3546,13 +3166,6 @@ noncomputable def FourierSeq.coeff
     (F : FourierSeq) (n : ℕ) (r : ZMod (F.p n)) : ℂ :=
   letI : NeZero (F.p n) := ⟨(F.prime n).ne_zero⟩
   normalizedDftFunction (F.h n) r
-
-lemma FourierSeq.coeff_eq_normalizedDftFunction
-    (F : FourierSeq) (n : ℕ) :
-    letI : NeZero (F.p n) := ⟨(F.prime n).ne_zero⟩
-    F.coeff n = normalizedDftFunction (F.h n) := by
-  funext r
-  rfl
 
 /-- Parseval bound for a bounded `FourierSeq` term. -/
 lemma FourierSeq.sum_sq_norm_coeff_le_one
@@ -3727,19 +3340,6 @@ lemma FourierSeq.exists_largeSpectrumLabelFreq_eq_of_mem
   rcases hcover r hr with ⟨k, hk⟩
   exact ⟨k, hk⟩
 
-/-- Existential packaging of the label-frequency assignment, useful for later
-extraction structures that should not expose the chosen implementation. -/
-theorem FourierSeq.exists_labelFreq_for_largeSpectrum
-    (F : FourierSeq) :
-    ∃ labelFreq : LargeLabel → ∀ n, ZMod (F.p n),
-      ∀ q n r,
-        r ∈ F.largeSpectrum q n →
-        ∃ k : Fin ((q : ℕ) ^ 2 + 1),
-          labelFreq ⟨q, k⟩ n = r := by
-  refine ⟨fun label n => F.largeSpectrumLabelFreq label n, ?_⟩
-  intro q n r hr
-  exact F.exists_largeSpectrumLabelFreq_eq_of_mem q n hr
-
 end CompactCayley
 
 /-
@@ -3840,12 +3440,6 @@ instance FourierSeq.extractionGroupCountable
     Countable (F.ExtractionGroup labelFreq) :=
   (QuotientAddGroup.mk'_surjective (F.eventualKernel labelFreq)).countable
 
-/-- Canonical quotient class of a large-spectrum label. -/
-noncomputable def FourierSeq.extractionGenerator
-    (F : FourierSeq) (labelFreq : LargeLabel → ∀ n, ZMod (F.p n)) :
-    LargeLabel → F.ExtractionGroup labelFreq :=
-  fun label => QuotientAddGroup.mk (FreeAbelianGroup.of label)
-
 /-- Quotient equality is exactly eventual equality of finite lifts. -/
 lemma FourierSeq.extractionQuotient_eq_iff_eventually_lift_eq
     {F : FourierSeq} {labelFreq : LargeLabel → ∀ n, ZMod (F.p n)}
@@ -3866,18 +3460,6 @@ lemma FourierSeq.extractionQuotient_eq_zero_iff_eventually_lift_eq_zero
       ∀ᶠ n in atTop, F.wordLift labelFreq w n = 0 := by
   rw [QuotientAddGroup.eq_zero_iff]
   rfl
-
-/-- Equality of two quotient generators is eventual equality of their labelled
-finite frequencies. -/
-lemma FourierSeq.extractionGenerator_eq_iff_eventually_freq_eq
-    (F : FourierSeq) (labelFreq : LargeLabel → ∀ n, ZMod (F.p n))
-    (label label' : LargeLabel) :
-    F.extractionGenerator labelFreq label =
-        F.extractionGenerator labelFreq label' ↔
-      ∀ᶠ n in atTop, labelFreq label n = labelFreq label' n := by
-  rw [FourierSeq.extractionGenerator, FourierSeq.extractionGenerator,
-    FourierSeq.extractionQuotient_eq_iff_eventually_lift_eq]
-  simp [FourierSeq.wordLiftHom_apply_of, FourierSeq.wordLift]
 
 end CompactCayley
 
@@ -3960,14 +3542,6 @@ def FourierSeq.subseqLabelFreq
     (φ : ℕ → ℕ) (hφ : StrictMono φ) :
     LargeLabel → ∀ n, ZMod ((F.subseq φ hφ).p n) :=
   fun label n => labelFreq label (φ n)
-
-lemma FourierSeq.wordLift_subseq
-    (F : FourierSeq) (labelFreq : LargeLabel → ∀ n, ZMod (F.p n))
-    (φ : ℕ → ℕ) (hφ : StrictMono φ)
-    (w : ExtractionFreeGroup) (n : ℕ) :
-    (F.subseq φ hφ).wordLift (F.subseqLabelFreq labelFreq φ hφ) w n =
-      F.wordLift labelFreq w (φ n) := by
-  rfl
 
 /-- A fully diagonalized compact-Cayley Fourier extraction package for a fixed
 label-frequency assignment.
@@ -4206,21 +3780,6 @@ lemma finiteLift_sum_eventually_eq
       [ih, data.finiteLift_add_eventually_eq (f a) (∑ i ∈ s, f i)] with n hsum hadd
     rw [Finset.sum_insert ha, Finset.sum_insert ha, hadd, hsum]
 
-lemma finiteLift_sum_univ_eventually_eq
-    (data : F.StableSubseqData labelFreq)
-    {ι : Type*} [Fintype ι] (f : ι → data.Group) :
-    ∀ᶠ n in atTop,
-      data.finiteLift n (∑ i, f i) =
-        ∑ i, data.finiteLift n (f i) := by
-  simpa using data.finiteLift_sum_eventually_eq (Finset.univ : Finset ι) f
-
-lemma finiteLift_eq_of_eq_eventually
-    (data : F.StableSubseqData labelFreq)
-    {γ δ : data.Group} (h : γ = δ) :
-    ∀ᶠ n in atTop, data.finiteLift n γ = data.finiteLift n δ := by
-  subst h
-  exact Eventually.of_forall fun _ => rfl
-
 /-- Nonzero quotient elements have nonzero finite lifts eventually. -/
 lemma finiteLift_eventually_ne_zero
     (data : F.StableSubseqData labelFreq)
@@ -4440,31 +3999,6 @@ lemma generator_mem_largeSpectrumGenerators
   exact Finset.mem_union.mpr <|
     Or.inl (Finset.mem_image.mpr ⟨k, Finset.mem_univ _, rfl⟩)
 
-lemma zero_mem_largeSpectrumGenerators
-    (data : F.StableSubseqData labelFreq) (q : ℕ+) :
-    (0 : data.Group) ∈ data.largeSpectrumGenerators q := by
-  classical
-  simp [largeSpectrumGenerators]
-
-lemma largeSpectrumGenerators_card_le
-    (data : F.StableSubseqData labelFreq) (q : ℕ+) :
-    (data.largeSpectrumGenerators q).card ≤ (q : ℕ) ^ 2 + 2 := by
-  classical
-  unfold largeSpectrumGenerators
-  calc
-    (((Finset.univ : Finset (Fin ((q : ℕ) ^ 2 + 1))).image
-          (fun k => data.generator (⟨q, k⟩ : LargeLabel))) ∪ {0}).card
-        ≤ ((((Finset.univ : Finset (Fin ((q : ℕ) ^ 2 + 1))).image
-          (fun k => data.generator (⟨q, k⟩ : LargeLabel))).card) +
-            (({(0 : data.Group)} : Finset data.Group).card)) := by
-          exact Finset.card_union_le _ _
-    _ = (((Finset.univ : Finset (Fin ((q : ℕ) ^ 2 + 1))).image
-          (fun k => data.generator (⟨q, k⟩ : LargeLabel))).card) + 1 := by
-          simp
-    _ ≤ (Finset.univ : Finset (Fin ((q : ℕ) ^ 2 + 1))).card + 1 := by
-          exact Nat.add_le_add_right Finset.card_image_le 1
-    _ = (q : ℕ) ^ 2 + 2 := by simp
-
 /-- Label generators have their labelled finite frequency as finite lift,
 eventually. -/
 lemma finiteLift_generator_eventually_eq
@@ -4515,50 +4049,6 @@ lemma eventually_largeSpectrum_covered
   refine ⟨data.generator (⟨q, k⟩ : LargeLabel),
     data.generator_mem_largeSpectrumGenerators q k, ?_⟩
   exact (hn k).trans hk
-
-/-- Coefficient limits outside the `q`-large-spectrum generator set have norm
-at most `q⁻¹`. -/
-lemma coeff_norm_le_inv_of_not_mem_largeSpectrumGenerators
-    (data : F.StableSubseqData labelFreq)
-    (hcover :
-      ∀ q n r, r ∈ F.largeSpectrum q n →
-        ∃ k : Fin ((q : ℕ) ^ 2 + 1),
-          labelFreq ⟨q, k⟩ n = r)
-    (q : ℕ+) {γ : data.Group}
-    (hγ : γ ∉ data.largeSpectrumGenerators q) :
-    ‖data.coeff γ‖ ≤ ((q : ℝ)⁻¹ : ℝ) := by
-  classical
-  by_contra hnot
-  have hlt : ((q : ℝ)⁻¹ : ℝ) < ‖data.coeff γ‖ := lt_of_not_ge hnot
-  have hnorm :
-      Tendsto
-        (fun n =>
-          ‖(letI : NeZero (F.p (data.φ n)) :=
-              ⟨(F.prime (data.φ n)).ne_zero⟩;
-            F.coeff (data.φ n) (data.finiteLift n γ))‖)
-        atTop (𝓝 ‖data.coeff γ‖) :=
-    (continuous_norm.tendsto (data.coeff γ)).comp (data.coeff_tendsto γ)
-  have hlarge :
-      ∀ᶠ n in atTop,
-        ((q : ℝ)⁻¹ : ℝ) <
-          ‖(letI : NeZero (F.p (data.φ n)) :=
-              ⟨(F.prime (data.φ n)).ne_zero⟩;
-            F.coeff (data.φ n) (data.finiteLift n γ))‖ :=
-    hnorm.eventually (eventually_gt_nhds hlt)
-  have hcovered := data.eventually_largeSpectrum_covered hcover q
-  have hinj :=
-    data.finiteLift_eventually_injOn_finset
-      (data.largeSpectrumGenerators q ∪ {γ})
-  rcases (hlarge.and (hcovered.and hinj)).exists with
-    ⟨n, hnlarge, hncovered, hninj⟩
-  rcases hncovered (data.finiteLift n γ) (by simpa using hnlarge) with
-    ⟨δ, hδmem, hδeq⟩
-  have hδmem' : δ ∈ (data.largeSpectrumGenerators q ∪ {γ}) := by
-    simp [hδmem]
-  have hγmem' : γ ∈ (data.largeSpectrumGenerators q ∪ {γ}) := by
-    simp
-  have hδγ : δ = γ := hninj hδmem' hγmem' hδeq
-  exact hγ (by simpa [hδγ] using hδmem)
 
 end FourierSeq.StableSubseqData
 
@@ -4653,20 +4143,6 @@ lemma eventually_largeSpectrum_covered
   simpa [lift, φ, CayleyCounterSeq.toFourierSeq, FourierSeq.coeff,
     normalizedDftCoeff] using
       E.data.eventually_largeSpectrum_covered hcover q
-
-lemma coeff_norm_le_inv_of_not_mem_largeSpectrumGenerators
-    (E : CayleyExtraction S) (q : ℕ+) {γ : E.Group}
-    (hγ : γ ∉ E.data.largeSpectrumGenerators q) :
-    ‖E.coeff γ‖ ≤ ((q : ℝ)⁻¹ : ℝ) := by
-  have hcover :
-      ∀ q n r,
-        r ∈ (S.toFourierSeq).largeSpectrum q n →
-          ∃ k : Fin ((q : ℕ) ^ 2 + 1),
-            (S.toFourierSeq).largeSpectrumLabelFreq ⟨q, k⟩ n = r := by
-    intro q n r hr
-    exact (S.toFourierSeq).exists_largeSpectrumLabelFreq_eq_of_mem q n hr
-  simpa [coeff] using
-    E.data.coeff_norm_le_inv_of_not_mem_largeSpectrumGenerators hcover q hγ
 
 lemma coeff_im_eq_zero (E : CayleyExtraction S) (γ : E.Group) :
     (E.coeff γ).im = 0 := by
@@ -4797,18 +4273,6 @@ abbrev CompactDual (E : CayleyExtraction S) : Type :=
 abbrev CompactAddDual (E : CayleyExtraction S) : Type :=
   Additive E.CompactDual
 
-theorem compactDual_compactSpace (E : CayleyExtraction S) :
-    CompactSpace E.CompactDual :=
-  inferInstance
-
-theorem compactDual_t2Space (E : CayleyExtraction S) :
-    T2Space E.CompactDual :=
-  inferInstance
-
-theorem compactDual_isTopologicalGroup (E : CayleyExtraction S) :
-    IsTopologicalGroup E.CompactDual :=
-  inferInstance
-
 instance dualDomainCountable (E : CayleyExtraction S) :
     Countable E.DualDomain :=
   Countable.of_equiv E.Group Multiplicative.ofAdd
@@ -4828,10 +4292,6 @@ instance compactDualSecondCountableTopology (E : CayleyExtraction S) :
   dsimp [CompactDual, PontryaginDual]
   exact (ContinuousMonoidHom.isInducing_toContinuousMap
     E.DualDomain Circle).secondCountableTopology
-
-theorem dualDomain_isMulTorsionFree (E : CayleyExtraction S) :
-    IsMulTorsionFree E.DualDomain :=
-  inferInstance
 
 /-- Identity homeomorphism from the multiplicative compact dual to its
 additive wrapper. -/
@@ -5363,19 +4823,6 @@ lemma TrigPoly.evalAdd_single_zero
         (Finsupp.single (0 : E.Group) c : E.TrigPoly) z = c := by
   simp
 
-lemma TrigPoly.continuous_eval
-    (E : CayleyExtraction S) (P : E.TrigPoly) :
-    Continuous (fun z : E.CompactDual => TrigPoly.eval P z) := by
-  refine Finsupp.induction_linear P ?zero ?add ?single
-  · simpa using (continuous_const :
-      Continuous (fun _ : E.CompactDual => (0 : ℂ)))
-  · intro P Q hP hQ
-    simpa [TrigPoly.eval_add] using hP.add hQ
-  · intro γ c
-    simpa using
-      (continuous_const.mul (E.characterValue_continuous γ) :
-        Continuous fun z : E.CompactDual => c * E.characterValue z γ)
-
 lemma TrigPoly.continuous_evalAdd
     (E : CayleyExtraction S) (P : E.TrigPoly) :
     Continuous (fun z : E.CompactAddDual => TrigPoly.evalAdd P z) := by
@@ -5388,103 +4835,6 @@ lemma TrigPoly.continuous_evalAdd
     simpa using
       (continuous_const.mul (E.addCharacterValue_continuous γ) :
         Continuous fun z : E.CompactAddDual => c * E.addCharacterValue z γ)
-
-lemma TrigPoly.integrable_evalAdd
-    (E : CayleyExtraction S) (P : E.TrigPoly) :
-    Integrable (fun z : E.CompactAddDual => TrigPoly.evalAdd P z) E.haar :=
-  (TrigPoly.continuous_evalAdd E P).integrable_of_hasCompactSupport
-    (HasCompactSupport.of_compactSpace _)
-
-lemma TrigPoly.integral_evalAdd_eq_compactAverage
-    (E : CayleyExtraction S) (P : E.TrigPoly) :
-    ∫ z : E.CompactAddDual, TrigPoly.evalAdd P z ∂E.haar =
-      TrigPoly.compactAverage P := by
-  refine Finsupp.induction_linear P ?zero ?add ?single
-  · simp [TrigPoly.compactAverage]
-  · intro P Q hP hQ
-    rw [show
-        (fun z : E.CompactAddDual => TrigPoly.evalAdd (P + Q) z) =
-          fun z => TrigPoly.evalAdd P z + TrigPoly.evalAdd Q z by
-        funext z
-        exact TrigPoly.evalAdd_add P Q z]
-    rw [integral_add (TrigPoly.integrable_evalAdd E P)
-      (TrigPoly.integrable_evalAdd E Q), hP, hQ]
-    simp [TrigPoly.compactAverage]
-  · intro γ c
-    by_cases hγ : γ = 0
-    · subst γ
-      simp [TrigPoly.compactAverage]
-    · rw [show
-          (fun z : E.CompactAddDual =>
-              TrigPoly.evalAdd (Finsupp.single γ c : E.TrigPoly) z) =
-            fun z => c * E.addCharacterValue z γ by
-          funext z
-          simp]
-      rw [integral_const_mul]
-      rw [E.integral_addCharacterValue]
-      simp [hγ, TrigPoly.compactAverage, Finsupp.single_eq_of_ne (Ne.symm hγ)]
-
-lemma TrigPoly.integrable_evalAdd_mul_char
-    (E : CayleyExtraction S) (P : E.TrigPoly) (γ : E.Group) :
-    Integrable
-      (fun z : E.CompactAddDual =>
-        TrigPoly.evalAdd P z * E.addCharacterValue z γ) E.haar :=
-  ((TrigPoly.continuous_evalAdd E P).mul
-      (E.addCharacterValue_continuous γ)).integrable_of_hasCompactSupport
-    (HasCompactSupport.of_compactSpace _)
-
-lemma TrigPoly.integral_evalAdd_mul_char
-    (E : CayleyExtraction S) (P : E.TrigPoly) (γ : E.Group) :
-    ∫ z : E.CompactAddDual,
-        TrigPoly.evalAdd P z * E.addCharacterValue z γ ∂E.haar =
-      P (-γ) := by
-  refine Finsupp.induction_linear P ?zero ?add ?single
-  · simp
-  · intro P Q hP hQ
-    rw [show
-        (fun z : E.CompactAddDual =>
-            TrigPoly.evalAdd (P + Q) z * E.addCharacterValue z γ) =
-          fun z =>
-            TrigPoly.evalAdd P z * E.addCharacterValue z γ +
-              TrigPoly.evalAdd Q z * E.addCharacterValue z γ by
-        funext z
-        rw [TrigPoly.evalAdd_add]
-        ring]
-    rw [integral_add (TrigPoly.integrable_evalAdd_mul_char E P γ)
-      (TrigPoly.integrable_evalAdd_mul_char E Q γ), hP, hQ]
-    simp
-  · intro δ c
-    rw [show
-        (fun z : E.CompactAddDual =>
-            TrigPoly.evalAdd (Finsupp.single δ c : E.TrigPoly) z *
-              E.addCharacterValue z γ) =
-          fun z => c * E.addCharacterValue z (δ + γ) by
-        funext z
-        simp only [TrigPoly.evalAdd_single]
-        rw [mul_assoc]
-        rw [← E.addCharacterValue_add]]
-    rw [integral_const_mul, E.integral_addCharacterValue]
-    by_cases hδγ : δ + γ = 0
-    · have hδ : δ = -γ := by
-        exact eq_neg_of_add_eq_zero_left hδγ
-      subst δ
-      simp
-    · have hδ : δ ≠ -γ := by
-        intro h
-        subst h
-        exact hδγ (by simp)
-      rw [Finsupp.single_eq_of_ne (Ne.symm hδ)]
-      simp [hδγ]
-
-lemma TrigPoly.integral_evalAdd_eq_compactAverage_of_separating
-    (E : CayleyExtraction S)
-    (_hsep :
-      ∀ γ : E.Group, γ ≠ 0 →
-        ∃ y : E.CompactAddDual, E.addCharacterValue y γ ≠ 1)
-    (P : E.TrigPoly) :
-    ∫ z : E.CompactAddDual, TrigPoly.evalAdd P z ∂E.haar =
-      TrigPoly.compactAverage P :=
-  TrigPoly.integral_evalAdd_eq_compactAverage E P
 
 @[simp]
 lemma TrigPoly.evalFinite_zero
@@ -5963,20 +5313,6 @@ namespace CayleyExtraction
 
 variable {ℓ : ℕ} {η : ℝ} {S : CayleyCounterSeq ℓ η}
 
-/-- Compact-dual Fejér kernel associated to a finite frequency set. -/
-noncomputable def compactFejerKernel
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (z : E.CompactDual) : ℂ :=
-  ((Q.card : ℂ)⁻¹) *
-    ((∑ γ ∈ Q, E.characterValue z γ) *
-      star (∑ γ ∈ Q, E.characterValue z γ))
-
-/-- Compact-dual Fejér kernel on the additive wrapper. -/
-noncomputable def compactAddFejerKernel
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (z : E.CompactAddDual) : ℂ :=
-  E.compactFejerKernel Q z.toMul
-
 /-- Finite cyclic lift of the Fejér kernel. -/
 noncomputable def finiteFejerKernel
     (E : CayleyExtraction S) (Q : Finset E.Group) (n : ℕ)
@@ -6042,13 +5378,6 @@ lemma fejerTerm_evalFinite
       (Q.card : ℂ)⁻¹ *
         ZMod.stdAddChar (-(E.lift n (pair.1 - pair.2) * x)) := by
   simp [fejerTerm, TrigPoly.evalFinite]
-
-lemma fejerTerm_evalAdd
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (pair : E.Group × E.Group) (z : E.CompactAddDual) :
-    TrigPoly.evalAdd (E.fejerTerm Q pair) z =
-      (Q.card : ℂ)⁻¹ * E.addCharacterValue z (pair.1 - pair.2) := by
-  simp [fejerTerm]
 
 lemma shiftedFejerTerm_evalFinite
     (E : CayleyExtraction S) (Q : Finset E.Group) (z : E.CompactAddDual)
@@ -6137,63 +5466,6 @@ lemma shiftedFejerTrigPoly_compactAverage_eq_one_of_nonempty
       E.fejerTrigPoly_compactAverage_eq_one_of_nonempty Q hQ
   rw [hfejer0]
   simp
-
-lemma fejerTrigPoly_evalAdd_eq_compactAddFejerKernel
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (z : E.CompactAddDual) :
-    TrigPoly.evalAdd (E.fejerTrigPoly Q) z =
-      E.compactAddFejerKernel Q z := by
-  classical
-  unfold fejerTrigPoly
-  let ev : E.TrigPoly →+ ℂ :=
-    { toFun := fun P => TrigPoly.evalAdd P z
-      map_zero' := by simp
-      map_add' := by
-        intro P R
-        exact TrigPoly.evalAdd_add P R z }
-  change ev (∑ pair ∈ Q.product Q, E.fejerTerm Q pair) =
-    E.compactAddFejerKernel Q z
-  rw [map_sum]
-  change
-      (∑ pair ∈ Q.product Q,
-        TrigPoly.evalAdd (E.fejerTerm Q pair) z) =
-      E.compactAddFejerKernel Q z
-  simp_rw [E.fejerTerm_evalAdd]
-  calc
-    (∑ pair ∈ Q.product Q,
-        (Q.card : ℂ)⁻¹ * E.addCharacterValue z (pair.1 - pair.2)) =
-        ∑ pair ∈ Q.product Q,
-          (Q.card : ℂ)⁻¹ *
-            (E.addCharacterValue z pair.1 *
-              star (E.addCharacterValue z pair.2)) := by
-      refine Finset.sum_congr rfl ?_
-      intro pair _hpair
-      rw [E.addCharacterValue_sub]
-    _ = E.compactAddFejerKernel Q z := by
-      unfold compactAddFejerKernel compactFejerKernel addCharacterValue
-      exact sum_product_const_mul_star Q
-        (fun γ => E.characterValue z.toMul γ)
-        ((Q.card : ℂ)⁻¹)
-
-lemma integral_compactAddFejerKernel_eq_one
-    (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅) :
-    ∫ z : E.CompactAddDual, E.compactAddFejerKernel Q z ∂E.haar = 1 := by
-  rw [show
-      (fun z : E.CompactAddDual => E.compactAddFejerKernel Q z) =
-        fun z => TrigPoly.evalAdd (E.fejerTrigPoly Q) z by
-      funext z
-      exact (E.fejerTrigPoly_evalAdd_eq_compactAddFejerKernel Q z).symm]
-  rw [TrigPoly.integral_evalAdd_eq_compactAverage E]
-  exact E.fejerTrigPoly_compactAverage_eq_one_of_nonempty Q hQ
-
-lemma integral_compactAddFejerKernel_eq_one_of_separating
-    (E : CayleyExtraction S)
-    (_hsep :
-      ∀ γ : E.Group, γ ≠ 0 →
-        ∃ y : E.CompactAddDual, E.addCharacterValue y γ ≠ 1)
-    (Q : Finset E.Group) (hQ : Q ≠ ∅) :
-    ∫ z : E.CompactAddDual, E.compactAddFejerKernel Q z ∂E.haar = 1 :=
-  E.integral_compactAddFejerKernel_eq_one Q hQ
 
 lemma fejerTrigPoly_apply_sum
     (E : CayleyExtraction S) (Q : Finset E.Group) (γ : E.Group) :
@@ -6400,18 +5672,6 @@ lemma fejerNegCoeffBound_of_coeffBound_neg
   intro γ hγ
   exact hM (-γ) (Finset.mem_image.mpr ⟨γ, hγ, rfl⟩)
 
-lemma fejerNegCoeffBound_of_pairCoeffRealBound_neg
-    (E : CayleyExtraction S) {Q B : Finset E.Group} {M : ℝ}
-    (hM : E.FejerPairCoeffRealBound Q (B.image Neg.neg) M) :
-    E.FejerNegCoeffBound Q B M :=
-  E.fejerNegCoeffBound_of_coeffBound_neg
-    (E.fejerCoeffBound_of_pairCoeffRealBound hM)
-
-lemma fejerPairFilter_card_le
-    (E : CayleyExtraction S) (Q : Finset E.Group) (γ : E.Group) :
-    (pairFiber Q γ).card ≤ Q.card :=
-  PairCoeffRealBound.pairFilter_card_le Q γ
-
 lemma fejerPairCoeffRealBound_of_lowerBound
     (E : CayleyExtraction S) {Q B : Finset E.Group} {M : ℝ}
     (hQ : Q ≠ ∅) (hM : E.FejerPairCoeffLowerBound Q B M) :
@@ -6550,24 +5810,6 @@ lemma finiteFejerKernelAverage_eventually_eq
   funext x
   exact (hn x).symm
 
-lemma finiteFejerKernelAverage_tendsto_compactAverage
-    (E : CayleyExtraction S) (Q : Finset E.Group) :
-    Tendsto (fun n => E.finiteFejerKernelAverage Q n) atTop
-      (𝓝 (TrigPoly.compactAverage (E.fejerTrigPoly Q))) := by
-  have h :
-      (fun n => TrigPoly.finiteAverage (E.fejerTrigPoly Q) n) =ᶠ[atTop]
-        fun n => E.finiteFejerKernelAverage Q n := by
-    filter_upwards [E.finiteFejerKernelAverage_eventually_eq Q] with n hn
-    exact hn.symm
-  exact (TrigPoly.finiteAverage_tendsto_compactAverage E
-    (E.fejerTrigPoly Q)).congr' h
-
-lemma finiteFejerKernelAverage_tendsto_one
-    (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅) :
-    Tendsto (fun n => E.finiteFejerKernelAverage Q n) atTop (𝓝 (1 : ℂ)) := by
-  simpa [E.fejerTrigPoly_compactAverage_eq_one_of_nonempty Q hQ] using
-    E.finiteFejerKernelAverage_tendsto_compactAverage Q
-
 lemma normalizedDftFunction_finiteFejerKernel_eventually_eq
     (E : CayleyExtraction S) (Q : Finset E.Group) :
     ∀ᶠ n in atTop,
@@ -6642,41 +5884,6 @@ lemma finiteFejerKernelAverage_eventually_eq_one
   rw [hkernel, hpoly]
   exact E.fejerTrigPoly_compactAverage_eq_one_of_nonempty Q hQ
 
-lemma compactFejerKernel_re_nonneg
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (z : E.CompactDual) :
-    0 ≤ (E.compactFejerKernel Q z).re := by
-  unfold compactFejerKernel
-  set w : ℂ := ∑ γ ∈ Q, E.characterValue z γ
-  have hnonneg : 0 ≤ ((Q.card : ℝ)⁻¹) :=
-    inv_nonneg.mpr (Nat.cast_nonneg Q.card)
-  rw [← Complex.ofReal_natCast, ← Complex.ofReal_inv]
-  rw [show star w = conj w by rfl, Complex.mul_conj]
-  simp [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
-  exact mul_nonneg hnonneg (Complex.normSq_nonneg w)
-
-lemma compactFejerKernel_im_eq_zero
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (z : E.CompactDual) :
-    (E.compactFejerKernel Q z).im = 0 := by
-  unfold compactFejerKernel
-  set w : ℂ := ∑ γ ∈ Q, E.characterValue z γ
-  rw [← Complex.ofReal_natCast, ← Complex.ofReal_inv]
-  rw [show star w = conj w by rfl, Complex.mul_conj]
-  simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
-
-lemma compactAddFejerKernel_re_nonneg
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (z : E.CompactAddDual) :
-    0 ≤ (E.compactAddFejerKernel Q z).re := by
-  simpa [compactAddFejerKernel] using E.compactFejerKernel_re_nonneg Q z.toMul
-
-lemma compactAddFejerKernel_im_eq_zero
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (z : E.CompactAddDual) :
-    (E.compactAddFejerKernel Q z).im = 0 := by
-  simpa [compactAddFejerKernel] using E.compactFejerKernel_im_eq_zero Q z.toMul
-
 lemma finiteFejerKernel_re_nonneg
     (E : CayleyExtraction S) (Q : Finset E.Group) (n : ℕ)
     (x : ZMod (S.p (E.φ n))) :
@@ -6719,19 +5926,6 @@ lemma shiftedFiniteFejerKernel_re_nonneg
   rw [show star w = conj w by rfl, Complex.mul_conj]
   simp [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
   exact mul_nonneg hnonneg (Complex.normSq_nonneg w)
-
-lemma shiftedFiniteFejerKernel_im_eq_zero
-    (E : CayleyExtraction S) (Q : Finset E.Group) (z : E.CompactAddDual)
-    (n : ℕ) (x : ZMod (S.p (E.φ n))) :
-    (E.shiftedFiniteFejerKernel Q z n x).im = 0 := by
-  haveI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-  unfold shiftedFiniteFejerKernel
-  set w : ℂ := ∑ γ ∈ Q,
-    E.addCharacterValue z γ * ZMod.stdAddChar (-(E.lift n γ * x))
-  change (((Q.card : ℂ)⁻¹) * (w * star w)).im = 0
-  rw [← Complex.ofReal_natCast, ← Complex.ofReal_inv]
-  rw [show star w = conj w by rfl, Complex.mul_conj]
-  simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
 
 end CayleyExtraction
 
@@ -7367,28 +6561,6 @@ lemma normalizedDftFunction_indicator_sub_finiteSmooth
   simp [normalizedDftCoeff]
   ring
 
-lemma normalizedDftFunction_finiteSmooth_at_lift_tendsto
-    (E : CayleyExtraction S) (Q : Finset E.Group) (γ : E.Group) :
-    Tendsto
-      (fun n =>
-        letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-        normalizedDftFunction (E.finiteSmooth Q n) (E.lift n γ))
-      atTop
-      (𝓝 (E.coeff γ * (E.fejerTrigPoly Q) (-γ))) := by
-  have hT := E.coeff_tendsto γ
-  have hK :
-      Tendsto (fun _n : ℕ => (E.fejerTrigPoly Q) (-γ))
-        atTop (𝓝 ((E.fejerTrigPoly Q) (-γ))) :=
-    tendsto_const_nhds
-  have hprod := hT.mul hK
-  refine hprod.congr' ?_
-  filter_upwards
-    [E.normalizedDftFunction_finiteFejerKernel_at_lift_eventually_eq_coeff
-      Q γ] with n hKcoeff
-  haveI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-  rw [E.normalizedDftFunction_finiteSmooth Q n (E.lift n γ)]
-  rw [hKcoeff]
-
 /-- Compact-side trigonometric polynomial whose coefficients match the
 fixed-`Q` Fejér-smoothed Cayley limit. -/
 noncomputable def compactSmoothTrigPoly
@@ -7557,40 +6729,6 @@ lemma compactSmoothReal_continuous
     Continuous (E.compactSmoothReal Q) :=
   Complex.continuous_re.comp (E.compactSmooth_continuous Q)
 
-lemma compactSmoothReal_eq_sum_support
-    (E : CayleyExtraction S) (Q : Finset E.Group) (z : E.CompactAddDual) :
-    E.compactSmoothReal Q z =
-      ∑ γ ∈ (E.compactSmoothTrigPoly Q).support,
-        ((E.fejerTrigPoly Q γ).re * (E.coeff γ).re *
-          (E.addCharacterValue z γ).re) := by
-  classical
-  have hsum :
-      TrigPoly.evalAdd (E.compactSmoothTrigPoly Q) z =
-        ∑ γ ∈ (E.compactSmoothTrigPoly Q).support,
-          E.compactSmoothTrigPoly Q γ * E.addCharacterValue z γ := by
-    unfold TrigPoly.evalAdd
-    rw [Finsupp.sum_of_support_subset
-      (f := E.compactSmoothTrigPoly Q)
-      (s := (E.compactSmoothTrigPoly Q).support) (by intro γ hγ; exact hγ)]
-    intro γ _hγ
-    simp
-  unfold compactSmoothReal compactSmooth
-  rw [hsum]
-  change Complex.reAddGroupHom
-      (∑ γ ∈ (E.compactSmoothTrigPoly Q).support,
-        E.compactSmoothTrigPoly Q γ * E.addCharacterValue z γ) = _
-  rw [map_sum]
-  refine Finset.sum_congr rfl ?_
-  intro γ hγ
-  change (E.compactSmoothTrigPoly Q γ * E.addCharacterValue z γ).re =
-    (E.fejerTrigPoly Q γ).re * (E.coeff γ).re *
-      (E.addCharacterValue z γ).re
-  rw [E.compactSmoothTrigPoly_apply Q γ, E.coeff_neg_eq γ]
-  have hKim : ((E.fejerTrigPoly Q) γ).im = 0 :=
-    E.fejerTrigPoly_apply_im_eq_zero Q γ
-  have hAim : (E.coeff γ).im = 0 := E.coeff_im_eq_zero γ
-  simp [Complex.mul_re, Complex.mul_im, hKim, hAim, mul_assoc]
-
 lemma compactSmoothReal_eq_sum_of_support_subset
     (E : CayleyExtraction S) (Q : Finset E.Group) (z : E.CompactAddDual)
     (A : Finset E.Group) (hA : (E.compactSmoothTrigPoly Q).support ⊆ A) :
@@ -7625,62 +6763,6 @@ lemma compactSmoothReal_eq_sum_of_support_subset
   have hAim : (E.coeff γ).im = 0 := E.coeff_im_eq_zero γ
   simp [Complex.mul_re, Complex.mul_im, hKim, hAim, mul_assoc]
 
-lemma integral_compactSmooth
-    (E : CayleyExtraction S) (Q : Finset E.Group) :
-    ∫ z : E.CompactAddDual, E.compactSmooth Q z ∂E.haar =
-      E.compactSmoothTrigPoly Q 0 := by
-  simp [compactSmooth, TrigPoly.integral_evalAdd_eq_compactAverage,
-    TrigPoly.compactAverage]
-
-lemma integral_compactSmooth_eq_coeff_zero_of_nonempty
-    (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅) :
-    ∫ z : E.CompactAddDual, E.compactSmooth Q z ∂E.haar =
-      E.coeff 0 := by
-  rw [E.integral_compactSmooth Q]
-  rw [E.compactSmoothTrigPoly_apply Q 0]
-  have hfejer0 : (E.fejerTrigPoly Q) (0 : E.Group) = 1 :=
-    E.fejerTrigPoly_compactAverage_eq_one_of_nonempty Q hQ
-  simp [hfejer0]
-
-lemma normalizedDftFunction_finiteSmooth_at_neg_lift_tendsto_compactCoeff
-    (E : CayleyExtraction S) (Q : Finset E.Group) (γ : E.Group) :
-    Tendsto
-      (fun n =>
-        letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-        normalizedDftFunction (E.finiteSmooth Q n) (-E.lift n γ))
-      atTop (𝓝 (E.compactSmoothTrigPoly Q γ)) := by
-  have ht := E.normalizedDftFunction_finiteSmooth_at_lift_tendsto Q (-γ)
-  have htarget :
-      E.coeff (-γ) * (E.fejerTrigPoly Q) γ =
-        E.compactSmoothTrigPoly Q γ := by
-    rw [E.compactSmoothTrigPoly_apply Q γ]
-    ring
-  have ht' :
-      Tendsto
-        (fun n =>
-          letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-          normalizedDftFunction (E.finiteSmooth Q n) (-E.lift n γ))
-        atTop (𝓝 (E.coeff (-γ) * (E.fejerTrigPoly Q) γ)) := by
-    have heq :
-        (fun n =>
-          letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-          normalizedDftFunction (E.finiteSmooth Q n) (E.lift n (-γ))) =ᶠ[atTop]
-        (fun n =>
-          letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-          normalizedDftFunction (E.finiteSmooth Q n) (-E.lift n γ)) := by
-      filter_upwards [E.data.finiteLift_neg_eventually_eq γ] with n hneg
-      haveI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-      simp [lift, hneg]
-    have ht_simplified :
-        Tendsto
-          (fun n =>
-            letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-            normalizedDftFunction (E.finiteSmooth Q n) (E.lift n (-γ)))
-          atTop (𝓝 (E.coeff (-γ) * (E.fejerTrigPoly Q) γ)) := by
-      simpa using ht
-    exact ht_simplified.congr' heq
-  simpa [htarget] using ht'
-
 /-- Finite average pairing the smoothed Cayley kernel with a lifted fixed
 trigonometric polynomial. -/
 noncomputable def finiteSmoothWeightedAverage
@@ -7697,169 +6779,11 @@ noncomputable def smoothedCoeffFunctional
     (P : E.TrigPoly) : ℂ :=
   P.sum fun γ c => c * (E.coeff γ * (E.fejerTrigPoly Q) (-γ))
 
-lemma finiteSmoothWeightedAverage_add
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (P R : E.TrigPoly) (n : ℕ) :
-    E.finiteSmoothWeightedAverage Q (P + R) n =
-      E.finiteSmoothWeightedAverage Q P n +
-        E.finiteSmoothWeightedAverage Q R n := by
-  haveI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-  unfold finiteSmoothWeightedAverage
-  rw [show
-      (fun x : ZMod (S.p (E.φ n)) =>
-        E.finiteSmooth Q n x * TrigPoly.evalFinite (P + R) n x) =
-      (fun x : ZMod (S.p (E.φ n)) =>
-        E.finiteSmooth Q n x * TrigPoly.evalFinite P n x +
-        E.finiteSmooth Q n x * TrigPoly.evalFinite R n x) by
-        funext x
-        rw [TrigPoly.evalFinite_add]
-        ring]
-  unfold avgZMod
-  rw [Finset.sum_add_distrib, mul_add]
-
-lemma finiteSmoothWeightedAverage_single
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (γ : E.Group) (c : ℂ) (n : ℕ) :
-    E.finiteSmoothWeightedAverage Q
-        (Finsupp.single γ c : E.TrigPoly) n =
-      (letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-        c * normalizedDftFunction (E.finiteSmooth Q n) (E.lift n γ)) := by
-  haveI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-  unfold finiteSmoothWeightedAverage
-  change avgZMod
-      (fun x : ZMod (S.p (E.φ n)) =>
-        E.finiteSmooth Q n x *
-          TrigPoly.evalFinite
-            (Finsupp.single γ c : E.TrigPoly) n x) =
-    c * normalizedDftFunction (E.finiteSmooth Q n) (E.lift n γ)
-  rw [show
-      (fun x : ZMod (S.p (E.φ n)) =>
-        E.finiteSmooth Q n x *
-          TrigPoly.evalFinite
-            (Finsupp.single γ c : E.TrigPoly) n x) =
-      (fun x : ZMod (S.p (E.φ n)) =>
-        c * (ZMod.stdAddChar (-(x * E.lift n γ)) *
-          E.finiteSmooth Q n x)) by
-        funext x
-        simp [TrigPoly.evalFinite_single]
-        ring_nf]
-  rw [avgZMod_const_mul]
-  rw [normalizedDftFunction_eq_avgZMod]
-
-lemma smoothedCoeffFunctional_add
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (P R : E.TrigPoly) :
-    E.smoothedCoeffFunctional Q (P + R) =
-      E.smoothedCoeffFunctional Q P +
-        E.smoothedCoeffFunctional Q R := by
-  unfold smoothedCoeffFunctional
-  let h : E.Group → ℂ →+ ℂ := fun γ =>
-    { toFun := fun c => c * (E.coeff γ * (E.fejerTrigPoly Q) (-γ))
-      map_zero' := by simp
-      map_add' := by intro a b; ring }
-  change Finsupp.sum (P + R) (fun γ c => h γ c) =
-    Finsupp.sum P (fun γ c => h γ c) +
-      Finsupp.sum R (fun γ c => h γ c)
-  rw [Finsupp.sum_hom_add_index]
-
 @[simp]
 lemma smoothedCoeffFunctional_zero
     (E : CayleyExtraction S) (Q : Finset E.Group) :
     E.smoothedCoeffFunctional Q (0 : E.TrigPoly) = 0 := by
   simp [smoothedCoeffFunctional]
-
-lemma smoothedCoeffFunctional_single
-    (E : CayleyExtraction S) (Q : Finset E.Group)
-    (γ : E.Group) (c : ℂ) :
-    E.smoothedCoeffFunctional Q (Finsupp.single γ c : E.TrigPoly) =
-      c * (E.coeff γ * (E.fejerTrigPoly Q) (-γ)) := by
-  simp [smoothedCoeffFunctional]
-
-lemma compactSmooth_mul_evalAdd_integrable
-    (E : CayleyExtraction S) (Q : Finset E.Group) (P : E.TrigPoly) :
-    Integrable
-      (fun z : E.CompactAddDual =>
-        E.compactSmooth Q z * TrigPoly.evalAdd P z) E.haar :=
-  ((E.compactSmooth_continuous Q).mul
-      (TrigPoly.continuous_evalAdd E P)).integrable_of_hasCompactSupport
-    (HasCompactSupport.of_compactSpace _)
-
-lemma smoothedCoeffFunctional_eq_integral_compactSmooth_mul_evalAdd
-    (E : CayleyExtraction S) (Q : Finset E.Group) (P : E.TrigPoly) :
-    E.smoothedCoeffFunctional Q P =
-      ∫ z : E.CompactAddDual,
-        E.compactSmooth Q z * TrigPoly.evalAdd P z ∂E.haar := by
-  refine Finsupp.induction_linear P ?zero ?add ?single
-  · simp [smoothedCoeffFunctional]
-  · intro P R hP hR
-    rw [E.smoothedCoeffFunctional_add Q P R, hP, hR]
-    rw [show
-        (fun z : E.CompactAddDual =>
-            E.compactSmooth Q z * TrigPoly.evalAdd (P + R) z) =
-          fun z =>
-            E.compactSmooth Q z * TrigPoly.evalAdd P z +
-              E.compactSmooth Q z * TrigPoly.evalAdd R z by
-        funext z
-        rw [TrigPoly.evalAdd_add]
-        ring]
-    rw [integral_add (E.compactSmooth_mul_evalAdd_integrable Q P)
-      (E.compactSmooth_mul_evalAdd_integrable Q R)]
-  · intro γ c
-    rw [E.smoothedCoeffFunctional_single Q γ c]
-    rw [show
-        (fun z : E.CompactAddDual =>
-            E.compactSmooth Q z *
-              TrigPoly.evalAdd (Finsupp.single γ c : E.TrigPoly) z) =
-          fun z =>
-            c * (TrigPoly.evalAdd (E.compactSmoothTrigPoly Q) z *
-              E.addCharacterValue z γ) by
-        funext z
-        simp [compactSmooth]
-        ring]
-    rw [integral_const_mul]
-    rw [TrigPoly.integral_evalAdd_mul_char E (E.compactSmoothTrigPoly Q) γ]
-    rw [E.compactSmoothTrigPoly_apply Q (-γ)]
-    have hnegneg : (-(-γ) : E.Group) = γ := by simp
-    rw [hnegneg]
-    ring
-
-lemma finiteSmoothWeightedAverage_tendsto_coeffFunctional
-    (E : CayleyExtraction S) (Q : Finset E.Group) (P : E.TrigPoly) :
-    Tendsto
-      (fun n => E.finiteSmoothWeightedAverage Q P n)
-      atTop (𝓝 (E.smoothedCoeffFunctional Q P)) := by
-  refine Finsupp.induction_linear P ?zero ?add ?single
-  · rw [E.smoothedCoeffFunctional_zero Q]
-    have hzero :
-        (fun n => E.finiteSmoothWeightedAverage Q (0 : E.TrigPoly) n) =
-          fun _n => (0 : ℂ) := by
-      funext n
-      haveI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-      simp [finiteSmoothWeightedAverage, avgZMod]
-    rw [hzero]
-    exact tendsto_const_nhds
-  · intro P R hP hR
-    rw [E.smoothedCoeffFunctional_add Q P R]
-    exact (hP.add hR).congr' (Filter.Eventually.of_forall fun n => by
-      exact (E.finiteSmoothWeightedAverage_add Q P R n).symm)
-  · intro γ c
-    rw [E.smoothedCoeffFunctional_single Q γ c]
-    have hcoeff := E.normalizedDftFunction_finiteSmooth_at_lift_tendsto Q γ
-    have hc : Tendsto (fun _ : ℕ => c) atTop (𝓝 c) :=
-      tendsto_const_nhds
-    have hmul := hc.mul hcoeff
-    exact hmul.congr' (Filter.Eventually.of_forall fun n => by
-      exact (E.finiteSmoothWeightedAverage_single Q γ c n).symm)
-
-lemma finiteSmoothWeightedAverage_tendsto_integral_compactSmooth_mul_evalAdd
-    (E : CayleyExtraction S) (Q : Finset E.Group) (P : E.TrigPoly) :
-    Tendsto
-      (fun n => E.finiteSmoothWeightedAverage Q P n)
-      atTop
-      (𝓝 (∫ z : E.CompactAddDual,
-        E.compactSmooth Q z * TrigPoly.evalAdd P z ∂E.haar)) := by
-  simpa [E.smoothedCoeffFunctional_eq_integral_compactSmooth_mul_evalAdd Q P]
-    using E.finiteSmoothWeightedAverage_tendsto_coeffFunctional Q P
 
 /-- Fejér smoothing is spectrally close to the original indicator once the
 chosen Fejér polynomial is close to `1` on the extracted large-spectrum
@@ -8010,14 +6934,6 @@ def addMonoidHomEmbedding (f : G →+ H) (hf : Function.Injective f) : G ↪ H w
   toFun := f
   inj' := hf
 
-private def addEquivPairEmbedding (e : G ≃+ H) : G × G ↪ H × H where
-  toFun pair := (e pair.1, e pair.2)
-  inj' := by
-    intro pair pair' hpair
-    exact Prod.ext
-      (e.injective (congrArg Prod.fst hpair))
-      (e.injective (congrArg Prod.snd hpair))
-
 lemma pairFiber_card_map_addEquiv
     (e : G ≃+ H) (Q : Finset G) (γ : G) :
     (pairFiber (Q.map (addEquivEmbedding e))
@@ -8154,19 +7070,6 @@ lemma map_addMonoidHom_of_injective
   rw [pairFiber_card_map_addMonoidHom_of_injective, Finset.card_map]
   exact h δ hδ
 
-lemma of_map_addEquiv
-    (e : G ≃+ H) {Q B : Finset G} {M : ℝ}
-    (h :
-      PairCoeffLowerBound
-        (Q.map (addEquivEmbedding e)) (B.map (addEquivEmbedding e)) M) :
-    PairCoeffLowerBound Q B M := by
-  classical
-  intro γ hγ
-  have hγ' : (addEquivEmbedding e) γ ∈ B.map (addEquivEmbedding e) :=
-    Finset.mem_map.mpr ⟨γ, hγ, rfl⟩
-  have hbound := h ((addEquivEmbedding e) γ) hγ'
-  rwa [pairFiber_card_map_addEquiv, Finset.card_map] at hbound
-
 lemma exists_of_addEquiv
     (e : G ≃+ H) {B : Finset G} {M : ℝ}
     (h :
@@ -8279,98 +7182,6 @@ lemma intInnerInterval_sub_mem_centered
     have hγZ : (γ.natAbs : ℤ) ≤ (K : ℤ) := by exact_mod_cast hγ
     exact le_trans (neg_le_neg hγZ) hneg_abs
   constructor <;> nlinarith [hx.1, hx.2, hγ_le_K, hnegK_le_γ]
-
-lemma int_pairCoeffLowerBound_of_inner_ratio
-    {B : Finset ℤ} {N K : ℕ} {M : ℝ}
-    (hB : ∀ γ ∈ B, γ.natAbs ≤ K)
-    (hratio :
-      1 - M ≤
-        ((intInnerInterval N K).card : ℝ) /
-          ((intCenteredInterval N).card : ℝ)) :
-    PairCoeffLowerBound (intCenteredInterval N) B M := by
-  classical
-  refine pairCoeffLowerBound_of_inner_card
-    (Q := intCenteredInterval N) (B := B) (M := M)
-    (fun _γ => intInnerInterval N K) ?_ ?_
-  · intro γ hγ x hx
-    exact
-      ⟨intInnerInterval_subset_centered hx,
-        intInnerInterval_sub_mem_centered (hB γ hγ) hx⟩
-  · intro γ _hγ
-    exact hratio
-
-lemma int_pairCoeffLowerBound_of_nat_ratio
-    {B : Finset ℤ} {N K : ℕ} {M : ℝ}
-    (hK : K ≤ N)
-    (hB : ∀ γ ∈ B, γ.natAbs ≤ K)
-    (hratio :
-      1 - M ≤
-        ((2 * (N - K) + 1 : ℕ) : ℝ) /
-          ((2 * N + 1 : ℕ) : ℝ)) :
-    PairCoeffLowerBound (intCenteredInterval N) B M :=
-  int_pairCoeffLowerBound_of_inner_ratio hB (by
-    simpa [intInnerInterval_card hK, intCenteredInterval_card] using hratio)
-
-lemma int_interval_ratio_bound
-    {N K : ℕ} {M : ℝ} (hK : K ≤ N)
-    (hloss : (2 * K : ℝ) ≤ M * ((2 * N + 1 : ℕ) : ℝ)) :
-    1 - M ≤
-      ((2 * (N - K) + 1 : ℕ) : ℝ) /
-        ((2 * N + 1 : ℕ) : ℝ) := by
-  have hden : 0 < ((2 * N + 1 : ℕ) : ℝ) := by positivity
-  rw [le_div_iff₀ hden]
-  norm_num [Nat.cast_sub hK] at hloss hden ⊢
-  nlinarith
-
-lemma int_pairCoeffLowerBound_of_loss
-    {B : Finset ℤ} {N K : ℕ} {M : ℝ}
-    (hK : K ≤ N)
-    (hB : ∀ γ ∈ B, γ.natAbs ≤ K)
-    (hloss : (2 * K : ℝ) ≤ M * ((2 * N + 1 : ℕ) : ℝ)) :
-    PairCoeffLowerBound (intCenteredInterval N) B M :=
-  int_pairCoeffLowerBound_of_nat_ratio hK hB
-    (int_interval_ratio_bound hK hloss)
-
-lemma exists_int_pairCoeffLowerBound_of_bound
-    (B : Finset ℤ) (K : ℕ) {M : ℝ} (hM : 0 < M)
-    (hB : ∀ γ ∈ B, γ.natAbs ≤ K) :
-    ∃ Q : Finset ℤ, Q.Nonempty ∧ PairCoeffLowerBound Q B M := by
-  classical
-  obtain ⟨N, hN⟩ := exists_nat_gt (((2 * K : ℝ) / M) + (K : ℝ))
-  have hN_gt_K : (K : ℝ) < (N : ℝ) := by
-    have hterm_nonneg : 0 ≤ (2 * K : ℝ) / M := by
-      positivity
-    nlinarith [hN]
-  have hKle : K ≤ N := by exact_mod_cast le_of_lt hN_gt_K
-  have hloss : (2 * K : ℝ) ≤ M * ((2 * N + 1 : ℕ) : ℝ) := by
-    have hNbig : (2 * K : ℝ) / M < (N : ℝ) := by
-      nlinarith [hN]
-    have htwoK_lt : (2 * K : ℝ) < M * (N : ℝ) := by
-      have hraw : (2 * K : ℝ) < (N : ℝ) * M := by
-        rwa [div_lt_iff₀ hM] at hNbig
-      nlinarith
-    have hN_le : (N : ℝ) ≤ ((2 * N + 1 : ℕ) : ℝ) := by
-      exact_mod_cast (by omega : N ≤ 2 * N + 1)
-    exact (le_of_lt htwoK_lt).trans
-      (mul_le_mul_of_nonneg_left hN_le (le_of_lt hM))
-  exact
-    ⟨intCenteredInterval N, intCenteredInterval_nonempty N,
-      int_pairCoeffLowerBound_of_loss hKle hB hloss⟩
-
-lemma exists_int_pairCoeffLowerBound
-    (B : Finset ℤ) {M : ℝ} (hM : 0 < M) :
-    ∃ Q : Finset ℤ, Q.Nonempty ∧ PairCoeffLowerBound Q B M := by
-  classical
-  by_cases hBne : B.Nonempty
-  · let K : ℕ := (B.image Int.natAbs).max' (hBne.image Int.natAbs)
-    exact exists_int_pairCoeffLowerBound_of_bound B K hM (by
-      intro γ hγ
-      exact (B.image Int.natAbs).le_max' γ.natAbs
-        (Finset.mem_image.mpr ⟨γ, hγ, rfl⟩))
-  · have hBempty : B = ∅ := Finset.not_nonempty_iff_eq_empty.mp hBne
-    exact
-      ⟨intCenteredInterval 0, intCenteredInterval_nonempty 0, by
-        simp [PairCoeffLowerBound, hBempty]⟩
 
 end IntIntervals
 
@@ -8762,67 +7573,6 @@ noncomputable def continuousCliqueDensity
     (μ : Measure G) (M : ℕ) (f : G → ℝ) : ℝ :=
   ∫ x : Fin M → G, continuousCliqueKernel M f x ∂Measure.pi (fun _ : Fin M => μ)
 
-lemma abs_prod_sub_prod_le_sum_abs
-    {ι : Type*} (s : Finset ι) (f g : ι → ℝ)
-    (hf_nonneg : ∀ i ∈ s, 0 ≤ f i)
-    (hf_le : ∀ i ∈ s, f i ≤ 1)
-    (hg_nonneg : ∀ i ∈ s, 0 ≤ g i)
-    (hg_le : ∀ i ∈ s, g i ≤ 1) :
-    |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| ≤
-      ∑ i ∈ s, |f i - g i| := by
-  classical
-  revert hf_nonneg hf_le hg_nonneg hg_le
-  refine Finset.induction_on s ?base ?step
-  · simp
-  · intro a s ha ih hf_nonneg hf_le hg_nonneg hg_le
-    have hf_nonneg_s : ∀ i ∈ s, 0 ≤ f i := by
-      intro i hi
-      exact hf_nonneg i (by simp [hi])
-    have hf_le_s : ∀ i ∈ s, f i ≤ 1 := by
-      intro i hi
-      exact hf_le i (by simp [hi])
-    have hg_nonneg_s : ∀ i ∈ s, 0 ≤ g i := by
-      intro i hi
-      exact hg_nonneg i (by simp [hi])
-    have hg_le_s : ∀ i ∈ s, g i ≤ 1 := by
-      intro i hi
-      exact hg_le i (by simp [hi])
-    have htail := ih hf_nonneg_s hf_le_s hg_nonneg_s hg_le_s
-    let Pf : ℝ := ∏ i ∈ s, f i
-    let Pg : ℝ := ∏ i ∈ s, g i
-    have hfa_abs : |f a| ≤ 1 := by
-      have hfa_nonneg : 0 ≤ f a := hf_nonneg a (by simp [ha])
-      simpa [abs_of_nonneg hfa_nonneg] using hf_le a (by simp [ha])
-    have hPg_nonneg : 0 ≤ Pg := by
-      dsimp [Pg]
-      exact Finset.prod_nonneg fun i hi => hg_nonneg_s i hi
-    have hPg_le : Pg ≤ 1 := by
-      dsimp [Pg]
-      exact Finset.prod_le_one
-        (fun i hi => hg_nonneg_s i hi) (fun i hi => hg_le_s i hi)
-    have hPg_abs : |Pg| ≤ 1 := by
-      simpa [abs_of_nonneg hPg_nonneg] using hPg_le
-    rw [Finset.prod_insert ha, Finset.prod_insert ha, Finset.sum_insert ha]
-    have hdecomp : f a * Pf - g a * Pg =
-        f a * (Pf - Pg) + (f a - g a) * Pg := by ring
-    calc
-      |f a * Pf - g a * Pg|
-          = |f a * (Pf - Pg) + (f a - g a) * Pg| := by rw [hdecomp]
-      _ ≤ |f a * (Pf - Pg)| + |(f a - g a) * Pg| := abs_add_le _ _
-      _ = |f a| * |Pf - Pg| + |f a - g a| * |Pg| := by
-            rw [abs_mul, abs_mul]
-      _ ≤ 1 * |Pf - Pg| + |f a - g a| * 1 := by
-            exact add_le_add
-              (mul_le_mul_of_nonneg_right hfa_abs (abs_nonneg _))
-              (mul_le_mul_of_nonneg_left hPg_abs (abs_nonneg _))
-      _ ≤ 1 * (∑ i ∈ s, |f i - g i|) + |f a - g a| * 1 := by
-            have hfirst :
-                1 * |Pf - Pg| ≤ 1 * (∑ i ∈ s, |f i - g i|) :=
-              mul_le_mul_of_nonneg_left (by simpa [Pf, Pg] using htail)
-                zero_le_one
-            nlinarith
-      _ = |f a - g a| + ∑ i ∈ s, |f i - g i| := by ring
-
 lemma abs_prod_sub_prod_le_sum_abs_mul_two_pow
     {ι : Type*} (s : Finset ι) (f g : ι → ℝ)
     (hf_abs : ∀ i ∈ s, |f i| ≤ 2)
@@ -8883,33 +7633,6 @@ lemma abs_prod_sub_prod_le_sum_abs_mul_two_pow
             rw [Finset.card_insert_of_notMem ha, pow_succ]
             ring
 
-lemma abs_continuousCliqueKernel_sub_le_card_mul
-    {G : Type u} [Sub G] (M : ℕ) {f g : G → ℝ} {δ : ℝ}
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    (hclose : ∀ x, |f x - g x| ≤ δ)
-    (x : Fin M → G) :
-    |continuousCliqueKernel M f x - continuousCliqueKernel M g x| ≤
-      ((continuousCliqueEdgePairs M).card : ℝ) * δ := by
-  unfold continuousCliqueKernel
-  calc
-    |(∏ e ∈ continuousCliqueEdgePairs M, f (x e.1 - x e.2)) -
-        ∏ e ∈ continuousCliqueEdgePairs M, g (x e.1 - x e.2)|
-        ≤ ∑ e ∈ continuousCliqueEdgePairs M,
-            |f (x e.1 - x e.2) - g (x e.1 - x e.2)| := by
-          exact abs_prod_sub_prod_le_sum_abs (continuousCliqueEdgePairs M)
-            (fun e => f (x e.1 - x e.2))
-            (fun e => g (x e.1 - x e.2))
-            (fun e _he => hf_nonneg _)
-            (fun e _he => hf_le _)
-            (fun e _he => hg_nonneg _)
-            (fun e _he => hg_le _)
-    _ ≤ ∑ _e ∈ continuousCliqueEdgePairs M, δ := by
-          exact Finset.sum_le_sum fun e _he => hclose (x e.1 - x e.2)
-    _ = ((continuousCliqueEdgePairs M).card : ℝ) * δ := by simp
-
 lemma abs_continuousCliqueKernel_sub_le_card_mul_two_pow
     {G : Type u} [Sub G] (M : ℕ) {f g : G → ℝ} {δ : ℝ}
     (hf_abs : ∀ x, |f x| ≤ 2)
@@ -8941,77 +7664,6 @@ lemma abs_continuousCliqueKernel_sub_le_card_mul_two_pow
             hpow_nonneg
     _ = (((continuousCliqueEdgePairs M).card : ℝ) * δ) *
           (2 : ℝ) ^ (continuousCliqueEdgePairs M).card := by simp
-
-lemma continuousCliqueDensity_lipschitz_sup
-    {G : Type u} [MeasurableSpace G] [Sub G] [MeasurableSub₂ G]
-    (μ : Measure G) [IsProbabilityMeasure μ] (M : ℕ)
-    {f g : G → ℝ} {δ : ℝ}
-    (hf_meas : Measurable f) (hg_meas : Measurable g)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    (hδ_nonneg : 0 ≤ δ)
-    (hclose : ∀ x, |f x - g x| ≤ δ) :
-    |continuousCliqueDensity μ M f - continuousCliqueDensity μ M g| ≤
-      ((continuousCliqueEdgePairs M).card : ℝ) * δ := by
-  let μM : Measure (Fin M → G) := Measure.pi (fun _ : Fin M => μ)
-  let Kf : (Fin M → G) → ℝ := fun x => continuousCliqueKernel M f x
-  let Kg : (Fin M → G) → ℝ := fun x => continuousCliqueKernel M g x
-  have hKf_meas : Measurable Kf := by
-    dsimp [Kf, continuousCliqueKernel]
-    refine (continuousCliqueEdgePairs M).measurable_prod ?_
-    intro e _he
-    exact hf_meas.comp ((measurable_pi_apply e.1).sub (measurable_pi_apply e.2))
-  have hKg_meas : Measurable Kg := by
-    dsimp [Kg, continuousCliqueKernel]
-    refine (continuousCliqueEdgePairs M).measurable_prod ?_
-    intro e _he
-    exact hg_meas.comp ((measurable_pi_apply e.1).sub (measurable_pi_apply e.2))
-  have hKf_bound : ∀ᵐ x ∂μM, ‖Kf x‖ ≤ 1 := by
-    exact Eventually.of_forall fun x => by
-      have hnonneg : 0 ≤ Kf x := by
-        dsimp [Kf, continuousCliqueKernel]
-        exact Finset.prod_nonneg fun e _he => hf_nonneg _
-      have hle : Kf x ≤ 1 := by
-        dsimp [Kf, continuousCliqueKernel]
-        exact Finset.prod_le_one (fun e _he => hf_nonneg _) (fun e _he => hf_le _)
-      simpa [Real.norm_eq_abs, abs_of_nonneg hnonneg] using hle
-  have hKg_bound : ∀ᵐ x ∂μM, ‖Kg x‖ ≤ 1 := by
-    exact Eventually.of_forall fun x => by
-      have hnonneg : 0 ≤ Kg x := by
-        dsimp [Kg, continuousCliqueKernel]
-        exact Finset.prod_nonneg fun e _he => hg_nonneg _
-      have hle : Kg x ≤ 1 := by
-        dsimp [Kg, continuousCliqueKernel]
-        exact Finset.prod_le_one (fun e _he => hg_nonneg _) (fun e _he => hg_le _)
-      simpa [Real.norm_eq_abs, abs_of_nonneg hnonneg] using hle
-  have hKf_int : Integrable Kf μM :=
-    Integrable.of_bound hKf_meas.aestronglyMeasurable 1 hKf_bound
-  have hKg_int : Integrable Kg μM :=
-    Integrable.of_bound hKg_meas.aestronglyMeasurable 1 hKg_bound
-  let C : ℝ := ((continuousCliqueEdgePairs M).card : ℝ) * δ
-  have hC_nonneg : 0 ≤ C := by
-    dsimp [C]
-    exact mul_nonneg (Nat.cast_nonneg _) hδ_nonneg
-  have hdiff_bound : ∀ᵐ x ∂μM, ‖Kf x - Kg x‖ ≤ C := by
-    exact Eventually.of_forall fun x => by
-      simpa [Kf, Kg, C, Real.norm_eq_abs] using
-        abs_continuousCliqueKernel_sub_le_card_mul M
-          hf_nonneg hf_le hg_nonneg hg_le hclose x
-  have hμM_real : μM.real Set.univ = 1 := by
-    haveI : IsProbabilityMeasure μM := inferInstance
-    simp [Measure.real, IsProbabilityMeasure.measure_univ]
-  unfold continuousCliqueDensity
-  change |∫ x, Kf x ∂μM - ∫ x, Kg x ∂μM| ≤ C
-  rw [← integral_sub hKf_int hKg_int]
-  calc
-    |∫ x, Kf x - Kg x ∂μM|
-        = ‖∫ x, Kf x - Kg x ∂μM‖ := by
-            simp [Real.norm_eq_abs]
-    _ ≤ C * μM.real Set.univ :=
-        MeasureTheory.norm_integral_le_of_norm_le_const hdiff_bound
-    _ = C := by rw [hμM_real, mul_one]
 
 lemma continuousCliqueDensity_lipschitz_sup_two_pow
     {G : Type u} [MeasurableSpace G] [Sub G] [MeasurableSub₂ G]
@@ -9091,23 +7743,6 @@ lemma continuousCliqueDensity_lipschitz_sup_two_pow
     _ ≤ C * μM.real Set.univ :=
         MeasureTheory.norm_integral_le_of_norm_le_const hdiff_bound
     _ = C := by rw [hμM_real, mul_one]
-
-/-- Route A weighted continuous avoidance kernel:
-`∏ᵢ u(xᵢ) * ∏_{i<j} (1 - f(xᵢ - xⱼ))`.
-
-In the Fourier-positive route, `f` is the compact-limit forbidden kernel and
-`u` is the compact-limit dense vertex weight. -/
-noncomputable def continuousWeightedAvoidanceKernel
-    {G : Type u} [Sub G] (M : ℕ) (f u : G → ℝ) (x : Fin M → G) : ℝ :=
-  (∏ i : Fin M, u (x i)) *
-    ∏ e ∈ continuousCliqueEdgePairs M, (1 - f (x e.1 - x e.2))
-
-/-- Route A weighted continuous avoidance density. -/
-noncomputable def continuousWeightedAvoidanceDensity
-    {G : Type u} [MeasurableSpace G] [Sub G]
-    (μ : Measure G) (M : ℕ) (f u : G → ℝ) : ℝ :=
-  ∫ x : Fin M → G, continuousWeightedAvoidanceKernel M f u x
-    ∂Measure.pi (fun _ : Fin M => μ)
 
 /-- If the continuous clique kernel is strictly positive on a nonempty open box,
 then its continuous Cayley density is strictly positive.
@@ -9462,25 +8097,6 @@ theorem continuousCliqueDensity_pos_of_zeroLevel_null_subgroup
   exact integral_pos_of_ae_pos_of_nonneg
     (Measure.pi (fun _ : Fin M => μ)) hkernel_int hkernel_nonneg hkernel_pos
 
-theorem continuousCliqueDensity_pos_of_zeroLevel_proper_subgroup
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f : G → ℝ) (hf_meas : Measurable f)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ f x = 0)
-    (hH_proper : (H : Set G) ≠ Set.univ) :
-    0 < continuousCliqueDensity μ M f := by
-  have hμH : μ (H : Set G) = 0 :=
-    closed_proper_subgroup_haar_null μ H hH_closed hH_proper
-  exact continuousCliqueDensity_pos_of_zeroLevel_null_subgroup μ M f
-    hf_meas hf_nonneg hf_le H hH_closed hH_eq hμH
-
 /-- Compact-Cayley Lemma 2.7 endpoint after the positive-definite argument has
 identified the level set `{x | g x = 1}` as a Haar-null closed subgroup.
 Applying the zero-level null-subgroup theorem to `f = 1 - g` gives positive
@@ -9512,343 +8128,6 @@ theorem continuousCliqueDensity_pos_of_one_sub_level_one_null_subgroup
       linarith
     · intro hzero
       exact (hH_eq x).mpr (by linarith)
-
-/-- Version of the compact-Cayley level-one endpoint where the level-one
-subgroup is known to have infinite index.  The general Haar theorem converts
-that algebraic hypothesis into nullness. -/
-theorem continuousCliqueDensity_pos_of_one_sub_level_one_not_finiteIndex_subgroup
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (g : G → ℝ) (hg_meas : Measurable g)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ g x = 1)
-    (hH_not_finiteIndex : ¬ H.FiniteIndex) :
-    0 < continuousCliqueDensity μ M (fun x => 1 - g x) :=
-  continuousCliqueDensity_pos_of_one_sub_level_one_null_subgroup μ M g
-    hg_meas hg_nonneg hg_le H hH_closed hH_eq
-    (closed_subgroup_haar_null_of_not_finiteIndex μ H hH_closed hH_not_finiteIndex)
-
-/-- Compact-Cayley Lemma 2.7 endpoint after the positive-definite argument has
-identified the level set `{x | g x = 1}` as a proper closed subgroup.  Applying
-the previous theorem to `f = 1 - g` gives positive continuous clique density
-for the allowed kernel. -/
-theorem continuousCliqueDensity_pos_of_one_sub_level_one_proper_subgroup
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (g : G → ℝ) (hg_meas : Measurable g)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ g x = 1)
-    (hH_proper : (H : Set G) ≠ Set.univ) :
-    0 < continuousCliqueDensity μ M (fun x => 1 - g x) := by
-  refine continuousCliqueDensity_pos_of_zeroLevel_proper_subgroup μ M
-    (fun x => 1 - g x) ?_ ?_ ?_ H hH_closed ?_ hH_proper
-  · exact measurable_const.sub hg_meas
-  · intro x
-    linarith [hg_le x]
-  · intro x
-    linarith [hg_nonneg x]
-  · intro x
-    constructor
-    · intro hx
-      have hg : g x = 1 := (hH_eq x).mp hx
-      linarith
-    · intro hzero
-      exact (hH_eq x).mpr (by linarith)
-
-/-- Route A weighted endpoint after the positive-definite argument identifies
-the level set `{x | f x = 1}` as a proper closed subgroup.
-
-If `u` is positive on a set of positive Haar measure, then almost every tuple in
-that positive-measure vertex box avoids the subgroup in every pairwise
-difference.  On that set all vertex factors `u(xᵢ)` and edge factors
-`1 - f(xᵢ - xⱼ)` are strictly positive, so the weighted avoidance integral is
-strictly positive. -/
-theorem continuousWeightedAvoidanceDensity_pos_of_level_one_null_subgroup
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f u : G → ℝ) (hf_meas : Measurable f) (hu_meas : Measurable u)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hu_nonneg : ∀ x, 0 ≤ u x)
-    (hu_le : ∀ x, u x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ f x = 1)
-    (hμH : μ (H : Set G) = 0)
-    (hu_pos_set : 0 < μ {x : G | 0 < u x}) :
-    0 < continuousWeightedAvoidanceDensity μ M f u := by
-  let μM : Measure (Fin M → G) := Measure.pi (fun _ : Fin M => μ)
-  let S : Set G := {x : G | 0 < u x}
-  let Bad : Set (Fin M → G) :=
-    ⋃ (i : Fin M) (j : Fin M) (_ : i < j),
-      {x : Fin M → G | x i - x j ∈ (H : Set G)}
-  let K : (Fin M → G) → ℝ := fun x => continuousWeightedAvoidanceKernel M f u x
-  have h_pair_null :
-      ∀ i j : Fin M, i ≠ j →
-        μM {x : Fin M → G | x i - x j ∈ (H : Set G)} = 0 := by
-    intro i j hij
-    dsimp [μM]
-    exact pi_pair_sub_mem_null μ H hH_closed hμH i j hij
-  have h_bad_null : μM Bad = 0 := by
-    dsimp [Bad, μM]
-    refine measure_iUnion_null fun i => measure_iUnion_null fun j => ?_
-    by_cases hij : i < j
-    · simp only [hij, Set.iUnion_true]
-      exact h_pair_null i j (ne_of_lt hij)
-    · simp only [hij, Set.iUnion_of_empty, measure_empty]
-  have hkernel_meas : Measurable K := by
-    dsimp [K, continuousWeightedAvoidanceKernel]
-    refine
-      ((Finset.univ : Finset (Fin M)).measurable_prod
-        (fun i _hi => hu_meas.comp (measurable_pi_apply i))).mul ?_
-    refine (continuousCliqueEdgePairs M).measurable_prod ?_
-    intro e _he
-    exact measurable_const.sub
-      (hf_meas.comp ((measurable_pi_apply e.1).sub (measurable_pi_apply e.2)))
-  have hkernel_nonneg : 0 ≤ᵐ[μM] K := by
-    exact Eventually.of_forall fun x => by
-      dsimp [K, continuousWeightedAvoidanceKernel]
-      refine mul_nonneg ?_ ?_
-      · exact Finset.prod_nonneg fun i _hi => hu_nonneg _
-      · exact Finset.prod_nonneg fun e _he => by linarith [hf_le (x e.1 - x e.2)]
-  have hkernel_bound : ∀ᵐ x ∂μM, ‖K x‖ ≤ 1 := by
-    exact Eventually.of_forall fun x => by
-      have hv_nonneg : 0 ≤ ∏ i : Fin M, u (x i) :=
-        Finset.prod_nonneg fun i _hi => hu_nonneg _
-      have hv_le : (∏ i : Fin M, u (x i)) ≤ 1 :=
-        Finset.prod_le_one (fun i _hi => hu_nonneg _) (fun i _hi => hu_le _)
-      have he_nonneg :
-          0 ≤ ∏ e ∈ continuousCliqueEdgePairs M, (1 - f (x e.1 - x e.2)) :=
-        Finset.prod_nonneg fun e _he => by linarith [hf_le (x e.1 - x e.2)]
-      have he_le :
-          (∏ e ∈ continuousCliqueEdgePairs M, (1 - f (x e.1 - x e.2))) ≤ 1 :=
-        Finset.prod_le_one
-          (fun e _he => by linarith [hf_le (x e.1 - x e.2)])
-          (fun e _he => by linarith [hf_nonneg (x e.1 - x e.2)])
-      have hnonneg : 0 ≤ K x := by
-        dsimp [K, continuousWeightedAvoidanceKernel]
-        exact mul_nonneg hv_nonneg he_nonneg
-      have hle : K x ≤ 1 := by
-        dsimp [K, continuousWeightedAvoidanceKernel]
-        calc
-          (∏ i : Fin M, u (x i)) *
-              ∏ e ∈ continuousCliqueEdgePairs M, (1 - f (x e.1 - x e.2))
-              ≤ 1 * 1 := mul_le_mul hv_le he_le he_nonneg (by norm_num)
-          _ = 1 := by norm_num
-      simpa [Real.norm_eq_abs, abs_of_nonneg hnonneg] using hle
-  have hkernel_int : Integrable K μM :=
-    Integrable.of_bound hkernel_meas.aestronglyMeasurable 1 hkernel_bound
-  have hpiS_pos : 0 < μM (Set.univ.pi (fun _ : Fin M => S)) := by
-    dsimp [μM, S]
-    rw [Measure.pi_pi]
-    rw [pos_iff_ne_zero]
-    exact Finset.prod_ne_zero_iff.mpr
-      (fun _i _hi => ne_of_gt hu_pos_set)
-  have hpiS_subset : Set.univ.pi (fun _ : Fin M => S) ⊆ Function.support K ∪ Bad := by
-    intro x hxS
-    by_cases hxBad : x ∈ Bad
-    · exact Or.inr hxBad
-    · refine Or.inl ?_
-      have havoid :
-          ∀ i j : Fin M, i < j → x i - x j ∉ (H : Set G) := by
-        intro i j hij hmem
-        exact hxBad (Set.mem_iUnion.mpr
-          ⟨i, Set.mem_iUnion.mpr
-            ⟨j, Set.mem_iUnion.mpr ⟨hij, hmem⟩⟩⟩)
-      have hv_pos : 0 < ∏ i : Fin M, u (x i) := by
-        refine Finset.prod_pos ?_
-        intro i _hi
-        exact hxS i (by simp)
-      have he_pos :
-          0 < ∏ e ∈ continuousCliqueEdgePairs M, (1 - f (x e.1 - x e.2)) := by
-        refine Finset.prod_pos ?_
-        intro e he
-        have hlt : e.1 < e.2 := (Finset.mem_filter.mp he).2
-        have hnot : x e.1 - x e.2 ∉ (H : Set G) := havoid e.1 e.2 hlt
-        have hne : f (x e.1 - x e.2) ≠ 1 := by
-          intro hone
-          exact hnot ((hH_eq (x e.1 - x e.2)).mpr hone)
-        have hlt_one : f (x e.1 - x e.2) < 1 :=
-          lt_of_le_of_ne (hf_le (x e.1 - x e.2)) hne
-        linarith
-      exact ne_of_gt (by
-        dsimp [K, continuousWeightedAvoidanceKernel]
-        exact mul_pos hv_pos he_pos)
-  have hsupport_pos : 0 < μM (Function.support K) := by
-    by_contra hnot
-    have hsupport_zero : μM (Function.support K) = 0 :=
-      le_antisymm (not_lt.mp hnot) bot_le
-    have hpiS_zero : μM (Set.univ.pi (fun _ : Fin M => S)) = 0 := by
-      refine le_antisymm ?_ bot_le
-      calc
-        μM (Set.univ.pi (fun _ : Fin M => S)) ≤ μM (Function.support K ∪ Bad) :=
-          measure_mono hpiS_subset
-        _ ≤ μM (Function.support K) + μM Bad := measure_union_le _ _
-        _ = 0 := by simp [hsupport_zero, h_bad_null]
-    exact (ne_of_gt hpiS_pos) hpiS_zero
-  rw [continuousWeightedAvoidanceDensity]
-  exact (MeasureTheory.integral_pos_iff_support_of_nonneg_ae hkernel_nonneg hkernel_int).mpr
-    hsupport_pos
-
-/-- Route A weighted endpoint after the positive-definite argument identifies
-the level set `{x | f x = 1}` as a proper closed subgroup of a connected compact
-group.  This wrapper proves Haar-nullness from connectedness and then applies
-the sharper null-subgroup endpoint. -/
-theorem continuousWeightedAvoidanceDensity_pos_of_level_one_proper_subgroup
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f u : G → ℝ) (hf_meas : Measurable f) (hu_meas : Measurable u)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hu_nonneg : ∀ x, 0 ≤ u x)
-    (hu_le : ∀ x, u x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ f x = 1)
-    (hH_proper : (H : Set G) ≠ Set.univ)
-    (hu_pos_set : 0 < μ {x : G | 0 < u x}) :
-    0 < continuousWeightedAvoidanceDensity μ M f u :=
-  continuousWeightedAvoidanceDensity_pos_of_level_one_null_subgroup μ M
-    f u hf_meas hu_meas hf_nonneg hf_le hu_nonneg hu_le H hH_closed hH_eq
-    (closed_proper_subgroup_haar_null μ H hH_closed hH_proper) hu_pos_set
-
-/-- Integral-positive version of
-`continuousWeightedAvoidanceDensity_pos_of_level_one_null_subgroup`.
-
-This is the narrow Route A endpoint: the level-one subgroup is assumed
-Haar-null directly, avoiding a separate connectedness hypothesis. -/
-theorem continuousWeightedAvoidanceDensity_pos_of_level_one_null_subgroup_of_integral_pos
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f u : G → ℝ) (hf_meas : Measurable f) (hu_meas : Measurable u)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hu_nonneg : ∀ x, 0 ≤ u x)
-    (hu_le : ∀ x, u x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ f x = 1)
-    (hμH : μ (H : Set G) = 0)
-    (hu_integral_pos : 0 < ∫ x, u x ∂μ) :
-    0 < continuousWeightedAvoidanceDensity μ M f u := by
-  have hu_bound : ∀ᵐ x ∂μ, ‖u x‖ ≤ 1 := by
-    exact Eventually.of_forall fun x => by
-      simpa [Real.norm_eq_abs, abs_of_nonneg (hu_nonneg x)] using hu_le x
-  have hu_int : Integrable u μ :=
-    Integrable.of_bound hu_meas.aestronglyMeasurable 1 hu_bound
-  have hsupp_pos : 0 < μ (Function.support u) :=
-    (MeasureTheory.integral_pos_iff_support_of_nonneg
-      (fun x => hu_nonneg x) hu_int).mp hu_integral_pos
-  have hsupp_subset : Function.support u ⊆ {x : G | 0 < u x} := by
-    intro x hx
-    exact lt_of_le_of_ne (hu_nonneg x) hx.symm
-  have hu_pos_set : 0 < μ {x : G | 0 < u x} :=
-    lt_of_lt_of_le hsupp_pos (measure_mono hsupp_subset)
-  exact continuousWeightedAvoidanceDensity_pos_of_level_one_null_subgroup μ M
-    f u hf_meas hu_meas hf_nonneg hf_le hu_nonneg hu_le H hH_closed
-    hH_eq hμH hu_pos_set
-
-/-- Route A null-subgroup endpoint with the usual compact-model lower bound
-`α ≤ ∫ u`, `α > 0`. -/
-theorem continuousWeightedAvoidanceDensity_pos_of_level_one_null_subgroup_of_integral_ge
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f u : G → ℝ) (hf_meas : Measurable f) (hu_meas : Measurable u)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hu_nonneg : ∀ x, 0 ≤ u x)
-    (hu_le : ∀ x, u x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ f x = 1)
-    (hμH : μ (H : Set G) = 0)
-    {α : ℝ} (hα : 0 < α) (hmean_u : α ≤ ∫ x, u x ∂μ) :
-    0 < continuousWeightedAvoidanceDensity μ M f u :=
-  continuousWeightedAvoidanceDensity_pos_of_level_one_null_subgroup_of_integral_pos μ M
-    f u hf_meas hu_meas hf_nonneg hf_le hu_nonneg hu_le H hH_closed hH_eq hμH
-    (lt_of_lt_of_le hα hmean_u)
-
-/-- Integral-positive version of
-`continuousWeightedAvoidanceDensity_pos_of_level_one_proper_subgroup`.
-
-This is closer to the Route A compact model: the dense vertex weight satisfies
-`∫ u > 0`, hence `{x | 0 < u x}` has positive Haar measure. -/
-theorem continuousWeightedAvoidanceDensity_pos_of_level_one_proper_subgroup_of_integral_pos
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f u : G → ℝ) (hf_meas : Measurable f) (hu_meas : Measurable u)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hu_nonneg : ∀ x, 0 ≤ u x)
-    (hu_le : ∀ x, u x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ f x = 1)
-    (hH_proper : (H : Set G) ≠ Set.univ)
-    (hu_integral_pos : 0 < ∫ x, u x ∂μ) :
-    0 < continuousWeightedAvoidanceDensity μ M f u := by
-  have hu_bound : ∀ᵐ x ∂μ, ‖u x‖ ≤ 1 := by
-    exact Eventually.of_forall fun x => by
-      simpa [Real.norm_eq_abs, abs_of_nonneg (hu_nonneg x)] using hu_le x
-  have hu_int : Integrable u μ :=
-    Integrable.of_bound hu_meas.aestronglyMeasurable 1 hu_bound
-  have hsupp_pos : 0 < μ (Function.support u) :=
-    (MeasureTheory.integral_pos_iff_support_of_nonneg
-      (fun x => hu_nonneg x) hu_int).mp hu_integral_pos
-  have hsupp_subset : Function.support u ⊆ {x : G | 0 < u x} := by
-    intro x hx
-    exact lt_of_le_of_ne (hu_nonneg x) hx.symm
-  have hu_pos_set : 0 < μ {x : G | 0 < u x} :=
-    lt_of_lt_of_le hsupp_pos (measure_mono hsupp_subset)
-  exact continuousWeightedAvoidanceDensity_pos_of_level_one_proper_subgroup μ M
-    f u hf_meas hu_meas hf_nonneg hf_le hu_nonneg hu_le H hH_closed
-    hH_eq hH_proper hu_pos_set
-
-/-- Route A endpoint with the usual compact-model lower bound
-`α ≤ ∫ u`, `α > 0`. -/
-theorem continuousWeightedAvoidanceDensity_pos_of_level_one_proper_subgroup_of_integral_ge
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f u : G → ℝ) (hf_meas : Measurable f) (hu_meas : Measurable u)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hu_nonneg : ∀ x, 0 ≤ u x)
-    (hu_le : ∀ x, u x ≤ 1)
-    (H : AddSubgroup G) (hH_closed : IsClosed (H : Set G))
-    (hH_eq : ∀ x : G, x ∈ H ↔ f x = 1)
-    (hH_proper : (H : Set G) ≠ Set.univ)
-    {α : ℝ} (hα : 0 < α) (hmean_u : α ≤ ∫ x, u x ∂μ) :
-    0 < continuousWeightedAvoidanceDensity μ M f u :=
-  continuousWeightedAvoidanceDensity_pos_of_level_one_proper_subgroup_of_integral_pos μ M
-    f u hf_meas hu_meas hf_nonneg hf_le hu_nonneg hu_le H hH_closed hH_eq hH_proper
-    (lt_of_lt_of_le hα hmean_u)
 
 /-- **Tao's continuous-analogue key lemma (May 2026 forum comment).** Let `G` be a
 connected compact abelian Hausdorff group with Haar probability measure `μ`, and
@@ -9953,69 +8232,6 @@ structure LevelOneSubgroupKernel {G : Type u} [Zero G] [Sub G]
   map_zero : g 0 = 1
   sub_mem : ∀ x y : G, g x = 1 → g y = 1 → g (x - y) = 1
 
-/-- A concrete Hilbert-space representation of a real positive-definite kernel:
-`g (x - y)` is realized as an inner product of unit vectors.
-
-This is not yet the compact extraction/GNS construction. It is the clean
-finite-dimensional-style interface from which the level-one subgroup property
-is elementary. -/
-structure RealHilbertKernelRepresentation
-    {G : Type u} (E : Type*) [AddCommGroup G]
-    [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    (g : G → ℝ) where
-  vec : G → E
-  norm_vec : ∀ x : G, ‖vec x‖ = 1
-  inner_sub : ∀ x y : G, inner ℝ (vec x) (vec y) = g (x - y)
-
-lemma RealHilbertKernelRepresentation.vec_eq_zero_of_level_one
-    {G : Type u} {E : Type*} [AddCommGroup G]
-    [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    {g : G → ℝ} (hrep : RealHilbertKernelRepresentation E g)
-    {x : G} (hx : g x = 1) :
-    hrep.vec x = hrep.vec 0 := by
-  let v : E := hrep.vec x
-  let w : E := hrep.vec 0
-  have hinner : inner ℝ v w = 1 := by
-    calc
-      inner ℝ v w = g (x - 0) := by simpa [v, w] using hrep.inner_sub x 0
-      _ = g x := by simp
-      _ = 1 := hx
-  have hnormv : ‖v‖ = 1 := by simpa [v] using hrep.norm_vec x
-  have hnormw : ‖w‖ = 1 := by simpa [w] using hrep.norm_vec 0
-  have hsquare : ‖v - w‖ ^ 2 = 0 := by
-    rw [norm_sub_sq_real, hinner, hnormv, hnormw]
-    norm_num
-  have hnorm : ‖v - w‖ = 0 := by
-    have hnonneg : 0 ≤ ‖v - w‖ := norm_nonneg _
-    nlinarith
-  have hsub : v - w = 0 := norm_eq_zero.mp hnorm
-  have hvw : v = w := sub_eq_zero.mp hsub
-  simp [v, w, hvw]
-
-theorem levelOneSubgroupKernel_of_realHilbertKernelRepresentation
-    {G : Type u} {E : Type*} [AddCommGroup G]
-    [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    {g : G → ℝ} (hrep : RealHilbertKernelRepresentation E g) :
-    LevelOneSubgroupKernel g where
-  map_zero := by
-    calc
-      g 0 = inner ℝ (hrep.vec 0) (hrep.vec 0) := by
-        simpa using (hrep.inner_sub 0 0).symm
-      _ = ‖hrep.vec 0‖ ^ 2 := real_inner_self_eq_norm_sq _
-      _ = 1 := by rw [hrep.norm_vec 0]; norm_num
-  sub_mem := by
-    intro x y hx hy
-    have hxvec : hrep.vec x = hrep.vec 0 :=
-      hrep.vec_eq_zero_of_level_one hx
-    have hyvec : hrep.vec y = hrep.vec 0 :=
-      hrep.vec_eq_zero_of_level_one hy
-    calc
-      g (x - y) = inner ℝ (hrep.vec x) (hrep.vec y) :=
-        (hrep.inner_sub x y).symm
-      _ = inner ℝ (hrep.vec 0) (hrep.vec 0) := by rw [hxvec, hyvec]
-      _ = ‖hrep.vec 0‖ ^ 2 := real_inner_self_eq_norm_sq _
-      _ = 1 := by rw [hrep.norm_vec 0]; norm_num
-
 /-- The subgroup `{x | g x = 1}` built from the level-one closure property. -/
 def levelOneAddSubgroup {G : Type u} [AddCommGroup G]
     (g : G → ℝ) (hg : LevelOneSubgroupKernel g) : AddSubgroup G where
@@ -10041,60 +8257,6 @@ lemma levelOneAddSubgroup_isClosed {G : Type u}
     IsClosed (levelOneAddSubgroup g hg : Set G) := by
   change IsClosed {x | g x = 1}
   simpa using isClosed_singleton.preimage hg_cont
-
-lemma levelOneAddSubgroup_proper_of_exists_ne_one {G : Type u}
-    [AddCommGroup G] {g : G → ℝ} (hg : LevelOneSubgroupKernel g)
-    (hne : ∃ x : G, g x ≠ 1) :
-    (levelOneAddSubgroup g hg : Set G) ≠ Set.univ := by
-  rcases hne with ⟨x, hx⟩
-  intro htop
-  have hxmem : x ∈ (levelOneAddSubgroup g hg : Set G) := by
-    rw [htop]
-    trivial
-  exact hx (mem_levelOneAddSubgroup.mp hxmem)
-
-lemma levelOneAddSubgroup_proper_of_integral_le_one_sub
-    {G : Type u} [AddCommGroup G] [MeasurableSpace G]
-    (μ : Measure G) [IsProbabilityMeasure μ]
-    {g : G → ℝ} (hg : LevelOneSubgroupKernel g)
-    {η : ℝ} (hη : 0 < η)
-    (hmean : (∫ x, g x ∂μ) ≤ 1 - η) :
-    (levelOneAddSubgroup g hg : Set G) ≠ Set.univ := by
-  refine levelOneAddSubgroup_proper_of_exists_ne_one hg ?_
-  by_contra hnone
-  push_neg at hnone
-  have hint : (∫ x, g x ∂μ) = 1 := by
-    simp [hnone]
-  nlinarith
-
-/-- Compact-Cayley Lemma 2.7 after isolating the positive-definite algebraic
-input.  Once the positive-definite argument gives `LevelOneSubgroupKernel g`,
-continuity gives closedness, the mean bound gives properness, and the
-measure-theoretic endpoint yields positive `K_M` density for `1 - g`. -/
-theorem continuousCliqueDensity_pos_of_levelOneSubgroupKernel
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (g : G → ℝ) (hg_cont : Continuous g)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    (hg_level : LevelOneSubgroupKernel g)
-    {η : ℝ} (hη : 0 < η)
-    (hmean : (∫ x, g x ∂μ) ≤ 1 - η) :
-    0 < continuousCliqueDensity μ M (fun x => 1 - g x) := by
-  let H : AddSubgroup G := levelOneAddSubgroup g hg_level
-  have hH_closed : IsClosed (H : Set G) :=
-    levelOneAddSubgroup_isClosed hg_level hg_cont
-  have hH_eq : ∀ x : G, x ∈ H ↔ g x = 1 := by
-    intro x
-    rfl
-  have hH_proper : (H : Set G) ≠ Set.univ :=
-    levelOneAddSubgroup_proper_of_integral_le_one_sub μ hg_level hη hmean
-  exact continuousCliqueDensity_pos_of_one_sub_level_one_proper_subgroup
-    μ M g hg_cont.measurable hg_nonneg hg_le H hH_closed hH_eq hH_proper
 
 /-- Compact-Cayley endpoint with the exact null-subgroup hypothesis on the
 level-one subgroup.  This avoids connectedness: once the positive-definite
@@ -10144,87 +8306,6 @@ theorem continuousCliqueDensity_pos_of_levelOneSubgroupKernel_not_finiteIndex
     hg_cont hg_nonneg hg_le hg_level
     (closed_subgroup_haar_null_of_not_finiteIndex μ H hH_closed hH_not_finiteIndex)
 
-/-- Route A weighted endpoint after isolating the positive-definite algebraic
-input.  Once the limiting forbidden kernel `f` has level-one subgroup closure,
-continuity gives closedness, the mean bound `∫ f ≤ 1 - ρ` gives properness, and
-the weighted measure-theoretic endpoint gives a positive avoidance integral
-against any vertex weight `u` with `α ≤ ∫ u`, `α > 0`. -/
-theorem continuousWeightedAvoidanceDensity_pos_of_levelOneSubgroupKernel
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (f u : G → ℝ) (hf_cont : Continuous f) (hu_meas : Measurable u)
-    (hf_nonneg : ∀ x, 0 ≤ f x)
-    (hf_le : ∀ x, f x ≤ 1)
-    (hu_nonneg : ∀ x, 0 ≤ u x)
-    (hu_le : ∀ x, u x ≤ 1)
-    (hf_level : LevelOneSubgroupKernel f)
-    {ρ : ℝ} (hρ : 0 < ρ)
-    (hmean_f : (∫ x, f x ∂μ) ≤ 1 - ρ)
-    {α : ℝ} (hα : 0 < α)
-    (hmean_u : α ≤ ∫ x, u x ∂μ) :
-    0 < continuousWeightedAvoidanceDensity μ M f u := by
-  let H : AddSubgroup G := levelOneAddSubgroup f hf_level
-  have hH_closed : IsClosed (H : Set G) :=
-    levelOneAddSubgroup_isClosed hf_level hf_cont
-  have hH_eq : ∀ x : G, x ∈ H ↔ f x = 1 := by
-    intro x
-    rfl
-  have hH_proper : (H : Set G) ≠ Set.univ :=
-    levelOneAddSubgroup_proper_of_integral_le_one_sub μ hf_level hρ hmean_f
-  exact continuousWeightedAvoidanceDensity_pos_of_level_one_proper_subgroup_of_integral_ge
-    μ M f u hf_cont.measurable hu_meas hf_nonneg hf_le hu_nonneg hu_le
-    H hH_closed hH_eq hH_proper hα hmean_u
-
-/-- Compact-Cayley Lemma 2.7 endpoint in the Hilbert-representation form:
-once the positive-definite kernel is represented by unit vectors with
-`g (x - y) = ⟪v x, v y⟫`, the level-one subgroup property and the continuous
-clique-forcing conclusion are automatic. -/
-theorem continuousCliqueDensity_pos_of_realHilbertKernelRepresentation
-    {G : Type u} {E : Type*} [AddCommGroup G]
-    [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ]
-    (M : ℕ)
-    (g : G → ℝ) (hg_cont : Continuous g)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    (hrep : RealHilbertKernelRepresentation E g)
-    {η : ℝ} (hη : 0 < η)
-    (hmean : (∫ x, g x ∂μ) ≤ 1 - η) :
-    0 < continuousCliqueDensity μ M (fun x => 1 - g x) := by
-  exact continuousCliqueDensity_pos_of_levelOneSubgroupKernel μ M g hg_cont hg_nonneg hg_le
-    (levelOneSubgroupKernel_of_realHilbertKernelRepresentation hrep) hη hmean
-
-/-- Compact-Cayley Lemma 2.7 endpoint with the two proof branches exposed:
-either `g 0 < 1`, or the positive-definite argument supplies the level-one
-subgroup closure property. -/
-theorem continuousCliqueDensity_pos_of_lt_one_or_levelOneSubgroupKernel
-    {G : Type u} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ] [μ.IsOpenPosMeasure]
-    (M : ℕ)
-    (g : G → ℝ) (hg_cont : Continuous g)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    {η : ℝ} (hη : 0 < η)
-    (hmean : (∫ x, g x ∂μ) ≤ 1 - η)
-    (hbranch : g 0 < 1 ∨ LevelOneSubgroupKernel g) :
-    0 < continuousCliqueDensity μ M (fun x => 1 - g x) := by
-  rcases hbranch with hg0 | hg_level
-  · exact continuousCliqueDensity_pos_of_one_sub_of_lt_one_at_zero μ M g hg_cont
-      hg_nonneg hg_le hg0
-  · exact continuousCliqueDensity_pos_of_levelOneSubgroupKernel μ M g hg_cont
-      hg_nonneg hg_le hg_level hη hmean
-
 /-- Two-branch compact-Cayley endpoint using the narrower infinite-index
 certificate instead of connectedness. -/
 theorem continuousCliqueDensity_pos_of_lt_one_or_levelOneSubgroupKernel_not_finiteIndex
@@ -10247,29 +8328,6 @@ theorem continuousCliqueDensity_pos_of_lt_one_or_levelOneSubgroupKernel_not_fini
   · rcases hlevel with ⟨hg_level, hnot⟩
     exact continuousCliqueDensity_pos_of_levelOneSubgroupKernel_not_finiteIndex
       μ M g hg_cont hg_nonneg hg_le hg_level hnot
-
-/-- Same two-branch endpoint, using a concrete Hilbert-space representation for
-the second branch. The remaining Fourier/GNS work can target the `Nonempty`
-representation hypothesis directly. -/
-theorem continuousCliqueDensity_pos_of_lt_one_or_realHilbertKernelRepresentation
-    {G : Type u} {E : Type*} [AddCommGroup G]
-    [TopologicalSpace G] [IsTopologicalAddGroup G]
-    [CompactSpace G] [T2Space G] [ConnectedSpace G]
-    [MeasurableSpace G] [BorelSpace G] [MeasurableSub₂ G]
-    [MeasurableAdd₂ G] [MeasurableNeg G]
-    [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    (μ : Measure G) [μ.IsAddHaarMeasure] [IsProbabilityMeasure μ] [μ.IsOpenPosMeasure]
-    (M : ℕ)
-    (g : G → ℝ) (hg_cont : Continuous g)
-    (hg_nonneg : ∀ x, 0 ≤ g x)
-    (hg_le : ∀ x, g x ≤ 1)
-    {η : ℝ} (hη : 0 < η)
-    (hmean : (∫ x, g x ∂μ) ≤ 1 - η)
-    (hbranch : g 0 < 1 ∨ Nonempty (RealHilbertKernelRepresentation E g)) :
-    0 < continuousCliqueDensity μ M (fun x => 1 - g x) := by
-  refine continuousCliqueDensity_pos_of_lt_one_or_levelOneSubgroupKernel μ M g hg_cont
-    hg_nonneg hg_le hη hmean ?_
-  exact hbranch.imp id (fun hrep => levelOneSubgroupKernel_of_realHilbertKernelRepresentation hrep.some)
 
 /-
 Erdős Problem 42 — first compact-limit kernel coefficient layer.
@@ -10311,27 +8369,6 @@ lemma coeff_zero_re_le_one (E : CayleyExtraction S) :
   exact (Complex.re_le_norm (E.coeff (0 : E.Group))).trans
     (E.coeff_norm_le_one 0)
 
-lemma coeff_zero_re_nonneg (E : CayleyExtraction S) :
-    0 ≤ (E.coeff (0 : E.Group)).re := by
-  have hlim :=
-    Complex.continuous_re.tendsto (E.coeff (0 : E.Group)) |>.comp
-      (E.coeff_tendsto (0 : E.Group))
-  have hnonneg :
-      ∀ᶠ n in atTop,
-        0 ≤
-          (letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩;
-            (normalizedDftCoeff (S.T (E.φ n)) (E.lift n 0)).re) := by
-    filter_upwards [E.data.finiteLift_zero_eventually_eq_zero] with n hn
-    letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-    have hp_pos : 0 < (S.p (E.φ n) : ℝ) := by
-      exact_mod_cast Nat.pos_of_ne_zero (S.prime (E.φ n)).ne_zero
-    have hcard_nonneg :
-        0 ≤ ((S.T (E.φ n)).card : ℝ) / (S.p (E.φ n) : ℝ) := by
-      positivity
-    simpa [lift, hn, normalizedDftCoeff_zero_eq_card_div,
-      Complex.ofReal_div] using hcard_nonneg
-  exact le_of_tendsto_of_tendsto tendsto_const_nhds hlim hnonneg
-
 /-- Complement Fourier coefficients for the compact limit kernel `g = 1 - f`. -/
 noncomputable def gCoeff (E : CayleyExtraction S) (γ : E.Group) : ℝ :=
   if γ = 0 then 1 - (E.coeff (0 : E.Group)).re else -(E.coeff γ).re
@@ -10359,92 +8396,6 @@ lemma gCoeff_zero_le_one_sub_eta (E : CayleyExtraction S) :
   rw [E.gCoeff_zero]
   linarith [E.coeff_zero_ge_eta]
 
-lemma gCoeff_neg_eq (E : CayleyExtraction S) (γ : E.Group) :
-    E.gCoeff (-γ) = E.gCoeff γ := by
-  by_cases hγ : γ = 0
-  · subst hγ
-    simp
-  · have hneg : -γ ≠ 0 := neg_ne_zero.mpr hγ
-    rw [E.gCoeff_of_ne_zero hneg, E.gCoeff_of_ne_zero hγ, E.coeff_neg_eq γ]
-
-lemma gCoeff_le_one (E : CayleyExtraction S) (γ : E.Group) :
-    E.gCoeff γ ≤ 1 := by
-  by_cases hγ : γ = 0
-  · subst hγ
-    rw [E.gCoeff_zero]
-    linarith [E.coeff_zero_re_nonneg]
-  · rw [E.gCoeff_of_ne_zero hγ]
-    have hneg_re_le_norm : -(E.coeff γ).re ≤ ‖E.coeff γ‖ := by
-      have h := (abs_le.mp (Complex.abs_re_le_norm (E.coeff γ))).1
-      linarith
-    exact hneg_re_le_norm.trans (E.coeff_norm_le_one γ)
-
-lemma gCoeff_le_norm_coeff_of_ne_zero
-    (E : CayleyExtraction S) {γ : E.Group} (hγ : γ ≠ 0) :
-    E.gCoeff γ ≤ ‖E.coeff γ‖ := by
-  rw [E.gCoeff_of_ne_zero hγ]
-  have h := (abs_le.mp (Complex.abs_re_le_norm (E.coeff γ))).1
-  linarith
-
-lemma ne_zero_of_not_mem_largeSpectrumGenerators
-    (E : CayleyExtraction S) (q : ℕ+) {γ : E.Group}
-    (hγ : γ ∉ E.data.largeSpectrumGenerators q) :
-    γ ≠ 0 := by
-  intro hzero
-  subst hzero
-  exact hγ (E.data.zero_mem_largeSpectrumGenerators q)
-
-lemma gCoeff_le_inv_of_not_mem_largeSpectrumGenerators
-    (E : CayleyExtraction S) (q : ℕ+) {γ : E.Group}
-    (hγ : γ ∉ E.data.largeSpectrumGenerators q) :
-    E.gCoeff γ ≤ ((q : ℝ)⁻¹ : ℝ) := by
-  exact (E.gCoeff_le_norm_coeff_of_ne_zero
-      (E.ne_zero_of_not_mem_largeSpectrumGenerators q hγ)).trans
-    (E.coeff_norm_le_inv_of_not_mem_largeSpectrumGenerators q hγ)
-
-lemma sum_gCoeff_le_card_mul_inv_of_forall_not_mem_largeSpectrumGenerators
-    (E : CayleyExtraction S) (q : ℕ+) (A : Finset E.Group)
-    (hA : ∀ γ ∈ A, γ ∉ E.data.largeSpectrumGenerators q) :
-    (∑ γ ∈ A, E.gCoeff γ) ≤
-      (A.card : ℝ) * ((q : ℝ)⁻¹ : ℝ) := by
-  calc
-    (∑ γ ∈ A, E.gCoeff γ)
-        ≤ ∑ γ ∈ A, ((q : ℝ)⁻¹ : ℝ) := by
-          refine Finset.sum_le_sum ?_
-          intro γ hγ
-          exact E.gCoeff_le_inv_of_not_mem_largeSpectrumGenerators q (hA γ hγ)
-    _ = (A.card : ℝ) * ((q : ℝ)⁻¹ : ℝ) := by
-          simp [mul_comm]
-
-lemma sum_gCoeff_sdiff_largeSpectrumGenerators_le_card_mul_inv
-    (E : CayleyExtraction S) (q : ℕ+) (A : Finset E.Group) :
-    (∑ γ ∈ A \ E.data.largeSpectrumGenerators q, E.gCoeff γ) ≤
-      ((A \ E.data.largeSpectrumGenerators q).card : ℝ) *
-        ((q : ℝ)⁻¹ : ℝ) :=
-  E.sum_gCoeff_le_card_mul_inv_of_forall_not_mem_largeSpectrumGenerators q
-    (A \ E.data.largeSpectrumGenerators q) (by
-      intro γ hγ hmem
-      exact (Finset.mem_sdiff.mp hγ).2 hmem)
-
-lemma sum_gCoeff_largeSpectrumGenerators_le_card
-    (E : CayleyExtraction S) (q : ℕ+) :
-    (∑ γ ∈ E.data.largeSpectrumGenerators q, E.gCoeff γ) ≤
-      (E.data.largeSpectrumGenerators q).card := by
-  calc
-    (∑ γ ∈ E.data.largeSpectrumGenerators q, E.gCoeff γ)
-        ≤ ∑ γ ∈ E.data.largeSpectrumGenerators q, (1 : ℝ) := by
-          refine Finset.sum_le_sum ?_
-          intro γ _hγ
-          exact E.gCoeff_le_one γ
-    _ = (E.data.largeSpectrumGenerators q).card := by simp
-
-lemma sum_gCoeff_largeSpectrumGenerators_le_quad
-    (E : CayleyExtraction S) (q : ℕ+) :
-    (∑ γ ∈ E.data.largeSpectrumGenerators q, E.gCoeff γ) ≤
-      ((q : ℕ) ^ 2 + 2 : ℕ) := by
-  exact (E.sum_gCoeff_largeSpectrumGenerators_le_card q).trans
-    (by exact_mod_cast E.data.largeSpectrumGenerators_card_le q)
-
 lemma one_sub_indicatorCoeffFunctional_fejer_re_le_one
     (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅) :
     (1 - TrigPoly.indicatorCoeffFunctional (E.fejerTrigPoly Q)).re ≤ 1 := by
@@ -10455,15 +8406,6 @@ lemma one_sub_indicatorCoeffFunctional_fejer_re_le_one
       (1 - TrigPoly.indicatorCoeffFunctional (E.fejerTrigPoly Q)) |>.comp htendsto
   exact le_of_tendsto_of_tendsto htendsto_re tendsto_const_nhds
     (E.finiteComplementFejerAverage_re_le_one_eventually Q hQ)
-
-lemma indicatorCoeffFunctional_fejer_re_nonneg
-    (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅) :
-    0 ≤ (TrigPoly.indicatorCoeffFunctional (E.fejerTrigPoly Q)).re := by
-  have h := E.one_sub_indicatorCoeffFunctional_fejer_re_le_one Q hQ
-  have h' :
-      1 - (TrigPoly.indicatorCoeffFunctional (E.fejerTrigPoly Q)).re ≤ 1 := by
-    simpa using h
-  linarith
 
 lemma one_sub_indicatorCoeffFunctional_fejer_re_eq_sum_gCoeff
     (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅) :
@@ -10779,32 +8721,6 @@ lemma gComplexTerm_continuous
     Continuous (fun z : E.CompactAddDual => E.gComplexTerm γ z) := by
   exact continuous_const.mul (E.addCharacterValue_continuous γ)
 
-lemma star_gComplexTerm
-    (E : CayleyExtraction S) (γ : E.Group) (z : E.CompactAddDual) :
-    star (E.gComplexTerm γ z) = E.gComplexTerm (-γ) z := by
-  unfold gComplexTerm
-  simp [E.star_addCharacterValue, E.gCoeff_neg_eq γ, mul_comm]
-
-lemma gComplexTerm_integrable
-    (E : CayleyExtraction S) (γ : E.Group) :
-    Integrable (fun z : E.CompactAddDual => E.gComplexTerm γ z) E.haar :=
-  (E.gComplexTerm_continuous γ).integrable_of_hasCompactSupport
-    (HasCompactSupport.of_compactSpace _)
-
-lemma integral_norm_gComplexTerm
-    (E : CayleyExtraction S) (γ : E.Group) :
-    ∫ z : E.CompactAddDual, ‖E.gComplexTerm γ z‖ ∂E.haar =
-      E.gCoeff γ := by
-  simp [E.norm_gComplexTerm_eq_gCoeff γ]
-
-lemma integral_gComplexTerm
-    (E : CayleyExtraction S) (γ : E.Group) :
-    ∫ z : E.CompactAddDual, E.gComplexTerm γ z ∂E.haar =
-      if γ = 0 then (E.gCoeff γ : ℂ) else 0 := by
-  unfold gComplexTerm
-  rw [integral_const_mul, E.integral_addCharacterValue]
-  by_cases hγ : γ = 0 <;> simp [hγ]
-
 lemma gComplex_continuous
     (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
     Continuous E.gComplex := by
@@ -10824,26 +8740,6 @@ lemma fReal_continuous
     Continuous E.fReal :=
   continuous_const.sub (E.gReal_continuous hsum)
 
-lemma star_gComplex
-    (E : CayleyExtraction S) (z : E.CompactAddDual) :
-    star (E.gComplex z) = E.gComplex z := by
-  unfold gComplex
-  calc
-    star (∑' γ : E.Group, E.gComplexTerm γ z)
-        = ∑' γ : E.Group, star (E.gComplexTerm γ z) := by
-          simpa using
-            (Complex.conj_tsum (fun γ : E.Group => E.gComplexTerm γ z))
-    _ = ∑' γ : E.Group, E.gComplexTerm (-γ) z := by
-          exact tsum_congr fun γ => E.star_gComplexTerm γ z
-    _ = ∑' γ : E.Group, E.gComplexTerm γ z := by
-          exact (Equiv.neg E.Group).tsum_eq (fun γ : E.Group =>
-            E.gComplexTerm γ z)
-
-lemma gComplex_im_eq_zero
-    (E : CayleyExtraction S) (z : E.CompactAddDual) :
-    (E.gComplex z).im = 0 :=
-  Complex.conj_eq_iff_im.mp (E.star_gComplex z)
-
 lemma gComplex_zero_eq_tsum_gCoeff
     (E : CayleyExtraction S) :
     E.gComplex (0 : E.CompactAddDual) =
@@ -10859,81 +8755,6 @@ lemma gReal_zero_eq_tsum_gCoeff
   rw [E.gComplex_zero_eq_tsum_gCoeff]
   rw [← Complex.ofReal_tsum (fun γ : E.Group => E.gCoeff γ)]
   simp
-
-lemma gComplex_integrable
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    Integrable E.gComplex E.haar :=
-  (E.gComplex_continuous hsum).integrable_of_hasCompactSupport
-    (HasCompactSupport.of_compactSpace _)
-
-lemma gReal_integrable
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    Integrable E.gReal E.haar :=
-  (E.gComplex_integrable hsum).re
-
-lemma fReal_integrable
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    Integrable E.fReal E.haar :=
-  (integrable_const (1 : ℝ)).sub (E.gReal_integrable hsum)
-
-lemma integral_gComplex
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    ∫ z : E.CompactAddDual, E.gComplex z ∂E.haar =
-      (E.gCoeff 0 : ℂ) := by
-  have hterm_int :
-      ∀ γ : E.Group,
-        Integrable (fun z : E.CompactAddDual => E.gComplexTerm γ z) E.haar :=
-    fun γ => E.gComplexTerm_integrable γ
-  have hnorm_sum :
-      Summable
-        (fun γ : E.Group =>
-          ∫ z : E.CompactAddDual, ‖E.gComplexTerm γ z‖ ∂E.haar) := by
-    simpa [E.integral_norm_gComplexTerm] using hsum
-  unfold gComplex
-  rw [← integral_tsum_of_summable_integral_norm hterm_int hnorm_sum]
-  calc
-    (∑' γ : E.Group,
-        ∫ z : E.CompactAddDual, E.gComplexTerm γ z ∂E.haar)
-        =
-      ∑' γ : E.Group, if γ = 0 then (E.gCoeff γ : ℂ) else 0 := by
-        exact tsum_congr fun γ => E.integral_gComplexTerm γ
-    _ = (E.gCoeff 0 : ℂ) := by
-        rw [tsum_eq_single (0 : E.Group)]
-        · simp
-        · intro γ hγ
-          simp [hγ]
-
-lemma integral_gReal
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    ∫ z : E.CompactAddDual, E.gReal z ∂E.haar =
-      E.gCoeff 0 := by
-  unfold gReal
-  have hre :=
-    integral_re (μ := E.haar) (f := E.gComplex)
-      (E.gComplex_integrable hsum)
-  rw [E.integral_gComplex hsum] at hre
-  simpa using hre
-
-lemma integral_fReal_eq_coeff_zero_re
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    ∫ z : E.CompactAddDual, E.fReal z ∂E.haar =
-      (E.coeff (0 : E.Group)).re := by
-  unfold fReal
-  rw [integral_sub (integrable_const (1 : ℝ)) (E.gReal_integrable hsum)]
-  rw [E.integral_gReal hsum, E.gCoeff_zero]
-  simp
-
-lemma integral_fReal_ge_eta
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    η ≤ ∫ z : E.CompactAddDual, E.fReal z ∂E.haar := by
-  rw [E.integral_fReal_eq_coeff_zero_re hsum]
-  exact E.coeff_zero_ge_eta
-
-lemma integral_gReal_le_one_sub_eta
-    (E : CayleyExtraction S) (hsum : Summable E.gCoeff) :
-    ∫ z : E.CompactAddDual, E.gReal z ∂E.haar ≤ 1 - η := by
-  rw [E.integral_gReal hsum]
-  exact E.gCoeff_zero_le_one_sub_eta
 
 lemma addCharacterValue_re_le_one
     (E : CayleyExtraction S) (z : E.CompactAddDual) (γ : E.Group) :
@@ -11197,113 +9018,6 @@ lemma compactSmoothReal_eq_coeff_zero_sub_sum_nonzero_gCoeff
   rw [Finset.sum_neg_distrib]
   ring
 
-lemma abs_compactSmoothReal_sub_fReal_le_of_tsum_tail
-    (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅)
-    (z : E.CompactAddDual) (A : Finset E.Group)
-    (hA0 : (0 : E.Group) ∈ A)
-    (hAsupport : (E.compactSmoothTrigPoly Q).support ⊆ A)
-    {M δ : ℝ} (hM_nonneg : 0 ≤ M)
-    (hclose : ∀ γ ∈ A, ‖1 - E.fejerTrigPoly Q γ‖ ≤ M)
-    (htail :
-      |(∑ γ ∈ A,
-          if γ = 0 then 0
-          else E.gCoeff γ * (E.addCharacterValue z γ).re) -
-        ∑' γ : E.Group,
-          if γ = 0 then 0
-          else E.gCoeff γ * (E.addCharacterValue z γ).re| ≤ δ) :
-    |E.compactSmoothReal Q z - E.fReal z| ≤
-      δ + M * ∑ γ ∈ A, E.gCoeff γ := by
-  classical
-  let a : E.Group → ℝ :=
-    fun γ => if γ = 0 then 0
-      else E.gCoeff γ * (E.addCharacterValue z γ).re
-  let b : E.Group → ℝ :=
-    fun γ => if γ = 0 then 0
-      else (E.fejerTrigPoly Q γ).re * E.gCoeff γ *
-        (E.addCharacterValue z γ).re
-  have hcompact :
-      E.compactSmoothReal Q z =
-        (E.coeff (0 : E.Group)).re - ∑ γ ∈ A, b γ := by
-    simpa [b] using
-      E.compactSmoothReal_eq_coeff_zero_sub_sum_nonzero_gCoeff
-        Q hQ z A hA0 hAsupport
-  have hf :
-      E.fReal z =
-        (E.coeff (0 : E.Group)).re - ∑' γ : E.Group, a γ := by
-    simpa [a] using E.fReal_eq_coeff_zero_sub_tsum_nonzero_gCoeff z
-  have htail' : |(∑ γ ∈ A, a γ) - ∑' γ : E.Group, a γ| ≤ δ := by
-    simpa [a] using htail
-  have hfinite :
-      |(∑ γ ∈ A, a γ) - ∑ γ ∈ A, b γ| ≤
-        M * ∑ γ ∈ A, E.gCoeff γ := by
-    rw [← Finset.sum_sub_distrib]
-    calc
-      |∑ γ ∈ A, (a γ - b γ)|
-          ≤ ∑ γ ∈ A, |a γ - b γ| := by
-            exact Finset.abs_sum_le_sum_abs (fun γ => a γ - b γ) A
-      _ ≤ ∑ γ ∈ A, M * E.gCoeff γ := by
-            refine Finset.sum_le_sum ?_
-            intro γ hγ
-            by_cases hzero : γ = 0
-            · simpa [a, b, hzero] using
-                mul_nonneg hM_nonneg (E.gCoeff_nonneg γ)
-            · have hK_abs : |1 - (E.fejerTrigPoly Q γ).re| ≤ M := by
-                have hre :
-                    |(1 - E.fejerTrigPoly Q γ).re| ≤
-                      ‖1 - E.fejerTrigPoly Q γ‖ :=
-                  Complex.abs_re_le_norm _
-                have hnorm := hclose γ hγ
-                have hrewrite :
-                    (1 - E.fejerTrigPoly Q γ).re =
-                      1 - (E.fejerTrigPoly Q γ).re := by simp
-                simpa [hrewrite] using hre.trans hnorm
-              have hchar_abs :
-                  |(E.addCharacterValue z γ).re| ≤ 1 :=
-                (Complex.abs_re_le_norm (E.addCharacterValue z γ)).trans
-                  (by simp [E.norm_addCharacterValue z γ])
-              have hg_nonneg : 0 ≤ E.gCoeff γ := E.gCoeff_nonneg γ
-              have hdiff :
-                  a γ - b γ =
-                    (1 - (E.fejerTrigPoly Q γ).re) *
-                      E.gCoeff γ * (E.addCharacterValue z γ).re := by
-                simp [a, b, hzero, mul_assoc]
-                ring
-              calc
-                |a γ - b γ|
-                    = |(1 - (E.fejerTrigPoly Q γ).re) *
-                        E.gCoeff γ * (E.addCharacterValue z γ).re| := by
-                          rw [hdiff]
-                _ = |1 - (E.fejerTrigPoly Q γ).re| *
-                    E.gCoeff γ * |(E.addCharacterValue z γ).re| := by
-                      rw [abs_mul, abs_mul, abs_of_nonneg hg_nonneg]
-                _ ≤ M * E.gCoeff γ * 1 := by
-                          exact mul_le_mul
-                            (mul_le_mul hK_abs le_rfl hg_nonneg hM_nonneg)
-                            hchar_abs
-                            (abs_nonneg _)
-                            (mul_nonneg hM_nonneg hg_nonneg)
-                _ = M * E.gCoeff γ := by ring
-      _ = M * ∑ γ ∈ A, E.gCoeff γ := by
-            rw [Finset.mul_sum]
-  rw [hcompact, hf]
-  have hdecomp :
-      ((E.coeff (0 : E.Group)).re - ∑ γ ∈ A, b γ) -
-          ((E.coeff (0 : E.Group)).re - ∑' γ : E.Group, a γ) =
-        ((∑' γ : E.Group, a γ) - ∑ γ ∈ A, a γ) +
-          ((∑ γ ∈ A, a γ) - ∑ γ ∈ A, b γ) := by
-    ring
-  rw [hdecomp]
-  calc
-    |((∑' γ : E.Group, a γ) - ∑ γ ∈ A, a γ) +
-        ((∑ γ ∈ A, a γ) - ∑ γ ∈ A, b γ)|
-        ≤ |(∑' γ : E.Group, a γ) - ∑ γ ∈ A, a γ| +
-          |(∑ γ ∈ A, a γ) - ∑ γ ∈ A, b γ| := abs_add_le _ _
-    _ ≤ δ + M * ∑ γ ∈ A, E.gCoeff γ := by
-      have htail_sym :
-          |(∑' γ : E.Group, a γ) - ∑ γ ∈ A, a γ| ≤ δ := by
-        simpa [abs_sub_comm] using htail'
-      exact add_le_add htail_sym hfinite
-
 lemma abs_sum_sub_tsum_nonzero_gCoeff_character_re_le_tsum_compl
     (E : CayleyExtraction S) (A : Finset E.Group)
     (z : E.CompactAddDual) :
@@ -11396,22 +9110,6 @@ lemma abs_sum_sub_tsum_nonzero_gCoeff_character_re_le_of_gCoeff_tail
     have hle := (abs_le.mp htail).1
     linarith
   exact h.trans htail_upper
-
-lemma abs_compactSmoothReal_sub_fReal_le_of_gCoeff_tail
-    (E : CayleyExtraction S) (Q : Finset E.Group) (hQ : Q ≠ ∅)
-    (z : E.CompactAddDual) (A : Finset E.Group)
-    (hA0 : (0 : E.Group) ∈ A)
-    (hAsupport : (E.compactSmoothTrigPoly Q).support ⊆ A)
-    {M δ : ℝ} (hM_nonneg : 0 ≤ M)
-    (hclose : ∀ γ ∈ A, ‖1 - E.fejerTrigPoly Q γ‖ ≤ M)
-    (hg_tail :
-      |(∑ γ ∈ A, E.gCoeff γ) - ∑' γ : E.Group, E.gCoeff γ| ≤ δ) :
-    |E.compactSmoothReal Q z - E.fReal z| ≤
-      δ + M * ∑ γ ∈ A, E.gCoeff γ := by
-  exact E.abs_compactSmoothReal_sub_fReal_le_of_tsum_tail Q hQ z A hA0
-    hAsupport hM_nonneg hclose
-    (E.abs_sum_sub_tsum_nonzero_gCoeff_character_re_le_of_gCoeff_tail A z
-      hg_tail)
 
 lemma sum_gCoeff_sdiff_le_of_gCoeff_tail
     (E : CayleyExtraction S) (B A : Finset E.Group) {δ : ℝ}
@@ -11680,66 +9378,6 @@ lemma abs_compactSmoothReal_sub_fReal_le_of_core_fejer_and_gCoeff_tail
     _ ≤ δ + M * ∑ γ ∈ B, E.gCoeff γ + δ := by
           exact add_le_add (add_le_add htail_signed hcore) hextra
     _ = 2 * δ + M * ∑ γ ∈ B, E.gCoeff γ := by ring
-
-theorem exists_compactSmoothReal_uniform_close
-    (E : CayleyExtraction S) {ε : ℝ} (hε : 0 < ε) :
-    ∃ Q : Finset E.Group, Q ≠ ∅ ∧
-      ∀ z : E.CompactAddDual,
-        |E.compactSmoothReal Q z - E.fReal z| ≤ ε := by
-  classical
-  let δ : ℝ := ε / 4
-  have hδ_pos : 0 < δ := by
-    dsimp [δ]
-    positivity
-  let Gtot : ℝ := ∑' γ : E.Group, E.gCoeff γ
-  have htail_event :
-      ∀ᶠ B : Finset E.Group in atTop,
-        |(∑ γ ∈ B, E.gCoeff γ) - Gtot| < δ := by
-    have h := (Metric.tendsto_nhds.mp E.summable_gCoeff.hasSum δ hδ_pos)
-    filter_upwards [h] with B hB
-    simpa [Real.dist_eq, Gtot] using hB
-  obtain ⟨B₀, hB₀⟩ := Filter.eventually_atTop.mp htail_event
-  let B : Finset E.Group := insert 0 B₀
-  have hB_ge : B ≥ B₀ := by
-    intro γ hγ
-    exact Finset.mem_insert.mpr (Or.inr hγ)
-  have hB_tail_lt : |(∑ γ ∈ B, E.gCoeff γ) - Gtot| < δ :=
-    hB₀ B hB_ge
-  have hB_tail :
-      |(∑ γ ∈ B, E.gCoeff γ) - ∑' γ : E.Group, E.gCoeff γ| ≤ δ := by
-    simpa [Gtot] using le_of_lt hB_tail_lt
-  have hB0 : (0 : E.Group) ∈ B := Finset.mem_insert_self _ _
-  let SB : ℝ := ∑ γ ∈ B, E.gCoeff γ
-  have hSB_nonneg : 0 ≤ SB := by
-    dsimp [SB]
-    exact Finset.sum_nonneg fun γ _hγ => E.gCoeff_nonneg γ
-  let M : ℝ := δ / (SB + 1)
-  have hden_pos : 0 < SB + 1 := by
-    nlinarith
-  have hM_pos : 0 < M := by
-    dsimp [M]
-    exact div_pos hδ_pos hden_pos
-  obtain ⟨Q, hQ, hlower⟩ := E.exists_fejerPairCoeffLowerBound B hM_pos
-  have hclose : ∀ γ ∈ B, ‖1 - E.fejerTrigPoly Q γ‖ ≤ M :=
-    E.fejerCoeffBound_of_pairCoeffLowerBound hQ hlower
-  refine ⟨Q, hQ, ?_⟩
-  intro z
-  have hmain :=
-    E.abs_compactSmoothReal_sub_fReal_le_of_core_fejer_and_gCoeff_tail
-      Q hQ z B hB0 (le_of_lt hM_pos) hclose hB_tail
-  have hM_mul : M * SB ≤ δ := by
-    dsimp [M]
-    rw [div_mul_eq_mul_div, div_le_iff₀ hden_pos]
-    nlinarith
-  calc
-    |E.compactSmoothReal Q z - E.fReal z|
-        ≤ 2 * δ + M * ∑ γ ∈ B, E.gCoeff γ := hmain
-    _ = 2 * δ + M * SB := by rfl
-    _ ≤ 2 * δ + δ := by
-          nlinarith
-    _ ≤ ε := by
-          dsimp [δ]
-          nlinarith
 
 theorem exists_compactSmoothReal_uniform_close_and_fejerPairCoeffLowerBound
     (E : CayleyExtraction S) (Bextra : Finset E.Group)
@@ -12142,84 +9780,6 @@ lemma levelOneAddSubgroup_gReal_not_finiteIndex_of_gReal_zero_eq_one
     exact hinj (by simpa using hNγ_zero)
   exact hγ_ne hγ_zero
 
-lemma fReal_nonneg_of_gReal_le_one
-    (E : CayleyExtraction S)
-    (hg_le : ∀ x : E.CompactAddDual, E.gReal x ≤ 1) :
-    ∀ x : E.CompactAddDual, 0 ≤ E.fReal x := by
-  intro x
-  unfold fReal
-  linarith [hg_le x]
-
-lemma fReal_le_one_of_gReal_nonneg
-    (E : CayleyExtraction S)
-    (hg_nonneg : ∀ x : E.CompactAddDual, 0 ≤ E.gReal x) :
-    ∀ x : E.CompactAddDual, E.fReal x ≤ 1 := by
-  intro x
-  unfold fReal
-  linarith [hg_nonneg x]
-
-theorem compact_limit_cliqueDensity_pos_of_gReal_bounds
-    (E : CayleyExtraction S)
-    (_hℓ : 2 ≤ ℓ) (hη : 0 < η)
-    [ConnectedSpace E.CompactAddDual]
-    (hsum : Summable E.gCoeff)
-    (hg_nonneg : ∀ x : E.CompactAddDual, 0 ≤ E.gReal x)
-    (hg_le : ∀ x : E.CompactAddDual, E.gReal x ≤ 1) :
-    0 < continuousCliqueDensity E.haar ℓ E.fReal := by
-  classical
-  letI : CompactSpace E.CompactAddDual := E.compactAddDual_compactSpace
-  letI : T2Space E.CompactAddDual := E.compactAddDual_t2Space
-  letI : IsTopologicalAddGroup E.CompactAddDual :=
-    E.compactAddDual_isTopologicalAddGroup
-  have hbranch :
-      E.gReal (0 : E.CompactAddDual) < 1 ∨
-        LevelOneSubgroupKernel E.gReal := by
-    by_cases hlt : E.gReal (0 : E.CompactAddDual) < 1
-    · exact Or.inl hlt
-    · have hg0 : E.gReal (0 : E.CompactAddDual) = 1 :=
-        le_antisymm (hg_le 0) (not_lt.mp hlt)
-      exact Or.inr (E.levelOneSubgroupKernel_gReal_of_gReal_zero_eq_one hsum hg0)
-  simpa [fReal] using
-    continuousCliqueDensity_pos_of_lt_one_or_levelOneSubgroupKernel
-      E.haar ℓ E.gReal (E.gReal_continuous hsum)
-      hg_nonneg hg_le hη (E.integral_gReal_le_one_sub_eta hsum) hbranch
-
-/-- Variant of `compact_limit_cliqueDensity_pos_of_gReal_bounds` that replaces
-connectedness of the whole compact dual by the exact infinite-index certificate
-for every level-one subgroup structure on `E.gReal`. -/
-theorem compact_limit_cliqueDensity_pos_of_gReal_bounds_not_finiteIndex
-    (E : CayleyExtraction S)
-    (_hℓ : 2 ≤ ℓ) (_hη : 0 < η)
-    (hsum : Summable E.gCoeff)
-    (hg_nonneg : ∀ x : E.CompactAddDual, 0 ≤ E.gReal x)
-    (hg_le : ∀ x : E.CompactAddDual, E.gReal x ≤ 1)
-    (hlevel_not_finiteIndex :
-      ∀ hg_level : LevelOneSubgroupKernel E.gReal,
-        ¬ (levelOneAddSubgroup E.gReal hg_level :
-          AddSubgroup E.CompactAddDual).FiniteIndex) :
-    0 < continuousCliqueDensity E.haar ℓ E.fReal := by
-  classical
-  letI : CompactSpace E.CompactAddDual := E.compactAddDual_compactSpace
-  letI : T2Space E.CompactAddDual := E.compactAddDual_t2Space
-  letI : IsTopologicalAddGroup E.CompactAddDual :=
-    E.compactAddDual_isTopologicalAddGroup
-  have hbranch :
-      E.gReal (0 : E.CompactAddDual) < 1 ∨
-        ∃ hg_level : LevelOneSubgroupKernel E.gReal,
-          ¬ (levelOneAddSubgroup E.gReal hg_level :
-            AddSubgroup E.CompactAddDual).FiniteIndex := by
-    by_cases hlt : E.gReal (0 : E.CompactAddDual) < 1
-    · exact Or.inl hlt
-    · have hg0 : E.gReal (0 : E.CompactAddDual) = 1 :=
-        le_antisymm (hg_le 0) (not_lt.mp hlt)
-      let hg_level : LevelOneSubgroupKernel E.gReal :=
-        E.levelOneSubgroupKernel_gReal_of_gReal_zero_eq_one hsum hg0
-      exact Or.inr ⟨hg_level, hlevel_not_finiteIndex hg_level⟩
-  simpa [fReal] using
-    continuousCliqueDensity_pos_of_lt_one_or_levelOneSubgroupKernel_not_finiteIndex
-      E.haar ℓ E.gReal (E.gReal_continuous hsum)
-      hg_nonneg hg_le hbranch
-
 /-- Compact positive clique-density endpoint with connectedness replaced by the
 finite-index contradiction proved from extraction torsion-freeness and the mean
 gap.  The remaining analytic input is the pointwise bound `0 ≤ gReal ≤ 1` and
@@ -12276,55 +9836,6 @@ theorem compact_limit_cliqueDensity_pos
     0 < continuousCliqueDensity E.haar ℓ E.fReal :=
   E.compact_limit_cliqueDensity_pos_of_gReal_nonneg hℓ hη E.gReal_nonneg
 
-theorem compactSmoothReal_cliqueDensity_pos_of_close
-    (E : CayleyExtraction S) (Q : Finset E.Group) {κ : ℝ}
-    (hκ_nonneg : 0 ≤ κ) (hκ_le_one : κ ≤ 1)
-    (hclose : ∀ z : E.CompactAddDual,
-      |E.fReal z - E.compactSmoothReal Q z| ≤ κ)
-    (hmargin :
-      (((continuousCliqueEdgePairs ℓ).card : ℝ) * κ) *
-          (2 : ℝ) ^ (continuousCliqueEdgePairs ℓ).card <
-        continuousCliqueDensity E.haar ℓ E.fReal) :
-    0 < continuousCliqueDensity E.haar ℓ (E.compactSmoothReal Q) := by
-  classical
-  let C : ℝ := (((continuousCliqueEdgePairs ℓ).card : ℝ) * κ) *
-    (2 : ℝ) ^ (continuousCliqueEdgePairs ℓ).card
-  have hf_abs : ∀ z : E.CompactAddDual, |E.fReal z| ≤ 2 := by
-    intro z
-    have hnonneg := E.fReal_nonneg z
-    have hle := E.fReal_le_one z
-    rw [abs_of_nonneg hnonneg]
-    linarith
-  have hs_abs : ∀ z : E.CompactAddDual, |E.compactSmoothReal Q z| ≤ 2 := by
-    intro z
-    have hf_abs_one : |E.fReal z| ≤ 1 := by
-      have hnonneg := E.fReal_nonneg z
-      have hle := E.fReal_le_one z
-      rw [abs_of_nonneg hnonneg]
-      exact hle
-    have hclose' : |E.compactSmoothReal Q z - E.fReal z| ≤ κ := by
-      simpa [abs_sub_comm] using hclose z
-    calc
-      |E.compactSmoothReal Q z|
-          = |(E.compactSmoothReal Q z - E.fReal z) + E.fReal z| := by ring_nf
-      _ ≤ |E.compactSmoothReal Q z - E.fReal z| + |E.fReal z| := abs_add_le _ _
-      _ ≤ κ + 1 := add_le_add hclose' hf_abs_one
-      _ ≤ 2 := by linarith
-  have hdiff :=
-    continuousCliqueDensity_lipschitz_sup_two_pow
-      E.haar ℓ
-      (E.fReal_continuous E.summable_gCoeff).measurable
-      (E.compactSmoothReal_continuous Q).measurable
-      hf_abs hs_abs hκ_nonneg hclose
-  have hlow :
-      continuousCliqueDensity E.haar ℓ E.fReal -
-        continuousCliqueDensity E.haar ℓ (E.compactSmoothReal Q) ≤ C := by
-    exact (le_abs_self _).trans (by simpa [C] using hdiff)
-  have hC_lt :
-      C < continuousCliqueDensity E.haar ℓ E.fReal := by
-    simpa [C] using hmargin
-  linarith
-
 theorem compactSmoothReal_cliqueDensity_ge_sub_error_of_close
     (E : CayleyExtraction S) (Q : Finset E.Group) {κ : ℝ}
     (hκ_nonneg : 0 ≤ κ) (hκ_le_one : κ ≤ 1)
@@ -12373,63 +9884,6 @@ theorem compactSmoothReal_cliqueDensity_ge_sub_error_of_close
         continuousCliqueDensity E.haar ℓ (E.compactSmoothReal Q) := by
     linarith
   simpa [C] using htarget
-
-theorem exists_compactSmoothReal_cliqueDensity_pos
-    (E : CayleyExtraction S) (hℓ : 2 ≤ ℓ) (hη : 0 < η) :
-    ∃ Q : Finset E.Group, Q ≠ ∅ ∧
-      0 < continuousCliqueDensity E.haar ℓ (E.compactSmoothReal Q) := by
-  classical
-  let ρ : ℝ := continuousCliqueDensity E.haar ℓ E.fReal
-  have hρ_pos : 0 < ρ := by
-    dsimp [ρ]
-    exact E.compact_limit_cliqueDensity_pos hℓ hη
-  let edgeCount : ℝ := ((continuousCliqueEdgePairs ℓ).card : ℝ)
-  let P : ℝ := (2 : ℝ) ^ (continuousCliqueEdgePairs ℓ).card
-  let A : ℝ := (edgeCount + 1) * (P + 1)
-  have hedge_nonneg : 0 ≤ edgeCount := by
-    dsimp [edgeCount]
-    exact Nat.cast_nonneg _
-  have hP_nonneg : 0 ≤ P := by
-    dsimp [P]
-    positivity
-  have hA_pos : 0 < A := by
-    dsimp [A]
-    nlinarith
-  let κ : ℝ := min 1 (ρ / (2 * A))
-  have hκ_pos : 0 < κ := by
-    dsimp [κ]
-    exact lt_min zero_lt_one (div_pos hρ_pos (mul_pos two_pos hA_pos))
-  have hκ_nonneg : 0 ≤ κ := le_of_lt hκ_pos
-  have hκ_le_one : κ ≤ 1 := by
-    dsimp [κ]
-    exact min_le_left _ _
-  obtain ⟨Q, hQ, hclose₀⟩ := E.exists_compactSmoothReal_uniform_close hκ_pos
-  have hclose : ∀ z : E.CompactAddDual,
-      |E.fReal z - E.compactSmoothReal Q z| ≤ κ := by
-    intro z
-    simpa [abs_sub_comm] using hclose₀ z
-  have hκA_le : κ * A ≤ ρ / 2 := by
-    have hκ_le : κ ≤ ρ / (2 * A) := by
-      dsimp [κ]
-      exact min_le_right _ _
-    calc
-      κ * A ≤ (ρ / (2 * A)) * A :=
-        mul_le_mul_of_nonneg_right hκ_le (le_of_lt hA_pos)
-      _ = ρ / 2 := by
-        field_simp [ne_of_gt hA_pos]
-  have hedgeP_le_A : edgeCount * P ≤ A := by
-    dsimp [A]
-    nlinarith
-  have hmargin :
-      (edgeCount * κ) * P < ρ := by
-    have hC_le : (edgeCount * κ) * P ≤ κ * A := by
-      have h := mul_le_mul_of_nonneg_left hedgeP_le_A hκ_nonneg
-      nlinarith
-    nlinarith
-  refine ⟨Q, hQ, ?_⟩
-  exact E.compactSmoothReal_cliqueDensity_pos_of_close Q
-    hκ_nonneg hκ_le_one hclose (by
-      simpa [edgeCount, P, ρ] using hmargin)
 
 theorem exists_compactSmoothReal_cliqueDensity_pos_and_fejerPairCoeffLowerBound
     (E : CayleyExtraction S) (hℓ : 2 ≤ ℓ) (hη : 0 < η)
@@ -12560,19 +10014,6 @@ noncomputable def cliqueEdgeAssignmentCoeff
     (P : E.TrigPoly) (ω : CliqueEdgeIndex M → E.Group) : ℂ :=
   ∏ e : CliqueEdgeIndex M, P (ω e)
 
-lemma TrigPoly.evalFinite_eq_sum_support
-    (E : CayleyExtraction S) (P : E.TrigPoly) (n : ℕ)
-    (x : ZMod (S.p (E.φ n))) [NeZero (S.p (E.φ n))] :
-    TrigPoly.evalFinite P n x =
-      ∑ γ ∈ P.support,
-        P γ * ZMod.stdAddChar (-(E.lift n γ * x)) := by
-  classical
-  unfold TrigPoly.evalFinite
-  rw [Finsupp.sum_of_support_subset
-    (f := P) (s := P.support) (by intro γ hγ; exact hγ)]
-  intro γ _hγ
-  simp
-
 lemma TrigPoly.evalFinite_eq_sum_of_support_subset
     (E : CayleyExtraction S) (P : E.TrigPoly) (n : ℕ)
     (A : Finset E.Group) (hP : P.support ⊆ A)
@@ -12582,18 +10023,6 @@ lemma TrigPoly.evalFinite_eq_sum_of_support_subset
   classical
   unfold TrigPoly.evalFinite
   rw [Finsupp.sum_of_support_subset (f := P) (s := A) hP]
-  intro γ _hγ
-  simp
-
-lemma TrigPoly.evalAdd_eq_sum_support
-    (E : CayleyExtraction S) (P : E.TrigPoly)
-    (z : E.CompactAddDual) :
-    TrigPoly.evalAdd P z =
-      ∑ γ ∈ P.support, P γ * E.addCharacterValue z γ := by
-  classical
-  unfold TrigPoly.evalAdd
-  rw [Finsupp.sum_of_support_subset
-    (f := P) (s := P.support) (by intro γ hγ; exact hγ)]
   intro γ _hγ
   simp
 
@@ -12621,28 +10050,6 @@ lemma addCharacterValue_sum
     rw [Finset.sum_insert ha, Finset.prod_insert ha]
     rw [E.addCharacterValue_add, ih]
 
-lemma addCharacterValue_sum_univ
-    (E : CayleyExtraction S) {ι : Type*} [Fintype ι]
-    (z : E.CompactAddDual) (f : ι → E.Group) :
-    E.addCharacterValue z (∑ i, f i) =
-      ∏ i, E.addCharacterValue z (f i) := by
-  simpa using E.addCharacterValue_sum (Finset.univ : Finset ι) z f
-
-lemma stdAddChar_neg_sum_mul
-    {p : ℕ} [NeZero p] {ι : Type*} (s : Finset ι)
-    (f : ι → ZMod p) (x : ZMod p) :
-    ZMod.stdAddChar (-((∑ i ∈ s, f i) * x)) =
-      ∏ i ∈ s, ZMod.stdAddChar (-(f i * x)) := by
-  classical
-  refine Finset.induction_on s ?base ?step
-  · simp
-  · intro a s ha ih
-    rw [Finset.sum_insert ha, Finset.prod_insert ha]
-    rw [← ih]
-    rw [← ZMod.stdAddChar.map_add_eq_mul]
-    congr 1
-    ring
-
 lemma stdAddChar_sum
     {p : ℕ} [NeZero p] {ι : Type*} (s : Finset ι)
     (f : ι → ZMod p) :
@@ -12661,13 +10068,6 @@ lemma stdAddChar_sum_univ
     ZMod.stdAddChar (∑ i, f i) =
       ∏ i, ZMod.stdAddChar (f i) := by
   simpa using stdAddChar_sum (Finset.univ : Finset ι) f
-
-lemma stdAddChar_neg_sum_univ_mul
-    {p : ℕ} [NeZero p] {ι : Type*} [Fintype ι]
-    (f : ι → ZMod p) (x : ZMod p) :
-    ZMod.stdAddChar (-((∑ i, f i) * x)) =
-      ∏ i, ZMod.stdAddChar (-(f i * x)) := by
-  simpa using stdAddChar_neg_sum_mul (Finset.univ : Finset ι) f x
 
 lemma finitePiAverage_prod_zmod {p M : ℕ} [NeZero p]
     (φ : Fin M → ZMod p → ℂ) :
@@ -13072,45 +10472,6 @@ lemma finiteCliqueAssignmentAverage_eq_if
   exact finitePiAverage_prod_stdAddChar_neg_mul_eq_if
     (fun i : Fin M => E.finiteCliqueFrequencyBalance ω n i)
 
-lemma finiteCliqueKernelWeight_evalFinite_eq_sum_edgeAssignments
-    (E : CayleyExtraction S) {M : ℕ}
-    (P : E.TrigPoly) (n : ℕ)
-    (x : Fin M → ZMod (S.p (E.φ n))) [NeZero (S.p (E.φ n))] :
-    finiteCliqueKernelWeight (ℓ := M)
-        (fun z : ZMod (S.p (E.φ n)) => TrigPoly.evalFinite P n z) x =
-      ∑ ω ∈ Fintype.piFinset (fun _ : CliqueEdgeIndex M => P.support),
-        E.cliqueEdgeAssignmentCoeff P ω *
-          ∏ e : CliqueEdgeIndex M,
-            ZMod.stdAddChar
-              (-(E.lift n (ω e) * (x e.1.1 - x e.1.2))) := by
-  classical
-  unfold finiteCliqueKernelWeight
-  rw [show
-      (∏ e ∈ cliqueEdgePairs M,
-          TrigPoly.evalFinite P n (x e.1 - x e.2)) =
-        ∏ e : CliqueEdgeIndex M,
-          TrigPoly.evalFinite P n (x e.1.1 - x e.1.2) by
-        simpa [CliqueEdgeIndex] using
-          (Finset.prod_attach (s := cliqueEdgePairs M)
-            (f := fun e : Fin M × Fin M =>
-              TrigPoly.evalFinite P n (x e.1 - x e.2))).symm]
-  rw [show
-      (∏ e : CliqueEdgeIndex M,
-          TrigPoly.evalFinite P n (x e.1.1 - x e.1.2)) =
-        ∏ e : CliqueEdgeIndex M,
-          ∑ γ ∈ P.support,
-            P γ * ZMod.stdAddChar
-              (-(E.lift n γ * (x e.1.1 - x e.1.2))) by
-        refine Finset.prod_congr rfl ?_
-        intro e _he
-        exact TrigPoly.evalFinite_eq_sum_support E P n
-          (x e.1.1 - x e.1.2)]
-  rw [Finset.prod_univ_sum]
-  refine Finset.sum_congr rfl ?_
-  intro ω hω
-  rw [Finset.prod_mul_distrib]
-  rfl
-
 lemma finiteCliqueKernelWeight_evalFinite_eq_sum_edgeAssignments_of_support_subset
     (E : CayleyExtraction S) {M : ℕ}
     (P : E.TrigPoly) (A : Finset E.Group) (hP : P.support ⊆ A)
@@ -13168,71 +10529,6 @@ lemma prod_stdAddChar_cliqueEdgeIndex_eq_extend
         ZMod.stdAddChar
           (-(E.lift n (E.extendCliqueEdgeAssignment ω e) *
               (x e.1 - x e.2)))))
-
-lemma finiteCliqueKernelDensity_evalFinite_eq_sum_edgeAssignments
-    (E : CayleyExtraction S) {M : ℕ}
-    (P : E.TrigPoly) (n : ℕ)
-    [Fact (S.p (E.φ n)).Prime] [NeZero (S.p (E.φ n))] :
-    finiteCliqueKernelDensity (p := S.p (E.φ n)) (ℓ := M)
-        (fun z : ZMod (S.p (E.φ n)) => TrigPoly.evalFinite P n z) =
-      ∑ ω ∈ Fintype.piFinset (fun _ : CliqueEdgeIndex M => P.support),
-        E.cliqueEdgeAssignmentCoeff P ω *
-          (if (∀ i : Fin M,
-              E.finiteCliqueFrequencyBalance
-                (E.extendCliqueEdgeAssignment ω) n i = 0)
-            then 1 else 0) := by
-  classical
-  unfold finiteCliqueKernelDensity
-  rw [show
-      (∑ x : Fin M → ZMod (S.p (E.φ n)),
-          finiteCliqueKernelWeight
-            (fun z : ZMod (S.p (E.φ n)) =>
-              TrigPoly.evalFinite P n z) x) =
-        ∑ x : Fin M → ZMod (S.p (E.φ n)),
-          ∑ ω ∈ Fintype.piFinset (fun _ : CliqueEdgeIndex M => P.support),
-            E.cliqueEdgeAssignmentCoeff P ω *
-              ∏ e : CliqueEdgeIndex M,
-                ZMod.stdAddChar
-                  (-(E.lift n (ω e) * (x e.1.1 - x e.1.2))) by
-        refine Finset.sum_congr rfl ?_
-        intro x _hx
-        exact E.finiteCliqueKernelWeight_evalFinite_eq_sum_edgeAssignments P n x]
-  rw [Finset.sum_comm]
-  rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl ?_
-  intro ω hω
-  rw [← Finset.mul_sum]
-  rw [show
-      ((Fintype.card (Fin M → ZMod (S.p (E.φ n))) : ℂ)⁻¹) *
-          (E.cliqueEdgeAssignmentCoeff P ω *
-            ∑ x : Fin M → ZMod (S.p (E.φ n)),
-              ∏ e : CliqueEdgeIndex M,
-                ZMod.stdAddChar
-                  (-(E.lift n (ω e) * (x e.1.1 - x e.1.2)))) =
-        E.cliqueEdgeAssignmentCoeff P ω *
-          (((Fintype.card (Fin M → ZMod (S.p (E.φ n))) : ℂ)⁻¹) *
-            ∑ x : Fin M → ZMod (S.p (E.φ n)),
-              ∏ e : CliqueEdgeIndex M,
-                ZMod.stdAddChar
-                  (-(E.lift n (ω e) * (x e.1.1 - x e.1.2)))) by
-        ring]
-  rw [show
-      ((Fintype.card (Fin M → ZMod (S.p (E.φ n))) : ℂ)⁻¹) *
-          ∑ x : Fin M → ZMod (S.p (E.φ n)),
-            ∏ e : CliqueEdgeIndex M,
-              ZMod.stdAddChar
-                (-(E.lift n (ω e) * (x e.1.1 - x e.1.2))) =
-        ((Fintype.card (Fin M → ZMod (S.p (E.φ n))) : ℂ)⁻¹) *
-          ∑ x : Fin M → ZMod (S.p (E.φ n)),
-            ∏ e ∈ cliqueEdgePairs M,
-              ZMod.stdAddChar
-                (-(E.lift n (E.extendCliqueEdgeAssignment ω e) *
-                    (x e.1 - x e.2))) by
-        congr 1
-        refine Finset.sum_congr rfl ?_
-        intro x _hx
-        exact E.prod_stdAddChar_cliqueEdgeIndex_eq_extend ω n x]
-  rw [E.finiteCliqueAssignmentAverage_eq_if (E.extendCliqueEdgeAssignment ω) n]
 
 lemma finiteCliqueKernelDensity_evalFinite_eq_sum_edgeAssignments_of_support_subset
     (E : CayleyExtraction S) {M : ℕ}
@@ -13391,40 +10687,6 @@ lemma integrable_cliqueEdgeAssignmentTerm
       (E.continuous_cliqueEdgeAssignmentCharacterProduct ω)).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-lemma compactCliqueKernel_evalAdd_eq_sum_edgeAssignments
-    (E : CayleyExtraction S) {M : ℕ}
-    (P : E.TrigPoly) (x : Fin M → E.CompactAddDual) :
-    (∏ e ∈ cliqueEdgePairs M,
-        TrigPoly.evalAdd P (x e.1 - x e.2)) =
-      ∑ ω ∈ Fintype.piFinset (fun _ : CliqueEdgeIndex M => P.support),
-        E.cliqueEdgeAssignmentCoeff P ω *
-          ∏ e : CliqueEdgeIndex M,
-            E.addCharacterValue (x e.1.1 - x e.1.2) (ω e) := by
-  classical
-  rw [show
-      (∏ e ∈ cliqueEdgePairs M,
-          TrigPoly.evalAdd P (x e.1 - x e.2)) =
-        ∏ e : CliqueEdgeIndex M,
-          TrigPoly.evalAdd P (x e.1.1 - x e.1.2) by
-        simpa [CliqueEdgeIndex] using
-          (Finset.prod_attach (s := cliqueEdgePairs M)
-            (f := fun e : Fin M × Fin M =>
-              TrigPoly.evalAdd P (x e.1 - x e.2))).symm]
-  rw [show
-      (∏ e : CliqueEdgeIndex M,
-          TrigPoly.evalAdd P (x e.1.1 - x e.1.2)) =
-        ∏ e : CliqueEdgeIndex M,
-          ∑ γ ∈ P.support,
-            P γ * E.addCharacterValue (x e.1.1 - x e.1.2) γ by
-        refine Finset.prod_congr rfl ?_
-        intro e _he
-        exact TrigPoly.evalAdd_eq_sum_support E P (x e.1.1 - x e.1.2)]
-  rw [Finset.prod_univ_sum]
-  refine Finset.sum_congr rfl ?_
-  intro ω _hω
-  rw [Finset.prod_mul_distrib]
-  rfl
-
 lemma compactCliqueKernel_evalAdd_eq_sum_edgeAssignments_of_support_subset
     (E : CayleyExtraction S) {M : ℕ}
     (P : E.TrigPoly) (A : Finset E.Group) (hP : P.support ⊆ A)
@@ -13476,55 +10738,6 @@ lemma prod_addCharacterValue_cliqueEdgeIndex_eq_extend
         E.addCharacterValue (x e.1 - x e.2)
           (E.extendCliqueEdgeAssignment ω e)))
 
-lemma compactCliqueDensity_evalAdd_eq_sum_edgeAssignments
-    (E : CayleyExtraction S) {M : ℕ}
-    (P : E.TrigPoly) :
-    (∫ x : Fin M → E.CompactAddDual,
-        (∏ e ∈ cliqueEdgePairs M,
-          TrigPoly.evalAdd P (x e.1 - x e.2))
-        ∂Measure.pi (fun _ : Fin M => E.haar)) =
-      ∑ ω ∈ Fintype.piFinset (fun _ : CliqueEdgeIndex M => P.support),
-        E.cliqueEdgeAssignmentCoeff P ω *
-          (if (∀ i : Fin M,
-              E.cliqueFrequencyBalance
-                (E.extendCliqueEdgeAssignment ω) i = 0)
-            then 1 else 0) := by
-  classical
-  rw [show
-      (∫ x : Fin M → E.CompactAddDual,
-          (∏ e ∈ cliqueEdgePairs M,
-            TrigPoly.evalAdd P (x e.1 - x e.2))
-          ∂Measure.pi (fun _ : Fin M => E.haar)) =
-        ∫ x : Fin M → E.CompactAddDual,
-          ∑ ω ∈ Fintype.piFinset (fun _ : CliqueEdgeIndex M => P.support),
-            E.cliqueEdgeAssignmentCoeff P ω *
-              ∏ e : CliqueEdgeIndex M,
-                E.addCharacterValue (x e.1.1 - x e.1.2) (ω e)
-          ∂Measure.pi (fun _ : Fin M => E.haar) by
-        congr 1
-        funext x
-        exact E.compactCliqueKernel_evalAdd_eq_sum_edgeAssignments P x]
-  rw [MeasureTheory.integral_finset_sum]
-  · refine Finset.sum_congr rfl ?_
-    intro ω _hω
-    rw [MeasureTheory.integral_const_mul]
-    rw [show
-        (∫ x : Fin M → E.CompactAddDual,
-            (∏ e : CliqueEdgeIndex M,
-              E.addCharacterValue (x e.1.1 - x e.1.2) (ω e))
-            ∂Measure.pi (fun _ : Fin M => E.haar)) =
-          ∫ x : Fin M → E.CompactAddDual,
-            (∏ e ∈ cliqueEdgePairs M,
-              E.addCharacterValue (x e.1 - x e.2)
-                (E.extendCliqueEdgeAssignment ω e))
-            ∂Measure.pi (fun _ : Fin M => E.haar) by
-          congr 1
-          funext x
-          exact E.prod_addCharacterValue_cliqueEdgeIndex_eq_extend ω x]
-    rw [E.compactCliqueAssignmentIntegral_eq_if (E.extendCliqueEdgeAssignment ω)]
-  · intro ω _hω
-    exact E.integrable_cliqueEdgeAssignmentTerm P ω
-
 lemma compactCliqueDensity_evalAdd_eq_sum_edgeAssignments_of_support_subset
     (E : CayleyExtraction S) {M : ℕ}
     (P : E.TrigPoly) (A : Finset E.Group) (hP : P.support ⊆ A) :
@@ -13574,59 +10787,6 @@ lemma compactCliqueDensity_evalAdd_eq_sum_edgeAssignments_of_support_subset
     rw [E.compactCliqueAssignmentIntegral_eq_if (E.extendCliqueEdgeAssignment ω)]
   · intro ω _hω
     exact E.integrable_cliqueEdgeAssignmentTerm P ω
-
-lemma finiteCliqueKernelDensity_evalFinite_eventually_eq_compact
-    (E : CayleyExtraction S) {M : ℕ}
-    (P : E.TrigPoly) :
-    ∀ᶠ n in atTop,
-      (letI : Fact (S.p (E.φ n)).Prime := ⟨S.prime (E.φ n)⟩
-       letI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-       finiteCliqueKernelDensity (p := S.p (E.φ n)) (ℓ := M)
-        (fun z : ZMod (S.p (E.φ n)) => TrigPoly.evalFinite P n z)) =
-      (∫ x : Fin M → E.CompactAddDual,
-        (∏ e ∈ cliqueEdgePairs M,
-          TrigPoly.evalAdd P (x e.1 - x e.2))
-        ∂Measure.pi (fun _ : Fin M => E.haar)) := by
-  classical
-  let A : Finset (CliqueEdgeIndex M → E.Group) :=
-    Fintype.piFinset (fun _ : CliqueEdgeIndex M => P.support)
-  have hbalance :
-      ∀ᶠ n in atTop, ∀ ω ∈ A,
-        ((∀ i : Fin M,
-            E.finiteCliqueFrequencyBalance
-              (E.extendCliqueEdgeAssignment ω) n i = 0) ↔
-          ∀ i : Fin M,
-            E.cliqueFrequencyBalance
-              (E.extendCliqueEdgeAssignment ω) i = 0) := by
-    rw [A.eventually_all]
-    intro ω _hω
-    exact E.finiteCliqueFrequencyBalance_all_zero_iff_eventually
-      (E.extendCliqueEdgeAssignment ω)
-  filter_upwards [hbalance] with n hbalance_n
-  haveI : Fact (S.p (E.φ n)).Prime := ⟨S.prime (E.φ n)⟩
-  haveI : NeZero (S.p (E.φ n)) := ⟨(S.prime (E.φ n)).ne_zero⟩
-  rw [E.finiteCliqueKernelDensity_evalFinite_eq_sum_edgeAssignments P n]
-  rw [E.compactCliqueDensity_evalAdd_eq_sum_edgeAssignments P]
-  dsimp [A] at hbalance_n
-  refine Finset.sum_congr rfl ?_
-  intro ω hω
-  by_cases hfin :
-      ∀ i : Fin M,
-        E.finiteCliqueFrequencyBalance
-          (E.extendCliqueEdgeAssignment ω) n i = 0
-  · have hcompact :
-        ∀ i : Fin M,
-          E.cliqueFrequencyBalance
-            (E.extendCliqueEdgeAssignment ω) i = 0 :=
-      (hbalance_n ω hω).mp hfin
-    simp [hfin, hcompact]
-  · have hcompact :
-        ¬ ∀ i : Fin M,
-          E.cliqueFrequencyBalance
-            (E.extendCliqueEdgeAssignment ω) i = 0 := by
-      intro hc
-      exact hfin ((hbalance_n ω hω).mpr hc)
-    simp [hfin, hcompact]
 
 lemma finiteCliqueKernelDensity_evalFinite_tendsto_compact_of_coeff_tendsto
     (E : CayleyExtraction S) {M : ℕ}

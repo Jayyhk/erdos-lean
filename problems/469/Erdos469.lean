@@ -2720,10 +2720,6 @@ theorem forcedBoundaryCost_le_parent
     exitingCost_le_quarter pkg hlog hz hA hparentLower hexiting
   exact forced_bellman_of_quarter_bounds hparent hcontinue hexit
 
-namespace CandidateFrontier
-
-end CandidateFrontier
-
 /-- A certified bootstrap row bounds its affine child cost at every
 nonnegative logarithmic state. -/
 theorem BootstrapCertificate.head_eval_le
@@ -5904,10 +5900,6 @@ structure DecoratedRootMajorantPackage
   majorant : DecoratedRootKey → ℝ
   summable : Summable majorant
   rootCost_le : ∀ key, tree.rootCost key ≤ majorant key
-
-namespace DecoratedRootMajorantPackage
-
-end DecoratedRootMajorantPackage
 
 /-- Exact fiber reindexing plus the local tree and root majorant prove
 summability on the subtype of non-PND primitive semiperfect endpoints. -/
