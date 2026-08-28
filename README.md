@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-222 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 220 `complete`
+224 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 222 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -148,6 +148,7 @@ lake build
 | [608](https://www.erdosproblems.com/608) | `complete` | [problems/608/](problems/608/) | |
 | [610](https://www.erdosproblems.com/610) | `axiomatic` | [problems/610/](problems/610/) | assumes Corollary 2 of [Joret–Micek–Reed–Smid](https://jayyhk.github.io/papers/joret-micek-reed-smid2021.pdf) (`jmrs_corollary2`) |
 | [613](https://www.erdosproblems.com/613) | `complete` | [problems/613/](problems/613/) | |
+| [615](https://www.erdosproblems.com/615) | `complete` | [problems/615/](problems/615/) | |
 | [618](https://www.erdosproblems.com/618) | `complete` | [problems/618/](problems/618/) | |
 | [619](https://www.erdosproblems.com/619) | `complete` | [problems/619/](problems/619/) | |
 | [621](https://www.erdosproblems.com/621) | `complete` | [problems/621/](problems/621/) | |
@@ -202,6 +203,7 @@ lake build
 | [914](https://www.erdosproblems.com/914) | `complete` | [problems/914/](problems/914/) | |
 | [923](https://www.erdosproblems.com/923) | `complete` | [problems/923/](problems/923/) | |
 | [927](https://www.erdosproblems.com/927) | `complete` | [problems/927/](problems/927/) | |
+| [937](https://www.erdosproblems.com/937) | `complete` | [problems/937/](problems/937/) | |
 | [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) | |
 | [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) | |
 | [964](https://www.erdosproblems.com/964) | `complete` | [problems/964/](problems/964/) | |

@@ -1335,6 +1335,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/613#post-1678"
       - "https://github.com/teorth/analysis/blob/main/Analysis/Misc/erdos_613.lean"
+- number: "615"
+  proof:
+    path: "problems/615/"
+    theorem: "Erdos615.erdos_615"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos615.lean"
 - number: "618"
   proof:
     path: "problems/618/"
@@ -1935,6 +1945,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/927#post-6850"
       - "https://gist.github.com/JohnEdwardJennings/24c9debc9854cb118fbc1314c70941c3#file-erdos927-lean"
+- number: "937"
+  proof:
+    path: "problems/937/"
+    theorem: "Erdos937.erdos_937"
+    state: "complete"
+    last_update: "2026-08-27"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos937.lean"
 - number: "947"
   proof:
     path: "problems/947/"

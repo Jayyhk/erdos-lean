@@ -13,7 +13,8 @@ and `Mₙ = max_{|z| = 1} |pₙ(z)|`. Erdős asked three questions: (i) is `lims
 Question (i) was proved by Wagner [Wa80] and question (ii) by Beck [Be91]. The $100 prize was
 offered in [Er97f] for question (iii), which was resolved by GPT 5.6 and Korsky with the
 stronger bound `∑_{k ≤ n} M_k ≫ n^(5/4) / √(log n)`; that quantitative form is
-`erdos_119_quantitative` below, and `erdos_119` is question (iii) itself.
+`erdos_119_quantitative` below. The final theorem `erdos_119` is the conjunction of the
+affirmative answers to all three questions.
 
 The formalisation is by plby (github.com/plby/lean-proofs),
 `src/latest/ErdosProblems/Erdos119.lean`, a single self-contained file whose only import is
@@ -21,8 +22,8 @@ The formalisation is by plby (github.com/plby/lean-proofs),
 lines), with the upstream trust-base print lines and the trailing `alias` removed. The three
 parts are renamed from `erdos_119.parts.{i,ii,iii_quantitative}` to `erdos_119_question_one`,
 `erdos_119_question_two` and `erdos_119_quantitative`; upstream's `erdos_119` (question (iii),
-from which the other two are derived) becomes `sum_M_gt_one_add_pow`, and `erdos_119` restates
-it as the final theorem. No mathematical content is changed.
+from which the other two are derived) becomes `sum_M_gt_one_add_pow`, and `erdos_119` is the
+conjunction of all three answers. No mathematical content is changed.
 -/
 
 
@@ -1780,16 +1781,25 @@ theorem erdos_119_question_one :
   exact (hfreq.and_eventually (hpow.eventually_gt_atTop (y + 1))).mono
     (fun n hn => EReal.coe_le_coe_iff.mpr (hn.2.le.trans hn.1.le))
 
-/-- **Erdős Problem 119** (Question 3, the $100 question). For any sequence `zᵢ` on the unit
-circle there is `c > 0` with `∑_{k < n} M_k > n^(1+c)` for all large `n`. This is the
-statement `erdos_119.parts.iii` of the Formal Conjectures entry; it is the strongest of the
-three questions, and `erdos_119_question_two` and `erdos_119_question_one` are derived from
-it above. -/
+/-- **Erdős Problem 119.** Erdős asked three questions about `Mₙ = max_{|z|=1} |pₙ(z)|` for a
+sequence `zᵢ` on the unit circle, and all three have an affirmative answer:
+
+* `limsup Mₙ = ∞` (Wagner [Wa80]);
+* there is `c > 0` with `Mₙ > n^c` for infinitely many `n` (Beck [Be91]);
+* there is `c > 0` with `∑_{k < n} M_k > n^(1+c)` for all large `n` (the $100 question,
+  resolved by GPT 5.6 and Korsky; see `erdos_119_quantitative` for their stronger bound).
+
+The three conjuncts are `erdos_119_question_one`, `erdos_119_question_two` and
+`sum_M_gt_one_add_pow` above. -/
 theorem erdos_119 :
-    ∀ (z : ℕ → ℂ) (_ : ∀ i : ℕ, ‖z i‖ = 1),
-      ∃ (c : ℝ) (_ : c > 0), ∀ᶠ n in atTop,
-        ∑ k ∈ range n, M z k > n ^ (1 + c) :=
-  sum_M_gt_one_add_pow
+    (∀ (z : ℕ → ℂ) (_ : ∀ i : ℕ, ‖z i‖ = 1),
+        atTop.limsup (fun n => (M z n : EReal)) = ⊤) ∧
+      (∀ (z : ℕ → ℂ) (_ : ∀ i : ℕ, ‖z i‖ = 1),
+        ∃ (c : ℝ) (_ : c > 0), Infinite {n : ℕ | M z n > n ^ c}) ∧
+      (∀ (z : ℕ → ℂ) (_ : ∀ i : ℕ, ‖z i‖ = 1),
+        ∃ (c : ℝ) (_ : c > 0), ∀ᶠ n in atTop,
+          ∑ k ∈ range n, M z k > n ^ (1 + c)) :=
+  ⟨erdos_119_question_one, erdos_119_question_two, sum_M_gt_one_add_pow⟩
 
 #print axioms erdos_119
 -- 'Erdos119.erdos_119' depends on axioms: [propext, Classical.choice, Quot.sound]

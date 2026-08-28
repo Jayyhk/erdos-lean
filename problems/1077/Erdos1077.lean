@@ -7,6 +7,21 @@ namespace Erdos1077
 
 Erdős Problem 1077. Call a graph `D`-balanced if its maximum degree is at most `D` times its minimum degree. For `ε, α > 0` and `D`, `n` sufficiently large, must every `n`-vertex graph with at least `n^(1+α)` edges contain a `D`-balanced subgraph on `m > n^(1-α)` vertices with at least `ε m^(1+α)` edges? `erdos_1077` disproves this.
 
+The inequalities below are strict, matching the original source. Erdős and Simonovits state
+this as the first of two open problems on pp. 388--389 of [ErSi70]: "Is it true that for every
+`ε` and `α` if `n > n₀(ε,α)` and `d > d₀(ε,α)` every `Gⁿ`, `e(Gⁿ) > n^(1+α)` contains a
+`d`-regular subgraph `Gᵐ`, `m > n^(1-α)`, `e(Gᵐ) > ε m^(1+α)`?" All three inequalities are `>`
+in the paper; erdosproblems.com paraphrases them as "at least", but the non-strict form
+appears in [ErSi70] only in Theorem 1, the proved result, which gives `e(Gᵐ) ≥ (2/5) m^(1+α)`
+with `m ≥ n^(α(1-α)/(1+α))`. Their Definition 1, "`Gₙ` is `d`-regular if
+`d · min σ(x) ≥ max σ(x)`", is the `IsBalanced` predicate used below. The restriction to
+`ε < 1` and `α < 1` only strengthens the disproof, since a counterexample in that range is a
+counterexample to the unrestricted question.
+
+The site further notes that the [ErSi70] question "does not really make sense" as literally
+stated -- the use of `ε > 0` suggests a small constant while the statement suggests taking `ε`
+arbitrarily large -- and discusses what the intended question probably was.
+
 The formalisation is by plby (github.com/plby/lean-proofs),
 `src/latest/ErdosProblems/Erdos1077.lean`, a single self-contained file whose only import is
 `Mathlib`. It is reproduced here with the file-level comment header, the upstream trust-base

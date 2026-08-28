@@ -111,7 +111,7 @@
       "configFile": "lakefile.toml"
     }
   ],
-  "name": "erdos965",
+  "name": "erdos615",
   "lakeDir": ".lake",
   "fixedToolchain": false
 }
