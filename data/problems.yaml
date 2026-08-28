@@ -518,7 +518,6 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos228.lean"
-      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "229"
   proof:
     path: "problems/229/"
@@ -1101,7 +1100,6 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos442.lean"
-      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "443"
   proof:
     path: "problems/443/"
