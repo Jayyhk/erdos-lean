@@ -106,6 +106,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/42#post-6370"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P42/CompactCayley/Proof.lean"
+- number: "43"
+  proof:
+    path: "problems/43/"
+    theorem: "Erdos43.erdos_43"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos43.lean"
 - number: "45"
   proof:
     path: "problems/45/"
