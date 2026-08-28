@@ -20,14 +20,15 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-224 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 222 `complete`
+233 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 231 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
 | [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) | |
 | [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
+| [22](https://www.erdosproblems.com/22) | `complete` | [problems/22/](problems/22/) | |
 | [24](https://www.erdosproblems.com/24) | `complete` | [problems/24/](problems/24/) | |
 | [26](https://www.erdosproblems.com/26) | `complete` | [problems/26/](problems/26/) | |
 | [31](https://www.erdosproblems.com/31) | `complete` | [problems/31/](problems/31/) | |
@@ -74,9 +75,11 @@ lake build
 | [231](https://www.erdosproblems.com/231) | `complete` | [problems/231/](problems/231/) | |
 | [237](https://www.erdosproblems.com/237) | `complete` | [problems/237/](problems/237/) | |
 | [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
+| [250](https://www.erdosproblems.com/250) | `complete` | [problems/250/](problems/250/) | |
 | [253](https://www.erdosproblems.com/253) | `complete` | [problems/253/](problems/253/) | |
 | [258](https://www.erdosproblems.com/258) | `complete` | [problems/258/](problems/258/) | |
 | [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
+| [266](https://www.erdosproblems.com/266) | `complete` | [problems/266/](problems/266/) | |
 | [268](https://www.erdosproblems.com/268) | `complete` | [problems/268/](problems/268/) | |
 | [275](https://www.erdosproblems.com/275) | `complete` | [problems/275/](problems/275/) | |
 | [277](https://www.erdosproblems.com/277) | `complete` | [problems/277/](problems/277/) | |
@@ -101,6 +104,7 @@ lake build
 | [351](https://www.erdosproblems.com/351) | `complete` | [problems/351/](problems/351/) | |
 | [353](https://www.erdosproblems.com/353) | `complete` | [problems/353/](problems/353/) | |
 | [355](https://www.erdosproblems.com/355) | `complete` | [problems/355/](problems/355/) | |
+| [358](https://www.erdosproblems.com/358) | `complete` | [problems/358/](problems/358/) | |
 | [363](https://www.erdosproblems.com/363) | `complete` | [problems/363/](problems/363/) | |
 | [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
 | [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
@@ -138,12 +142,15 @@ lake build
 | [502](https://www.erdosproblems.com/502) | `complete` | [problems/502/](problems/502/) | |
 | [505](https://www.erdosproblems.com/505) | `complete` | [problems/505/](problems/505/) | |
 | [512](https://www.erdosproblems.com/512) | `complete` | [problems/512/](problems/512/) | |
+| [516](https://www.erdosproblems.com/516) | `complete` | [problems/516/](problems/516/) | |
 | [519](https://www.erdosproblems.com/519) | `complete` | [problems/519/](problems/519/) | |
 | [532](https://www.erdosproblems.com/532) | `complete` | [problems/532/](problems/532/) | |
+| [533](https://www.erdosproblems.com/533) | `complete` | [problems/533/](problems/533/) | |
 | [537](https://www.erdosproblems.com/537) | `complete` | [problems/537/](problems/537/) | |
 | [540](https://www.erdosproblems.com/540) | `complete` | [problems/540/](problems/540/) | |
 | [541](https://www.erdosproblems.com/541) | `complete` | [problems/541/](problems/541/) | |
 | [582](https://www.erdosproblems.com/582) | `complete` | [problems/582/](problems/582/) | |
+| [590](https://www.erdosproblems.com/590) | `complete` | [problems/590/](problems/590/) | |
 | [594](https://www.erdosproblems.com/594) | `complete` | [problems/594/](problems/594/) | |
 | [608](https://www.erdosproblems.com/608) | `complete` | [problems/608/](problems/608/) | |
 | [610](https://www.erdosproblems.com/610) | `axiomatic` | [problems/610/](problems/610/) | assumes Corollary 2 of [Joret–Micek–Reed–Smid](https://jayyhk.github.io/papers/joret-micek-reed-smid2021.pdf) (`jmrs_corollary2`) |
@@ -192,6 +199,7 @@ lake build
 | [862](https://www.erdosproblems.com/862) | `complete` | [problems/862/](problems/862/) | |
 | [865](https://www.erdosproblems.com/865) | `complete` | [problems/865/](problems/865/) | |
 | [867](https://www.erdosproblems.com/867) | `complete` | [problems/867/](problems/867/) | |
+| [868](https://www.erdosproblems.com/868) | `complete` | [problems/868/](problems/868/) | |
 | [871](https://www.erdosproblems.com/871) | `complete` | [problems/871/](problems/871/) | |
 | [884](https://www.erdosproblems.com/884) | `complete` | [problems/884/](problems/884/) | |
 | [897](https://www.erdosproblems.com/897) | `complete` | [problems/897/](problems/897/) | |
@@ -234,6 +242,7 @@ lake build
 | [1077](https://www.erdosproblems.com/1077) | `complete` | [problems/1077/](problems/1077/) | |
 | [1080](https://www.erdosproblems.com/1080) | `complete` | [problems/1080/](problems/1080/) | |
 | [1090](https://www.erdosproblems.com/1090) | `complete` | [problems/1090/](problems/1090/) | |
+| [1096](https://www.erdosproblems.com/1096) | `complete` | [problems/1096/](problems/1096/) | |
 | [1098](https://www.erdosproblems.com/1098) | `complete` | [problems/1098/](problems/1098/) | |
 | [1102](https://www.erdosproblems.com/1102) | `complete` | [problems/1102/](problems/1102/) | |
 | [1112](https://www.erdosproblems.com/1112) | `complete` | [problems/1112/](problems/1112/) | |
