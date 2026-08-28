@@ -30,11 +30,11 @@ infinitely many arithmetic progressions, conjecturing `A'(r) = 0` for `r ≥ 4` 
 
 The formalisation is by plby (github.com/plby/lean-proofs),
 `src/latest/ErdosProblems/Erdos937.lean` together with
-`src/latest/ErdosProblems/Erdos937/Erdos937Elliptic.lean`. The two files are concatenated here
-in dependency order, with their project-internal imports removed so that `Mathlib` is the only
-import, each module's contents kept in a `section` carrying its own `open` lines, and the whole
-wrapped once in `namespace Erdos937` with the upstream trust-base print line removed. No
-mathematical content is changed.
+`src/latest/ErdosProblems/Erdos937/Erdos937Elliptic.lean`. The two files are concatenated
+here in dependency order, with their project-internal imports removed so that `Mathlib` is
+the only import, each module's contents kept in a `section` carrying its own `open` lines,
+and the whole wrapped once in `namespace Erdos937` with the upstream trust-base print line
+removed. No mathematical content is changed.
 -/
 
 /-! ### Upstream module `/tmp/plby-fresh/src/latest/ErdosProblems/Erdos937/Erdos937Elliptic.lean` -/
