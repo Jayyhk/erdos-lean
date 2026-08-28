@@ -276,6 +276,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/134#post-4233"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos134.lean"
+- number: "139"
+  proof:
+    path: "problems/139/"
+    theorem: "Erdos139.erdos_139"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos139.lean"
 - number: "146"
   proof:
     path: "problems/146/"
@@ -485,6 +495,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/214#post-4547"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem214FourPoints.lean"
+- number: "219"
+  proof:
+    path: "problems/219/"
+    theorem: "Erdos219.erdos_219"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos219.lean"
 - number: "221"
   proof:
     path: "problems/221/"
@@ -1142,6 +1162,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/447#post-4248"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos447.lean"
+- number: "448"
+  proof:
+    path: "problems/448/"
+    theorem: "Erdos448.erdos_448"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos448.lean"
 - number: "453"
   proof:
     path: "problems/453/"
@@ -1901,6 +1931,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/818#post-5890"
       - "https://gist.github.com/tomaz1502/d8f3632157bae289e5d0ed68ccdc9433#file-erdos_818-lean"
+- number: "825"
+  proof:
+    path: "problems/825/"
+    theorem: "Erdos825.erdos_825"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos825.lean"
 - number: "844"
   proof:
     path: "problems/844/"
@@ -2010,6 +2050,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/884#post-7362"
       - "https://github.com/honicky/erdos884"
+- number: "888"
+  proof:
+    path: "problems/888/"
+    theorem: "Erdos888.erdos_888"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos888.lean"
 - number: "897"
   proof:
     path: "problems/897/"
