@@ -705,6 +705,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/283#post-6290"
       - "https://github.com/Shashi456/erdos-formalizations/blob/main/Erdos/P283/Proof_flat.lean"
+- number: "285"
+  proof:
+    path: "problems/285/"
+    theorem: "Erdos285.erdos_285"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos285.lean"
 - number: "290"
   proof:
     path: "problems/290/"
