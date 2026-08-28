@@ -508,6 +508,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/226#post-2574"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos226.lean"
+- number: "228"
+  proof:
+    path: "problems/228/"
+    theorem: "Erdos228.erdos_228"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos228.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "229"
   proof:
     path: "problems/229/"
@@ -556,6 +567,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/246#post-2513"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos246.lean"
+- number: "248"
+  proof:
+    path: "problems/248/"
+    theorem: "Erdos248.erdos_248"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos248.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "250"
   proof:
     path: "problems/250/"
