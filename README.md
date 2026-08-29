@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-248 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
-- 246 `complete`
+249 proofs in the catalog (out of 250 Erdős problems with formalized solutions):
+- 247 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -40,6 +40,7 @@ lake build
 | [45](https://www.erdosproblems.com/45) | `complete` | [problems/45/](problems/45/) | |
 | [46](https://www.erdosproblems.com/46) | `complete` | [problems/46/](problems/46/) | |
 | [47](https://www.erdosproblems.com/47) | `complete` | [problems/47/](problems/47/) | |
+| [48](https://www.erdosproblems.com/48) | `complete` | [problems/48/](problems/48/) | |
 | [56](https://www.erdosproblems.com/56) | `complete` | [problems/56/](problems/56/) | |
 | [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) | |
 | [90](https://www.erdosproblems.com/90) | `axiomatic` | [problems/90/](problems/90/) | assumes Theorem 3.9.7 of [Neukirch–Schmidt–Wingberg](https://jayyhk.github.io/papers/neukirch-schmidt-wingberg2008.pdf) (`golod_shafarevich_inequality`) and Theorem 5.1 of [Mayer](https://jayyhk.github.io/papers/mayer2015.pdf) (`shafarevich_relation_rank_bound`) |

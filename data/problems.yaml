@@ -146,6 +146,17 @@
     mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
     sources:
       - "https://github.com/plby/unit-fractions/tree/master/src4"
+- number: "48"
+  proof:
+    path: "problems/48/"
+    theorem: "Erdos48.erdos_48"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos48.lean"
+      - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
 - number: "56"
   proof:
     path: "problems/56/"
