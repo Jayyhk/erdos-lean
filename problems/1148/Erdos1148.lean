@@ -12616,7 +12616,7 @@ lemma infiniteOrbitAvoidance_eq_iInter :
   simp only [infiniteOrbitAvoidance, finiteOrbitAvoidance, Set.mem_setOf_eq, Set.mem_iInter]
   exact ⟨fun h _ k _ => h k, fun h k => h (k + 1) k (Nat.lt_succ_self k)⟩
 
-theorem _root_.Ergodic.infiniteOrbitAvoidance_null [IsFiniteMeasure μ] (hf : _root_.Ergodic f μ)
+private theorem _root_.Ergodic.infiniteOrbitAvoidance_null [IsFiniteMeasure μ] (hf : _root_.Ergodic f μ)
     (hU : MeasurableSet U) (hpos : 0 < μ U) : μ (infiniteOrbitAvoidance f U) = 0 := by
   have hm := measurableSet_infiniteOrbitAvoidance hf.measurable hU
   have hsub : infiniteOrbitAvoidance f U ⊆ f ⁻¹' infiniteOrbitAvoidance f U := by
@@ -12635,7 +12635,7 @@ theorem _root_.Ergodic.infiniteOrbitAvoidance_null [IsFiniteMeasure μ] (hf : _r
       exact ha 0 hx
     exact (hpos.ne' (measure_mono_null hUsub h)).elim
 
-theorem _root_.Ergodic.finiteOrbitAvoidance_mass_tendsto_zero [IsFiniteMeasure μ]
+private theorem _root_.Ergodic.finiteOrbitAvoidance_mass_tendsto_zero [IsFiniteMeasure μ]
     (hf : _root_.Ergodic f μ) (hU : MeasurableSet U) (hpos : 0 < μ U) :
     Tendsto (fun n : ℕ => μ (finiteOrbitAvoidance f U n)) atTop (𝓝 0) := by
   have hanti : Antitone (finiteOrbitAvoidance f U) := by

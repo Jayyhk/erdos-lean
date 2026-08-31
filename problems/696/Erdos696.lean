@@ -422,15 +422,15 @@ section LPSieveProdsAntidiagonal
 open scoped ArithmeticFunction.omega
 
 /-- Alias for the multiplicative antidiagonal indexed by `Fin d`. -/
-abbrev _root_.Nat.finMulAntidiagonal (d n : ℕ) : Finset (Fin d → ℕ) :=
+private abbrev _root_.Nat.finMulAntidiagonal (d n : ℕ) : Finset (Fin d → ℕ) :=
   Nat.finMulAntidiag d n
 
-theorem _root_.Nat.finMulAntidiagonal_univ_eq {d m n : ℕ} (hmn : m ∣ n) (hn : n ≠ 0) :
+private theorem _root_.Nat.finMulAntidiagonal_univ_eq {d m n : ℕ} (hmn : m ∣ n) (hn : n ≠ 0) :
     Nat.finMulAntidiagonal d m =
       (Fintype.piFinset fun _ : Fin d => n.divisors).filter (fun f => ∏ i, f i = m) :=
   Nat.finMulAntidiag_eq_piFinset_divisors_filter hmn hn
 
-theorem _root_.Nat.card_finMulAntidiagonal {d n : ℕ} (hn : Squarefree n) :
+private theorem _root_.Nat.card_finMulAntidiagonal {d n : ℕ} (hn : Squarefree n) :
     (Nat.finMulAntidiagonal d n).card = d ^ ω n := by
   simpa [Nat.finMulAntidiagonal] using Nat.card_finMulAntidiag_of_squarefree (d := d) hn
 
@@ -4112,7 +4112,7 @@ end PrimeSummatory
 section
 open Nat
 
-theorem _root_.Nat.cast_floor_eq_cast_int_floor {a : ℝ} (ha : 0 ≤ a) : (⌊a⌋₊ : ℝ) = ⌊a⌋ := by
+private theorem _root_.Nat.cast_floor_eq_cast_int_floor {a : ℝ} (ha : 0 ≤ a) : (⌊a⌋₊ : ℝ) = ⌊a⌋ := by
   exact natCast_floor_eq_intCast_floor ha
 
 end
@@ -4205,7 +4205,7 @@ end
 section
 open Finset
 
-lemma _root_.Finset.Icc_eq_insert_Icc_succ {a b : ℕ} (h : a ≤ b) :
+private lemma _root_.Finset.Icc_eq_insert_Icc_succ {a b : ℕ} (h : a ≤ b) :
     Finset.Icc a b = insert a (Finset.Icc (a + 1) b) := by
   simpa using (Finset.insert_Icc_succ_left_eq_Icc h).symm
 
@@ -4214,7 +4214,7 @@ end
 section
 open Nat
 
-@[simp] lemma _root_.Nat.floor_two {R : Type*} [Semiring R] [LinearOrder R] [FloorSemiring R]
+@[simp] private lemma _root_.Nat.floor_two {R : Type*} [Semiring R] [LinearOrder R] [FloorSemiring R]
     [IsStrictOrderedRing R] :
   ⌊(2 : R)⌋₊ = 2 := by
   simp
