@@ -84,6 +84,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/34#post-4197"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos34.lean"
+- number: "35"
+  proof:
+    path: "problems/35/"
+    theorem: "Erdos35.erdos_35"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos35.lean"
 - number: "38"
   proof:
     path: "problems/38/"
@@ -157,6 +167,16 @@
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos48.lean"
       - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
+- number: "53"
+  proof:
+    path: "problems/53/"
+    theorem: "Erdos53.erdos_53"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos53.lean"
 - number: "56"
   proof:
     path: "problems/56/"
@@ -714,6 +734,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/268#post-5359"
       - "https://gist.github.com/madeve-unipi/62a8f68cdb4864b85b81a6752dcb0aa4#file-erdos268-lean"
+- number: "270"
+  proof:
+    path: "problems/270/"
+    theorem: "Erdos270.erdos_270"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos270.lean"
 - number: "275"
   proof:
     path: "problems/275/"
@@ -1082,6 +1112,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/403#post-7067"
       - "https://github.com/AxiomMath/erdos-public/blob/main/Erdos/Erdos403/solution.lean"
+- number: "405"
+  proof:
+    path: "problems/405/"
+    theorem: "Erdos405.erdos_405"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos405.lean"
 - number: "418"
   proof:
     path: "problems/418/"
