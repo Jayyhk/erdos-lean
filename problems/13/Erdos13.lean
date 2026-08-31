@@ -62,67 +62,67 @@ instance (s : Finset α) : DecidablePred (· ∈ stabilizer α (s : Set α)) :=
 
 /-- The stabilizer of `s` as a finset. As an exception, this sends `∅` to `∅`. -/
 @[to_additive /-- The stabilizer of `s` as a finset. As an exception, this sends `∅` to `∅`. -/]
-def _root_.Finset.mulStab (s : Finset α) : Finset α := {a ∈ s / s | a • s = s}
+private def _root_.Finset.mulStab (s : Finset α) : Finset α := {a ∈ s / s | a • s = s}
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mem_mulStab (hs : s.Nonempty) : a ∈ s.mulStab ↔ a • s = s := by
+private lemma _root_.Finset.mem_mulStab (hs : s.Nonempty) : a ∈ s.mulStab ↔ a • s = s := by
   rw [mulStab, mem_filter, mem_div, and_iff_right_of_imp]
   obtain ⟨b, hb⟩ := hs
   exact fun h ↦ ⟨_, by rw [← h]; exact smul_mem_smul_finset hb, _, hb, mul_div_cancel_right _ _⟩
 
 @[to_additive]
-lemma _root_.Finset.mulStab_subset_div : s.mulStab ⊆ s / s := filter_subset _ _
+private lemma _root_.Finset.mulStab_subset_div : s.mulStab ⊆ s / s := filter_subset _ _
 
 @[to_additive]
-lemma _root_.Finset.mulStab_subset_div_right (ha : a ∈ s) : s.mulStab ⊆ s / {a} := by
+private lemma _root_.Finset.mulStab_subset_div_right (ha : a ∈ s) : s.mulStab ⊆ s / {a} := by
   refine fun b hb ↦ mem_div.2 ⟨_, ?_, _, mem_singleton_self _, mul_div_cancel_right _ _⟩
   rw [mem_mulStab ⟨a, ha⟩] at hb
   rw [← hb]
   exact smul_mem_smul_finset ha
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.coe_mulStab (hs : s.Nonempty) : (s.mulStab : Set α) = stabilizer α (s : Set α) := by
+private lemma _root_.Finset.coe_mulStab (hs : s.Nonempty) : (s.mulStab : Set α) = stabilizer α (s : Set α) := by
   ext; simp [mem_mulStab hs]
 
 @[to_additive]
-lemma _root_.Finset.mem_mulStab_iff_subset_smul_finset (hs : s.Nonempty) : a ∈ s.mulStab ↔ s ⊆ a • s := by
+private lemma _root_.Finset.mem_mulStab_iff_subset_smul_finset (hs : s.Nonempty) : a ∈ s.mulStab ↔ s ⊆ a • s := by
   rw [← mem_coe, coe_mulStab hs, SetLike.mem_coe, stabilizer_coe_finset,
     mem_stabilizer_finset_iff_subset_smul_finset]
 
 @[to_additive]
-lemma _root_.Finset.mem_mulStab_iff_smul_finset_subset (hs : s.Nonempty) : a ∈ s.mulStab ↔ a • s ⊆ s := by
+private lemma _root_.Finset.mem_mulStab_iff_smul_finset_subset (hs : s.Nonempty) : a ∈ s.mulStab ↔ a • s ⊆ s := by
   rw [← mem_coe, coe_mulStab hs, SetLike.mem_coe, stabilizer_coe_finset,
     mem_stabilizer_finset_iff_smul_finset_subset]
 
 @[to_additive]
-lemma _root_.Finset.mem_mulStab' (hs : s.Nonempty) : a ∈ s.mulStab ↔ ∀ ⦃b⦄, b ∈ s → a • b ∈ s := by
+private lemma _root_.Finset.mem_mulStab' (hs : s.Nonempty) : a ∈ s.mulStab ↔ ∀ ⦃b⦄, b ∈ s → a • b ∈ s := by
   rw [← mem_coe, coe_mulStab hs, SetLike.mem_coe, stabilizer_coe_finset, mem_stabilizer_finset']
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mulStab_empty : mulStab (∅ : Finset α) = ∅ := by simp [mulStab]
+private lemma _root_.Finset.mulStab_empty : mulStab (∅ : Finset α) = ∅ := by simp [mulStab]
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mulStab_singleton (a : α) : mulStab ({a} : Finset α) = 1 := by
+private lemma _root_.Finset.mulStab_singleton (a : α) : mulStab ({a} : Finset α) = 1 := by
   simp [mulStab, singleton_one, filter_true_of_mem]
 
 @[to_additive]
-lemma _root_.Finset.Nonempty.of_mulStab : s.mulStab.Nonempty → s.Nonempty := by
+private lemma _root_.Finset.Nonempty.of_mulStab : s.mulStab.Nonempty → s.Nonempty := by
   simp_rw [nonempty_iff_ne_empty, not_imp_not]; rintro rfl; exact mulStab_empty
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.one_mem_mulStab : (1 : α) ∈ s.mulStab ↔ s.Nonempty :=
+private lemma _root_.Finset.one_mem_mulStab : (1 : α) ∈ s.mulStab ↔ s.Nonempty :=
   ⟨fun h ↦ Nonempty.of_mulStab ⟨_, h⟩, fun h ↦ (mem_mulStab h).2 <| one_smul _ _⟩
 
 @[to_additive] protected alias ⟨_, _root_.Finset.Nonempty.one_mem_mulStab⟩ := one_mem_mulStab
 
 @[to_additive]
-lemma _root_.Finset.Nonempty.mulStab (h : s.Nonempty) : s.mulStab.Nonempty := ⟨_, h.one_mem_mulStab⟩
+private lemma _root_.Finset.Nonempty.mulStab (h : s.Nonempty) : s.mulStab.Nonempty := ⟨_, h.one_mem_mulStab⟩
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mulStab_nonempty : s.mulStab.Nonempty ↔ s.Nonempty := ⟨Finset.Nonempty.of_mulStab, Finset.Nonempty.mulStab⟩
+private lemma _root_.Finset.mulStab_nonempty : s.mulStab.Nonempty ↔ s.Nonempty := ⟨Finset.Nonempty.of_mulStab, Finset.Nonempty.mulStab⟩
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.card_mulStab_eq_one : #s.mulStab = 1 ↔ s.mulStab = 1 := by
+private lemma _root_.Finset.card_mulStab_eq_one : #s.mulStab = 1 ↔ s.mulStab = 1 := by
   refine ⟨fun h ↦ ?_, fun h ↦ by rw [h, card_one]⟩
   obtain ⟨a, ha⟩ := card_eq_one.1 h
   rw [ha]
@@ -130,11 +130,11 @@ lemma _root_.Finset.card_mulStab_eq_one : #s.mulStab = 1 ↔ s.mulStab = 1 := by
   rw [← ha.2 _ ha.1, singleton_one]
 
 @[to_additive]
-lemma _root_.Finset.Nonempty.mulStab_nontrivial (h : s.Nonempty) : s.mulStab.Nontrivial ↔ s.mulStab ≠ 1 :=
+private lemma _root_.Finset.Nonempty.mulStab_nontrivial (h : s.Nonempty) : s.mulStab.Nontrivial ↔ s.mulStab ≠ 1 :=
   nontrivial_iff_ne_singleton h.one_mem_mulStab
 
 @[to_additive]
-lemma _root_.Finset.subset_mulStab_mul_left (ht : t.Nonempty) : s.mulStab ⊆ (s * t).mulStab := by
+private lemma _root_.Finset.subset_mulStab_mul_left (ht : t.Nonempty) : s.mulStab ⊆ (s * t).mulStab := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
   simp_rw [subset_iff, mem_mulStab hs, mem_mulStab (hs.mul ht)]
@@ -142,38 +142,38 @@ lemma _root_.Finset.subset_mulStab_mul_left (ht : t.Nonempty) : s.mulStab ⊆ (s
   rw [← smul_mul_assoc, h]
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mulStab_mul (s : Finset α) : s.mulStab * s = s := by
+private lemma _root_.Finset.mulStab_mul (s : Finset α) : s.mulStab * s = s := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · exact mul_empty _
   · simp only [← coe_inj, hs, coe_mul, coe_mulStab, stabilizer_mul_self]
 
 @[to_additive]
-lemma _root_.Finset.mul_subset_right_iff (ht : t.Nonempty) : s * t ⊆ t ↔ s ⊆ t.mulStab := by
+private lemma _root_.Finset.mul_subset_right_iff (ht : t.Nonempty) : s * t ⊆ t ↔ s ⊆ t.mulStab := by
   simp_rw [← smul_eq_mul, ← biUnion_smul_finset, biUnion_subset,
     ← mem_mulStab_iff_smul_finset_subset ht, subset_iff]
 
 @[to_additive]
-lemma _root_.Finset.mul_subset_right : s ⊆ t.mulStab → s * t ⊆ t := by
+private lemma _root_.Finset.mul_subset_right : s ⊆ t.mulStab → s * t ⊆ t := by
   obtain rfl | ht := t.eq_empty_or_nonempty
   · simp
   · exact (mul_subset_right_iff ht).2
 
 @[to_additive]
-lemma _root_.Finset.smul_mulStab (ha : a ∈ s.mulStab) : a • s.mulStab = s.mulStab := by
+private lemma _root_.Finset.smul_mulStab (ha : a ∈ s.mulStab) : a • s.mulStab = s.mulStab := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
   rw [← mem_coe, coe_mulStab hs, SetLike.mem_coe] at ha
   rw [← coe_inj, coe_smul_finset, coe_mulStab hs, smul_coe_set ha]
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mulStab_mul_mulStab (s : Finset α) : s.mulStab * s.mulStab = s.mulStab := by
+private lemma _root_.Finset.mulStab_mul_mulStab (s : Finset α) : s.mulStab * s.mulStab = s.mulStab := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
   · simp_rw [← smul_eq_mul, ← biUnion_smul_finset, biUnion_congr rfl fun _ ↦ smul_mulStab,
       ← sup_eq_biUnion, sup_const hs.mulStab]
 
 @[to_additive]
-lemma _root_.Finset.inter_mulStab_subset_mulStab_union : s.mulStab ∩ t.mulStab ⊆ (s ∪ t).mulStab := by
+private lemma _root_.Finset.inter_mulStab_subset_mulStab_union : s.mulStab ∩ t.mulStab ⊆ (s ∪ t).mulStab := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
   obtain rfl | ht := t.eq_empty_or_nonempty
@@ -188,62 +188,62 @@ end Group
 variable [CommGroup α] [DecidableEq α] {s t : Finset α} {a : α}
 
 @[to_additive]
-lemma _root_.Finset.mulStab_subset_div_left (ha : a ∈ s) : s.mulStab ⊆ {a} / s := by
+private lemma _root_.Finset.mulStab_subset_div_left (ha : a ∈ s) : s.mulStab ⊆ {a} / s := by
   refine fun b hb ↦ mem_div.2 ⟨_, mem_singleton_self _, _, ?_, div_div_cancel _ _⟩
   rw [mem_mulStab ⟨a, ha⟩] at hb
   rwa [← hb, ← inv_smul_mem_iff, smul_eq_mul, inv_mul_eq_div] at ha
 
 @[to_additive]
-lemma _root_.Finset.subset_mulStab_mul_right (hs : s.Nonempty) : t.mulStab ⊆ (s * t).mulStab := by
+private lemma _root_.Finset.subset_mulStab_mul_right (hs : s.Nonempty) : t.mulStab ⊆ (s * t).mulStab := by
   rw [mul_comm]; exact subset_mulStab_mul_left hs
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mul_mulStab (s : Finset α) : s * s.mulStab = s := by rw [mul_comm]; exact mulStab_mul _
+private lemma _root_.Finset.mul_mulStab (s : Finset α) : s * s.mulStab = s := by rw [mul_comm]; exact mulStab_mul _
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mul_mulStab_mul_mul_mul_mulStab_mul :
+private lemma _root_.Finset.mul_mulStab_mul_mul_mul_mulStab_mul :
     s * (s * t).mulStab * (t * (s * t).mulStab) = s * t := by
   rw [mul_mul_mul_comm, mulStab_mul_mulStab, mul_mulStab]
 
 @[to_additive]
-lemma _root_.Finset.smul_finset_mulStab_subset (ha : a ∈ s) : a • s.mulStab ⊆ s :=
+private lemma _root_.Finset.smul_finset_mulStab_subset (ha : a ∈ s) : a • s.mulStab ⊆ s :=
   (smul_finset_subset_smul ha).trans s.mul_mulStab.subset
 
 @[to_additive]
-lemma _root_.Finset.mul_subset_left_iff (hs : s.Nonempty) : s * t ⊆ s ↔ t ⊆ s.mulStab := by
+private lemma _root_.Finset.mul_subset_left_iff (hs : s.Nonempty) : s * t ⊆ s ↔ t ⊆ s.mulStab := by
   rw [mul_comm, mul_subset_right_iff hs]
 
 @[to_additive]
-lemma _root_.Finset.mul_subset_left : t ⊆ s.mulStab → s * t ⊆ s := by rw [mul_comm]; exact mul_subset_right
+private lemma _root_.Finset.mul_subset_left : t ⊆ s.mulStab → s * t ⊆ s := by rw [mul_comm]; exact mul_subset_right
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mulStab_idem (s : Finset α) : s.mulStab.mulStab = s.mulStab := by
+private lemma _root_.Finset.mulStab_idem (s : Finset α) : s.mulStab.mulStab = s.mulStab := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
   rw [← coe_inj, coe_mulStab hs, coe_mulStab hs.mulStab, coe_mulStab hs]
   simp
 
 @[to_additive (attr := simp)]
-lemma _root_.Finset.mulStab_smul (a : α) (s : Finset α) : (a • s).mulStab = s.mulStab := by
+private lemma _root_.Finset.mulStab_smul (a : α) (s : Finset α) : (a • s).mulStab = s.mulStab := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
   · rw [← coe_inj, coe_mulStab hs, coe_mulStab hs.smul_finset, stabilizer_coe_finset,
     stabilizer_coe_finset, stabilizer_smul_eq_right]
 
 @[to_additive]
-lemma _root_.Finset.mulStab_image_coe_quotient (hs : s.Nonempty) :
+private lemma _root_.Finset.mulStab_image_coe_quotient (hs : s.Nonempty) :
     (s.image (↑) : Finset (α ⧸ stabilizer α (s : Set α))).mulStab = 1 := by
   simp_rw [← coe_inj, coe_mulStab (hs.image _), coe_image, coe_one]
   rw [stabilizer_image_coe_quotient, Subgroup.coe_bot, Set.singleton_one]
 
 @[to_additive]
-lemma _root_.Finset.preimage_image_quotientMk_stabilizer_eq_mul_mulStab (ht : t.Nonempty) (s : Finset α) :
+private lemma _root_.Finset.preimage_image_quotientMk_stabilizer_eq_mul_mulStab (ht : t.Nonempty) (s : Finset α) :
     QuotientGroup.mk ⁻¹' (s +ˢ stabilizer α (t : Set α)) = s * t.mulStab := by
   rw [QuotientGroup.preimage_image_mk_eq_mul, coe_mulStab ht, stabilizer_coe_finset]
 
 omit [DecidableEq α] in
 @[to_additive]
-lemma _root_.Finset.preimage_image_quotientMk_mulStabilizer (s : Finset α) :
+private lemma _root_.Finset.preimage_image_quotientMk_mulStabilizer (s : Finset α) :
     QuotientGroup.mk ⁻¹' (s +ˢ stabilizer α (s : Set α)) = s := by
   classical
   obtain rfl | hs := s.eq_empty_or_nonempty
@@ -251,7 +251,7 @@ lemma _root_.Finset.preimage_image_quotientMk_mulStabilizer (s : Finset α) :
   · rw [preimage_image_quotientMk_stabilizer_eq_mul_mulStab hs s, ← coe_mul, mul_mulStab]
 
 @[to_additive]
-lemma _root_.Finset.pairwiseDisjoint_smul_finset_mulStab (s : Finset α) :
+private lemma _root_.Finset.pairwiseDisjoint_smul_finset_mulStab (s : Finset α) :
     (Set.range fun a : α ↦ a • s.mulStab).PairwiseDisjoint id := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
@@ -261,7 +261,7 @@ lemma _root_.Finset.pairwiseDisjoint_smul_finset_mulStab (s : Finset α) :
   exact fun h ↦ isBlock_subgroup h
 
 @[to_additive]
-lemma _root_.Finset.disjoint_smul_finset_mulStab_mul_mulStab :
+private lemma _root_.Finset.disjoint_smul_finset_mulStab_mul_mulStab :
     ¬a • s.mulStab ⊆ t * s.mulStab → Disjoint (a • s.mulStab) (t * s.mulStab) := by
   simp_rw [@not_imp_comm (_ ≤ _), ← smul_eq_mul, ← biUnion_smul_finset, disjoint_biUnion_right,
     Classical.not_forall]
@@ -270,16 +270,16 @@ lemma _root_.Finset.disjoint_smul_finset_mulStab_mul_mulStab :
   exact subset_biUnion_of_mem (· • mulStab s) hb
 
 @[to_additive]
-lemma _root_.Finset.card_mulStab_dvd_card_mul_mulStab (s t : Finset α) : #t.mulStab ∣ #(s * t.mulStab) :=
+private lemma _root_.Finset.card_mulStab_dvd_card_mul_mulStab (s t : Finset α) : #t.mulStab ∣ #(s * t.mulStab) :=
   card_dvd_card_smul_right <|
     t.pairwiseDisjoint_smul_finset_mulStab.subset <| Set.image_subset_range _ _
 
 @[to_additive]
-lemma _root_.Finset.card_mulStab_dvd_card (s : Finset α) : #s.mulStab ∣ #s := by
+private lemma _root_.Finset.card_mulStab_dvd_card (s : Finset α) : #s.mulStab ∣ #s := by
   simpa only [mul_mulStab] using s.card_mulStab_dvd_card_mul_mulStab s
 
 @[to_additive]
-lemma _root_.Finset.card_mulStab_le_card : #s.mulStab ≤ #s := by
+private lemma _root_.Finset.card_mulStab_le_card : #s.mulStab ≤ #s := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · rfl
   · exact Nat.le_of_dvd hs.card_pos s.card_mulStab_dvd_card
@@ -294,7 +294,7 @@ private def _root_.Finset.fintypeStabilizerOfMulStab (hs : s.Nonempty) : Fintype
     ⟨⟨_, (mem_mulStab hs).2 a.2⟩, mem_attach _ ⟨_, (mem_mulStab hs).2 a.2⟩, Subtype.ext rfl⟩
 
 @[to_additive]
-lemma _root_.Finset.card_mulStab_dvd_card_mulStab (hs : s.Nonempty) (h : s.mulStab ⊆ t.mulStab) :
+private lemma _root_.Finset.card_mulStab_dvd_card_mulStab (hs : s.Nonempty) (h : s.mulStab ⊆ t.mulStab) :
     #s.mulStab ∣ #t.mulStab := by
   obtain rfl | ht := t.eq_empty_or_nonempty
   · simp
@@ -313,7 +313,7 @@ lemma _root_.Finset.card_mulStab_dvd_card_mulStab (hs : s.Nonempty) (h : s.mulSt
 
 /-- A version of Lagrange's theorem. -/
 @[to_additive /-- A version of Lagrange's theorem. -/]
-lemma _root_.Finset.card_mulStab_mul_card_image_coe' (s t : Finset α)
+private lemma _root_.Finset.card_mulStab_mul_card_image_coe' (s t : Finset α)
     [DecidableEq (α ⧸ stabilizer α (t : Set α))] :
     #t.mulStab * #(s +ₛ stabilizer α (t : Set α)) = #(s * t.mulStab) := by
   obtain rfl | ht := t.eq_empty_or_nonempty
@@ -328,7 +328,7 @@ lemma _root_.Finset.card_mulStab_mul_card_image_coe' (s t : Finset α)
     using Fintype.card_congr temp
 
 @[to_additive]
-lemma _root_.Finset.card_mul_card_eq_mulStab_card_mul_coe (s t : Finset α) :
+private lemma _root_.Finset.card_mul_card_eq_mulStab_card_mul_coe (s t : Finset α) :
     #(s * t) = #(s * t).mulStab * #((s * t) +ₛ stabilizer α (↑(s * t) : Set α)) := by
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simp
@@ -344,7 +344,7 @@ lemma _root_.Finset.card_mul_card_eq_mulStab_card_mul_coe (s t : Finset α) :
 
 /-- A version of Lagrange's theorem. -/
 @[to_additive /-- A version of Lagrange's theorem. -/]
-lemma _root_.Finset.card_mulStab_mul_card_image_coe (s t : Finset α) :
+private lemma _root_.Finset.card_mulStab_mul_card_image_coe (s t : Finset α) :
     #(s * t).mulStab *
       #((s +ₛ stabilizer α (↑(s * t) : Set α)) * (t +ₛ stabilizer α (↑(s * t) : Set α))) =
         #(s * t) := by
@@ -381,7 +381,7 @@ lemma _root_.Finset.card_mulStab_mul_card_image_coe (s t : Finset α) :
   rw [temp]
 
 @[to_additive]
-lemma _root_.Finset.subgroup_mul_card_eq_mul_of_mul_stab_subset (s : Subgroup α) [DecidablePred (· ∈ s)]
+private lemma _root_.Finset.subgroup_mul_card_eq_mul_of_mul_stab_subset (s : Subgroup α) [DecidablePred (· ∈ s)]
     (t : Finset α) (hst : (s : Set α) ⊆ t.mulStab) : Nat.card s * #(t +ₛ s) = #t := by
   suffices h : (t : Set α) * s = t by
     simpa [h, eq_comm] using s.card_mul_eq_card_subgroup_mul_card_quotient  t
@@ -392,7 +392,7 @@ lemma _root_.Finset.subgroup_mul_card_eq_mul_of_mul_stab_subset (s : Subgroup α
   · rw [← coe_mul, mul_mulStab]
 
 @[to_additive]
-lemma _root_.Finset.mulStab_quotient_commute_subgroup (s : Subgroup α) [DecidablePred (· ∈ s)] (t : Finset α)
+private lemma _root_.Finset.mulStab_quotient_commute_subgroup (s : Subgroup α) [DecidablePred (· ∈ s)] (t : Finset α)
     (hst : (s : Set α) ⊆ t.mulStab) : (t.mulStab +ₛ s) = (t +ₛ s).mulStab := by
   obtain rfl | ht := t.eq_empty_or_nonempty
   · simp
@@ -478,7 +478,7 @@ open Finset
 /-! ### Auxiliary results -/
 
 @[to_additive]
-lemma _root_.Finset.mulStab_mul_ssubset_mulStab (hs₁ : (s ∩ a • C.mulStab).Nonempty)
+private lemma _root_.Finset.mulStab_mul_ssubset_mulStab (hs₁ : (s ∩ a • C.mulStab).Nonempty)
     (ht₁ : (t ∩ b • C.mulStab).Nonempty) (hab : ¬(a * b) • C.mulStab ⊆ s * t) :
     (s ∩ a • C.mulStab * (t ∩ b • C.mulStab)).mulStab ⊂ C.mulStab := by
   have hCne : C.Nonempty := by
@@ -523,7 +523,7 @@ lemma _root_.Finset.mulStab_mul_ssubset_mulStab (hs₁ : (s ∩ a • C.mulStab)
   exact notMem_mono (mul_subset_mul inter_subset_left inter_subset_left) hzst
 
 @[to_additive]
-lemma _root_.Finset.mulStab_union (hs₁ : (s ∩ a • C.mulStab).Nonempty) (ht₁ : (t ∩ b • C.mulStab).Nonempty)
+private lemma _root_.Finset.mulStab_union (hs₁ : (s ∩ a • C.mulStab).Nonempty) (ht₁ : (t ∩ b • C.mulStab).Nonempty)
     (hab : ¬(a * b) • C.mulStab ⊆ s * t)
     (hC : Disjoint C (s ∩ a • C.mulStab * (t ∩ b • C.mulStab))) :
     (C ∪ s ∩ a • C.mulStab * (t ∩ b • C.mulStab)).mulStab =
@@ -572,7 +572,7 @@ lemma _root_.Finset.mulStab_union (hs₁ : (s ∩ a • C.mulStab).Nonempty) (ht
     exact hab.trans (mul_subset_mul inter_subset_left inter_subset_left)
 
 @[to_additive]
-lemma _root_.Finset.mul_aux1
+private lemma _root_.Finset.mul_aux1
     (ih : #(s' * (s' * t').mulStab) + #(t' * (s' * t').mulStab) ≤ #(s' * t') + #(s' * t').mulStab)
     (hconv : #(s ∩ t) + #((s ∪ t) * C.mulStab) ≤ #C + #C.mulStab)
     (hnotconv :
@@ -594,7 +594,7 @@ lemma _root_.Finset.mul_aux1
     _ ≤ #H - #(s' * H') - #(t' * H') := by linarith [ih]
 
 @[to_additive]
-lemma _root_.Finset.disjoint_smul_mulStab (hst : s ⊆ t) (has : ¬a • s.mulStab ⊆ t) :
+private lemma _root_.Finset.disjoint_smul_mulStab (hst : s ⊆ t) (has : ¬a • s.mulStab ⊆ t) :
     Disjoint s (a • s.mulStab) := by
   suffices Disjoint (a • s.mulStab) (s * s.mulStab) by
     simpa [mul_comm, disjoint_comm, mulStab_mul]
@@ -604,7 +604,7 @@ lemma _root_.Finset.disjoint_smul_mulStab (hst : s ⊆ t) (has : ¬a • s.mulSt
   exact subset_trans has hst
 
 @[to_additive]
-lemma _root_.Finset.disjoint_mul_sub_card_le {a : α} (b : α) {s t C : Finset α} (has : a ∈ s)
+private lemma _root_.Finset.disjoint_mul_sub_card_le {a : α} (b : α) {s t C : Finset α} (has : a ∈ s)
     (hsC : Disjoint t (a • C.mulStab))
     (hst : (s ∩ a • C.mulStab * (t ∩ b • C.mulStab)).mulStab ⊆ C.mulStab) :
     (#C.mulStab : ℤ) -
@@ -654,7 +654,7 @@ lemma _root_.Finset.disjoint_mul_sub_card_le {a : α} (b : α) {s t C : Finset �
       exact mul_mem_mul (mem_inter.mpr ⟨hyst, hyC⟩) hd
 
 @[to_additive]
-lemma _root_.Finset.inter_mul_sub_card_le {a : α} {s t C : Finset α} (has : a ∈ s)
+private lemma _root_.Finset.inter_mul_sub_card_le {a : α} {s t C : Finset α} (has : a ∈ s)
     (hst : (s ∩ a • C.mulStab * (t ∩ a • C.mulStab)).mulStab ⊆ C.mulStab) :
     (#C.mulStab : ℤ) -
           #(s ∩ a • C.mulStab * (s ∩ a • C.mulStab * (t ∩ a • C.mulStab)).mulStab) -
@@ -718,7 +718,7 @@ variable (s t)
 stabilizer. -/
 @[to_additive /-- **Kneser's addition theorem**: A lower bound on the size of `s + t` in terms of
 its stabilizer. -/]
-theorem _root_.Finset.mul_kneser :
+private theorem _root_.Finset.mul_kneser :
     #(s * (s * t).mulStab) + #(t * (s * t).mulStab)
       ≤ #(s * t) + #(s * t).mulStab := by
   -- We're doing induction on `#(s * t) + #s` generalizing the group. This is a bit tricky
@@ -964,7 +964,7 @@ theorem _root_.Finset.mul_kneser :
 does not equal the RHS, then it is in fact much smaller. -/
 @[to_additive /-- The strict version of **Kneser's addition theorem**. If the LHS of
 `Finset.add_kneser` does not equal the RHS, then it is in fact much smaller. -/]
-lemma _root_.Finset.mul_strict_kneser (h : #(s * (s * t).mulStab) + #(t * (s * t).mulStab) <
+private lemma _root_.Finset.mul_strict_kneser (h : #(s * (s * t).mulStab) + #(t * (s * t).mulStab) <
       #(s * t) + #(s * t).mulStab) :
     #(s * (s * t).mulStab) + #(t * (s * t).mulStab) ≤ #(s * t) :=
   Nat.le_of_lt_add_of_dvd h

@@ -45,7 +45,7 @@ open SimpleGraph
 /-- A finite graph is `D`-balanced when its maximum degree is at most `D`
 times its minimum degree.  This is the definition used by the upstream
 Formal Conjectures statement. -/
-def _root_.SimpleGraph.IsBalanced {V : Type*} [Fintype V] (G : SimpleGraph V) (D : ℝ)
+def IsBalanced {V : Type*} [Fintype V] (G : SimpleGraph V) (D : ℝ)
     [DecidableRel G.Adj] : Prop :=
   G.maxDegree ≤ D * G.minDegree
 
@@ -76,7 +76,7 @@ has at most `D` times as many vertices as the left part. -/
 lemma right_part_card_le {V : Type*} [Fintype V]
     (F : SimpleGraph V) [DecidableRel F.Adj] (D : ℝ)
     (L R : Finset V) (hBip : F.IsBipartiteWith L R)
-    (hBal : F.IsBalanced D) (hmin : 0 < F.minDegree) :
+    (hBal : IsBalanced F D) (hmin : 0 < F.minDegree) :
     (R.card : ℝ) ≤ D * (L.card : ℝ) := by
   have hnat : R.card * F.minDegree ≤ L.card * F.maxDegree := by
     calc
@@ -194,7 +194,7 @@ lemma counterexampleGraph_many_edges {k : ℕ} (hk : 3 ≤ k) :
 /-- A balanced subgraph containing an edge cannot have minimum degree zero. -/
 lemma minDegree_pos_of_balanced_of_edge {V : Type*} [Fintype V]
     {G : SimpleGraph V} (H : G.Subgraph) [DecidableRel H.Adj] (D : ℝ)
-    (hBal : H.coe.IsBalanced D) (hEdge : H.edgeSet.Nonempty) :
+    (hBal : IsBalanced H.coe D) (hEdge : H.edgeSet.Nonempty) :
     0 < H.coe.minDegree := by
   obtain ⟨e, he⟩ := hEdge
   induction e using Sym2.inductionOn with
@@ -212,7 +212,7 @@ lemma minDegree_pos_of_balanced_of_edge {V : Type*} [Fintype V]
         intro hzero
         exact hne (SimpleGraph.maxDegree_eq_zero_iff.mp hzero)
       have hmaxpos : 0 < H.coe.maxDegree := Nat.pos_of_ne_zero hmaxne
-      rw [SimpleGraph.IsBalanced] at hBal
+      rw [IsBalanced] at hBal
       by_contra hmin
       have hminzero : H.coe.minDegree = 0 := Nat.eq_zero_of_not_pos hmin
       rw [hminzero, Nat.cast_zero, mul_zero] at hBal
@@ -224,7 +224,7 @@ lemma balanced_subgraph_vertex_bound {V : Type*} [Fintype V]
     {G : SimpleGraph V} [DecidableRel G.Adj] (s : Finset V)
     (hBip : G.IsBipartiteWith (s : Set V) (s : Set V)ᶜ)
     (H : G.Subgraph) [DecidableRel H.Adj] (D : ℝ) (hD : 0 ≤ D)
-    (hBal : H.coe.IsBalanced D) (hEdge : H.edgeSet.Nonempty) :
+    (hBal : IsBalanced H.coe D) (hEdge : H.edgeSet.Nonempty) :
     (H.verts.ncard : ℝ) ≤ (D + 1) * (s.card : ℝ) := by
   let L : Finset H.verts := Finset.univ.filter fun x ↦ (x : V) ∈ s
   let R : Finset H.verts := Lᶜ

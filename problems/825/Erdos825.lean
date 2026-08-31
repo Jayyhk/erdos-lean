@@ -55,7 +55,7 @@ we define the partial density of `S` (relative to a set `A`) to be the proportio
 This definition was inspired from https://github.com/b-mehta/unit-fractions
 -/
 @[inline]
-noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+private noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Set.Iio b).ncard / (A ∩ Set.Iio b).ncard
 
@@ -67,7 +67,7 @@ in `A` tends to `α` as `n → ∞`.
 When `β = ℕ` this by default defines the natural density of a set
 (i.e., relative to all of `ℕ`).
 -/
-def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+private def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=
   Tendsto (fun (b : β) => S.partialDensity A b) atTop (𝓝 α)
 
@@ -76,7 +76,7 @@ section
 /-- In a non-trivial partial order with a least element, the set of all
 elements has density one. -/
 @[simp]
-theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
+private theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
     (@Set.univ β).HasDensity 1 := by
   by_cases h : atTop (α := β) = ⊥
   · simp [h, HasDensity]
@@ -132,12 +132,12 @@ and was obtained by Aristotle from Harmonic (aristotle-harmonic@harmonic.fun).
 -/
 
 /-- The proposition that `n` is a sum of distinct proper divisors. -/
-def _root_.Nat.IsSumDivisors (n : ℕ) : Prop :=
+private def _root_.Nat.IsSumDivisors (n : ℕ) : Prop :=
   ∃ S ⊆ n.properDivisors, ∑ d ∈ S, d = n
 
 /-- Being a sum of distinct proper divisors is membership in the corresponding
 subset-sum finset. -/
-theorem _root_.Nat.isSumDivisors_iff_mem_subsetSum (n : ℕ) :
+private theorem _root_.Nat.isSumDivisors_iff_mem_subsetSum (n : ℕ) :
     n.IsSumDivisors ↔ n ∈ n.properDivisors.subsetSum := by
   rw [Nat.IsSumDivisors, Finset.mem_subsetSum_iff]
 
@@ -19867,7 +19867,7 @@ theorem finiteMultiples_empty : finiteMultiples ∅ = ∅ := by
   simp
 
 /-- Pseudoperfectness is inherited by positive multiples. -/
-theorem _root_.Nat.IsSumDivisors.of_dvd {m n : ℕ} (hm : Nat.IsSumDivisors m)
+private theorem _root_.Nat.IsSumDivisors.of_dvd {m n : ℕ} (hm : Nat.IsSumDivisors m)
     (hmn : m ∣ n) (hn : 0 < n) : Nat.IsSumDivisors n := by
   obtain ⟨k, rfl⟩ := hmn
   have hk : 0 < k := by
@@ -20178,7 +20178,7 @@ end
 section
 open Nat
 
-@[simp] lemma _root_.Nat.floor_two {R : Type*} [Semiring R] [LinearOrder R] [FloorSemiring R]
+@[simp] private lemma _root_.Nat.floor_two {R : Type*} [Semiring R] [LinearOrder R] [FloorSemiring R]
     [IsStrictOrderedRing R] :
   ⌊(2 : R)⌋₊ = 2 := by
   simp
@@ -20360,7 +20360,7 @@ Theorems already available directly from Mathlib, such as `sum_pow`, `sum_pow'`,
 `sum_add_sum`, are not duplicated here.
 -/
 
-theorem _root_.ArithmeticFunction.IsMultiplicative.prod {ι : Type*} (g : ι → ℕ) {f : ArithmeticFunction ℝ}
+private theorem _root_.ArithmeticFunction.IsMultiplicative.prod {ι : Type*} (g : ι → ℕ) {f : ArithmeticFunction ℝ}
     (hf : f.IsMultiplicative) (s : Finset ι)
     (hs : (s : Set ι).Pairwise fun i j ↦ Nat.Coprime (g i) (g j)) :
     s.prod (fun i ↦ f (g i)) = f (s.prod g) := by
@@ -20438,20 +20438,20 @@ section
 section
 open List
 
-abbrev _root_.List.Sorted {α : Type*} (r : α → α → Prop) (l : List α) : Prop :=
+private abbrev _root_.List.Sorted {α : Type*} (r : α → α → Prop) (l : List α) : Prop :=
   l.Pairwise r
 
 @[simp]
-theorem _root_.List.sorted_nil {α : Type*} {r : α → α → Prop} : List.Sorted r [] := by
+private theorem _root_.List.sorted_nil {α : Type*} {r : α → α → Prop} : List.Sorted r [] := by
   simp [List.Sorted]
 
 section
 
-theorem _root_.List.Sorted.tail {α : Type*} {r : α → α → Prop} {a : α} {l : List α}
+private theorem _root_.List.Sorted.tail {α : Type*} {r : α → α → Prop} {a : α} {l : List α}
     (h : List.Sorted r (a :: l)) : List.Sorted r l := by
   simpa [List.Sorted] using (List.pairwise_cons.mp h).2
 
-theorem _root_.List.Sorted.filter {α : Type*} {r : α → α → Prop} (p : α → Bool) {l : List α}
+private theorem _root_.List.Sorted.filter {α : Type*} {r : α → α → Prop} (p : α → Bool) {l : List α}
     (h : List.Sorted r l) : List.Sorted r (l.filter p) := by
   simpa [List.Sorted] using List.Pairwise.filter p h
 

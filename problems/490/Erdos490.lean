@@ -385,10 +385,10 @@ open Finset Interval MeasureTheory
 variable {𝕜 : Type*} [RCLike 𝕜] {f : ℝ → 𝕜} {a b : ℝ}
 
 /-- The 1st Bernoulli function. -/
-noncomputable def _root_.B1 (x : ℝ) : ℝ := x - ⌊x⌋₊ - 1 / 2
+private noncomputable def _root_.B1 (x : ℝ) : ℝ := x - ⌊x⌋₊ - 1 / 2
 
 @[fun_prop]
-lemma _root_.aestronglyMeasurable_B1 : AEStronglyMeasurable B1 := by
+private lemma _root_.aestronglyMeasurable_B1 : AEStronglyMeasurable B1 := by
   unfold B1
   fun_prop
 
@@ -400,14 +400,14 @@ end
 
 section
 
-theorem _root_.Filter.EventuallyEq.iff_eventually {α : Type _} {β : Type _} {l : Filter α} {f g : α → β} : f =ᶠ[l] g ↔ ∀ᶠ (x : α) in l, f x = g x := by rfl
+private theorem _root_.Filter.EventuallyEq.iff_eventually {α : Type _} {β : Type _} {l : Filter α} {f g : α → β} : f =ᶠ[l] g ↔ ∀ᶠ (x : α) in l, f x = g x := by rfl
 
 section
 open _root_.Real
 
 open Filter Asymptotics
 
-theorem _root_.Real.inv_log_eq_o_one : (fun x ↦ 1 / log x) =o[atTop] (fun _ ↦ (1:ℝ)) := by
+private theorem _root_.Real.inv_log_eq_o_one : (fun x ↦ 1 / log x) =o[atTop] (fun _ ↦ (1:ℝ)) := by
     rw [isLittleO_one_iff]
     convert tendsto_log_atTop.inv_tendsto_atTop using 1
     ext; simp
@@ -3334,50 +3334,50 @@ open scoped BigOperators
 set_option maxRecDepth 4000
 
 /-- ψ(n) = Σ_{m=1}^{n} Λ(m), the first Chebyshev function. -/
-noncomputable def _root_.chebyshevPsi' (n : ℕ) : ℝ :=
+private noncomputable def _root_.chebyshevPsi' (n : ℕ) : ℝ :=
   ∑ m ∈ Finset.range (n + 1), vonMangoldt m
 
 /-- L_n = lcm(1, 2, ..., n). -/
-def _root_.lcmRange (n : ℕ) : ℕ :=
+private def _root_.lcmRange (n : ℕ) : ℕ :=
   (Finset.Icc 1 n).lcm _root_.id
 
 /-- S(n) = Σ_{m=2}^{n} Λ(m)/m. -/
-noncomputable def _root_.sumS (n : ℕ) : ℝ :=
+private noncomputable def _root_.sumS (n : ℕ) : ℝ :=
   ∑ m ∈ Finset.Icc 2 n, vonMangoldt m / m
 
 /-- T(n) = Σ_{m=2}^{n} Λ(m)/(m * log m). -/
-noncomputable def _root_.sumT (n : ℕ) : ℝ :=
+private noncomputable def _root_.sumT (n : ℕ) : ℝ :=
   ∑ m ∈ Finset.Icc 2 n, vonMangoldt m / (m * Real.log m)
 
 /-- P(n) = ∏_{p ≤ n, p prime} (1 - 1/p). -/
-noncomputable def _root_.prodP (n : ℕ) : ℝ :=
+private noncomputable def _root_.prodP (n : ℕ) : ℝ :=
   ∏ p ∈ (Finset.range (n + 1)).filter Nat.Prime, (1 - 1 / (p : ℝ))
 
 /-! # Lemma: Central Binomial Coefficient Bounds -/
 
-lemma _root_.centralBinom_le_four_pow (r : ℕ) (hr : 1 ≤ r) :
+private lemma _root_.centralBinom_le_four_pow (r : ℕ) (hr : 1 ≤ r) :
     Nat.choose (2 * r) r ≤ 4 ^ r := by
   rw [show 4 ^ r = (2 : ℕ) ^ (2 * r) by norm_num [pow_mul]]
   rw [← Nat.sum_range_choose]
   exact Finset.single_le_sum (fun x _ => Nat.zero_le _)
     (Finset.mem_range.mpr (by linarith))
 
-lemma _root_.choose_odd_le_four_pow (r : ℕ) (_hr : 1 ≤ r) :
+private lemma _root_.choose_odd_le_four_pow (r : ℕ) (_hr : 1 ≤ r) :
     Nat.choose (2 * r + 1) r ≤ 4 ^ r := by
   exact Nat.choose_middle_le_pow r
 
 /-! # LCM helpers -/
 
-lemma _root_.lcmRange_pos (n : ℕ) (_hn : 1 ≤ n) : 0 < lcmRange n := by
+private lemma _root_.lcmRange_pos (n : ℕ) (_hn : 1 ≤ n) : 0 < lcmRange n := by
   exact Nat.pos_of_ne_zero ( mt Finset.lcm_eq_zero_iff.mp ( by aesop ) )
 
-lemma _root_.lcmRange_dvd_of_le {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤ n) :
+private lemma _root_.lcmRange_dvd_of_le {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤ n) :
     m ∣ lcmRange n := by
   exact Finset.dvd_lcm ( Finset.mem_Icc.mpr ⟨ hm, hmn ⟩ )
 
 /-! # LCM Divisibility Lemmas -/
 
-lemma _root_.lcmRange_dvd_even (r : ℕ) (hr : 1 ≤ r) :
+private lemma _root_.lcmRange_dvd_even (r : ℕ) (hr : 1 ≤ r) :
     lcmRange (2 * r) ∣ lcmRange r * Nat.choose (2 * r) r := by
   -- By definition of lcmRange, we need to show that for every prime power $p^a$ dividing $m \in (1, 2r]$, $p^a$ divides $lcmRange(r) * \binom{2r}{r}$.
   have h_div : ∀ m ∈ Finset.Icc 1 (2 * r), ∀ p ∈ Nat.primeFactors m, p ^ Nat.factorization m p ∣ lcmRange r * Nat.choose (2 * r) r := by
@@ -3424,7 +3424,7 @@ lemma _root_.lcmRange_dvd_even (r : ℕ) (hr : 1 ≤ r) :
     rwa [ ← Nat.prod_factorization_pow_eq_self ( by linarith [ Finset.mem_Icc.mp hm ] : m ≠ 0 ) ];
   exact Finset.lcm_dvd h_lcm_div
 
-lemma _root_.lcmRange_dvd_odd (r : ℕ) (hr : 1 ≤ r) :
+private lemma _root_.lcmRange_dvd_odd (r : ℕ) (hr : 1 ≤ r) :
     lcmRange (2 * r + 1) ∣ lcmRange (r + 1) * Nat.choose (2 * r + 1) r := by
   -- For any prime power $p^a \leq 2r+1$, we need to show that $p^a$ divides $lcmRange(r+1) * (2r+1 choose r)$.
   have h_prime_power : ∀ p a : ℕ, Nat.Prime p → p^a ≤ 2 * r + 1 → p^a ∣ lcmRange (r + 1) * Nat.choose (2 * r + 1) r := by
@@ -3466,7 +3466,7 @@ lemma _root_.lcmRange_dvd_odd (r : ℕ) (hr : 1 ≤ r) :
 
 /-! # LCM Bound: L_n ≤ 4^n -/
 
-lemma _root_.lcmRange_le_four_pow (n : ℕ) (hn : 1 ≤ n) :
+private lemma _root_.lcmRange_le_four_pow (n : ℕ) (hn : 1 ≤ n) :
     lcmRange n ≤ 4 ^ n := by
   induction n using Nat.strong_induction_on with
   | h n ih =>
@@ -3493,7 +3493,7 @@ lemma _root_.lcmRange_le_four_pow (n : ℕ) (hn : 1 ≤ n) :
 
 /-! # Chebyshev ψ bound -/
 
-lemma _root_.chebyshevPsi_eq_log_lcmRange (n : ℕ) (hn : 1 ≤ n) :
+private lemma _root_.chebyshevPsi_eq_log_lcmRange (n : ℕ) (hn : 1 ≤ n) :
     chebyshevPsi' n = Real.log (lcmRange n) := by
   -- By definition of ψ, we know that ψ(n) = Σ_{m=0}^n Λ(m)
   have h_psi_def : chebyshevPsi' n = ∑ p ∈ Finset.filter Nat.Prime (Finset.range (n + 1)), Nat.log p n * Real.log p := by
@@ -3543,7 +3543,7 @@ lemma _root_.chebyshevPsi_eq_log_lcmRange (n : ℕ) (hn : 1 ≤ n) :
       exact Finset.lcm_dvd h_lcmRange_div;
   rw [ h_psi_def, h_lcm_def, Nat.cast_prod, Real.log_prod ] <;> aesop
 
-lemma _root_.chebyshevPsi_le (n : ℕ) (hn : 1 ≤ n) :
+private lemma _root_.chebyshevPsi_le (n : ℕ) (hn : 1 ≤ n) :
     chebyshevPsi' n ≤ 2 * n * Real.log 2 := by
   have h_log : Real.log (lcmRange n) ≤ Real.log (4 ^ n) := by
     gcongr;
@@ -3557,7 +3557,7 @@ lemma _root_.chebyshevPsi_le (n : ℕ) (hn : 1 ≤ n) :
 /-
 S(n) ≤ (log(n!) + ψ(n)) / n
 -/
-lemma _root_.sumS_le_basic (n : ℕ) (hn : 2 ≤ n) :
+private lemma _root_.sumS_le_basic (n : ℕ) (hn : 2 ≤ n) :
     sumS n ≤ (Real.log (n.factorial) + chebyshevPsi' n) / n := by
   -- By the properties of logarithms and the definition of S(n), we can rewrite the inequality.
   have h_rewrite : ∑ m ∈ Finset.Icc 2 n, (vonMangoldt m / m : ℝ) * n ≤ Real.log (Nat.factorial n) + ∑ m ∈ Finset.Icc 1 n, vonMangoldt m := by
@@ -3615,14 +3615,14 @@ lemma _root_.sumS_le_basic (n : ℕ) (hn : 2 ≤ n) :
 /-
 log(n!) ≤ n*log(n) - n + 1 + log(n)
 -/
-lemma _root_.log_factorial_le (n : ℕ) (hn : 1 ≤ n) :
+private lemma _root_.log_factorial_le (n : ℕ) (hn : 1 ≤ n) :
     Real.log (n.factorial) ≤ n * Real.log n - n + 1 + Real.log n := by
   induction hn <;> simp_all +decide [ Nat.factorial_succ ];
   rw [ Real.log_mul ( by positivity ) ( by positivity ), add_comm ];
   have := Real.log_le_sub_one_of_pos ( by positivity : 0 < ( ↑‹ℕ› : ℝ ) / ( ↑‹ℕ› + 1 ) );
   rw [ Real.log_div ] at this <;> first | positivity | nlinarith [ mul_div_cancel₀ ( ( ↑‹ℕ› : ℝ ) : ℝ ) ( by positivity : ( ↑‹ℕ› + 1 : ℝ ) ≠ 0 ) ] ;
 
-lemma _root_.sumS_le_logn_plus (n : ℕ) (hn : 200 ≤ n) :
+private lemma _root_.sumS_le_logn_plus (n : ℕ) (hn : 200 ≤ n) :
     sumS n ≤ Real.log n + 0.418 := by
   -- By combining the results from the previous steps, we conclude the proof.
   have h_final : Real.log (n.factorial) + chebyshevPsi' n ≤ n * Real.log n + 2 * n * Real.log 2 - n + 1 + Real.log n := by
@@ -3660,7 +3660,7 @@ lemma _root_.sumS_le_logn_plus (n : ℕ) (hn : 200 ≤ n) :
 -/
 set_option maxHeartbeats 800000 in
 -- The generated tail-bound proof uses large `norm_num` and summability terms.
-lemma _root_.neg_log_prodP_le_sumT_plus (n : ℕ) (hn : 200 ≤ n) :
+private lemma _root_.neg_log_prodP_le_sumT_plus (n : ℕ) (hn : 200 ≤ n) :
     -Real.log (prodP n) ≤ sumT n + 1/10 := by
   -- Let's rewrite the sum in terms of the prime number theorem and the bound we have.
   have h_sum_bound : ∑ p ∈ Finset.filter Nat.Prime (Finset.range (n + 1)), (-Real.log (1 - 1 / (p : ℝ)) - ∑ k ∈ Finset.Icc 1 (Nat.log p n), 1 / (k * (p : ℝ) ^ k)) ≤ 1 / 10 := by
@@ -3898,7 +3898,7 @@ private lemma _root_.abel_identity_sumT (n : ℕ) (hn : 200 ≤ n) :
 /-
 T(n) - T(199) ≤ log(log n) - log(log 199) + 27/100, using Abel summation and S(m) ≤ log m + 0.418
 -/
-lemma _root_.sumT_sub_199_bound (n : ℕ) (hn : 200 ≤ n) :
+private lemma _root_.sumT_sub_199_bound (n : ℕ) (hn : 200 ≤ n) :
     sumT n ≤ sumT 199 + Real.log (Real.log ↑n) - Real.log (Real.log 199) + 27/100 := by
   -- Step 1: Split sumT
   have h_split : sumT n = sumT 199 + ∑ m ∈ Finset.Icc 200 n, vonMangoldt m / (m * Real.log m) := by
@@ -3941,7 +3941,7 @@ lemma _root_.sumT_sub_199_bound (n : ℕ) (hn : 200 ≤ n) :
 /-
 Computational upper bound on T(199)
 -/
-lemma _root_.sumT_199_lt : sumT 199 < 23/10 := by
+private lemma _root_.sumT_199_lt : sumT 199 < 23/10 := by
   -- By definition of sumT, we can rewrite the sum as a sum over prime powers.
   have h_sum_prime_powers : ∀ n : ℕ, sumT n = ∑ p ∈ Finset.filter Nat.Prime (Finset.Icc 2 n), ∑ k ∈ Finset.Icc 1 (Nat.log p n), (1 / (p^k * k : ℝ)) := by
     intro n
@@ -3979,7 +3979,7 @@ lemma _root_.sumT_199_lt : sumT 199 < 23/10 := by
 /-
 Lower bound on log(log 199)
 -/
-lemma _root_.log_log_199_gt : Real.log (Real.log 199) > 163/100 := by
+private lemma _root_.log_log_199_gt : Real.log (Real.log 199) > 163/100 := by
   -- We'll use that $Real.log 199 > 5.11$.
   have h_log_199 : Real.log 199 > 5.11 := by
     norm_num [ Real.lt_log_iff_exp_lt ];
@@ -3996,7 +3996,7 @@ lemma _root_.log_log_199_gt : Real.log (Real.log 199) > 163/100 := by
   rw [ div_lt_iff₀' ] <;> norm_num [ ← Real.log_rpow, Real.lt_log_iff_exp_lt ];
   have := Real.exp_one_lt_d9.le ; norm_num1 at * ; rw [ show Real.exp 163 = ( Real.exp 1 ) ^ 163 by rw [ ← Real.exp_nat_mul ] ; norm_num ] ; exact lt_of_le_of_lt ( pow_le_pow_left₀ ( by positivity ) this _ ) ( by norm_num )
 
-lemma _root_.neg_log_prodP_bound (n : ℕ) (hn : 200 ≤ n) :
+private lemma _root_.neg_log_prodP_bound (n : ℕ) (hn : 200 ≤ n) :
     -Real.log (prodP n) < Real.log (Real.log n) + 1.095 := by
   have h1 := neg_log_prodP_le_sumT_plus n hn
   have h2 := sumT_sub_199_bound n hn
@@ -4012,12 +4012,12 @@ lemma _root_.neg_log_prodP_bound (n : ℕ) (hn : 200 ≤ n) :
 
 /-! # Finite Check -/
 
-lemma _root_.prodP_le_of_le {m n : ℕ} (h : m ≤ n) : prodP n ≤ prodP m := by
+private lemma _root_.prodP_le_of_le {m n : ℕ} (h : m ≤ n) : prodP n ≤ prodP m := by
   unfold prodP;
   rw [ ← Finset.prod_sdiff ( Finset.filter_subset_filter _ <| Finset.range_mono <| Nat.succ_le_succ h ) ];
   exact mul_le_of_le_one_left ( Finset.prod_nonneg fun _ _ => sub_nonneg.2 <| div_le_self zero_le_one <| mod_cast Nat.Prime.pos <| by aesop ) <| Finset.prod_le_one ( fun _ _ => sub_nonneg.2 <| div_le_self zero_le_one <| mod_cast Nat.Prime.pos <| by aesop ) fun _ _ => sub_le_self _ <| by positivity;
 
-lemma _root_.mertens_finite_check (n : ℕ) (hn3 : 3 ≤ n) (hn199 : n ≤ 199) :
+private lemma _root_.mertens_finite_check (n : ℕ) (hn3 : 3 ≤ n) (hn199 : n ≤ 199) :
     1 / (3 * Real.log n) ≤ prodP n := by
   by_cases hn : n ≤ 10;
   · interval_cases n <;> norm_num [ Finset.prod_filter, Finset.prod_range_succ, prodP ];
@@ -4053,7 +4053,7 @@ lemma _root_.mertens_finite_check (n : ℕ) (hn3 : 3 ≤ n) (hn199 : n ≤ 199) 
 
 /-! # Main Theorem -/
 
-theorem _root_.mertens_third_theorem (n : ℕ) (hn : 3 ≤ n) :
+private theorem _root_.mertens_third_theorem (n : ℕ) (hn : 3 ≤ n) :
     1 / (3 * Real.log n) ≤ ∏ p ∈ (Finset.range (n + 1)).filter Nat.Prime, (1 - 1 / (p : ℝ)) := by
   by_cases hn2 : n ≥ 200;
   · have := neg_log_prodP_bound n hn2;

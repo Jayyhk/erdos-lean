@@ -4,7 +4,7 @@ namespace Erdos884
 
 /-- `Real.sqrt_le_self` does not exist in Mathlib (only `Nat.sqrt_le_self`).
 Reconstructed here from `Real.sqrt_le_left : 0 ≤ y → (√x ≤ y ↔ x ≤ y ^ 2)`. -/
-theorem _root_.Real.sqrt_le_self (x : ℝ) (hx : 1 ≤ x) : Real.sqrt x ≤ x :=
+private theorem _root_.Real.sqrt_le_self (x : ℝ) (hx : 1 ≤ x) : Real.sqrt x ≤ x :=
   (Real.sqrt_le_left (by linarith)).2 (by nlinarith)
 
 section
@@ -30,7 +30,7 @@ open _root_.ArithmeticFunction.IsMultiplicative
 
 variable {R : Type*}
 
-theorem _root_.ArithmeticFunction.IsMultiplicative.prod_factors_of_mult (f : ArithmeticFunction ℝ)
+private theorem _root_.ArithmeticFunction.IsMultiplicative.prod_factors_of_mult (f : ArithmeticFunction ℝ)
     (h_mult : ArithmeticFunction.IsMultiplicative f) {l : ℕ} (hl : Squarefree l) :
     ∏ a ∈ l.primeFactors, f a = f l := by
   rw [←IsMultiplicative.map_prod_of_subset_primeFactors h_mult l _ Finset.Subset.rfl,
@@ -39,16 +39,16 @@ theorem _root_.ArithmeticFunction.IsMultiplicative.prod_factors_of_mult (f : Ari
 end ArithmeticFunction.IsMultiplicative
 
 namespace Aux
-theorem _root_.Aux.sum_over_dvd_ite {α : Type _} [Ring α] {P : ℕ} (hP : P ≠ 0) {n : ℕ} (hn : n ∣ P)
+private theorem _root_.Aux.sum_over_dvd_ite {α : Type _} [Ring α] {P : ℕ} (hP : P ≠ 0) {n : ℕ} (hn : n ∣ P)
     {f : ℕ → α} : ∑ d ∈ n.divisors, f d = ∑ d ∈ P.divisors, if d ∣ n then f d else 0 :=
   by
   rw [←Finset.sum_filter, Nat.divisors_filter_dvd_of_dvd hP hn]
 
-theorem _root_.Aux.ite_sum_zero {p : Prop} [Decidable p] (s : Finset ℕ) (f : ℕ → ℝ) :
+private theorem _root_.Aux.ite_sum_zero {p : Prop} [Decidable p] (s : Finset ℕ) (f : ℕ → ℝ) :
     (if p then (∑ x ∈ s, f x) else 0) = ∑ x ∈ s, if p then f x else 0 := by
   split_ifs <;> simp
 
-theorem _root_.Aux.conv_lambda_sq_larger_sum (f : ℕ → ℕ → ℕ → ℝ) (n : ℕ) :
+private theorem _root_.Aux.conv_lambda_sq_larger_sum (f : ℕ → ℕ → ℕ → ℝ) (n : ℕ) :
     (∑ d ∈ n.divisors,
         ∑ d1 ∈ d.divisors,
           ∑ d2 ∈ d.divisors, if d = Nat.lcm d1 d2 then f d1 d2 d else 0) =
@@ -67,7 +67,7 @@ theorem _root_.Aux.conv_lambda_sq_larger_sum (f : ℕ → ℕ → ℕ → ℝ) (
   rintro rfl
   exact ⟨Nat.dvd_lcm_left d1 d2, Nat.dvd_lcm_right d1 d2, rfl⟩
 
-theorem _root_.Aux.moebius_inv_dvd_lower_bound (l m : ℕ) (hm : Squarefree m) :
+private theorem _root_.Aux.moebius_inv_dvd_lower_bound (l m : ℕ) (hm : Squarefree m) :
     (∑ d ∈ m.divisors, if l ∣ d then (μ d:ℤ) else 0) = if l = m then (μ l:ℤ) else 0 := by
   have hm_pos : 0 < m := Nat.pos_of_ne_zero hm.ne_zero
   revert hm
@@ -90,25 +90,25 @@ theorem _root_.Aux.moebius_inv_dvd_lower_bound (l m : ℕ) (hm : Squarefree m) :
     by_contra h; rw [←h] at hd; exact hl (dvd_of_mem_divisors hd)
 
 
-theorem _root_.Aux.moebius_inv_dvd_lower_bound' {P : ℕ} (hP : Squarefree P) (l m : ℕ) (hm : m ∣ P) :
+private theorem _root_.Aux.moebius_inv_dvd_lower_bound' {P : ℕ} (hP : Squarefree P) (l m : ℕ) (hm : m ∣ P) :
     (∑ d ∈ P.divisors, if l ∣ d ∧ d ∣ m then μ d else 0) = if l = m then μ l else 0 := by
   rw [←Aux.moebius_inv_dvd_lower_bound _ _ (Squarefree.squarefree_of_dvd hm hP),
     Aux.sum_over_dvd_ite hP.ne_zero hm]
   simp_rw[ite_and, ←sum_filter, filter_comm]
 
-theorem _root_.Aux.moebius_inv_dvd_lower_bound_real {P : ℕ} (hP : Squarefree P) (l m : ℕ) (hm : m ∣ P) :
+private theorem _root_.Aux.moebius_inv_dvd_lower_bound_real {P : ℕ} (hP : Squarefree P) (l m : ℕ) (hm : m ∣ P) :
     (∑ d ∈ P.divisors, if l ∣ d ∧ d ∣ m then (μ d : ℝ) else 0) =
       if l = m then (μ l : ℝ) else 0 := by
   norm_cast
   apply Aux.moebius_inv_dvd_lower_bound' hP l m hm
 
-theorem _root_.Aux.multiplicative_zero_of_zero_dvd (f : ArithmeticFunction ℝ) (h_mult : IsMultiplicative f)
+private theorem _root_.Aux.multiplicative_zero_of_zero_dvd (f : ArithmeticFunction ℝ) (h_mult : IsMultiplicative f)
     {m n : ℕ} (h_sq : Squarefree n) (hmn : m ∣ n) (h_zero : f m = 0) : f n = 0 := by
   rcases hmn with ⟨k, rfl⟩
   simp only [MulZeroClass.zero_mul,
     h_mult.map_mul_of_coprime (coprime_of_squarefree_mul h_sq), h_zero]
 
-theorem _root_.Aux.div_mult_of_dvd_squarefree (f : ArithmeticFunction ℝ) (h_mult : IsMultiplicative f)
+private theorem _root_.Aux.div_mult_of_dvd_squarefree (f : ArithmeticFunction ℝ) (h_mult : IsMultiplicative f)
     (l d : ℕ) (hdl : d ∣ l) (hl : Squarefree l) (hd : f d ≠ 0) : f l / f d = f (l / d) := by
   apply div_eq_of_eq_mul hd
   rw [← h_mult.right, Nat.div_mul_cancel hdl]
@@ -116,7 +116,7 @@ theorem _root_.Aux.div_mult_of_dvd_squarefree (f : ArithmeticFunction ℝ) (h_mu
   convert hl
   exact Nat.div_mul_cancel hdl
 
-theorem _root_.Aux.inv_sub_antitoneOn_gt
+private theorem _root_.Aux.inv_sub_antitoneOn_gt
     {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] (c : R) :
     AntitoneOn (fun x:R ↦ (x-c)⁻¹) (Set.Ioi c) := by
   refine antitoneOn_iff_forall_lt.mpr ?_
@@ -124,7 +124,7 @@ theorem _root_.Aux.inv_sub_antitoneOn_gt
   rw [Set.mem_Ioi] at ha hb
   gcongr
 
-theorem _root_.Aux.inv_sub_antitoneOn_Icc
+private theorem _root_.Aux.inv_sub_antitoneOn_Icc
     {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
     (a b c : R) (ha : c < a) :
     AntitoneOn (fun x ↦ (x-c)⁻¹) (Set.Icc a b) := by
@@ -132,16 +132,16 @@ theorem _root_.Aux.inv_sub_antitoneOn_Icc
   · exact Aux.inv_sub_antitoneOn_gt c |>.mono <| (Set.Icc_subset_Ioi_iff hab).mpr ha
   · simp [hab, Set.Subsingleton.antitoneOn]
 
-theorem _root_.Aux.inv_antitoneOn_pos {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] :
+private theorem _root_.Aux.inv_antitoneOn_pos {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] :
     AntitoneOn (fun x:R ↦ x⁻¹) (Set.Ioi 0) := by
   convert Aux.inv_sub_antitoneOn_gt (R:=R) 0; ring
 
-theorem _root_.Aux.inv_antitoneOn_Icc {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+private theorem _root_.Aux.inv_antitoneOn_Icc {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
     (a b : R) (ha : 0 < a) :
     AntitoneOn (fun x ↦ x⁻¹) (Set.Icc a b) := by
   convert Aux.inv_sub_antitoneOn_Icc a b 0 ha; ring
 
-theorem _root_.Aux.log_add_one_le_sum_inv (n : ℕ) :
+private theorem _root_.Aux.log_add_one_le_sum_inv (n : ℕ) :
     Real.log ↑(n+1) ≤ ∑ d ∈ Finset.Icc 1 n, (d:ℝ)⁻¹ := by
   calc _ = ∫ x in (1)..↑(n+1), x⁻¹ := ?_
        _ = ∫ x in (1:ℕ)..↑(n+1), x⁻¹ := ?_
@@ -152,7 +152,7 @@ theorem _root_.Aux.log_add_one_le_sum_inv (n : ℕ) :
     apply Aux.inv_antitoneOn_Icc
     norm_num
 
-theorem _root_.Aux.log_le_sum_inv (y : ℝ) (hy : 1 ≤ y) :
+private theorem _root_.Aux.log_le_sum_inv (y : ℝ) (hy : 1 ≤ y) :
     Real.log y ≤ ∑ d ∈ Finset.Icc 1 (⌊y⌋₊), (d:ℝ)⁻¹ := by
   calc _ ≤ Real.log ↑(Nat.floor y + 1) := ?_
        _ ≤ _ := ?_
@@ -162,7 +162,7 @@ theorem _root_.Aux.log_le_sum_inv (y : ℝ) (hy : 1 ≤ y) :
     exact ceil_le_floor_add_one y
   · apply Aux.log_add_one_le_sum_inv
 
-theorem _root_.Aux.sum_inv_le_log (n : ℕ) (hn : 1 ≤ n) :
+private theorem _root_.Aux.sum_inv_le_log (n : ℕ) (hn : 1 ≤ n) :
     ∑ d ∈ Finset.Icc 1 n, (d : ℝ)⁻¹ ≤ 1 + Real.log ↑n :=
   by
   rw [← Finset.sum_erase_add (Icc 1 n) _ (by simp [hn] : 1 ∈ Icc 1 n), add_comm]
@@ -181,7 +181,7 @@ theorem _root_.Aux.sum_inv_le_log (n : ℕ) (hn : 1 ≤ n) :
   · norm_num
   norm_num; simp[hn, show (0:ℝ) < 1 by norm_num]
 
-theorem _root_.Aux.sum_inv_le_log_real (y : ℝ) (hy : 1 ≤ y) :
+private theorem _root_.Aux.sum_inv_le_log_real (y : ℝ) (hy : 1 ≤ y) :
     ∑ d ∈ Finset.Icc 1 (⌊y⌋₊), (d:ℝ)⁻¹ ≤ 1 + Real.log y := by
   trans (1 + Real.log (⌊y⌋₊))
   · apply Aux.sum_inv_le_log (⌊y⌋₊)
@@ -191,7 +191,7 @@ theorem _root_.Aux.sum_inv_le_log_real (y : ℝ) (hy : 1 ≤ y) :
   · apply floor_le; linarith
 
 -- Lemma 3.1 in Heath-Brown's notes
-theorem _root_.Aux.sum_pow_cardDistinctFactors_div_self_le_log_pow {P k : ℕ} (x : ℝ) (hx : 1 ≤ x)
+private theorem _root_.Aux.sum_pow_cardDistinctFactors_div_self_le_log_pow {P k : ℕ} (x : ℝ) (hx : 1 ≤ x)
     (hP : Squarefree P) :
     (∑ d ∈ P.divisors, if d ≤ x then (k:ℝ) ^ (ω d) / (d : ℝ) else (0 : ℝ))
     ≤ (1 + Real.log x) ^ k := by
@@ -259,7 +259,7 @@ theorem _root_.Aux.sum_pow_cardDistinctFactors_div_self_le_log_pow {P k : ℕ} (
     apply Aux.sum_inv_le_log_real
     linarith
 
-theorem _root_.Aux.sum_pow_cardDistinctFactors_le_self_mul_log_pow {P h : ℕ} (x : ℝ) (hx : 1 ≤ x)
+private theorem _root_.Aux.sum_pow_cardDistinctFactors_le_self_mul_log_pow {P h : ℕ} (x : ℝ) (hx : 1 ≤ x)
     (hP : Squarefree P) :
     (∑ d ∈ P.divisors, if ↑d ≤ x then (h : ℝ) ^ ω d else (0 : ℝ)) ≤
       x * (1 + Real.log x) ^ h := by
@@ -311,12 +311,12 @@ local notation3 "R" => BoundingSieve.rem (s := s)
 
 -- S = ∑_{l|P, l≤√y} g(l)
 -- Used in statement of the simple form of the selberg bound
-def _root_.SelbergSieve.selbergTerms : ArithmeticFunction ℝ :=
+private def _root_.SelbergSieve.selbergTerms : ArithmeticFunction ℝ :=
   s.nu.pmul (.prodPrimeFactors fun p =>  1 / (1 - ν p))
 
 local notation3 "g" => SelbergSieve.selbergTerms s
 
-theorem _root_.SelbergSieve.selbergTerms_apply (d : ℕ) :
+private theorem _root_.SelbergSieve.selbergTerms_apply (d : ℕ) :
     g d = ν d * ∏ p ∈ d.primeFactors, 1/(1 - ν p) := by
   unfold SelbergSieve.selbergTerms
   by_cases h : d=0
@@ -329,42 +329,42 @@ structure _root_.SelbergSieve.UpperBoundSieve where mk ::
   μPlus : ℕ → ℝ
   hμPlus : IsUpperMoebius μPlus
 
-instance _root_.SelbergSieve.ubToμPlus : CoeFun UpperBoundSieve fun _ => ℕ → ℝ where coe ub := ub.μPlus
+private instance _root_.SelbergSieve.ubToμPlus : CoeFun UpperBoundSieve fun _ => ℕ → ℝ where coe ub := ub.μPlus
 
-def _root_.SelbergSieve.IsLowerMoebius (μMinus : ℕ → ℝ) : Prop :=
+private def _root_.SelbergSieve.IsLowerMoebius (μMinus : ℕ → ℝ) : Prop :=
   ∀ n : ℕ, ∑ d ∈ n.divisors, μMinus d ≤ (if n=1 then 1 else 0)
 
 structure _root_.SelbergSieve.LowerBoundSieve where mk ::
   μMinus : ℕ → ℝ
   hμMinus : IsLowerMoebius μMinus
 
-instance _root_.SelbergSieve.lbToμMinus : CoeFun LowerBoundSieve fun _ => ℕ → ℝ where coe lb := lb.μMinus
+private instance _root_.SelbergSieve.lbToμMinus : CoeFun LowerBoundSieve fun _ => ℕ → ℝ where coe lb := lb.μMinus
 
 end UpperBoundSieve
 
 section SieveLemmas
 
-theorem _root_.SelbergSieve.nu_ne_zero_of_mem_divisors_prodPrimes {d : ℕ} (hd : d ∈ divisors P) : ν d ≠ 0 := by
+private theorem _root_.SelbergSieve.nu_ne_zero_of_mem_divisors_prodPrimes {d : ℕ} (hd : d ∈ divisors P) : ν d ≠ 0 := by
   apply _root_.ne_of_gt
   rw [mem_divisors] at hd
   apply nu_pos_of_dvd_prodPrimes hd.left
 
-def _root_.SelbergSieve.delta (n : ℕ) : ℝ := if n=1 then 1 else 0
+private def _root_.SelbergSieve.delta (n : ℕ) : ℝ := if n=1 then 1 else 0
 
 local notation "δ" => delta
 
-theorem _root_.SelbergSieve.siftedSum_as_delta : siftedSum (s := s) = ∑ d ∈ s.support, a d * δ (Nat.gcd P d) :=
+private theorem _root_.SelbergSieve.siftedSum_as_delta : siftedSum (s := s) = ∑ d ∈ s.support, a d * δ (Nat.gcd P d) :=
   by
   rw [siftedSum_eq_sum_support_mul_ite]
   simp only [delta]
 
 -- Unused ?
-theorem _root_.SelbergSieve.nu_lt_self_of_dvd_prodPrimes (d : ℕ) (hdP : d ∣ P) (hd_ne_one : d ≠ 1) : ν d < 1 :=
+private theorem _root_.SelbergSieve.nu_lt_self_of_dvd_prodPrimes (d : ℕ) (hdP : d ∣ P) (hd_ne_one : d ≠ 1) : ν d < 1 :=
   nu_lt_one_of_dvd_prodPrimes hdP hd_ne_one
 
 -- Facts about g
 @[aesop safe]
-theorem _root_.SelbergSieve.selbergTerms_pos (l : ℕ) (hl : l ∣ P) : 0 < g l := by
+private theorem _root_.SelbergSieve.selbergTerms_pos (l : ℕ) (hl : l ∣ P) : 0 < g l := by
   rw [SelbergSieve.selbergTerms_apply]
   apply mul_pos
   · exact nu_pos_of_dvd_prodPrimes hl
@@ -375,11 +375,11 @@ theorem _root_.SelbergSieve.selbergTerms_pos (l : ℕ) (hl : l ∣ P) : 0 < g l 
   have hp_dvd : p ∣ P := (Nat.dvd_of_mem_primeFactors hp).trans hl
   linarith only [s.nu_lt_one_of_prime p hp_prime hp_dvd]
 
-theorem _root_.SelbergSieve.selbergTerms_mult : ArithmeticFunction.IsMultiplicative g := by
+private theorem _root_.SelbergSieve.selbergTerms_mult : ArithmeticFunction.IsMultiplicative g := by
   unfold SelbergSieve.selbergTerms
   arith_mult
 
-theorem _root_.SelbergSieve.one_div_selbergTerms_eq_conv_moebius_nu (l : ℕ) (hl : Squarefree l)
+private theorem _root_.SelbergSieve.one_div_selbergTerms_eq_conv_moebius_nu (l : ℕ) (hl : Squarefree l)
     (hnu_nonzero : ν l ≠ 0) : 1 / g l = ∑ d ∈ l.divisors, (μ <| l / d) * (ν d)⁻¹ :=
   by
   rw [SelbergSieve.selbergTerms_apply]
@@ -396,7 +396,7 @@ theorem _root_.SelbergSieve.one_div_selbergTerms_eq_conv_moebius_nu (l : ℕ) (h
   revert hnu_nonzero; contrapose!
   exact Aux.multiplicative_zero_of_zero_dvd ν s.nu_mult hl hd_dvd
 
-theorem _root_.SelbergSieve.nu_eq_conv_one_div_selbergTerms (d : ℕ) (hdP : d ∣ P) :
+private theorem _root_.SelbergSieve.nu_eq_conv_one_div_selbergTerms (d : ℕ) (hdP : d ∣ P) :
     (ν d)⁻¹ = ∑ l ∈ divisors P, if l ∣ d then 1 / g l else 0 := by
   apply symm
   rw [←sum_filter, Nat.divisors_filter_dvd_of_dvd prodPrimes_ne_zero hdP]
@@ -410,7 +410,7 @@ theorem _root_.SelbergSieve.nu_eq_conv_one_div_selbergTerms (d : ℕ) (hdP : d �
     (Squarefree.squarefree_of_dvd hlP s.prodPrimes_squarefree)
     (_root_.ne_of_gt <| nu_pos_of_dvd_prodPrimes hlP)
 
-theorem _root_.SelbergSieve.conv_selbergTerms_eq_selbergTerms_mul_nu {d : ℕ} (hd : d ∣ P) :
+private theorem _root_.SelbergSieve.conv_selbergTerms_eq_selbergTerms_mul_nu {d : ℕ} (hd : d ∣ P) :
     (∑ l ∈ divisors P, if l ∣ d then g l else 0) = g d * (ν d)⁻¹ := by
   calc
     (∑ l ∈ divisors P, if l ∣ d then g l else 0) =
@@ -427,11 +427,11 @@ theorem _root_.SelbergSieve.conv_selbergTerms_eq_selbergTerms_mul_nu {d : ℕ} (
       · apply _root_.ne_of_gt; rw [mem_divisors] at hl; apply SelbergSieve.selbergTerms_pos; exact hl.left
     _ = g d * (ν d)⁻¹ := by rw [← nu_eq_conv_one_div_selbergTerms s d hd]
 
-theorem _root_.SelbergSieve.upper_bound_of_UpperBoundSieve (μPlus : UpperBoundSieve) :
+private theorem _root_.SelbergSieve.upper_bound_of_UpperBoundSieve (μPlus : UpperBoundSieve) :
     siftedSum (s := s) ≤ ∑ d ∈ divisors P, μPlus d * multSum (s := s) d :=
   siftedSum_le_sum_of_upperMoebius _ μPlus.hμPlus
 
-theorem _root_.SelbergSieve.siftedSum_le_mainSum_errSum_of_UpperBoundSieve (μPlus : UpperBoundSieve) :
+private theorem _root_.SelbergSieve.siftedSum_le_mainSum_errSum_of_UpperBoundSieve (μPlus : UpperBoundSieve) :
     siftedSum (s := s) ≤ X * mainSum (s := s) μPlus + errSum (s := s) μPlus := by
   apply siftedSum_le_mainSum_errSum_of_upperMoebius _ μPlus.hμPlus
 
@@ -440,7 +440,7 @@ end SieveLemmas
 -- Results about Lambda Squared Sieves
 section LambdaSquared
 
-def _root_.SelbergSieve.lambdaSquared (weights : ℕ → ℝ) : ℕ → ℝ := fun d =>
+private def _root_.SelbergSieve.lambdaSquared (weights : ℕ → ℝ) : ℕ → ℝ := fun d =>
   ∑ d1 ∈ d.divisors, ∑ d2 ∈ d.divisors,
     if d = Nat.lcm d1 d2 then weights d1 * weights d2 else 0
 
@@ -457,7 +457,7 @@ private theorem _root_.SelbergSieve.lambdaSquared_eq_zero_of_support_wlog {w : �
       _ ≤ _       := ?_
   · rw [sq]; gcongr
 
-theorem _root_.SelbergSieve.lambdaSquared_eq_zero_of_support (w : ℕ → ℝ) (y : ℝ)
+private theorem _root_.SelbergSieve.lambdaSquared_eq_zero_of_support (w : ℕ → ℝ) (y : ℝ)
     (hw : ∀ d : ℕ, ¬d ^ 2 ≤ y → w d = 0) (d : ℕ) (hd : ¬d ≤ y) :
     SelbergSieve.lambdaSquared w d = 0 := by
   dsimp only [SelbergSieve.lambdaSquared]
@@ -483,7 +483,7 @@ theorem _root_.SelbergSieve.lambdaSquared_eq_zero_of_support (w : ℕ → ℝ) (
     apply lambdaSquared_eq_zero_of_support_wlog hw hd d2 d1
       (Nat.lcm_comm d1 d2 ▸ h) hle
 
-theorem _root_.SelbergSieve.upperMoebius_of_lambda_sq (weights : ℕ → ℝ) (hw : weights 1 = 1) :
+private theorem _root_.SelbergSieve.upperMoebius_of_lambda_sq (weights : ℕ → ℝ) (hw : weights 1 = 1) :
     IsUpperMoebius <| SelbergSieve.lambdaSquared weights := by
   dsimp [IsUpperMoebius, SelbergSieve.lambdaSquared]
   intro n
@@ -514,7 +514,7 @@ theorem _root_.SelbergSieve.upperMoebius_of_lambda_sq (weights : ℕ → ℝ) (h
 -- local notation3 "R" => Sieve.rem s
 -- local notation3 "g" => Sieve.selbergTerms s
 
-theorem _root_.SelbergSieve.lambdaSquared_mainSum_eq_quad_form (w : ℕ → ℝ) :
+private theorem _root_.SelbergSieve.lambdaSquared_mainSum_eq_quad_form (w : ℕ → ℝ) :
     mainSum (s := s) (SelbergSieve.lambdaSquared w) =
       ∑ d1 ∈ divisors P, ∑ d2 ∈ divisors P,
         ν d1 * w d1 * ν d2 * w d2 * (ν (d1.gcd d2))⁻¹ := by
@@ -541,7 +541,7 @@ theorem _root_.SelbergSieve.lambdaSquared_mainSum_eq_quad_form (w : ℕ → ℝ)
   · exact Nat.gcd_dvd_left d1 d2
   · exact dvd_of_mem_divisors hd1
 
-theorem _root_.SelbergSieve.lambdaSquared_mainSum_eq_diag_quad_form (w : ℕ → ℝ) :
+private theorem _root_.SelbergSieve.lambdaSquared_mainSum_eq_diag_quad_form (w : ℕ → ℝ) :
     mainSum (s := s) (SelbergSieve.lambdaSquared w) =
       ∑ l ∈ divisors P,
         1 / g l * (∑ d ∈ divisors P, if l ∣ d then ν d * w d else 0) ^ 2 :=
@@ -611,13 +611,13 @@ local notation3 "y" => SelbergSieve.level (self := s)
 local notation3 "hy" => SelbergSieve.one_le_level (self := s)
 
 @[simp]
-def _root_.SelbergSieve.selbergBoundingSum : ℝ :=
+private def _root_.SelbergSieve.selbergBoundingSum : ℝ :=
   ∑ l ∈ divisors P, if l ^ 2 ≤ y then g l else 0
 
 set_option quotPrecheck false
 local notation3 "S" => SelbergSieve.selbergBoundingSum s
 
-theorem _root_.SelbergSieve.selbergBoundingSum_pos :
+private theorem _root_.SelbergSieve.selbergBoundingSum_pos :
     0 < S := by
   dsimp only [SelbergSieve.selbergBoundingSum]
   rw [← sum_filter]
@@ -631,13 +631,13 @@ theorem _root_.SelbergSieve.selbergBoundingSum_pos :
     rw [cast_one, one_pow]
     exact s.one_le_level
 
-theorem _root_.SelbergSieve.selbergBoundingSum_ne_zero : S ≠ 0 := by
+private theorem _root_.SelbergSieve.selbergBoundingSum_ne_zero : S ≠ 0 := by
   apply _root_.ne_of_gt
   exact s.selbergBoundingSum_pos
 
-theorem _root_.SelbergSieve.selbergBoundingSum_nonneg : 0 ≤ S := _root_.le_of_lt s.selbergBoundingSum_pos
+private theorem _root_.SelbergSieve.selbergBoundingSum_nonneg : 0 ≤ S := _root_.le_of_lt s.selbergBoundingSum_pos
 
-def _root_.SelbergSieve.selbergWeights : ℕ → ℝ := fun d =>
+private def _root_.SelbergSieve.selbergWeights : ℕ → ℝ := fun d =>
   if d ∣ P then
     (ν d)⁻¹ * g d * μ d * S⁻¹ *
       ∑ m ∈ divisors P, if (d * m) ^ 2 ≤ y ∧ m.Coprime d then g m else 0
@@ -647,11 +647,11 @@ def _root_.SelbergSieve.selbergWeights : ℕ → ℝ := fun d =>
 set_option quotPrecheck false
 local notation3 "γ" => SelbergSieve.selbergWeights s
 
-theorem _root_.SelbergSieve.selbergWeights_eq_zero_of_not_dvd {d : ℕ} (hd : ¬ d ∣ P) :
+private theorem _root_.SelbergSieve.selbergWeights_eq_zero_of_not_dvd {d : ℕ} (hd : ¬ d ∣ P) :
     γ d = 0 := by
   rw [SelbergSieve.selbergWeights, if_neg hd]
 
-theorem _root_.SelbergSieve.selbergWeights_eq_zero (d : ℕ) (hd : ¬d ^ 2 ≤ y) :
+private theorem _root_.SelbergSieve.selbergWeights_eq_zero (d : ℕ) (hd : ¬d ^ 2 ≤ y) :
     γ d = 0 := by
   dsimp only [SelbergSieve.selbergWeights]
   split_ifs with h
@@ -667,7 +667,7 @@ theorem _root_.SelbergSieve.selbergWeights_eq_zero (d : ℕ) (hd : ¬d ^ 2 ≤ y
   · rfl
 
 @[aesop safe]
-theorem _root_.SelbergSieve.selbergWeights_mul_mu_nonneg (d : ℕ) (hdP : d ∣ P) :
+private theorem _root_.SelbergSieve.selbergWeights_mul_mu_nonneg (d : ℕ) (hdP : d ∣ P) :
     0 ≤ γ d * μ d := by
   dsimp only [SelbergSieve.selbergWeights]
   rw [if_pos hdP, mul_assoc]
@@ -686,7 +686,7 @@ theorem _root_.SelbergSieve.selbergWeights_mul_mu_nonneg (d : ℕ) (hdP : d ∣ 
   · exact le_of_lt <| SelbergSieve.selbergTerms_pos _ m (dvd_of_mem_divisors hm)
   · rfl
 
-lemma _root_.SelbergSieve.sum_mul_subst (k n : ℕ) {f : ℕ → ℝ} (h : ∀ l, l ∣ n → ¬ k ∣ l → f l = 0) :
+private lemma _root_.SelbergSieve.sum_mul_subst (k n : ℕ) {f : ℕ → ℝ} (h : ∀ l, l ∣ n → ¬ k ∣ l → f l = 0) :
       ∑ l ∈ n.divisors, f l
     = ∑ m ∈ n.divisors, if k*m ∣ n then f (k*m) else 0 := by
   by_cases hn: n = 0
@@ -727,7 +727,7 @@ lemma _root_.SelbergSieve.sum_mul_subst (k n : ℕ) {f : ℕ → ℝ} (h : ∀ l
       exact hdvd hl.1
 
 --Important facts about the selberg weights
-theorem _root_.SelbergSieve.selbergWeights_eq_dvds_sum (d : ℕ) :
+private theorem _root_.SelbergSieve.selbergWeights_eq_dvds_sum (d : ℕ) :
     ν d * γ d =
       S⁻¹ * μ d *
         ∑ l ∈ divisors P, if d ∣ l ∧ l ^ 2 ≤ y then g l else 0 := by
@@ -769,7 +769,7 @@ theorem _root_.SelbergSieve.selbergWeights_eq_dvds_sum (d : ℕ) :
     rw [if_neg, mul_zero]
     push Not; intro h; contradiction
 
-theorem _root_.SelbergSieve.selbergWeights_diagonalisation (l : ℕ) (hl : l ∈ divisors P) :
+private theorem _root_.SelbergSieve.selbergWeights_diagonalisation (l : ℕ) (hl : l ∈ divisors P) :
     (∑ d ∈ divisors P, if l ∣ d then ν d * γ d else 0) =
       if l ^ 2 ≤ y then g l * μ l * S⁻¹ else 0 := by
   calc
@@ -803,13 +803,13 @@ theorem _root_.SelbergSieve.selbergWeights_diagonalisation (l : ℕ) (hl : l ∈
         intro heq; rw [heq]
       · intro h; rw [h.1]; ring
 
-def _root_.SelbergSieve.selbergMuPlus : ℕ → ℝ :=
+private def _root_.SelbergSieve.selbergMuPlus : ℕ → ℝ :=
   SelbergSieve.lambdaSquared γ
 
 set_option quotPrecheck false
 local notation3 "μ⁺" => SelbergSieve.selbergMuPlus s
 
-theorem _root_.SelbergSieve.weight_one_of_selberg : γ 1 = 1 := by
+private theorem _root_.SelbergSieve.weight_one_of_selberg : γ 1 = 1 := by
   dsimp only [SelbergSieve.selbergWeights]
   rw [if_pos (one_dvd P), s.nu_mult.left, (SelbergSieve.selbergTerms_mult _).map_one]
   simp only [inv_one, mul_one, isUnit_one, IsUnit.squarefree, moebius_apply_of_squarefree,
@@ -818,22 +818,22 @@ theorem _root_.SelbergSieve.weight_one_of_selberg : γ 1 = 1 := by
   rw [inv_mul_cancel₀]
   convert! s.selbergBoundingSum_ne_zero
 
-theorem _root_.SelbergSieve.selbergμPlus_eq_zero (d : ℕ) (hd : ¬d ≤ y) : μ⁺ d = 0 := by
+private theorem _root_.SelbergSieve.selbergμPlus_eq_zero (d : ℕ) (hd : ¬d ≤ y) : μ⁺ d = 0 := by
   apply SelbergSieve.lambdaSquared_eq_zero_of_support _ y _ d hd
   apply s.selbergWeights_eq_zero
 
-def _root_.SelbergSieve.selbergUbSieve : SelbergSieve.UpperBoundSieve :=
+private def _root_.SelbergSieve.selbergUbSieve : SelbergSieve.UpperBoundSieve :=
   ⟨μ⁺, SelbergSieve.upperMoebius_of_lambda_sq γ (s.weight_one_of_selberg)⟩
 
 -- proved for general lambda squared sieves
-theorem _root_.SelbergSieve.mainSum_eq_diag_quad_form :
+private theorem _root_.SelbergSieve.mainSum_eq_diag_quad_form :
     mainSum (s := s.toBoundingSieve) μ⁺ =
       ∑ l ∈ divisors P,
         1 / g l *
           (∑ d ∈ divisors P, if l ∣ d then ν d * γ d else 0) ^ 2 :=
   by apply SelbergSieve.lambdaSquared_mainSum_eq_diag_quad_form
 
-theorem _root_.SelbergSieve.selberg_bound_simple_mainSum :
+private theorem _root_.SelbergSieve.selberg_bound_simple_mainSum :
     mainSum (s := s.toBoundingSieve) μ⁺ = S⁻¹ := by
   rw [SelbergSieve.mainSum_eq_diag_quad_form]
   trans (∑ l ∈ divisors P, (if l ^ 2 ≤ y then g l * (S⁻¹) ^ 2 else 0))
@@ -851,7 +851,7 @@ theorem _root_.SelbergSieve.selberg_bound_simple_mainSum :
   · ring
   · apply _root_.ne_of_gt; apply SelbergSieve.selbergBoundingSum_pos
 
-lemma _root_.SelbergSieve.eq_gcd_mul_of_dvd_of_coprime {k d m : ℕ} (hkd : k ∣ d) (hmd : Coprime m d) (hk : k ≠ 0) :
+private lemma _root_.SelbergSieve.eq_gcd_mul_of_dvd_of_coprime {k d m : ℕ} (hkd : k ∣ d) (hmd : Coprime m d) (hk : k ≠ 0) :
     k = d.gcd (k*m) := by
   obtain ⟨r, hr⟩ := hkd
   have hrdvd : r ∣ d := by use k; rw [mul_comm]; exact hr
@@ -880,7 +880,7 @@ private lemma _root_.SelbergSieve._helper {k m d : ℕ} (hkd : k ∣ d) (hk : k 
     · exact SelbergSieve.eq_gcd_mul_of_dvd_of_coprime hkd h.2 (by rintro rfl; simp at hk ⊢)
     · exact h.1
 
-theorem _root_.SelbergSieve.selbergBoundingSum_ge {d : ℕ} (hdP : d ∣ P) :
+private theorem _root_.SelbergSieve.selbergBoundingSum_ge {d : ℕ} (hdP : d ∣ P) :
     S ≥ γ d * ↑(μ d) * S := by
   calc
   _ = (∑ k ∈ divisors P, ∑ l ∈ divisors P, if k = d.gcd l ∧ l ^ 2 ≤ y then g l else 0) := by
@@ -950,7 +950,7 @@ theorem _root_.SelbergSieve.selbergBoundingSum_ge {d : ℕ} (hdP : d ∣ P) :
     dsimp only [SelbergSieve.selbergWeights]; rw [if_pos hdP]
     ring
 
-theorem _root_.SelbergSieve.selberg_bound_weights (d : ℕ) : |γ d| ≤ 1 := by
+private theorem _root_.SelbergSieve.selberg_bound_weights (d : ℕ) : |γ d| ≤ 1 := by
   by_cases hdP : d ∣ P
   swap
   · rw [s.selbergWeights_eq_zero_of_not_dvd hdP]; simp only [zero_le_one, abs_zero]
@@ -965,7 +965,7 @@ theorem _root_.SelbergSieve.selberg_bound_weights (d : ℕ) : |γ d| ≤ 1 := by
     (s.prodPrimes_squarefree.squarefree_of_dvd hdP), Int.cast_one, mul_one]
 
 
-theorem _root_.SelbergSieve.selberg_bound_muPlus (n : ℕ) (hn : n ∈ divisors P) :
+private theorem _root_.SelbergSieve.selberg_bound_muPlus (n : ℕ) (hn : n ∈ divisors P) :
     |μ⁺ n| ≤ (3:ℝ) ^ ω n := by
   let f : ℕ → ℕ → ℝ := fun x z : ℕ => if n = x.lcm z then 1 else 0
   dsimp only [SelbergSieve.selbergMuPlus, SelbergSieve.lambdaSquared]
@@ -994,7 +994,7 @@ theorem _root_.SelbergSieve.selberg_bound_muPlus (n : ℕ) (hn : n ∈ divisors 
     simp [← card_pair_lcm_eq (squarefree_of_mem_divisors_prodPrimes hn), eq_comm]
   norm_num
 
-theorem _root_.SelbergSieve.selberg_bound_simple_errSum :
+private theorem _root_.SelbergSieve.selberg_bound_simple_errSum :
     errSum (s := s.toBoundingSieve) μ⁺ ≤
       ∑ d ∈ divisors P, if (d : ℝ) ≤ y then (3:ℝ) ^ ω d * |R d| else 0 := by
   dsimp only [errSum]
@@ -1005,7 +1005,7 @@ theorem _root_.SelbergSieve.selberg_bound_simple_errSum :
     · norm_num
   · rw [s.selbergμPlus_eq_zero d h, abs_zero, zero_mul]
 
-theorem _root_.SelbergSieve.selberg_bound_simple :
+private theorem _root_.SelbergSieve.selberg_bound_simple :
     siftedSum (s := s.toBoundingSieve) ≤
       X / S +
         ∑ d ∈ divisors P, if (d : ℝ) ≤ y then (3:ℝ) ^ ω d * |R d| else 0 := by
@@ -1050,7 +1050,7 @@ open BoundingSieve SelbergSieve
 noncomputable section
 namespace Sieve
 
-lemma _root_.Sieve.prodDistinctPrimes_squarefree (s : Finset ℕ) (h : ∀ p ∈ s, p.Prime) :
+private lemma _root_.Sieve.prodDistinctPrimes_squarefree (s : Finset ℕ) (h : ∀ p ∈ s, p.Prime) :
     Squarefree (∏ p ∈ s, p) := by
   refine Iff.mpr Nat.squarefree_iff_prime_squarefree ?_
   intro p hp; by_contra h_dvd
@@ -1067,23 +1067,23 @@ lemma _root_.Sieve.prodDistinctPrimes_squarefree (s : Finset ℕ) (h : ∀ p ∈
       exact hq.2
     rw [heq] at hps; exact hps hq.1
 
-lemma _root_.Sieve.primorial_squarefree (n : ℕ) : Squarefree (primorial n) := by
+private lemma _root_.Sieve.primorial_squarefree (n : ℕ) : Squarefree (primorial n) := by
   apply Sieve.prodDistinctPrimes_squarefree
   simp_rw [Finset.mem_filter];
   exact fun _ h => h.2
 
-theorem _root_.Sieve.zeta_pos_of_prime : ∀ (p : ℕ), Nat.Prime p → (0:ℝ) < (↑ζ:ArithmeticFunction ℝ) p := by
+private theorem _root_.Sieve.zeta_pos_of_prime : ∀ (p : ℕ), Nat.Prime p → (0:ℝ) < (↑ζ:ArithmeticFunction ℝ) p := by
   intro p hp
   rw [ArithmeticFunction.natCoe_apply, ArithmeticFunction.zeta_apply, if_neg (Nat.Prime.ne_zero hp)]
   norm_num
 
-theorem _root_.Sieve.zeta_lt_self_of_prime : ∀ (p : ℕ), Nat.Prime p → (↑ζ:ArithmeticFunction ℝ) p < (p:ℝ) := by
+private theorem _root_.Sieve.zeta_lt_self_of_prime : ∀ (p : ℕ), Nat.Prime p → (↑ζ:ArithmeticFunction ℝ) p < (p:ℝ) := by
   intro p hp
   rw [ArithmeticFunction.natCoe_apply, ArithmeticFunction.zeta_apply, if_neg (Nat.Prime.ne_zero hp)]
   norm_num;
   exact Nat.succ_le_iff.mp (Nat.Prime.two_le hp)
 
-theorem _root_.Sieve.prime_dvd_primorial_iff (n p : ℕ) (hp : p.Prime) :
+private theorem _root_.Sieve.prime_dvd_primorial_iff (n p : ℕ) (hp : p.Prime) :
     p ∣ primorial n ↔ p ≤ n := by
   unfold primorial
   constructor
@@ -1099,7 +1099,7 @@ theorem _root_.Sieve.prime_dvd_primorial_iff (n p : ℕ) (hp : p.Prime) :
     rw [Finset.mem_filter, Finset.mem_range]
     exact ⟨Nat.lt_succ_iff.mpr h, hp⟩
 
-theorem _root_.Sieve.siftedSum_eq (s : SelbergSieve) (hw : ∀ i ∈ s.support, s.weights i = 1) (z : ℝ)
+private theorem _root_.Sieve.siftedSum_eq (s : SelbergSieve) (hw : ∀ i ∈ s.support, s.weights i = 1) (z : ℝ)
     (hz : 1 ≤ z) (hP : s.prodPrimes = primorial (Nat.floor z)) :
     siftedSum (s := s.toBoundingSieve) =
     (s.support.filter (fun d => ∀ p:ℕ, p.Prime → p ≤ z → ¬p ∣ d)).card := by
@@ -1135,21 +1135,21 @@ theorem _root_.Sieve.siftedSum_eq (s : SelbergSieve) (hw : ∀ i ∈ s.support, 
   simp only [Finset.mem_filter] at hx
   apply hw x hx.1
 
-def _root_.Sieve.CompletelyMultiplicative (f : ArithmeticFunction ℝ) : Prop :=
+private def _root_.Sieve.CompletelyMultiplicative (f : ArithmeticFunction ℝ) : Prop :=
   f 1 = 1 ∧ ∀ a b, f (a*b) = f a * f b
 
 namespace CompletelyMultiplicative
 open ArithmeticFunction
-theorem _root_.Sieve.CompletelyMultiplicative.zeta : Sieve.CompletelyMultiplicative ζ := by
+private theorem _root_.Sieve.CompletelyMultiplicative.zeta : Sieve.CompletelyMultiplicative ζ := by
   unfold Sieve.CompletelyMultiplicative
   simp_rw [ArithmeticFunction.natCoe_apply, ArithmeticFunction.zeta_apply, one_ne_zero, ite_false,
     mul_eq_zero, Nat.cast_ite, Nat.cast_one, CharP.cast_eq_zero, mul_ite, mul_zero, mul_one,
     true_and, ← ite_or, or_comm, implies_true]
 
-theorem _root_.Sieve.CompletelyMultiplicative.id : Sieve.CompletelyMultiplicative ArithmeticFunction.id := by
+private theorem _root_.Sieve.CompletelyMultiplicative.id : Sieve.CompletelyMultiplicative ArithmeticFunction.id := by
     constructor <;> simp
 
-theorem _root_.Sieve.CompletelyMultiplicative.pmul (f g : ArithmeticFunction ℝ) (hf : Sieve.CompletelyMultiplicative f)
+private theorem _root_.Sieve.CompletelyMultiplicative.pmul (f g : ArithmeticFunction ℝ) (hf : Sieve.CompletelyMultiplicative f)
     (hg : Sieve.CompletelyMultiplicative g) :
     Sieve.CompletelyMultiplicative (ArithmeticFunction.pmul f g) := by
   constructor
@@ -1157,7 +1157,7 @@ theorem _root_.Sieve.CompletelyMultiplicative.pmul (f g : ArithmeticFunction ℝ
   intro a b
   simp_rw [pmul_apply, hf.2, hg.2]; ring
 
-theorem _root_.Sieve.CompletelyMultiplicative.pdiv {f g : ArithmeticFunction ℝ} (hf : Sieve.CompletelyMultiplicative f)
+private theorem _root_.Sieve.CompletelyMultiplicative.pdiv {f g : ArithmeticFunction ℝ} (hf : Sieve.CompletelyMultiplicative f)
     (hg : Sieve.CompletelyMultiplicative g) :
     Sieve.CompletelyMultiplicative (ArithmeticFunction.pdiv f g) := by
   constructor
@@ -1165,11 +1165,11 @@ theorem _root_.Sieve.CompletelyMultiplicative.pdiv {f g : ArithmeticFunction ℝ
   intro a b
   simp_rw [pdiv_apply, hf.2, hg.2]; ring
 
-theorem _root_.Sieve.CompletelyMultiplicative.isMultiplicative {f : ArithmeticFunction ℝ} (hf : Sieve.CompletelyMultiplicative f) :
+private theorem _root_.Sieve.CompletelyMultiplicative.isMultiplicative {f : ArithmeticFunction ℝ} (hf : Sieve.CompletelyMultiplicative f) :
     ArithmeticFunction.IsMultiplicative f :=
   ⟨hf.1, fun _ => hf.2 _ _⟩
 
-theorem _root_.Sieve.CompletelyMultiplicative.apply_pow (f : ArithmeticFunction ℝ) (hf : Sieve.CompletelyMultiplicative f) (a n : ℕ) :
+private theorem _root_.Sieve.CompletelyMultiplicative.apply_pow (f : ArithmeticFunction ℝ) (hf : Sieve.CompletelyMultiplicative f) (a n : ℕ) :
     f (a^n) = f a ^ n := by
   induction n with
   | zero => simp_rw [pow_zero, hf.1]
@@ -1177,7 +1177,7 @@ theorem _root_.Sieve.CompletelyMultiplicative.apply_pow (f : ArithmeticFunction 
 
 end CompletelyMultiplicative
 
-theorem _root_.Sieve.prod_factors_one_div_compMult_ge (M : ℕ) (f : ArithmeticFunction ℝ)
+private theorem _root_.Sieve.prod_factors_one_div_compMult_ge (M : ℕ) (f : ArithmeticFunction ℝ)
     (hf : Sieve.CompletelyMultiplicative f) (hf_nonneg : ∀ n, 0 ≤ f n) (d : ℕ) (hd : Squarefree d)
     (hf_size : ∀ n, n.Prime → n ∣ d → f n < 1) :
     f d * ∏ p ∈ d.primeFactors, 1 / (1 - f p)
@@ -1210,7 +1210,7 @@ theorem _root_.Sieve.prod_factors_one_div_compMult_ge (M : ℕ) (f : ArithmeticF
   _ = ∏ p ∈ d.primeFactors, ∑ n ∈ Finset.Icc 1 M, f (p^n)  := by
      simp_rw [hf.apply_pow]
 
-theorem _root_.Sieve.prod_factors_sum_pow_compMult (M : ℕ) (hM : M ≠ 0) (f : ArithmeticFunction ℝ)
+private theorem _root_.Sieve.prod_factors_sum_pow_compMult (M : ℕ) (hM : M ≠ 0) (f : ArithmeticFunction ℝ)
     (hf : Sieve.CompletelyMultiplicative f) (d : ℕ) (hd : Squarefree d) :
     ∏ p ∈ d.primeFactors, ∑ n ∈ Finset.Icc 1 M, f (p^n)
     = ∑ m ∈ (d^M).divisors.filter (d ∣ ·), f m := by
@@ -1354,19 +1354,19 @@ theorem _root_.Sieve.prod_factors_sum_pow_compMult (M : ℕ) (hM : M ≠ 0) (f :
 
   exact Finset.sum_bij i hi i_inj i_surj h
 
-theorem _root_.Sieve.prod_primes_dvd_of_dvd (P : ℕ) {s : Finset ℕ} (h : ∀ p ∈ s, p ∣ P) (h' : ∀ p ∈ s, p.Prime) :
+private theorem _root_.Sieve.prod_primes_dvd_of_dvd (P : ℕ) {s : Finset ℕ} (h : ∀ p ∈ s, p ∣ P) (h' : ∀ p ∈ s, p.Prime) :
     ∏ p ∈ s, p ∣ P := by
   simp_rw [Nat.prime_iff] at h'
   apply Finset.prod_primes_dvd _ h' h
 
-lemma _root_.Sieve.sqrt_le_self (x : ℝ) (hx : 1 ≤ x) : Real.sqrt x ≤ x := by
+private lemma _root_.Sieve.sqrt_le_self (x : ℝ) (hx : 1 ≤ x) : Real.sqrt x ≤ x := by
   refine Iff.mpr Real.sqrt_le_iff ?_
   constructor
   · linarith
   refine le_self_pow₀ hx ?right.h
   norm_num
 
-lemma _root_.Sieve.Nat.squarefree_dvd_pow (a b N : ℕ) (ha : Squarefree a) (hab : a ∣ b ^ N) : a ∣ b := by
+private lemma _root_.Sieve.Nat.squarefree_dvd_pow (a b N : ℕ) (ha : Squarefree a) (hab : a ∣ b ^ N) : a ∣ b := by
   by_cases hN : N=0
   · rw [hN, pow_zero, Nat.dvd_one] at hab
     rw [hab]; simp
@@ -1376,7 +1376,7 @@ lemma _root_.Sieve.Nat.squarefree_dvd_pow (a b N : ℕ) (ha : Squarefree a) (hab
 /-
 Proposed generalisation :
 
-theorem _root_.Sieve.selbergBoundingSum_ge_sum_div (s : SelbergSieve)
+private theorem _root_.Sieve.selbergBoundingSum_ge_sum_div (s : SelbergSieve)
     (hnu : CompletelyMultiplicative s.nuDivSelf) (hnu_nonneg : ∀ n, 0 ≤ s.nuDivSelf n)
     (hnu_lt : ∀ p, p.Prime → p ∣ s.prodPrimes → s.nuDivSelf p < 1):
     s.selbergBoundingSum ≥ ∑ m in
@@ -1384,7 +1384,7 @@ theorem _root_.Sieve.selbergBoundingSum_ge_sum_div (s : SelbergSieve)
       s.nu m
 -/
 
-theorem _root_.Sieve.selbergBoundingSum_ge_sum_div (s : SelbergSieve) (hP : ∀ p:ℕ, p.Prime → (p:ℝ) ≤ s.level → p ∣ s.prodPrimes)
+private theorem _root_.Sieve.selbergBoundingSum_ge_sum_div (s : SelbergSieve) (hP : ∀ p:ℕ, p.Prime → (p:ℝ) ≤ s.level → p ∣ s.prodPrimes)
   (hnu : Sieve.CompletelyMultiplicative s.nu) (hnu_nonneg : ∀ n, 0 ≤ s.nu n) (hnu_lt : ∀ p, p.Prime → p ∣ s.prodPrimes → s.nu p < 1):
     s.selbergBoundingSum ≥ ∑ m ∈ Finset.Icc 1 (Nat.floor <| Real.sqrt s.level), s.nu m := by
   unfold SelbergSieve.selbergBoundingSum
@@ -1484,7 +1484,7 @@ theorem _root_.Sieve.selbergBoundingSum_ge_sum_div (s : SelbergSieve) (hP : ∀ 
       apply h j i hj.1.1 htj.2 hti.1.1
     exact hij <| Nat.dvd_antisymm hidvdj hjdvdi
 
-theorem _root_.Sieve.boundingSum_ge_sum (s : SelbergSieve) (hnu : s.nu = (ζ : ArithmeticFunction ℝ).pdiv .id)
+private theorem _root_.Sieve.boundingSum_ge_sum (s : SelbergSieve) (hnu : s.nu = (ζ : ArithmeticFunction ℝ).pdiv .id)
   (hP : ∀ p:ℕ, p.Prime → (p:ℝ) ≤ s.level → p ∣ s.prodPrimes) :
     s.selbergBoundingSum ≥ ∑ m ∈ Finset.Icc 1 (Nat.floor <| Real.sqrt s.level), 1 / (m:ℝ) := by
   trans ∑ m ∈ Finset.Icc 1 (Nat.floor <| Real.sqrt s.level), (ζ : ArithmeticFunction ℝ).pdiv .id m
@@ -1516,7 +1516,7 @@ theorem _root_.Sieve.boundingSum_ge_sum (s : SelbergSieve) (hnu : s.nu = (ζ : A
     ArithmeticFunction.zeta_apply_ne (show m ≠ 0 by omega), Nat.cast_one,
     ArithmeticFunction.id_apply];
 
-theorem _root_.Sieve.boundingSum_ge_log (s : SelbergSieve) (hnu : s.nu = (ζ : ArithmeticFunction ℝ).pdiv .id)
+private theorem _root_.Sieve.boundingSum_ge_log (s : SelbergSieve) (hnu : s.nu = (ζ : ArithmeticFunction ℝ).pdiv .id)
   (hP : ∀ p:ℕ, p.Prime → (p:ℝ) ≤ s.level → p ∣ s.prodPrimes)  :
     s.selbergBoundingSum ≥ Real.log (s.level) / 2 := by
   trans (∑ m ∈ Finset.Icc 1 (Nat.floor <| Real.sqrt s.level), 1 / (m:ℝ))
@@ -1531,7 +1531,7 @@ theorem _root_.Sieve.boundingSum_ge_log (s : SelbergSieve) (hnu : s.nu = (ζ : A
 
 open ArithmeticFunction
 
-theorem _root_.Sieve.rem_sum_le_of_const (s : SelbergSieve) (C : ℝ) (hrem : ∀ d > 0, |rem (s := s.toBoundingSieve) d| ≤ C) :
+private theorem _root_.Sieve.rem_sum_le_of_const (s : SelbergSieve) (C : ℝ) (hrem : ∀ d > 0, |rem (s := s.toBoundingSieve) d| ≤ C) :
     ∑ d ∈ s.prodPrimes.divisors, (if (d : ℝ) ≤ s.level then (3:ℝ) ^ ω d * |rem (s := s.toBoundingSieve) d| else 0)
       ≤ C * s.level * (1+Real.log s.level)^3 := by
   rw [←Finset.sum_filter]
