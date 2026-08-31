@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-255 proofs in the catalog (out of 291 Erdős problems with formalized solutions):
-- 253 `complete`
+259 proofs in the catalog (out of 291 Erdős problems with formalized solutions):
+- 257 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -35,6 +35,7 @@ lake build
 | [31](https://www.erdosproblems.com/31) | `complete` | [problems/31/](problems/31/) | |
 | [34](https://www.erdosproblems.com/34) | `complete` | [problems/34/](problems/34/) | |
 | [35](https://www.erdosproblems.com/35) | `complete` | [problems/35/](problems/35/) | |
+| [37](https://www.erdosproblems.com/37) | `complete` | [problems/37/](problems/37/) | |
 | [38](https://www.erdosproblems.com/38) | `complete` | [problems/38/](problems/38/) | |
 | [42](https://www.erdosproblems.com/42) | `complete` | [problems/42/](problems/42/) | |
 | [43](https://www.erdosproblems.com/43) | `complete` | [problems/43/](problems/43/) | |
@@ -66,6 +67,7 @@ lake build
 | [180](https://www.erdosproblems.com/180) | `complete` | [problems/180/](problems/180/) | |
 | [183](https://www.erdosproblems.com/183) | `complete` | [problems/183/](problems/183/) | |
 | [189](https://www.erdosproblems.com/189) | `complete` | [problems/189/](problems/189/) | |
+| [191](https://www.erdosproblems.com/191) | `complete` | [problems/191/](problems/191/) | |
 | [192](https://www.erdosproblems.com/192) | `complete` | [problems/192/](problems/192/) | |
 | [194](https://www.erdosproblems.com/194) | `complete` | [problems/194/](problems/194/) | |
 | [198](https://www.erdosproblems.com/198) | `complete` | [problems/198/](problems/198/) | |
@@ -119,12 +121,14 @@ lake build
 | [351](https://www.erdosproblems.com/351) | `complete` | [problems/351/](problems/351/) | |
 | [353](https://www.erdosproblems.com/353) | `complete` | [problems/353/](problems/353/) | |
 | [355](https://www.erdosproblems.com/355) | `complete` | [problems/355/](problems/355/) | |
+| [356](https://www.erdosproblems.com/356) | `complete` | [problems/356/](problems/356/) | |
 | [358](https://www.erdosproblems.com/358) | `complete` | [problems/358/](problems/358/) | |
 | [363](https://www.erdosproblems.com/363) | `complete` | [problems/363/](problems/363/) | |
 | [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
 | [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
 | [379](https://www.erdosproblems.com/379) | `complete` | [problems/379/](problems/379/) | |
 | [392](https://www.erdosproblems.com/392) | `complete` | [problems/392/](problems/392/) | |
+| [395](https://www.erdosproblems.com/395) | `complete` | [problems/395/](problems/395/) | |
 | [397](https://www.erdosproblems.com/397) | `complete` | [problems/397/](problems/397/) | |
 | [399](https://www.erdosproblems.com/399) | `complete` | [problems/399/](problems/399/) | |
 | [401](https://www.erdosproblems.com/401) | `complete` | [problems/401/](problems/401/) | |
