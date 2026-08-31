@@ -1045,6 +1045,16 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos358.lean"
+- number: "362"
+  proof:
+    path: "problems/362/"
+    theorem: "Erdos362.erdos_362"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos362.lean"
 - number: "363"
   proof:
     path: "problems/363/"
