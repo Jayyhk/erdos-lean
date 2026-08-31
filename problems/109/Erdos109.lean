@@ -13,12 +13,11 @@ The conjecture is recorded in [ErGr80, p.85] and was proved by Moreira, Richter 
 invariant measure on the Stone--Čech compactification of `ℕ` obtained from a prefix sequence
 realising the upper density of `A`.
 
-One mechanical change was needed beyond concatenation: upstream declares a
-`namespace Set.HasDensity` block, which the flattener renders as `section` + `open` with
-`_root_.`-pinned declaration names (to keep Mathlib's `Set` from being shadowed by the
-`Erdos109` wrapper). The resulting `open Set.HasDensity` refers to a namespace that does not
-yet exist at that point, so it is dropped; the enclosing `open Set` already puts `HasDensity`
-in scope, and the declarations themselves keep their `_root_.Set.HasDensity.` names.
+One mechanical change was needed beyond concatenation: upstream declares its density
+notions inside `namespace Set`, which the flattener renders as `section` + `open`. Those
+declarations live in the `Erdos109` namespace here rather than extending Mathlib's `Set`,
+so `partialDensity`, `upperDensity`, `lowerDensity`, `HasDensity` and `HasPosDensity` are
+written in prefix form (`upperDensity A`) instead of as dot notation on a `Set`.
 
 The formalisation is by plby (github.com/plby/lean-proofs),
 `src/latest/ErdosProblems/Erdos109.lean` together with the module of
@@ -63,12 +62,12 @@ we define the partial density of `S` (relative to a set `A`) to be the proportio
 This definition was inspired from https://github.com/b-mehta/unit-fractions
 -/
 @[inline]
-noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Set.Iio b).ncard / (A ∩ Set.Iio b).ncard
 
-theorem _root_.Set.partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) (b : β) : S.partialDensity A b ≤ 1 := by
+theorem partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) (b : β) : partialDensity S A b ≤ 1 := by
   apply div_le_one_of_le₀ _ (Nat.cast_nonneg _)
   exact mod_cast Set.ncard_le_ncard <| Set.inter_subset_inter_left _ inter_subset_right
 
@@ -77,30 +76,30 @@ Given a set `S` in an order `β`, where all intervals bounded above are finite, 
 density of `S` (relative to a set `A`) to be the limsup of the partial densities of `S`
 (relative to `A`) for `b → ∞`.
 -/
-noncomputable def _root_.Set.upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable def upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : ℝ :=
-  atTop.limsup fun (b : β) ↦ S.partialDensity A b
+  atTop.limsup fun (b : β) ↦ partialDensity S A b
 
 /--
 Given a set `S` in an order `β`, where all intervals bounded above are finite, we define the lower
 density of `S` (relative to a set `A`) to be the liminf of the partial densities of `S`
 (relative to `A`) for `b → ∞`.
 -/
-noncomputable def _root_.Set.lowerDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable def lowerDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : ℝ :=
-  atTop.liminf fun (b : β) ↦ S.partialDensity A b
+  atTop.liminf fun (b : β) ↦ partialDensity S A b
 
-theorem _root_.Set.lowerDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) : S.lowerDensity A ≤ 1 := by
+theorem lowerDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) : lowerDensity S A ≤ 1 := by
   by_cases h : atTop (α := β) = ⊥
-  · simp [h, Set.lowerDensity, Filter.liminf_eq]
+  · simp [h, lowerDensity, Filter.liminf_eq]
   · have : (atTop (α := β)).NeBot := ⟨h⟩
     apply Real.sSup_le (fun x hx ↦ ?_) one_pos.le
-    simpa using hx.mono fun y hy ↦ hy.trans (Set.partialDensity_le_one _ _ y)
+    simpa using hx.mono fun y hy ↦ hy.trans (partialDensity_le_one _ _ y)
 
-theorem _root_.Set.lowerDensity_nonneg {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) : 0 ≤ S.lowerDensity A := by
-  rw [Set.lowerDensity, Filter.liminf_eq]
+theorem lowerDensity_nonneg {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) : 0 ≤ lowerDensity S A := by
+  rw [lowerDensity, Filter.liminf_eq]
   exact (em _).elim (le_csSup · <| .of_forall fun _ ↦ by positivity)
     (Real.sSup_of_not_bddAbove · |>.ge)
 
@@ -112,26 +111,26 @@ in `A` tends to `α` as `n → ∞`.
 When `β = ℕ` this by default defines the natural density of a set
 (i.e., relative to all of `ℕ`).
 -/
-def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+def HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=
-  Tendsto (fun (b : β) => S.partialDensity A b) atTop (𝓝 α)
+  Tendsto (fun (b : β) => partialDensity S A b) atTop (𝓝 α)
 
 /--
 A set `S` in an order `β` where all intervals bounded above are finite is said to have
 positive density (relative to a set `A`) if there exists a positive `α : ℝ` such that
 `S` has density `α` (relative to a set `A`).
 -/
-def _root_.Set.HasPosDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+def HasPosDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : Prop :=
-  ∃ α > 0, S.HasDensity α A
+  ∃ α > 0, HasDensity S α A
 
 section
 
 /-- In a non-trivial partial order with a least element, the set of all
 elements has density one. -/
 @[simp]
-theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
-    (@Set.univ β).HasDensity 1 := by
+theorem HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
+    HasDensity (@Set.univ β) 1 := by
   by_cases h : atTop (α := β) = ⊥
   · simp [h, HasDensity]
   · simp only [HasDensity, partialDensity, univ_inter, inter_univ]
@@ -201,23 +200,23 @@ its limsup, and the selected prefix lengths tend to infinity.  We discard a
 finite initial segment so that every selected prefix is nonempty. -/
 theorem exists_prefix_realizing_upperDensity (A : Set ℕ) :
     ∃ N : ℕ → ℕ,
-      Tendsto (fun k => A.partialDensity Set.univ (N k)) atTop
-        (𝓝 A.upperDensity) ∧
+      Tendsto (fun k => partialDensity A Set.univ (N k)) atTop
+        (𝓝 (upperDensity A)) ∧
       Tendsto N atTop atTop ∧ ∀ k, 0 < N k := by
   have hlow : IsCoboundedUnder (· ≤ ·) atTop
-      (fun n : ℕ => A.partialDensity Set.univ n) :=
+      (fun n : ℕ => partialDensity A Set.univ n) :=
     isCoboundedUnder_le_of_le atTop fun n => by positivity
   have hupp : IsBoundedUnder (· ≤ ·) atTop
-      (fun n : ℕ => A.partialDensity Set.univ n) :=
+      (fun n : ℕ => partialDensity A Set.univ n) :=
     isBoundedUnder_of ⟨(1 : ℝ), fun (n : ℕ) =>
-      Set.partialDensity_le_one A Set.univ n⟩
+      partialDensity_le_one A Set.univ n⟩
   obtain ⟨N, hNlim, hNtop⟩ := exists_seq_tendsto_limsup hlow hupp
   have hNpos : ∀ᶠ k in atTop, 0 < N k := by
     exact hNtop (eventually_gt_atTop 0)
   rw [eventually_atTop] at hNpos
   obtain ⟨K, hK⟩ := hNpos
   refine ⟨fun k => N (k + K), ?_, ?_, ?_⟩
-  · simpa [Set.upperDensity, Function.comp_def] using
+  · simpa [upperDensity, Function.comp_def] using
       hNlim.comp (tendsto_add_atTop_nat K)
   · exact hNtop.comp (tendsto_add_atTop_nat K)
   · intro k
@@ -810,10 +809,10 @@ theorem finsetDensity_le_one (F : Finset ℕ) (E : Set ℕ) :
     simp [this, finsetDensity]
 
 /-- On an initial interval, the finite-set normalization is definitionally
-the partial density used in `Set.upperDensity`. -/
+the partial density used in `upperDensity`. -/
 theorem finsetDensity_range_eq_partialDensity (A : Set ℕ) (N : ℕ) :
-    finsetDensity (Finset.range N) A = A.partialDensity Set.univ N := by
-  simp [finsetDensity, Set.partialDensity, Set.ncard_eq_toFinset_card, inter_comm]
+    finsetDensity (Finset.range N) A = partialDensity A Set.univ N := by
+  simp [finsetDensity, partialDensity, Set.ncard_eq_toFinset_card, inter_comm]
 
 /-- Countably many set densities can be made simultaneously convergent by
 one increasing reindexing.  This is the indicator-valued instance of MRR's
@@ -1125,7 +1124,7 @@ theorem exists_invariant_orbitMeasure_realizing_upperDensity (A : Set ℕ) :
           atTop (𝓝 μ) ∧
         MeasurePreserving patternShift (μ : Measure DensityPattern) μ ∧
         (((μ : ProbabilityMeasure DensityPattern) : Measure DensityPattern)
-          (patternEvent 0)).toReal = A.upperDensity := by
+          (patternEvent 0)).toReal = (upperDensity A) := by
   obtain ⟨N, hNdensity, hNtop, hNpos⟩ := exists_prefix_realizing_upperDensity A
   obtain ⟨μ, φ, hφ, hμ, hcoord⟩ :=
     exists_empiricalOrbitMeasure_subseq A N hNpos
@@ -1148,14 +1147,14 @@ theorem exists_invariant_orbitMeasure_realizing_upperDensity (A : Set ℕ) :
         (measure_ne_top ((μ : ProbabilityMeasure DensityPattern) :
           Measure DensityPattern) (patternEvent 0))).comp (hcoord 0))
   have hdensitySubseq :
-      Tendsto (fun k ↦ A.partialDensity Set.univ (N (φ k))) atTop
-        (𝓝 A.upperDensity) :=
+      Tendsto (fun k ↦ partialDensity A Set.univ (N (φ k))) atTop
+        (𝓝 (upperDensity A)) :=
     hNdensity.comp hφ.injective.nat_tendsto_atTop
   have hrealEq :
       (fun k ↦ ENNReal.toReal
         (((((Finset.range (N (φ k)) : Set ℕ) ∩ orbitSet A 0).ncard : ℕ) : ℝ≥0∞) /
           (N (φ k) : ℝ≥0∞))) =
-        (fun k ↦ A.partialDensity Set.univ (N (φ k))) := by
+        (fun k ↦ partialDensity A Set.univ (N (φ k))) := by
     funext k
     rw [show orbitSet A 0 = A by ext n; simp [orbitSet]]
     rw [ENNReal.toReal_div]
@@ -2140,7 +2139,7 @@ theorem exists_regular_ergodic_betaMeasure_realizing_upperDensity (A : Set ℕ) 
       ((μ : Measure BetaNat).Regular) ∧
       MeasurePreserving betaShift (μ : Measure BetaNat) μ ∧
       Ergodic betaShift (μ : Measure BetaNat) ∧
-      A.upperDensity ≤
+      (upperDensity A) ≤
         ∫ x, betaIndicator A x ∂(μ : Measure BetaNat) := by
   obtain ⟨N, hNdensity, hNtop, hNpos⟩ :=
     exists_prefix_realizing_upperDensity A
@@ -2160,7 +2159,7 @@ theorem exists_regular_ergodic_betaMeasure_realizing_upperDensity (A : Set ℕ) 
       (∫ x, f x ∂
           ((betaEmpirical (N k) (hNpos k) : ProbabilityMeasure BetaNat) :
             Measure BetaNat)) =
-        A.partialDensity Set.univ (N k) := by
+        partialDensity A Set.univ (N k) := by
     rw [integral_betaEmpirical]
     simp_rw [f, betaIndicator_pure, natIndicator_eq_realIndicator]
     calc
@@ -2170,13 +2169,13 @@ theorem exists_regular_ergodic_betaMeasure_realizing_upperDensity (A : Set ℕ) 
         simp [realFinsetMean]
       _ = finsetDensity (Finset.range (N k)) A :=
         realFinsetMean_indicator _ _
-      _ = A.partialDensity Set.univ (N k) :=
+      _ = partialDensity A Set.univ (N k) :=
         finsetDensity_range_eq_partialDensity A (N k)
   have hDensityTend :
-      Tendsto (fun k ↦ A.partialDensity Set.univ (N k))
-        (q : Filter ℕ) (𝓝 A.upperDensity) :=
+      Tendsto (fun k ↦ partialDensity A Set.univ (N k))
+        (q : Filter ℕ) (𝓝 (upperDensity A)) :=
     hNdensity.mono_left hq
-  have hIntEq : (∫ x, f x ∂(μ₀ : Measure BetaNat)) = A.upperDensity := by
+  have hIntEq : (∫ x, f x ∂(μ₀ : Measure BetaNat)) = (upperDensity A) := by
     apply tendsto_nhds_unique hIntTend
     convert hDensityTend using 1
     funext k
@@ -2191,7 +2190,7 @@ theorem exists_regular_ergodic_betaMeasure_realizing_upperDensity (A : Set ℕ) 
     measurePreserving_betaStateProbability Λ hΛext.1,
     ergodic_betaStateProbability_of_extreme Λ hΛext, ?_⟩
   calc
-    A.upperDensity = Λ₀ f := by
+    (upperDensity A) = Λ₀ f := by
       rw [← hIntEq]
       rfl
     _ ≤ Λ f := hΛge
@@ -8871,8 +8870,8 @@ theorem integral_betaIndicator_eq_of_upperDensity_limit
     (hmu : Tendsto (fun k ↦ betaEmpirical (N k) (hNpos k))
       (q : Filter ℕ) (nhds mu))
     (hdens : Tendsto (fun k ↦ finsetDensity (Finset.range (N k)) A)
-      atTop (nhds A.upperDensity)) :
-    ∫ p, betaIndicator A p ∂(mu : Measure BetaNat) = A.upperDensity := by
+      atTop (nhds (upperDensity A))) :
+    ∫ p, betaIndicator A p ∂(mu : Measure BetaNat) = (upperDensity A) := by
   let b : BetaNat →ᵇ ℝ :=
     BoundedContinuousFunction.mkOfCompact (betaIndicator A)
   have hmuA :=
@@ -9149,13 +9148,13 @@ noncomputable section
 noncomputable local instance : MeasurableSpace BetaNat := borel BetaNat
 local instance : BorelSpace BetaNat := ⟨rfl⟩
 
-theorem erdos_109 (A : Set ℕ) (hA : A.upperDensity > 0) :
+theorem erdos_109 (A : Set ℕ) (hA : (upperDensity A) > 0) :
     ∃ B C : Set ℕ, B.Infinite ∧ C.Infinite ∧ B + C ⊆ A := by
   obtain ⟨N, hNdensity, hNtop, hNpos⟩ :=
     exists_prefix_realizing_upperDensity A
   have hNdensity' : Tendsto
       (fun k ↦ finsetDensity (Finset.range (N k)) A)
-      atTop (nhds A.upperDensity) := by
+      atTop (nhds (upperDensity A)) := by
     simpa only [finsetDensity_range_eq_partialDensity] using hNdensity
   obtain ⟨q, hq, mu, hmureg, hmu, hpres⟩ :=
     exists_invariant_betaLimit N hNpos hNtop
@@ -9165,7 +9164,7 @@ theorem erdos_109 (A : Set ℕ) (hA : A.upperDensity > 0) :
   let a : BetaL2 (mu : Measure BetaNat) := unitaryCompactPart U F
   let b : BetaL2 (mu : Measure BetaNat) :=
     (betaBesClosed (mu := (mu : Measure BetaNat))).toSubmodule.starProjection F
-  let delta : ℝ := A.upperDensity
+  let delta : ℝ := (upperDensity A)
   let eps : ℝ := delta ^ 2 / 100
   have hdelta : 0 < delta := hA
   have heps : 0 < eps := by positivity
@@ -9478,7 +9477,7 @@ theorem erdos_109 (A : Set ℕ) (hA : A.upperDensity > 0) :
     linarith
   have hdeltaLe : delta ≤ 1 := by
     exact le_of_tendsto hNdensity
-      (Eventually.of_forall fun n ↦ Set.partialDensity_le_one A Set.univ (N n))
+      (Eventually.of_forall fun n ↦ partialDensity_le_one A Set.univ (N n))
   have hdLe : d ≤ 1 := by
     calc
       d ≤ ∫ _p : BetaNat, (1 : ℝ) ∂(mu : Measure BetaNat) := by

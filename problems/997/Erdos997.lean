@@ -65,7 +65,7 @@ we define the partial density of `S` (relative to a set `A`) to be the proportio
 This definition was inspired from https://github.com/b-mehta/unit-fractions
 -/
 @[inline]
-noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+private noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Iio b).ncard / (A ∩ Iio b).ncard
 
@@ -77,14 +77,14 @@ in `A` tends to `α` as `n → ∞`.
 When `β = ℕ` this by default defines the natural density of a set
 (i.e., relative to all of `ℕ`).
 -/
-def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+private def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=
   Tendsto (fun (b : β) => S.partialDensity A b) atTop (𝓝 α)
 
 /-- In a non-trivial partial order with a least element, the set of all
 elements has density one. -/
 @[simp]
-theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
+private theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
     (@Set.univ β).HasDensity 1 := by
   by_cases h : atTop (α := β) = ⊥
   · simp [h, HasDensity]
@@ -136,12 +136,12 @@ and was obtained by Aristotle from Harmonic (aristotle-harmonic@harmonic.fun).
 -/
 
 /-- The proposition that `n` is a sum of distinct proper divisors. -/
-def _root_.Nat.IsSumDivisors (n : ℕ) : Prop :=
+private def _root_.Nat.IsSumDivisors (n : ℕ) : Prop :=
   ∃ S ⊆ n.properDivisors, ∑ d ∈ S, d = n
 
 /-- Being a sum of distinct proper divisors is membership in the corresponding
 subset-sum finset. -/
-theorem _root_.Nat.isSumDivisors_iff_mem_subsetSum (n : ℕ) :
+private theorem _root_.Nat.isSumDivisors_iff_mem_subsetSum (n : ℕ) :
     n.IsSumDivisors ↔ n ∈ n.properDivisors.subsetSum := by
   rw [Nat.IsSumDivisors, Finset.mem_subsetSum_iff]
 
@@ -19871,7 +19871,7 @@ theorem finiteMultiples_empty : finiteMultiples ∅ = ∅ := by
   simp
 
 /-- Pseudoperfectness is inherited by positive multiples. -/
-theorem _root_.Nat.IsSumDivisors.of_dvd {m n : ℕ} (hm : Nat.IsSumDivisors m)
+private theorem _root_.Nat.IsSumDivisors.of_dvd {m n : ℕ} (hm : Nat.IsSumDivisors m)
     (hmn : m ∣ n) (hn : 0 < n) : Nat.IsSumDivisors n := by
   obtain ⟨k, rfl⟩ := hmn
   have hk : 0 < k := by
