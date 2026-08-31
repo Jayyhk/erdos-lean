@@ -11,7 +11,7 @@ Erdős Problem 139 (Szemerédi's theorem). Let `r_k(N)` be the size of the large
 
 A conjecture of Erdős and Turán, proved by Szemerédi [Sz75]; the best known bounds are due to
 Kelley and Meka [KeMe23] for `k = 3`, Green and Tao [GrTa17] for `k = 4`, and Leng, Sah and
-Sawhney [LSS24] for `k ≥ 5`. Below, `r k N` is `Set.IsAPOfLengthFree.maxCard k N`, the
+Sawhney [LSS24] for `k ≥ 5`. Below, `r k N` is `IsAPOfLengthFree.maxCard k N`, the
 supremum of `S.card` over `S ⊆ Finset.Icc 1 N` that are `k`-AP-free, and `r_k(N) = o(N)` is
 rendered as `r k N / N → 0`.
 
@@ -44,43 +44,43 @@ variable {α : Type*} [AddCommMonoid α]
 
 /-- A set is an arithmetic progression of length `l`, first term `a`, and
 difference `d`. Cardinality is included so repeated terms are not nontrivial. -/
-def _root_.Set.IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=
+def IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=
   ENat.card s = l ∧ s = {a + n • d | (n : ℕ) (_ : n < l)}
 
 /-- A set is an arithmetic progression of length `l`. -/
-def _root_.Set.IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=
-  ∃ a d : α, s.IsAPOfLengthWith l a d
+def IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=
+  ∃ a d : α, IsAPOfLengthWith s l a d
 
 section
 
-theorem _root_.Set.IsAPOfLength.card {s : Set α} {l : ℕ∞} (h : s.IsAPOfLength l) : ENat.card s = l :=
+theorem IsAPOfLength.card {s : Set α} {l : ℕ∞} (h : IsAPOfLength s l) : ENat.card s = l :=
   h.choose_spec.choose_spec.1
 
 end
 
 /-- A set is free of nontrivial arithmetic progressions of length `l`. -/
-def _root_.Set.IsAPOfLengthFree (s : Set α) (l : ℕ∞) : Prop :=
-  ∀ t ⊆ s, t.IsAPOfLength l → l ≤ 1
+def IsAPOfLengthFree (s : Set α) (l : ℕ∞) : Prop :=
+  ∀ t ⊆ s, IsAPOfLength t l → l ≤ 1
 
 section
 
 /-- The largest cardinality of a `k`-AP-free subset of `{1, ..., N}`. -/
-noncomputable def _root_.Set.IsAPOfLengthFree.maxCard (k : ℕ) (N : ℕ) : ℕ :=
+noncomputable def IsAPOfLengthFree.maxCard (k : ℕ) (N : ℕ) : ℕ :=
   sSup {Finset.card S | (S) (_ : S ⊆ Finset.Icc 1 N)
-    (_ : (S : Set ℕ).IsAPOfLengthFree k)}
+    (_ : IsAPOfLengthFree (S : Set ℕ) k)}
 
 end
 
 namespace SzemeredisTheorem
 
-noncomputable abbrev r := Set.IsAPOfLengthFree.maxCard
+noncomputable abbrev r := IsAPOfLengthFree.maxCard
 
 private def candidateCards (k N : ℕ) : Set ℕ :=
   {Finset.card S | (S) (_ : S ⊆ Finset.Icc 1 N)
-    (_ : (S : Set ℕ).IsAPOfLengthFree k)}
+    (_ : IsAPOfLengthFree (S : Set ℕ) k)}
 
 private lemma empty_isAPOfLengthFree (k : ℕ) :
-    (∅ : Set ℕ).IsAPOfLengthFree k := by
+    IsAPOfLengthFree (∅ : Set ℕ) k := by
   intro t ht hAP
   have ht0 : t = ∅ := Set.subset_empty_iff.mp ht
   subst t
@@ -103,7 +103,7 @@ private lemma candidateCards_bddAbove (k N : ℕ) :
 /-- The supremum in `maxCard` is attained by an AP-free subset. -/
 theorem exists_maxCard_witness (k N : ℕ) :
     ∃ S : Finset ℕ, S ⊆ Finset.Icc 1 N ∧
-      (S : Set ℕ).IsAPOfLengthFree k ∧ S.card = r k N := by
+      IsAPOfLengthFree (S : Set ℕ) k ∧ S.card = r k N := by
   have hm := Nat.sSup_mem (candidateCards_nonempty k N)
     (candidateCards_bddAbove k N)
   change r k N ∈ candidateCards k N at hm
@@ -115,7 +115,7 @@ def FinitarySzemeredi (k : ℕ) : Prop :=
   ∀ δ : ℝ, 0 < δ →
     ∃ N₀ : ℕ, 0 < N₀ ∧ ∀ N : ℕ, N₀ ≤ N → ∀ A : Finset ℕ,
       A ⊆ Finset.Icc 1 N → δ * (N : ℝ) ≤ (A.card : ℝ) →
-        ¬(A : Set ℕ).IsAPOfLengthFree k
+        ¬IsAPOfLengthFree (A : Set ℕ) k
 
 private lemma arithmeticProgressionSet_card
     (a d k : ℕ) (hd : 0 < d) :
@@ -142,7 +142,7 @@ private lemma arithmeticProgressionSet_card
 form used by the Formal Conjectures specification. -/
 theorem arithmeticProgressionSet_isAP
     (a d k : ℕ) (hd : 0 < d) :
-    Set.IsAPOfLength
+    IsAPOfLength
       {x : ℕ | ∃ i : ℕ, i < k ∧ x = a + i * d} (k : ℕ∞) := by
   refine ⟨a, d, arithmeticProgressionSet_card a d k hd, ?_⟩
   ext x
@@ -156,14 +156,14 @@ theorem arithmeticProgressionSet_isAP
 theorem not_isAPOfLengthFree_of_parameters {A : Set ℕ} {k a d : ℕ}
     (hk : 1 < k) (hd : 0 < d)
     (hmem : ∀ i < k, a + i * d ∈ A) :
-    ¬A.IsAPOfLengthFree k := by
+    ¬IsAPOfLengthFree A k := by
   intro hfree
   let t : Set ℕ := {x | ∃ i : ℕ, i < k ∧ x = a + i * d}
   have ht : t ⊆ A := by
     intro x hx
     rcases hx with ⟨i, hi, rfl⟩
     exact hmem i hi
-  have hAP : t.IsAPOfLength k := arithmeticProgressionSet_isAP a d k hd
+  have hAP : IsAPOfLength t k := arithmeticProgressionSet_isAP a d k hd
   have hle := hfree t ht hAP
   have hnle : ¬(k : ℕ∞) ≤ 1 := by exact_mod_cast (not_le.mpr hk)
   exact hnle hle
@@ -26101,7 +26101,7 @@ Authors: OpenAI Codex
 
 open scoped Topology
 
-noncomputable abbrev r := Set.IsAPOfLengthFree.maxCard
+noncomputable abbrev r := IsAPOfLengthFree.maxCard
 
 /-- Erdős Problem 139: the largest `k`-AP-free subset of `{1, ..., N}`
 has cardinality `o(N)`. -/

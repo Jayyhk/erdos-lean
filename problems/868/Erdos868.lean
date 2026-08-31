@@ -11,10 +11,10 @@ infinitely many `n ∉ A + A`? And what if instead `1_A * 1_A(n) > ε log n` for
 for an arbitrary fixed `ε > 0`? `erdos_868` answers both questions in the negative.
 
 The two questions are `erdos_868_question_one` and `erdos_868_question_two` below, and
-`erdos_868` is their conjunction. In both, `Set.IsAsymptoticAddBasisOfOrder 2` is the basis
+`erdos_868` is their conjunction. In both, `IsAsymptoticAddBasisOfOrder 2` is the basis
 property (every sufficiently large `n` lies in the sumset), `ncard_add_repr A 2 n` is the
 representation count `1_A * 1_A(n)`, and minimality is rendered as
-`∀ b ∈ B, ¬ (B \ {b}).IsAsymptoticAddBasisOfOrder 2`, which is exactly the parenthetical on
+`∀ b ∈ B, ¬ IsAsymptoticAddBasisOfOrder (B \ {b}) 2`, which is exactly the parenthetical on
 erdosproblems.com. A single construction refutes both: the counterexample below has
 representation function growing at least like `ε log n` with `ε = 1/1000000`, which is why the
 same certificate settles the stronger hypothesis of the second question.
@@ -74,11 +74,11 @@ variable {M : Type*} [AddCommMonoid M]
 This is the definition from
 `FormalConjecturesForMathlib.Combinatorics.Additive.Basis`; the local Mathlib
 snapshot does not yet contain that file. -/
-def _root_.Set.IsAsymptoticAddBasisOfOrder (A : Set M) (o : ℕ) : Prop :=
+def IsAsymptoticAddBasisOfOrder (A : Set M) (o : ℕ) : Prop :=
   ∀ᶠ m in cofinite, m ∈ o • A
 
-lemma _root_.Set.isAsymptoticAddBasisOfOrder_iff_atTop {A : Set ℕ} {o : ℕ} :
-    A.IsAsymptoticAddBasisOfOrder o ↔ ∀ᶠ m in atTop, m ∈ o • A := by
+lemma isAsymptoticAddBasisOfOrder_iff_atTop {A : Set ℕ} {o : ℕ} :
+    IsAsymptoticAddBasisOfOrder A o ↔ ∀ᶠ m in atTop, m ∈ o • A := by
   rw [IsAsymptoticAddBasisOfOrder, Nat.cofinite_eq_atTop]
 
 end
@@ -2257,9 +2257,9 @@ lemma mem_nsmul_iff_add_repr (A : Set ℕ) (o n : ℕ) :
     simpa only [List.sum_ofFn, b] using ha
 
 lemma isAsymptoticAddBasisOfOrder_iff_repr_pos (A : Set ℕ) (o : ℕ) :
-    A.IsAsymptoticAddBasisOfOrder o ↔
+    IsAsymptoticAddBasisOfOrder A o ↔
       ∀ᶠ n in atTop, 0 < ncard_add_repr A o n := by
-  rw [Set.isAsymptoticAddBasisOfOrder_iff_atTop]
+  rw [isAsymptoticAddBasisOfOrder_iff_atTop]
   constructor
   · intro h
     filter_upwards [h] with n hn
@@ -2273,12 +2273,12 @@ structure RobustCounterexample where
   A : Set ℕ
   epsilon : ℝ
   epsilon_pos : 0 < epsilon
-  basis : A.IsAsymptoticAddBasisOfOrder 2
+  basis : IsAsymptoticAddBasisOfOrder A 2
   logarithmic_representations :
     ∀ᶠ n : ℕ in atTop, epsilon * Real.log n < ncard_add_repr A 2 n
   every_subbasis_erasable :
-    ∀ B ⊆ A, B.IsAsymptoticAddBasisOfOrder 2 →
-      ∀ b ∈ B, (B \ {b}).IsAsymptoticAddBasisOfOrder 2
+    ∀ B ⊆ A, IsAsymptoticAddBasisOfOrder B 2 →
+      ∀ b ∈ B, IsAsymptoticAddBasisOfOrder (B \ {b}) 2
 
 /-- The deterministic consequences extracted from the probabilistic block construction.
 
@@ -2291,12 +2291,12 @@ structure ConstructionCertificate where
   C : Set ℕ
   epsilon : ℝ
   epsilon_pos : 0 < epsilon
-  basis : A.IsAsymptoticAddBasisOfOrder 2
+  basis : IsAsymptoticAddBasisOfOrder A 2
   logarithmic_representations :
     ∀ᶠ n : ℕ in atTop, epsilon * Real.log n < ncard_add_repr A 2 n
   cover : ∀ᶠ n : ℕ in atTop, n ∈ B ∨ n ∈ C
   canary_survives :
-    ∀ D ⊆ A, D.IsAsymptoticAddBasisOfOrder 2 → ∀ d ∈ D,
+    ∀ D ⊆ A, IsAsymptoticAddBasisOfOrder D 2 → ∀ d ∈ D,
       ∀ᶠ n : ℕ in atTop, n ∈ C → n ∈ 2 • (D \ {d})
   target_summands_finite :
     ∀ d ∈ A, {n : ℕ | n ∈ B ∧ ∃ a ∈ A, d + a = n}.Finite
@@ -2311,7 +2311,7 @@ structure TrapCertificate where
   C : Set ℕ
   epsilon : ℝ
   epsilon_pos : 0 < epsilon
-  basis : A.IsAsymptoticAddBasisOfOrder 2
+  basis : IsAsymptoticAddBasisOfOrder A 2
   logarithmic_representations :
     ∀ᶠ n : ℕ in atTop, epsilon * Real.log n < ncard_add_repr A 2 n
   cover : ∀ᶠ n : ℕ in atTop, n ∈ B ∨ n ∈ C
@@ -2322,11 +2322,11 @@ structure TrapCertificate where
     ∀ d ∈ A, {n : ℕ | n ∈ B ∧ ∃ a ∈ A, d + a = n}.Finite
 
 lemma TrapCertificate.canary_survives (c : TrapCertificate)
-    (D : Set ℕ) (hDA : D ⊆ c.A) (hD : D.IsAsymptoticAddBasisOfOrder 2)
+    (D : Set ℕ) (hDA : D ⊆ c.A) (hD : IsAsymptoticAddBasisOfOrder D 2)
     (d : ℕ) (_hdD : d ∈ D) :
     ∀ᶠ n : ℕ in atTop, n ∈ c.C → n ∈ 2 • (D \ {d}) := by
   obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp
-    (Set.isAsymptoticAddBasisOfOrder_iff_atTop.1 hD)
+    (isAsymptoticAddBasisOfOrder_iff_atTop.1 hD)
   filter_upwards [Filter.eventually_ge_atTop N] with n hn
   intro hnC
   have htwo : 2 ≤ (unordRepr D n).card := by
@@ -2362,7 +2362,7 @@ structure StagedTrapCertificate where
   Cn : ℕ → Finset ℕ
   epsilon : ℝ
   epsilon_pos : 0 < epsilon
-  basis : A.IsAsymptoticAddBasisOfOrder 2
+  basis : IsAsymptoticAddBasisOfOrder A 2
   logarithmic_representations :
     ∀ᶠ n : ℕ in atTop, epsilon * Real.log n < ncard_add_repr A 2 n
   cover : ∀ᶠ n : ℕ in atTop, n ∈ stagedSet Bn ∨ n ∈ stagedSet Cn
@@ -2401,16 +2401,16 @@ def StagedTrapCertificate.toTrapCertificate (c : StagedTrapCertificate) : TrapCe
   target_summands_finite := c.target_summands_finite
 
 lemma ConstructionCertificate.every_subbasis_erasable (c : ConstructionCertificate)
-    (D : Set ℕ) (hDA : D ⊆ c.A) (hD : D.IsAsymptoticAddBasisOfOrder 2)
+    (D : Set ℕ) (hDA : D ⊆ c.A) (hD : IsAsymptoticAddBasisOfOrder D 2)
     (d : ℕ) (hdD : d ∈ D) :
-    (D \ {d}).IsAsymptoticAddBasisOfOrder 2 := by
-  rw [Set.isAsymptoticAddBasisOfOrder_iff_atTop] at hD ⊢
+    IsAsymptoticAddBasisOfOrder (D \ {d}) 2 := by
+  rw [isAsymptoticAddBasisOfOrder_iff_atTop] at hD ⊢
   have hescape : ∀ᶠ n : ℕ in atTop,
       n ∉ {n : ℕ | n ∈ c.B ∧ ∃ a ∈ c.A, d + a = n} := by
     rw [← Nat.cofinite_eq_atTop]
     exact (c.target_summands_finite d (hDA hdD)).compl_mem_cofinite
   filter_upwards [hD, c.cover, c.canary_survives D hDA
-    (Set.isAsymptoticAddBasisOfOrder_iff_atTop.2 hD) d hdD, hescape]
+    (isAsymptoticAddBasisOfOrder_iff_atTop.2 hD) d hdD, hescape]
       with n hnD hncover hnC hnescape
   rcases hncover with hnB | hnCmem
   · have hnD' : n ∈ D + D := by simpa [two_nsmul] using hnD
@@ -2453,8 +2453,8 @@ lemma RobustCounterexample.representations_tendsto (c : RobustCounterexample) :
   exact_mod_cast (hN.trans hrepr.le)
 
 lemma RobustCounterexample.no_minimal_subbasis (c : RobustCounterexample) :
-    ¬∃ B ⊆ c.A, B.IsAsymptoticAddBasisOfOrder 2 ∧
-      ∀ b ∈ B, ¬(B \ {b}).IsAsymptoticAddBasisOfOrder 2 := by
+    ¬∃ B ⊆ c.A, IsAsymptoticAddBasisOfOrder B 2 ∧
+      ∀ b ∈ B, ¬IsAsymptoticAddBasisOfOrder (B \ {b}) 2 := by
   rintro ⟨B, hBA, hB, hminimal⟩
   have hBne : B.Nonempty := by
     by_contra h
@@ -2466,18 +2466,18 @@ lemma RobustCounterexample.no_minimal_subbasis (c : RobustCounterexample) :
   exact hminimal b hb (c.every_subbasis_erasable B hBA hB b hb)
 
 lemma parts_i_of_robustCounterexample (c : RobustCounterexample) :
-    ¬ ∀ (A : Set ℕ), A.IsAsymptoticAddBasisOfOrder 2 →
+    ¬ ∀ (A : Set ℕ), IsAsymptoticAddBasisOfOrder A 2 →
       atTop.Tendsto (fun n ↦ ncard_add_repr A 2 n) atTop → ∃ B ⊆ A,
-      B.IsAsymptoticAddBasisOfOrder 2 ∧
-        ∀ b ∈ B, ¬(B \ {b}).IsAsymptoticAddBasisOfOrder 2 := by
+      IsAsymptoticAddBasisOfOrder B 2 ∧
+        ∀ b ∈ B, ¬IsAsymptoticAddBasisOfOrder (B \ {b}) 2 := by
   intro h
   exact c.no_minimal_subbasis (h c.A c.basis c.representations_tendsto)
 
 lemma parts_ii_of_robustCounterexample (c : RobustCounterexample) :
-    ¬ ∀ᵉ (A : Set ℕ) (ε > 0), A.IsAsymptoticAddBasisOfOrder 2 →
+    ¬ ∀ᵉ (A : Set ℕ) (ε > 0), IsAsymptoticAddBasisOfOrder A 2 →
       (∀ᶠ (n : ℕ) in atTop, ε * Real.log n < ncard_add_repr A 2 n) → ∃ B ⊆ A,
-      B.IsAsymptoticAddBasisOfOrder 2 ∧
-        ∀ b ∈ B, ¬(B \ {b}).IsAsymptoticAddBasisOfOrder 2 := by
+      IsAsymptoticAddBasisOfOrder B 2 ∧
+        ∀ b ∈ B, ¬IsAsymptoticAddBasisOfOrder (B \ {b}) 2 := by
   intro h
   exact c.no_minimal_subbasis
     (h c.A c.epsilon c.epsilon_pos c.basis c.logarithmic_representations)
@@ -6640,7 +6640,7 @@ lemma dense_basis
     (hcollision : ∀ k ≥ K, ∀ q, q ∈ zBlock k → ∀ r, r ∈ zBlock k → q ≠ r →
       (denseGlobalCommonCenters q r ω).card < 182)
     (hsize : ∀ j, targetSizeCondition ω K j (denseBuildState ω K j)) :
-    (denseFinalSet ω K).IsAsymptoticAddBasisOfOrder 2 := by
+    IsAsymptoticAddBasisOfOrder (denseFinalSet ω K) 2 := by
   rw [isAsymptoticAddBasisOfOrder_iff_repr_pos]
   filter_upwards [dense_logarithmic_representations
     ω K hK hpair hcollision hsize,
@@ -6732,18 +6732,18 @@ lemma exists_robustCounterexample : ∃ c : RobustCounterexample,
   exact ⟨c.toTrapCertificate.toConstructionCertificate.toRobustCounterexample, hc⟩
 
 theorem erdos_868_question_one :
-    ¬ ∀ (A : Set ℕ), A.IsAsymptoticAddBasisOfOrder 2 →
+    ¬ ∀ (A : Set ℕ), IsAsymptoticAddBasisOfOrder A 2 →
       atTop.Tendsto (fun n ↦ ncard_add_repr A 2 n) atTop → ∃ B ⊆ A,
-      B.IsAsymptoticAddBasisOfOrder 2 ∧
-        ∀ b ∈ B, ¬(B \ {b}).IsAsymptoticAddBasisOfOrder 2 := by
+      IsAsymptoticAddBasisOfOrder B 2 ∧
+        ∀ b ∈ B, ¬IsAsymptoticAddBasisOfOrder (B \ {b}) 2 := by
   obtain ⟨c, _hc⟩ := exists_robustCounterexample
   exact parts_i_of_robustCounterexample c
 
 theorem erdos_868_question_two :
-    ¬ ∀ᵉ (A : Set ℕ) (ε > 0), A.IsAsymptoticAddBasisOfOrder 2 →
+    ¬ ∀ᵉ (A : Set ℕ) (ε > 0), IsAsymptoticAddBasisOfOrder A 2 →
       (∀ᶠ (n : ℕ) in atTop, ε * Real.log n < ncard_add_repr A 2 n) → ∃ B ⊆ A,
-      B.IsAsymptoticAddBasisOfOrder 2 ∧
-        ∀ b ∈ B, ¬(B \ {b}).IsAsymptoticAddBasisOfOrder 2 := by
+      IsAsymptoticAddBasisOfOrder B 2 ∧
+        ∀ b ∈ B, ¬IsAsymptoticAddBasisOfOrder (B \ {b}) 2 := by
   obtain ⟨c, _hc⟩ := exists_robustCounterexample
   exact parts_ii_of_robustCounterexample c
 
@@ -6756,14 +6756,14 @@ open Filter
 neither `1_A * 1_A(n) → ∞` nor the stronger `1_A * 1_A(n) > ε log n` forces an additive basis
 of order `2` to contain a minimal one. -/
 theorem erdos_868 :
-    (¬ ∀ (A : Set ℕ), A.IsAsymptoticAddBasisOfOrder 2 →
+    (¬ ∀ (A : Set ℕ), IsAsymptoticAddBasisOfOrder A 2 →
         atTop.Tendsto (fun n ↦ ncard_add_repr A 2 n) atTop → ∃ B ⊆ A,
-        B.IsAsymptoticAddBasisOfOrder 2 ∧
-          ∀ b ∈ B, ¬(B \ {b}).IsAsymptoticAddBasisOfOrder 2) ∧
-      (¬ ∀ᵉ (A : Set ℕ) (ε > 0), A.IsAsymptoticAddBasisOfOrder 2 →
+        IsAsymptoticAddBasisOfOrder B 2 ∧
+          ∀ b ∈ B, ¬IsAsymptoticAddBasisOfOrder (B \ {b}) 2) ∧
+      (¬ ∀ᵉ (A : Set ℕ) (ε > 0), IsAsymptoticAddBasisOfOrder A 2 →
         (∀ᶠ (n : ℕ) in atTop, ε * Real.log n < ncard_add_repr A 2 n) → ∃ B ⊆ A,
-        B.IsAsymptoticAddBasisOfOrder 2 ∧
-          ∀ b ∈ B, ¬(B \ {b}).IsAsymptoticAddBasisOfOrder 2) :=
+        IsAsymptoticAddBasisOfOrder B 2 ∧
+          ∀ b ∈ B, ¬IsAsymptoticAddBasisOfOrder (B \ {b}) 2) :=
   ⟨erdos_868_question_one, erdos_868_question_two⟩
 
 end

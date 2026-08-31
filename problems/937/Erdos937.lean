@@ -60,10 +60,10 @@ open Nat
 
 /-- A natural number is `k`-full when every prime factor occurs to exponent at least `k`.
 This is the definition used by `FormalConjecturesUtil`. -/
-def _root_.Nat.Full (k n : ℕ) : Prop := ∀ p ∈ n.primeFactors, p ^ k ∣ n
+def Full (k n : ℕ) : Prop := ∀ p ∈ n.primeFactors, p ^ k ∣ n
 
 /-- Powerful (squarefull) natural numbers are the `2`-full numbers. -/
-abbrev _root_.Nat.Powerful : ℕ → Prop := Full 2
+abbrev Powerful : ℕ → Prop := Full 2
 
 end
 
@@ -75,7 +75,7 @@ open Nat Set
 coprime powerful numbers.  This is the exact upstream specification. -/
 def IsCoprimePowerfulAP4 (a d : ℕ) : Prop :=
   0 < d ∧
-  a.Powerful ∧ (a + d).Powerful ∧ (a + 2 * d).Powerful ∧ (a + 3 * d).Powerful ∧
+  Powerful a ∧ Powerful (a + d) ∧ Powerful (a + 2 * d) ∧ Powerful (a + 3 * d) ∧
   a.Coprime (a + d) ∧ a.Coprime (a + 2 * d) ∧ a.Coprime (a + 3 * d) ∧
   (a + d).Coprime (a + 2 * d) ∧ (a + d).Coprime (a + 3 * d) ∧
   (a + 2 * d).Coprime (a + 3 * d)
@@ -1779,14 +1779,14 @@ private lemma reverse_progression_values {a b c : ℤ}
     linear_combination -(quartic_sub_apZ_sq a b) - (apZ_sq_sub_apY_sq a b) -
       (apY_sq_sub_apX_sq a b)
 
-private lemma powerful_sq (n : ℕ) : Nat.Powerful (n ^ 2) := by
+private lemma powerful_sq (n : ℕ) : Powerful (n ^ 2) := by
   intro p hp
   have pp := Nat.prime_of_mem_primeFactors hp
   have pd := Nat.dvd_of_mem_primeFactors hp
   have pn : p ∣ n := pp.dvd_of_dvd_pow pd
   exact pow_dvd_pow_of_dvd pn 2
 
-private lemma powerful_cube (n : ℕ) : Nat.Powerful (n ^ 3) := by
+private lemma powerful_cube (n : ℕ) : Powerful (n ^ 3) := by
   intro p hp
   have pp := Nat.prime_of_mem_primeFactors hp
   have pd := Nat.dvd_of_mem_primeFactors hp
@@ -1795,8 +1795,8 @@ private lemma powerful_cube (n : ℕ) : Nat.Powerful (n ^ 3) := by
   refine ⟨d ^ 3 * p, ?_⟩
   ring
 
-private lemma powerful_mul {m n : ℕ} (hm : Nat.Powerful m) (hn : Nat.Powerful n) :
-    Nat.Powerful (m * n) := by
+private lemma powerful_mul {m n : ℕ} (hm : Powerful m) (hn : Powerful n) :
+    Powerful (m * n) := by
   intro p hp
   rcases Nat.mem_primeFactors.mp hp with ⟨pp, pd, hmn⟩
   have hm0 : m ≠ 0 := by intro h; subst m; simp at hmn
@@ -1812,12 +1812,12 @@ private lemma goodParam_mem {a b c : ℤ}
   have hdelta := apDelta_ne_zero hab hpar hF
   have hdpos : 0 < apStep a b := by
     exact Int.natAbs_pos.mpr (mul_ne_zero (by norm_num) hdelta)
-  have pX : Nat.Powerful (squareNat (apX a b)) := powerful_sq _
-  have pY : Nat.Powerful (squareNat (apY a b)) := powerful_sq _
-  have pZ : Nat.Powerful (squareNat (apZ a b)) := powerful_sq _
+  have pX : Powerful (squareNat (apX a b)) := powerful_sq _
+  have pY : Powerful (squareNat (apY a b)) := powerful_sq _
+  have pZ : Powerful (squareNat (apZ a b)) := powerful_sq _
   have hfourth : fourthNat a b = 73 ^ 3 * c.natAbs ^ 2 := by
     simp [fourthNat, hF, Int.natAbs_mul, Int.natAbs_pow]
-  have pF : Nat.Powerful (fourthNat a b) := by
+  have pF : Powerful (fourthNat a b) := by
     rw [hfourth]
     exact powerful_mul (powerful_cube 73) (powerful_sq c.natAbs)
   have hXY : Nat.Coprime (squareNat (apX a b)) (squareNat (apY a b)) := by
