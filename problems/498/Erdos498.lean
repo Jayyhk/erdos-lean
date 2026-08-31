@@ -257,7 +257,7 @@ partial def generalizeProofs'
     let s := { propToFVar := ← initialPropToFVar }
     GeneralizeProofs.generalizeProofsCore' g fvars rfvars target |>.run config |>.run' s
 
-elab (name := generalizeProofsElab'') "generalize_proofs" config?:(Parser.Tactic.config)?
+scoped elab (name := generalizeProofsElab'') "generalize_proofs" config?:(Parser.Tactic.config)?
     hs:(ppSpace colGt binderIdent)* loc?:(location)? : tactic => withMainContext do
   let config ← elabConfig (mkOptionalNode config?)
   let (fvars, target) ←
@@ -278,6 +278,8 @@ elab (name := generalizeProofsElab'') "generalize_proofs" config?:(Parser.Tactic
         return g'.mvarId!
 
 end Harmonic
+
+open scoped Harmonic
 
 set_option maxHeartbeats 2000000
 

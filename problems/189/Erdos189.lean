@@ -368,7 +368,7 @@ lemma rectangle_imp_abs_I_eq_two_real {z1 z2 z3 z4 : ℂ}
   normSq (z1^2 - z2^2 + z3^2 - z4^2) = 4 := by
     convert rectangle_imp_abs_I_eq_two h_par h_perp h_area using 1
 
-notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
+scoped notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 
 variable {V P : Type*} {n : ℕ}
 

@@ -35,7 +35,7 @@ open Filter
 
 
 /-- `g ≫ h` means that `h` is big-O of `g` at infinity. -/
-notation:50 g " ≫ " h => Asymptotics.IsBigO Filter.atTop h g
+scoped notation:50 g " ≫ " h => Asymptotics.IsBigO Filter.atTop h g
 
 /-- A Sidon set has unique unordered two-term sums. -/
 def IsSidon {α : Type*} [AddCommMonoid α] (A : Set α) : Prop :=
