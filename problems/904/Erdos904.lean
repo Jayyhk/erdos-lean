@@ -7,7 +7,7 @@ open SimpleGraph
 open List Finset
 
 open Fin in
-lemma _root_.Fin.sum_univ_sub {n : ℕ} (f : Fin (n + 1) → ℕ) (hf : ∀ i : Fin n, f i.succ ≤ f i.castSucc) :
+private lemma _root_.Fin.sum_univ_sub {n : ℕ} (f : Fin (n + 1) → ℕ) (hf : ∀ i : Fin n, f i.succ ≤ f i.castSucc) :
     ∑ i : Fin n, (f i.castSucc - f i.succ) = f 0 - f (last n) := by
   rw [← antitone_iff_succ_le] at hf
   induction n with
@@ -27,17 +27,17 @@ variable {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (l : L
 
 variable (V) in
 /-- An abbreviation for the fixed number of vertices `n` in the graph. -/
-abbrev _root_.SimpleGraph.n : ℕ := Fintype.card V
+abbrev n : ℕ := Fintype.card V
 
 /-- `G.IsGreedyClique l` means `l` is a possible partial output of Faudree's algorithm `𝔓`. -/
-inductive _root_.SimpleGraph.IsGreedyClique (G : SimpleGraph V) [DecidableRel G.Adj] : List V → Prop
+private inductive _root_.SimpleGraph.IsGreedyClique (G : SimpleGraph V) [DecidableRel G.Adj] : List V → Prop
   | nil : G.IsGreedyClique []
   | append_singleton (l : List V) (gc : G.IsGreedyClique l) (v : V)
       (hmax : MaximalFor (∀ w ∈ l, G.Adj w ·) (G.degree ·) v) : G.IsGreedyClique (l ++ [v])
 
 /-- `G.IsPSequence l` means `l` is a possible final output of Faudree's algorithm `𝔓`
 aka `𝔓`-sequence. -/
-@[irreducible] def _root_.SimpleGraph.IsPSequence : Prop :=
+@[irreducible] private def _root_.SimpleGraph.IsPSequence : Prop :=
   G.IsGreedyClique l ∧ ∀ v, ∃ w ∈ l, ¬G.Adj w v
 
 /-- The smallest 0-index `i` such that `l`'s prefix **up to and including** `i` satisfies
@@ -45,37 +45,37 @@ aka `𝔓`-sequence. -/
 in which case `l` cannot be a `𝔓`-sequence (see `not_isPSequence_of_qIndex_eq_length`).
 
 This number plus one is `q` in the paper. -/
-def _root_.SimpleGraph.qIndex : ℕ :=
+private def _root_.SimpleGraph.qIndex : ℕ :=
   (List.range l.length).findIdx fun i ↦ (l.take (i + 1) |>.map (G.degree ·) |>.sum) ≤ i * n V
 
 /-- The 0-index of the first vertex in `l` not adjacent to `v`, capped at `G.qIndex l`.
 Equivalence classes form the partition `V_i` in section 2 of the paper. -/
-def _root_.SimpleGraph.qClass (v : V) : Fin (G.qIndex l + 1) :=
+private def _root_.SimpleGraph.qClass (v : V) : Fin (G.qIndex l + 1) :=
   ⟨min (l.findIdx (¬G.Adj · v)) (G.qIndex l), by grind⟩
 
 variable {l} in
 /-- The 0-index of the first vertex in `l` not adjacent to `v`, capped at `l.length - 1`.
 Equivalence classes form the partition `V_i` in section 3 of the paper. -/
-def _root_.SimpleGraph.lengthClass (hl : l.length ≠ 0) (v : V) : Fin l.length :=
+private def _root_.SimpleGraph.lengthClass (hl : l.length ≠ 0) (v : V) : Fin l.length :=
   ⟨min (l.findIdx (¬G.Adj · v)) (l.length - 1), by grind⟩
 
 variable {G l}
 
-lemma _root_.SimpleGraph.degree_eq_sum (i : V) : G.degree i = ∑ j, if G.Adj i j then 1 else 0 :=
+private lemma _root_.SimpleGraph.degree_eq_sum (i : V) : G.degree i = ∑ j, if G.Adj i j then 1 else 0 :=
   G.degree_eq_sum_if_adj i
 
 /-- Introduced by Aristotle -/
-lemma _root_.SimpleGraph.adj_take_of_qClass {v : V} {c : ℕ} (hc : G.qClass l v = c) :
+private lemma _root_.SimpleGraph.adj_take_of_qClass {v : V} {c : ℕ} (hc : G.qClass l v = c) :
     ∀ w ∈ l.take c, G.Adj w v := by
   grind [mem_iff_getElem, qClass]
 
 omit [Fintype V] in
-lemma _root_.SimpleGraph.adj_take_of_lengthClass {v : V} {c : Fin l.length} (hc : G.lengthClass c.pos.ne' v = c) :
+private lemma _root_.SimpleGraph.adj_take_of_lengthClass {v : V} {c : Fin l.length} (hc : G.lengthClass c.pos.ne' v = c) :
     ∀ w ∈ l.take c, G.Adj w v := by
   grind [mem_iff_getElem, lengthClass]
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.card_lengthClass_le {c : Fin l.length} (hl : l.length ≠ 0) (hc : c ≠ ⟨l.length - 1, by lia⟩) :
+private lemma _root_.SimpleGraph.card_lengthClass_le {c : Fin l.length} (hl : l.length ≠ 0) (hc : c ≠ ⟨l.length - 1, by lia⟩) :
     #{v | G.lengthClass hl v = c} ≤ n V - G.degree l[c] := by
   have : #{v | ¬G.Adj l[c] v} = n V - G.degree l[c] := by
     classical rw [← compl_filter, card_compl, degree_eq_sum, sum_boole, Nat.cast_id]
@@ -91,7 +91,7 @@ variable (gc : G.IsGreedyClique l)
 include gc
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.IsGreedyClique.isPrefix {l' : List V} (hl' : l' <+: l) : G.IsGreedyClique l' := by
+private lemma _root_.SimpleGraph.IsGreedyClique.isPrefix {l' : List V} (hl' : l' <+: l) : G.IsGreedyClique l' := by
   induction gc generalizing l' with
   | nil =>
     rw [prefix_nil] at hl'
@@ -102,19 +102,19 @@ lemma _root_.SimpleGraph.IsGreedyClique.isPrefix {l' : List V} (hl' : l' <+: l) 
     · exact gc.append_singleton l v hmax
     · exact ih hl'
 
-lemma _root_.SimpleGraph.IsGreedyClique.take {r : ℕ} : G.IsGreedyClique (l.take r) := gc.isPrefix (take_prefix ..)
+private lemma _root_.SimpleGraph.IsGreedyClique.take {r : ℕ} : G.IsGreedyClique (l.take r) := gc.isPrefix (take_prefix ..)
 
-lemma _root_.SimpleGraph.IsGreedyClique.pairwise_adj : l.Pairwise G.Adj := by
+private lemma _root_.SimpleGraph.IsGreedyClique.pairwise_adj : l.Pairwise G.Adj := by
   induction gc with
   | nil => exact Pairwise.nil
   | append_singleton l gc v hmax ih => simpa [pairwise_append] using ⟨ih, hmax.prop⟩
 
-lemma _root_.SimpleGraph.IsGreedyClique.nodup : l.Nodup := by
+private lemma _root_.SimpleGraph.IsGreedyClique.nodup : l.Nodup := by
   rw [nodup_iff_pairwise_ne]
   exact gc.pairwise_adj.imp fun h ↦ h.ne
 
 /-- Introduced by Aristotle -/
-lemma _root_.SimpleGraph.IsGreedyClique.degree_le_of_adj_all {v : V} (hadj : ∀ w ∈ l, G.Adj w v) :
+private lemma _root_.SimpleGraph.IsGreedyClique.degree_le_of_adj_all {v : V} (hadj : ∀ w ∈ l, G.Adj w v) :
     ∀ w ∈ l, G.degree v ≤ G.degree w := by
   induction gc with
   | nil => simp
@@ -123,7 +123,7 @@ lemma _root_.SimpleGraph.IsGreedyClique.degree_le_of_adj_all {v : V} (hadj : ∀
     exact ⟨ih hadj.1, hmax.le hadj.1⟩
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.IsGreedyClique.degree_antitone : l.Pairwise (G.degree · ≥ G.degree ·) := by
+private lemma _root_.SimpleGraph.IsGreedyClique.degree_antitone : l.Pairwise (G.degree · ≥ G.degree ·) := by
   induction gc with
   | nil => exact Pairwise.nil
   | append_singleton l gc v hmax ih =>
@@ -132,7 +132,7 @@ lemma _root_.SimpleGraph.IsGreedyClique.degree_antitone : l.Pairwise (G.degree �
     exact gc.degree_le_of_adj_all hmax.prop
 
 /-- Introduced by Aristotle -/
-lemma _root_.SimpleGraph.IsGreedyClique.qClass_getElem_eq {c : ℕ} (hc : c < l.length) (hcq : c ≤ G.qIndex l) :
+private lemma _root_.SimpleGraph.IsGreedyClique.qClass_getElem_eq {c : ℕ} (hc : c < l.length) (hcq : c ≤ G.qIndex l) :
     G.qClass l l[c] = ⟨c, by lia⟩ := by
   suffices l.findIdx (¬G.Adj · l[c]) = c by
     rw [qClass, Fin.mk.injEq, this]
@@ -143,7 +143,7 @@ lemma _root_.SimpleGraph.IsGreedyClique.qClass_getElem_eq {c : ℕ} (hc : c < l.
   exact (pairwise_iff_get.mp gc.pairwise_adj) _ _ hi
 
 /-- Introduced by Aristotle -/
-lemma _root_.SimpleGraph.IsGreedyClique.maximalFor_take {c : ℕ} (hc : c < l.length) :
+private lemma _root_.SimpleGraph.IsGreedyClique.maximalFor_take {c : ℕ} (hc : c < l.length) :
     MaximalFor (∀ w ∈ l.take c, G.Adj w ·) (G.degree ·) l[c] := by
   induction gc generalizing c with
   | nil => tauto
@@ -156,7 +156,7 @@ lemma _root_.SimpleGraph.IsGreedyClique.maximalFor_take {c : ℕ} (hc : c < l.le
 
 variable {c : Fin l.length}
 
-lemma _root_.SimpleGraph.IsGreedyClique.lengthClass_getElem_eq : G.lengthClass c.pos.ne' l[c] = c := by
+private lemma _root_.SimpleGraph.IsGreedyClique.lengthClass_getElem_eq : G.lengthClass c.pos.ne' l[c] = c := by
   suffices l.findIdx (¬G.Adj · l[c]) = c by
     rw [lengthClass, Fin.mk.injEq, this]
     exact min_eq_left (by lia)
@@ -164,13 +164,13 @@ lemma _root_.SimpleGraph.IsGreedyClique.lengthClass_getElem_eq : G.lengthClass c
     true_and, decide_not, Bool.not_eq_eq_eq_not, Bool.not_false, decide_eq_true_eq]
   exact fun i hi ↦ (pairwise_iff_get.mp gc.pairwise_adj) _ _ hi
 
-lemma _root_.SimpleGraph.IsGreedyClique.maximalFor_lengthClass_self :
+private lemma _root_.SimpleGraph.IsGreedyClique.maximalFor_lengthClass_self :
     MaximalFor (G.lengthClass c.pos.ne' · = c) (G.degree ·) l[c] :=
   ⟨gc.lengthClass_getElem_eq, fun _ hv _ ↦ (gc.maximalFor_take c.2).le (adj_take_of_lengthClass hv)⟩
 
 variable (hl : l.length ≠ 0)
 
-lemma _root_.SimpleGraph.IsGreedyClique.equation_15half :
+private lemma _root_.SimpleGraph.IsGreedyClique.equation_15half :
     let z : Fin l.length := ⟨l.length - 1, by grind⟩
     let s := ∑ c : Fin l.length, (G.degree l[c] : ℤ)
     2 * #G.edgeFinset ≤ n V * s - ∑ c : Fin l.length, (G.degree l[c] ^ 2 : ℤ) +
@@ -220,7 +220,7 @@ lemma _root_.SimpleGraph.IsGreedyClique.equation_15half :
       rw [sq, ← sum_mul, ← add_mul, ← mul_assoc, ← sub_mul, mul_comm _ (n V : ℤ),
         ← Fintype.sum_eq_add_sum_compl (f := fun c ↦ (G.degree l[c] : ℤ)), mul_comm]
 
-theorem _root_.SimpleGraph.IsGreedyClique.equation_16 (h : n V * (l.length - 1) ≤ ∑ c : Fin l.length, G.degree l[c]) :
+private theorem _root_.SimpleGraph.IsGreedyClique.equation_16 (h : n V * (l.length - 1) ≤ ∑ c : Fin l.length, G.degree l[c]) :
     2 * #G.edgeFinset * l.length ≤ n V * ∑ c : Fin l.length, G.degree l[c] := by
   obtain hl | hl := eq_or_ne l.length 0
   · simp [hl]
@@ -256,10 +256,10 @@ section
 
 variable [Nonempty V]
 
-lemma _root_.SimpleGraph.nil_not_isPSequence : ¬G.IsPSequence [] := by
+private lemma _root_.SimpleGraph.nil_not_isPSequence : ¬G.IsPSequence [] := by
   unfold SimpleGraph.IsPSequence; simp
 
-lemma _root_.SimpleGraph.not_isPSequence_of_qIndex_eq_length (hl : G.qIndex l = l.length) : ¬G.IsPSequence l := by
+private lemma _root_.SimpleGraph.not_isPSequence_of_qIndex_eq_length (hl : G.qIndex l = l.length) : ¬G.IsPSequence l := by
   obtain rfl | nl := eq_or_ne l []
   · exact nil_not_isPSequence
   rw [← length_pos_iff] at nl
@@ -291,14 +291,14 @@ variable (pl : G.IsPSequence l)
 include pl
 
 omit [Nonempty V] in
-lemma _root_.SimpleGraph.IsPSequence.greedyClique : G.IsGreedyClique l := by
+private lemma _root_.SimpleGraph.IsPSequence.greedyClique : G.IsGreedyClique l := by
   unfold SimpleGraph.IsPSequence at pl; exact pl.1
 
 omit [Nonempty V] in
-lemma _root_.SimpleGraph.IsPSequence.exists_not_adj (v : V) : ∃ w ∈ l, ¬G.Adj w v := by
+private lemma _root_.SimpleGraph.IsPSequence.exists_not_adj (v : V) : ∃ w ∈ l, ¬G.Adj w v := by
   unfold SimpleGraph.IsPSequence at pl; exact pl.2 v
 
-lemma _root_.SimpleGraph.IsPSequence.qIndex_lt_length : G.qIndex l < l.length := by
+private lemma _root_.SimpleGraph.IsPSequence.qIndex_lt_length : G.qIndex l < l.length := by
   contrapose! pl
   refine not_isPSequence_of_qIndex_eq_length (le_antisymm ?_ pl)
   rw [← length_range (n := l.length)]
@@ -306,10 +306,10 @@ lemma _root_.SimpleGraph.IsPSequence.qIndex_lt_length : G.qIndex l < l.length :=
 
 /-- Get the `c`-th vertex of a `𝔓`-sequence, up to index `q`.
 This is a shorthand to avoid having to provide the in-bounds proof every time. -/
-def _root_.SimpleGraph.IsPSequence.get (c : Fin (G.qIndex l + 1)) : V :=
+private def _root_.SimpleGraph.IsPSequence.get (c : Fin (G.qIndex l + 1)) : V :=
   l[c]'(by grind [pl.qIndex_lt_length])
 
-lemma _root_.SimpleGraph.IsPSequence.sum_degree_get_le_mul : ∑ i, G.degree (pl.get i) ≤ G.qIndex l * n V := by
+private lemma _root_.SimpleGraph.IsPSequence.sum_degree_get_le_mul : ∑ i, G.degree (pl.get i) ≤ G.qIndex l * n V := by
   have key := pl.qIndex_lt_length
   conv_rhs at key => rw [← length_range (n := l.length)]
   replace key := findIdx_getElem (w := key)
@@ -323,7 +323,7 @@ lemma _root_.SimpleGraph.IsPSequence.sum_degree_get_le_mul : ∑ i, G.degree (pl
   congr!
   simp
 
-lemma _root_.SimpleGraph.IsPSequence.mul_lt_sum_degree_get {s : ℕ} (hs : s < G.qIndex l) :
+private lemma _root_.SimpleGraph.IsPSequence.mul_lt_sum_degree_get {s : ℕ} (hs : s < G.qIndex l) :
     s * n V < ∑ i : Fin (s + 1), G.degree (pl.get (i.castLE (by lia))) := by
   have key := not_of_lt_findIdx hs
   simp_rw [getElem_range, decide_eq_false_iff_not, not_le] at key
@@ -335,13 +335,13 @@ lemma _root_.SimpleGraph.IsPSequence.mul_lt_sum_degree_get {s : ℕ} (hs : s < G
   congr!
   simp
 
-lemma _root_.SimpleGraph.IsPSequence.pred_mul_lt_sum_degree_get {r : ℕ} (hr : r ∈ Set.Icc 1 (G.qIndex l)) :
+private lemma _root_.SimpleGraph.IsPSequence.pred_mul_lt_sum_degree_get {r : ℕ} (hr : r ∈ Set.Icc 1 (G.qIndex l)) :
     (r - 1) * n V < ∑ i : Fin r, G.degree (pl.get (i.castLE (by grind))) := by
   rw [Set.mem_Icc] at hr
   convert pl.mul_lt_sum_degree_get (show r - 1 < G.qIndex l by lia) <;> lia
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.IsPSequence.maximalFor_qClass_self {c : Fin (G.qIndex l + 1)} :
+private lemma _root_.SimpleGraph.IsPSequence.maximalFor_qClass_self {c : Fin (G.qIndex l + 1)} :
     MaximalFor (G.qClass l · = c) (G.degree ·) (pl.get c) := by
   unfold SimpleGraph.IsPSequence.get
   generalize_proofs bc
@@ -351,15 +351,15 @@ lemma _root_.SimpleGraph.IsPSequence.maximalFor_qClass_self {c : Fin (G.qIndex l
 
 /-- The finset of **c**ommon **n**eighbours of the `𝔓`-sequence's vertices
 in the **r**ange `[0,c)`. $\widehat{Γ}([c])$ in the paper. -/
-def _root_.SimpleGraph.IsPSequence.cnr (c : Fin (G.qIndex l + 1)) : Finset V :=
+private def _root_.SimpleGraph.IsPSequence.cnr (c : Fin (G.qIndex l + 1)) : Finset V :=
   {v | ∀ j < c, G.Adj (pl.get j) v}
 
-lemma _root_.SimpleGraph.IsPSequence.cnr_succ_subset_cnr_castSucc {i : Fin (G.qIndex l)} :
+private lemma _root_.SimpleGraph.IsPSequence.cnr_succ_subset_cnr_castSucc {i : Fin (G.qIndex l)} :
     pl.cnr i.succ ⊆ pl.cnr i.castSucc := fun v mv ↦ by
   simp only [SimpleGraph.IsPSequence.cnr, mem_filter_univ] at mv ⊢
   exact fun j mj ↦ mv j (mj.trans Fin.castSucc_lt_succ)
 
-lemma _root_.SimpleGraph.IsPSequence.card_qClass_eq_cast {i : Fin (G.qIndex l)} :
+private lemma _root_.SimpleGraph.IsPSequence.card_qClass_eq_cast {i : Fin (G.qIndex l)} :
     #{v | G.qClass l v = i.castSucc} = #(pl.cnr i.castSucc) - #(pl.cnr i.succ) := by
   classical rw [← card_sdiff_of_subset pl.cnr_succ_subset_cnr_castSucc]
   congr
@@ -375,7 +375,7 @@ lemma _root_.SimpleGraph.IsPSequence.card_qClass_eq_cast {i : Fin (G.qIndex l)} 
   rw [forall_and, forall_eq, not_and_or, and_or_left, and_not_self_iff, false_or, and_comm]
   exact Iff.and ⟨fun h j ↦ h j.1, fun h j hj ↦ h ⟨j, by lia⟩ (by simp [Fin.lt_def, hj])⟩ Iff.rfl
 
-lemma _root_.SimpleGraph.IsPSequence.card_qClass_eq_last : #{v | G.qClass l v = Fin.last _} = #(pl.cnr (Fin.last _)) := by
+private lemma _root_.SimpleGraph.IsPSequence.card_qClass_eq_last : #{v | G.qClass l v = Fin.last _} = #(pl.cnr (Fin.last _)) := by
   have key : n V = ∑ c, ∑ v with G.qClass l v = c, 1 := by
     rw [sum_fiberwise, ← Fintype.card_eq_sum_ones]
   simp_rw [sum_const, smul_eq_mul, mul_one, Fin.sum_univ_castSucc, pl.card_qClass_eq_cast] at key
@@ -385,7 +385,7 @@ lemma _root_.SimpleGraph.IsPSequence.card_qClass_eq_last : #{v | G.qClass l v = 
   suffices #(pl.cnr (Fin.last (G.qIndex l))) ≤ n V by lia
   exact card_le_univ _
 
-lemma _root_.SimpleGraph.IsPSequence.equation_8 :
+private lemma _root_.SimpleGraph.IsPSequence.equation_8 :
     2 * #G.edgeFinset ≤ n V * G.degree (pl.get 0) + ∑ i : Fin (G.qIndex l),
       #(pl.cnr i.succ) * (G.degree (pl.get i.succ) - G.degree (pl.get i.castSucc) : ℤ) := by
   let d (c : Fin (G.qIndex l + 1)) : ℕ := G.degree (pl.get c)
@@ -418,12 +418,12 @@ lemma _root_.SimpleGraph.IsPSequence.equation_8 :
 
 /-- The number of vertices not adjacent to the vertex with index `c` if `c < q`,
 and the number of remaining vertices if `c = q`. $k_c$ in the paper. -/
-def _root_.SimpleGraph.IsPSequence.adeg (c : Fin (G.qIndex l + 1)) : ℕ :=
+private def _root_.SimpleGraph.IsPSequence.adeg (c : Fin (G.qIndex l + 1)) : ℕ :=
   c.lastCases (n V - ∑ i : Fin (G.qIndex l), (n V - G.degree (pl.get i.castSucc)))
     fun i ↦ n V - G.degree (pl.get i.castSucc)
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.IsPSequence.adeg_pos {c : Fin (G.qIndex l + 1)} : 0 < pl.adeg c := by
+private lemma _root_.SimpleGraph.IsPSequence.adeg_pos {c : Fin (G.qIndex l + 1)} : 0 < pl.adeg c := by
   unfold SimpleGraph.IsPSequence.adeg
   cases c using Fin.lastCases with
   | cast i => simp [degree_lt_card_verts]
@@ -449,19 +449,19 @@ lemma _root_.SimpleGraph.IsPSequence.adeg_pos {c : Fin (G.qIndex l + 1)} : 0 < p
       exact ext_get (by simp [pl.qIndex_lt_length.le]) (by simp [SimpleGraph.IsPSequence.get, finRange])
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.IsPSequence.sum_adeg : ∑ i, pl.adeg i = n V := by
+private lemma _root_.SimpleGraph.IsPSequence.sum_adeg : ∑ i, pl.adeg i = n V := by
   simp_rw [Fin.sum_univ_castSucc, SimpleGraph.IsPSequence.adeg, Fin.lastCases_castSucc, Fin.lastCases_last]
   apply Nat.add_sub_of_le
   have := pl.adeg_pos (c := Fin.last _)
   rw [SimpleGraph.IsPSequence.adeg, Fin.lastCases_last, tsub_pos_iff_lt] at this
   exact this.le
 
-lemma _root_.SimpleGraph.IsPSequence.sub_adeg_last_eq :
+private lemma _root_.SimpleGraph.IsPSequence.sub_adeg_last_eq :
     n V - pl.adeg (Fin.last _) = ∑ i : Fin (G.qIndex l), pl.adeg i.castSucc := by
   rw [← pl.sum_adeg, Fin.sum_univ_castSucc, add_tsub_cancel_right]
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.IsPSequence.equation_9 {i : Fin (G.qIndex l)} : n V - ∑ j ≤ i, pl.adeg j.castSucc ≤ #(pl.cnr i.succ) := by
+private lemma _root_.SimpleGraph.IsPSequence.equation_9 {i : Fin (G.qIndex l)} : n V - ∑ j ≤ i, pl.adeg j.castSucc ≤ #(pl.cnr i.succ) := by
   apply Nat.sub_le_of_le_add
   have key : n V ≤ ∑ v, ((if ∀ j ≤ i, G.Adj (pl.get j.castSucc) v then 1 else 0) +
       ∑ j ≤ i, if ¬G.Adj (pl.get j.castSucc) v then 1 else 0) := by
@@ -483,7 +483,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_9 {i : Fin (G.qIndex l)} : n V - �
       Fin.lastCases_castSucc, degree_eq_sum, ← card_filter, ← card_compl, compl_filter]
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.IsPSequence.equation_10 :
+private lemma _root_.SimpleGraph.IsPSequence.equation_10 :
     G.degree (pl.get (Fin.last _)) ≤ ∑ i : Fin (G.qIndex l), pl.adeg i.castSucc := by
   have key := pl.sum_degree_get_le_mul
   simp only [SimpleGraph.IsPSequence.adeg, Fin.sum_univ_castSucc, Fin.lastCases_castSucc] at key ⊢
@@ -493,7 +493,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_10 :
       smul_eq_mul, mul_comm]
   lia
 
-lemma _root_.SimpleGraph.IsPSequence.equation_11a : 2 * #G.edgeFinset ≤
+private lemma _root_.SimpleGraph.IsPSequence.equation_11a : 2 * #G.edgeFinset ≤
     ∑ i : Fin (G.qIndex l), (pl.adeg i.castSucc : ℤ) * G.degree (pl.get i.castSucc) +
       G.degree (pl.get (Fin.last _)) * pl.adeg (Fin.last _) := by
   calc
@@ -539,7 +539,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_11a : 2 * #G.edgeFinset ≤
 
 /-- We break the proof of equation 11 here so we can later substitute a strict version
 to prove the lower bound on the degree sum. -/
-lemma _root_.SimpleGraph.IsPSequence.equation_11b :
+private lemma _root_.SimpleGraph.IsPSequence.equation_11b :
     ∑ i : Fin (G.qIndex l), (pl.adeg i.castSucc : ℤ) * G.degree (pl.get i.castSucc) +
       G.degree (pl.get (Fin.last _)) * pl.adeg (Fin.last _) ≤
     ∑ i : Fin (G.qIndex l), (pl.adeg i.castSucc : ℤ) * G.degree (pl.get i.castSucc) +
@@ -548,7 +548,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_11b :
   rw [← Nat.cast_sum, Nat.cast_le]
   exact pl.equation_10
 
-lemma _root_.SimpleGraph.IsPSequence.equation_11c :
+private lemma _root_.SimpleGraph.IsPSequence.equation_11c :
     ∑ i : Fin (G.qIndex l), (pl.adeg i.castSucc : ℤ) * G.degree (pl.get i.castSucc) +
       (∑ i : Fin (G.qIndex l), (pl.adeg i.castSucc : ℤ)) * pl.adeg (Fin.last _) =
     ∑ i, ∑ j with i ≠ j, (pl.adeg i * pl.adeg j : ℤ) := by
@@ -566,7 +566,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_11c :
   rw [e₂, add_comm (Finset.sum ..), ← sum_add_distrib]
   simp_rw [sum_filter_add_sum_filter_not, ← pl.sum_adeg, Nat.cast_sum, sum_mul, mul_sum]
 
-theorem _root_.SimpleGraph.IsPSequence.equation_11 : 2 * #G.edgeFinset ≤ ∑ i, ∑ j with i ≠ j, pl.adeg i * pl.adeg j :=
+private theorem _root_.SimpleGraph.IsPSequence.equation_11 : 2 * #G.edgeFinset ≤ ∑ i, ∑ j with i ≠ j, pl.adeg i * pl.adeg j :=
   mod_cast pl.equation_11a |>.trans pl.equation_11b |>.trans_eq pl.equation_11c
 
 end
@@ -576,10 +576,10 @@ end
 section TuranNumber
 
 /-- The number of edges in the `r`-chromatic Turán graph on `n` vertices aka `t_r(n)`. -/
-abbrev _root_.SimpleGraph.turanNumber (n r : ℕ) : ℕ := #(turanGraph n r).edgeFinset
+abbrev turanNumber (n r : ℕ) : ℕ := #(turanGraph n r).edgeFinset
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.pair_sum_mul_le_turanNumber {n : ℕ} {f : Fin n → ℕ} :
+private lemma _root_.SimpleGraph.pair_sum_mul_le_turanNumber {n : ℕ} {f : Fin n → ℕ} :
     ∑ i, ∑ j with i ≠ j, f i * f j ≤ 2 * turanNumber (∑ i, f i) n := by
   let H : SimpleGraph (Σ i, Fin (f i)) := ⟨fun x y ↦ x.1 ≠ y.1, by tauto, by tauto⟩
   have cfH : H.CliqueFree (n + 1) := fun s ⟨hs₁, hs₂⟩ ↦ by
@@ -606,7 +606,7 @@ lemma _root_.SimpleGraph.pair_sum_mul_le_turanNumber {n : ℕ} {f : Fin n → �
   rwa [eH, mul_le_mul_iff_right₀ zero_lt_two]
 
 /-- Proved by Aristotle -/
-lemma _root_.SimpleGraph.strictMonoOn_turanNumber {n : ℕ} : StrictMonoOn (turanNumber n) (Set.Icc 1 n) := by
+private lemma _root_.SimpleGraph.strictMonoOn_turanNumber {n : ℕ} : StrictMonoOn (turanNumber n) (Set.Icc 1 n) := by
   rintro a ⟨lba, -⟩ b ⟨lbb, ubb⟩ hab
   by_contra! ht
   have itm : (turanGraph n a).IsTuranMaximal b := by
@@ -627,14 +627,14 @@ variable (pl : G.IsPSequence l)
   {r : ℕ} (hr : r ∈ Set.Icc 1 (n V)) (hm : turanNumber (n V) r ≤ #G.edgeFinset)
 
 include hr in
-lemma _root_.SimpleGraph.nonempty_of_params : Nonempty V := by
+private lemma _root_.SimpleGraph.nonempty_of_params : Nonempty V := by
   rw [← Fintype.card_pos_iff]
   grind
 
 section
 
 include pl hr hm in
-theorem _root_.SimpleGraph.IsPSequence.equation_12 : r ≤ G.qIndex l + 1 := by
+private theorem _root_.SimpleGraph.IsPSequence.equation_12 : r ≤ G.qIndex l + 1 := by
   let _ := nonempty_of_params hr
   rw [← mul_le_mul_iff_right₀ zero_lt_two] at hm
   have key := hm.trans (pl.equation_11.trans pair_sum_mul_le_turanNumber)
@@ -643,7 +643,7 @@ theorem _root_.SimpleGraph.IsPSequence.equation_12 : r ≤ G.qIndex l + 1 := by
   rwa [pl.sum_adeg, mul_le_mul_iff_right₀ zero_lt_two,
     strictMonoOn_turanNumber.le_iff_le hr bq] at key
 
-lemma _root_.SimpleGraph.IsPSequence.equation_10_strict (_ := nonempty_of_params hr) :
+private lemma _root_.SimpleGraph.IsPSequence.equation_10_strict (_ := nonempty_of_params hr) :
     ∑ i, G.degree (pl.get i) < G.qIndex l * n V →
     G.degree (pl.get (Fin.last _)) < ∑ i : Fin (G.qIndex l), pl.adeg i.castSucc := by
   simp only [IsPSequence.adeg, Fin.sum_univ_castSucc, Fin.lastCases_castSucc]
@@ -653,7 +653,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_10_strict (_ := nonempty_of_params
       smul_eq_mul, mul_comm]
   lia
 
-lemma _root_.SimpleGraph.IsPSequence.equation_11b_strict (_ := nonempty_of_params hr) :
+private lemma _root_.SimpleGraph.IsPSequence.equation_11b_strict (_ := nonempty_of_params hr) :
     ∑ i, G.degree (pl.get i) < G.qIndex l * n V →
     ∑ i : Fin (G.qIndex l), (pl.adeg i.castSucc : ℤ) * G.degree (pl.get i.castSucc) +
       G.degree (pl.get (Fin.last _)) * pl.adeg (Fin.last _) <
@@ -664,7 +664,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_11b_strict (_ := nonempty_of_param
   · exact pl.adeg_pos
   · exact pl.equation_10_strict hr _ h
 
-lemma _root_.SimpleGraph.IsPSequence.equation_11_strict (_ := nonempty_of_params hr) :
+private lemma _root_.SimpleGraph.IsPSequence.equation_11_strict (_ := nonempty_of_params hr) :
     ∑ i, G.degree (pl.get i) < G.qIndex l * n V →
     2 * #G.edgeFinset < ∑ i, ∑ j with i ≠ j, pl.adeg i * pl.adeg j := by
   intro h
@@ -672,7 +672,7 @@ lemma _root_.SimpleGraph.IsPSequence.equation_11_strict (_ := nonempty_of_params
     |>.trans_eq pl.equation_11c
 
 include hm in
-theorem _root_.SimpleGraph.IsPSequence.equation_12_strict (_ := nonempty_of_params hr) :
+private theorem _root_.SimpleGraph.IsPSequence.equation_12_strict (_ := nonempty_of_params hr) :
     ∑ i, G.degree (pl.get i) < G.qIndex l * n V → r ≤ G.qIndex l := by
   intro h
   rw [← mul_le_mul_iff_right₀ zero_lt_two] at hm
@@ -682,7 +682,7 @@ theorem _root_.SimpleGraph.IsPSequence.equation_12_strict (_ := nonempty_of_para
   rwa [pl.sum_adeg, mul_lt_mul_iff_right₀ zero_lt_two,
     strictMonoOn_turanNumber.lt_iff_lt hr bq, Nat.lt_add_one_iff] at key
 
-theorem _root_.SimpleGraph.IsPSequence.sum_degree_lower_bound (_ := nonempty_of_params hr) :
+private theorem _root_.SimpleGraph.IsPSequence.sum_degree_lower_bound (_ := nonempty_of_params hr) :
     (r - 1) * n V ≤ ∑ i : Fin r, G.degree (pl.get (i.castLE (pl.equation_12 hr hm))) := by
   generalize_proofs e12
   by_contra! h
@@ -692,7 +692,7 @@ theorem _root_.SimpleGraph.IsPSequence.sum_degree_lower_bound (_ := nonempty_of_
   · exact lt_asymm h (pl.pred_mul_lt_sum_degree_get ⟨hr.1, by lia⟩)
 
 include pl hr hm in
-theorem _root_.SimpleGraph.IsPSequence.mul_length_sub_one_le_sum_take :
+private theorem _root_.SimpleGraph.IsPSequence.mul_length_sub_one_le_sum_take :
     let l' := l.take r
     n V * (l'.length - 1) ≤ ∑ c : Fin l'.length, G.degree l'[c] := by
   extract_lets l'
@@ -713,7 +713,7 @@ theorem _root_.SimpleGraph.IsPSequence.mul_length_sub_one_le_sum_take :
 end
 
 /-- Proved by Aristotle -/
-theorem _root_.SimpleGraph.exists_isPSequence : ∃ l, G.IsPSequence l := by
+private theorem _root_.SimpleGraph.exists_isPSequence : ∃ l, G.IsPSequence l := by
   classical
   have fgc : {l | G.IsGreedyClique l}.Finite := by
     refine (finite_length_le V (n V)).subset fun l gc ↦ ?_
@@ -729,7 +729,7 @@ theorem _root_.SimpleGraph.exists_isPSequence : ∃ l, G.IsPSequence l := by
 
 include hr hm in
 /-- Erdős Problem 904. -/
-theorem _root_.SimpleGraph.erdos_904 : ∃ s, G.IsNClique r s ∧ 2 * r * #G.edgeFinset ≤ n V * ∑ v ∈ s, G.degree v := by
+private theorem _root_.SimpleGraph.erdos_904 : ∃ s, G.IsNClique r s ∧ 2 * r * #G.edgeFinset ≤ n V * ∑ v ∈ s, G.degree v := by
   let _ := nonempty_of_params hr
   obtain ⟨l, pl⟩ : ∃ l, G.IsPSequence l := exists_isPSequence
   have key := pl.greedyClique.take.equation_16 (pl.mul_length_sub_one_le_sum_take hr hm)
@@ -758,10 +758,10 @@ with no `K_{r+1}`), then there exists an `r`-clique `x_1, …, x_r` in `G` with
 `d(x_1) + ⋯ + d(x_r) ≥ 2rm/n` (written here without division as
 `n · ∑ d(x_i) ≥ 2 · r · m`). -/
 theorem erdos_904 {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
-    {r : ℕ} (hr₂ : 2 ≤ r) (hrn : r ≤ SimpleGraph.n V)
-    (hm : SimpleGraph.turanNumber (SimpleGraph.n V) r ≤ #G.edgeFinset) :
+    {r : ℕ} (hr₂ : 2 ≤ r) (hrn : r ≤ Erdos904.n V)
+    (hm : Erdos904.turanNumber (Erdos904.n V) r ≤ #G.edgeFinset) :
     ∃ s, G.IsNClique r s ∧
-      2 * r * #G.edgeFinset ≤ SimpleGraph.n V * ∑ v ∈ s, G.degree v :=
+      2 * r * #G.edgeFinset ≤ Erdos904.n V * ∑ v ∈ s, G.degree v :=
   SimpleGraph.erdos_904 ⟨by lia, hrn⟩ hm
 
 #print axioms erdos_904
