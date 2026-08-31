@@ -15,13 +15,13 @@ open scoped Classical
 /-
 A graph G is maximal triangle-free if it is triangle-free and cannot be extended to a larger triangle-free graph on the same vertex set.
 -/
-def _root_.SimpleGraph.IsMaximalTriangleFree {V : Type*} (G : SimpleGraph V) : Prop :=
+private def _root_.SimpleGraph.IsMaximalTriangleFree {V : Type*} (G : SimpleGraph V) : Prop :=
   G.CliqueFree 3 ∧ ∀ H : SimpleGraph V, G ≤ H → H.CliqueFree 3 → G = H
 
 /-
 A maximal triangle-free graph has diameter at most 2 (every pair of distinct vertices is either adjacent or shares a common neighbor).
 -/
-theorem _root_.SimpleGraph.maximal_triangle_free_diam_two {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
+private theorem _root_.SimpleGraph.maximal_triangle_free_diam_two {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
   (h : G.IsMaximalTriangleFree) :
   ∀ x y, x ≠ y → G.Adj x y ∨ ∃ z, G.Adj x z ∧ G.Adj z y := by
     -- Assume that there exist vertices $x$ and $y$ such that $x \neq y$ and $G$ does not have an edge between them.
@@ -53,7 +53,7 @@ theorem _root_.SimpleGraph.maximal_triangle_free_diam_two {V : Type*} [Fintype V
 /-
 If G is a subgraph of H, then the independence number of H is at most the independence number of G.
 -/
-theorem _root_.SimpleGraph.indepNum_le_of_le {V : Type*} [Fintype V] {G H : SimpleGraph V} (h : G ≤ H) :
+private theorem _root_.SimpleGraph.indepNum_le_of_le {V : Type*} [Fintype V] {G H : SimpleGraph V} (h : G ≤ H) :
   H.indepNum ≤ G.indepNum := by
     apply_rules [ csSup_le_csSup ];
     · exact ⟨ _, fun n hn => by rcases hn with ⟨ s, hs ⟩ ; exact le_trans ( hs.card_eq.symm.le ) ( Finset.card_le_univ _ ) ⟩;
@@ -64,7 +64,7 @@ theorem _root_.SimpleGraph.indepNum_le_of_le {V : Type*} [Fintype V] {G H : Simp
 /-
 Every triangle-free graph G can be extended to a maximal triangle-free graph H, and the independence number of H is at most that of G.
 -/
-theorem _root_.SimpleGraph.exists_maximal_triangle_free_extension {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
+private theorem _root_.SimpleGraph.exists_maximal_triangle_free_extension {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
   (h : G.CliqueFree 3) :
   ∃ H : SimpleGraph V, G ≤ H ∧ H.IsMaximalTriangleFree ∧ H.indepNum ≤ G.indepNum := by
     -- By definition of maximal triangle-free graphs, there exists a maximal triangle-free graph $H$ such that $G \leq H$.
@@ -82,7 +82,7 @@ theorem _root_.SimpleGraph.exists_maximal_triangle_free_extension {V : Type*} [F
 /-
 In a triangle-free graph, the maximum degree is at most the independence number.
 -/
-theorem _root_.SimpleGraph.maxDegree_le_indepNum {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
+private theorem _root_.SimpleGraph.maxDegree_le_indepNum {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
   (h : G.CliqueFree 3) :
   G.maxDegree ≤ G.indepNum := by
     -- By definition of maximal triangle-free graph, there exists a maximal triangle-free graph $H$ such that $G \leq H$.
@@ -122,7 +122,7 @@ theorem _root_.SimpleGraph.maxDegree_le_indepNum {V : Type*} [Fintype V] (G : Si
 /-
 If there exists a triangle-free supergraph Gm of G with independence number at most 5cn, then there exists a triangle-free supergraph G' of G with diameter 2 and at most 2.5cn^2 edges.
 -/
-theorem _root_.SimpleGraph.deterministic_reduction {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
+private theorem _root_.SimpleGraph.deterministic_reduction {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
   (n : ℕ) (c : ℝ) (h_n : Fintype.card V = n)
   (h_exists : ∃ G_m : SimpleGraph V, G ≤ G_m ∧ G_m.CliqueFree 3 ∧ (G_m.indepNum : ℝ) ≤ 5 * c * n) :
   ∃ G' : SimpleGraph V, G ≤ G' ∧ G'.CliqueFree 3 ∧
@@ -150,11 +150,11 @@ theorem _root_.SimpleGraph.deterministic_reduction {V : Type*} [Fintype V] (G : 
 /-
 Definitions of eligible pairs and symmetry lemma.
 -/
-def _root_.SimpleGraph.eligiblePair {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) (u v : V) : Prop :=
+private def _root_.SimpleGraph.eligiblePair {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) (u v : V) : Prop :=
   u ≠ v ∧ ¬G.Adj u v ∧ (G.degree u : ℝ) < 2 * c * Real.sqrt n ∧ (G.degree v : ℝ) < 2 * c * Real.sqrt n ∧
   ∀ w, ¬(G.Adj u w ∧ G.Adj v w)
 
-theorem _root_.SimpleGraph.eligiblePair_symm {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) (u v : V) :
+private theorem _root_.SimpleGraph.eligiblePair_symm {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) (u v : V) :
   G.eligiblePair c n u v ↔ G.eligiblePair c n v u := by
     unfold SimpleGraph.eligiblePair;
     tauto
@@ -162,7 +162,7 @@ theorem _root_.SimpleGraph.eligiblePair_symm {V : Type*} [Fintype V] (G : Simple
 /-
 The set of eligible edges as a Finset.
 -/
-noncomputable def _root_.SimpleGraph.eligibleFinset {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) : Finset (Sym2 V) :=
+private noncomputable def _root_.SimpleGraph.eligibleFinset {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) : Finset (Sym2 V) :=
   let r := G.eligiblePair c n
   have h_sym : Symmetric r := fun x y h => (G.eligiblePair_symm c n x y).mp h
   have : DecidablePred (· ∈ Sym2.fromRel h_sym) := Classical.decPred _
@@ -171,10 +171,10 @@ noncomputable def _root_.SimpleGraph.eligibleFinset {V : Type*} [Fintype V] (G :
 /-
 Two vertices have a common neighbor if they are distinct and there exists a vertex adjacent to both. This relation is symmetric.
 -/
-def _root_.SimpleGraph.hasCommonNeighbor {V : Type*} (G : SimpleGraph V) (u v : V) : Prop :=
+private def _root_.SimpleGraph.hasCommonNeighbor {V : Type*} (G : SimpleGraph V) (u v : V) : Prop :=
   u ≠ v ∧ ∃ w, G.Adj u w ∧ G.Adj v w
 
-theorem _root_.SimpleGraph.hasCommonNeighbor_symm {V : Type*} (G : SimpleGraph V) (u v : V) :
+private theorem _root_.SimpleGraph.hasCommonNeighbor_symm {V : Type*} (G : SimpleGraph V) (u v : V) :
   G.hasCommonNeighbor u v ↔ G.hasCommonNeighbor v u := by
     simp +decide only [SimpleGraph.hasCommonNeighbor];
     simp +contextual only [ne_comm, and_comm]
@@ -182,7 +182,7 @@ theorem _root_.SimpleGraph.hasCommonNeighbor_symm {V : Type*} (G : SimpleGraph V
 /-
 The set of pairs of vertices that share a common neighbor.
 -/
-noncomputable def _root_.SimpleGraph.commonNeighborFinset {V : Type*} [Fintype V] (G : SimpleGraph V) : Finset (Sym2 V) :=
+private noncomputable def _root_.SimpleGraph.commonNeighborFinset {V : Type*} [Fintype V] (G : SimpleGraph V) : Finset (Sym2 V) :=
   let r := G.hasCommonNeighbor
   have h_sym : Symmetric r := fun x y h => (G.hasCommonNeighbor_symm x y).mp h
   have : DecidablePred (· ∈ Sym2.fromRel h_sym) := Classical.decPred _
@@ -191,16 +191,16 @@ noncomputable def _root_.SimpleGraph.commonNeighborFinset {V : Type*} [Fintype V
 /-
 Definitions of eligible pairs in U and common neighbor pairs in U.
 -/
-noncomputable def _root_.SimpleGraph.eligiblePairsIn {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) (U : Finset V) : Finset (Sym2 V) :=
+private noncomputable def _root_.SimpleGraph.eligiblePairsIn {V : Type*} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) (U : Finset V) : Finset (Sym2 V) :=
   (G.eligibleFinset c n) ∩ U.sym2
 
-noncomputable def _root_.SimpleGraph.commonNeighborPairsIn {V : Type*} [Fintype V] (G : SimpleGraph V) (U : Finset V) : Finset (Sym2 V) :=
+private noncomputable def _root_.SimpleGraph.commonNeighborPairsIn {V : Type*} [Fintype V] (G : SimpleGraph V) (U : Finset V) : Finset (Sym2 V) :=
   (G.commonNeighborFinset) ∩ U.sym2
 
 /-
 Corrected helper lemma: The set of distinct pairs in U \ S that do not share a common neighbor is a subset of the eligible pairs in U.
 -/
-def _root_.SimpleGraph.distinctPairsIn {V : Type*} [Fintype V] [DecidableEq V] (U : Finset V) : Finset (Sym2 V) :=
+private def _root_.SimpleGraph.distinctPairsIn {V : Type*} [Fintype V] [DecidableEq V] (U : Finset V) : Finset (Sym2 V) :=
   U.sym2.filter (fun e => ¬e.IsDiag)
 
 theorem subset_eligible_pairs_corrected {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
@@ -523,7 +523,7 @@ noncomputable def HitGraphs {V : Type*} [Fintype V] [DecidableEq V] (c : ℝ) (n
 /-
 Adding an eligible edge preserves triangle-freeness.
 -/
-theorem _root_.SimpleGraph.add_eligible_edge_triangle_free {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.add_eligible_edge_triangle_free {V : Type*} [Fintype V] [DecidableEq V]
   (G : SimpleGraph V) [DecidableRel G.Adj] (c : ℝ) (n : ℕ) (u v : V)
   (h_free : G.CliqueFree 3)
   (h_eligible : G.eligiblePair c n u v) :
@@ -725,7 +725,7 @@ theorem card_NextGraphsState_eq {V : Type*} [Fintype V] [DecidableEq V]
 /-
 Adding an edge that does not have both endpoints in U preserves the independence of U.
 -/
-theorem _root_.SimpleGraph.IsIndepSet_add_edge_sym2 {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.IsIndepSet_add_edge_sym2 {V : Type*} [Fintype V] [DecidableEq V]
   (G : SimpleGraph V) [DecidableRel G.Adj] (U : Finset V) (e : Sym2 V)
   (h_indep : G.IsIndepSet U)
   (h_not_in_U : ¬(e.out.1 ∈ U ∧ e.out.2 ∈ U)) :
@@ -1674,7 +1674,7 @@ theorem SafeHit_subset_HitGraphsState {V : Type} [Fintype V] [DecidableEq V]
 /-
 If a set is independent in a graph H, it is also independent in any subgraph G of H.
 -/
-theorem _root_.SimpleGraph.IsIndepSet_of_le {V : Type*} (G H : SimpleGraph V) (s : Set V)
+private theorem _root_.SimpleGraph.IsIndepSet_of_le {V : Type*} (G H : SimpleGraph V) (s : Set V)
   (h_le : G ≤ H) (h_indep : H.IsIndepSet s) : G.IsIndepSet s := by
     intro u hu v hv huv; have := h_indep hu hv; aesop;
 

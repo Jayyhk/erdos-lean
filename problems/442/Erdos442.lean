@@ -12,9 +12,9 @@ disproves this.
 
 The question is from [ErGr80, p.88]. Tao [Ta24b] showed it is false, constructing `A` with
 `∑_{n ∈ A ∩ [1,x)} 1/n ≫ exp((1/2 + o(1)) √(log log x) · log log log x)` while the second
-expression stays bounded. Two renderings are worth noting: `Real.maxLogOne x = max (log x) 1`
+expression stays bounded. Two renderings are worth noting: `maxLogOne x = max (log x) 1`
 is a truncated logarithm guarding small `x`, which does not affect the limit; and
-`Set.bddProdUpper A x` is `{y ∈ (A ∩ Icc 1 ⌊x⌋) ×ˢ (A ∩ Icc 1 ⌊x⌋) | y.1 < y.2}`, the
+`bddProdUpper A x` is `{y ∈ (A ∩ Icc 1 ⌊x⌋) ×ˢ (A ∩ Icc 1 ⌊x⌋) | y.1 < y.2}`, the
 upper-triangular pairs. The latter includes `a = 1` where the site writes `(1, x]`; that only
 enlarges the second sum, so the refuted implication is if anything harder to refute, and the
 disproof below is correspondingly stronger.
@@ -61,7 +61,7 @@ we define the partial density of `S` (relative to a set `A`) to be the proportio
 This definition was inspired from https://github.com/b-mehta/unit-fractions
 -/
 @[inline]
-noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+private noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Set.Iio b).ncard / (A ∩ Set.Iio b).ncard
 
@@ -73,7 +73,7 @@ in `A` tends to `α` as `n → ∞`.
 When `β = ℕ` this by default defines the natural density of a set
 (i.e., relative to all of `ℕ`).
 -/
-def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+private def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=
   Tendsto (fun (b : β) => S.partialDensity A b) atTop (𝓝 α)
 
@@ -83,7 +83,7 @@ open Set
 /-- In a non-trivial partial order with a least element, the set of all
 elements has density one. -/
 @[simp]
-theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
+private theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
     (@Set.univ β).HasDensity 1 := by
   by_cases h : atTop (α := β) = ⊥
   · simp [h, HasDensity]
@@ -139,12 +139,12 @@ and was obtained by Aristotle from Harmonic (aristotle-harmonic@harmonic.fun).
 -/
 
 /-- The proposition that `n` is a sum of distinct proper divisors. -/
-def _root_.Nat.IsSumDivisors (n : ℕ) : Prop :=
+private def _root_.Nat.IsSumDivisors (n : ℕ) : Prop :=
   ∃ S ⊆ n.properDivisors, ∑ d ∈ S, d = n
 
 /-- Being a sum of distinct proper divisors is membership in the corresponding
 subset-sum finset. -/
-theorem _root_.Nat.isSumDivisors_iff_mem_subsetSum (n : ℕ) :
+private theorem _root_.Nat.isSumDivisors_iff_mem_subsetSum (n : ℕ) :
     n.IsSumDivisors ↔ n ∈ n.properDivisors.subsetSum := by
   rw [Nat.IsSumDivisors, Finset.mem_subsetSum_iff]
 
@@ -19874,7 +19874,7 @@ theorem finiteMultiples_empty : finiteMultiples ∅ = ∅ := by
   simp
 
 /-- Pseudoperfectness is inherited by positive multiples. -/
-theorem _root_.Nat.IsSumDivisors.of_dvd {m n : ℕ} (hm : Nat.IsSumDivisors m)
+private theorem _root_.Nat.IsSumDivisors.of_dvd {m n : ℕ} (hm : Nat.IsSumDivisors m)
     (hmn : m ∣ n) (hn : 0 < n) : Nat.IsSumDivisors n := by
   obtain ⟨k, rfl⟩ := hmn
   have hk : 0 < k := by
@@ -19943,7 +19943,7 @@ open scoped BigOperators Topology
 section Specification
 
 /-- The truncated logarithm used in the upstream statement. -/
-noncomputable def _root_.Real.maxLogOne (x : ℝ) : ℝ := max x.log 1
+noncomputable def maxLogOne (x : ℝ) : ℝ := max x.log 1
 
 section
 open Set
@@ -19952,10 +19952,10 @@ variable (A : Set ℕ) (x : ℝ)
 
 /-- The finite upper-triangular set of pairs in `A ∩ [1, x]`. -/
 @[inline]
-abbrev _root_.Set.bddProdUpper : Set (ℕ × ℕ) :=
+abbrev bddProdUpper : Set (ℕ × ℕ) :=
   {y ∈ (A ∩ Set.Icc 1 ⌊x⌋₊) ×ˢ (A ∩ Set.Icc 1 ⌊x⌋₊) | y.1 < y.2}
 
-noncomputable instance _root_.Set.boundedIccFintype : Fintype ↥(A ∩ Set.Icc 1 ⌊x⌋₊) :=
+private noncomputable instance _root_.Set.boundedIccFintype : Fintype ↥(A ∩ Set.Icc 1 ⌊x⌋₊) :=
   ((Set.finite_Icc 1 ⌊x⌋₊).subset inter_subset_right).fintype
 
 noncomputable instance : Fintype ↥(bddProdUpper A x) :=
@@ -20730,7 +20730,7 @@ lemma sum_squarefreeSemiprimes_Icc_eq_semiprimeMass (x : ℝ) :
     rfl
 
 lemma sum_squarefreeSemiprime_bddProdUpper_eq_semiprimeEnergy (x : ℝ) :
-    (∑ nm ∈ Set.bddProdUpper squarefreeSemiprimes x,
+    (∑ nm ∈ bddProdUpper squarefreeSemiprimes x,
       (1 : ℝ) / nm.1.lcm nm.2) = semiprimeEnergy ⌊x⌋₊ := by
   rw [semiprimeEnergy]
   apply Finset.sum_congr
@@ -20743,14 +20743,14 @@ lemma sum_squarefreeSemiprime_bddProdUpper_eq_semiprimeEnergy (x : ℝ) :
     rfl
 
 lemma tendsto_maxLogOne_maxLogOne :
-    Tendsto (fun x : ℝ ↦ Real.maxLogOne (Real.maxLogOne x)) atTop atTop := by
+    Tendsto (fun x : ℝ ↦ maxLogOne (maxLogOne x)) atTop atTop := by
   have hlogLog : Tendsto (fun x : ℝ ↦ Real.log (Real.log x)) atTop atTop :=
     Real.tendsto_log_atTop.comp Real.tendsto_log_atTop
   refine hlogLog.congr' ?_
   have hlogOne := Real.tendsto_log_atTop.eventually (eventually_ge_atTop 1)
   have hlogLogOne := hlogLog.eventually (eventually_ge_atTop 1)
   filter_upwards [hlogOne, hlogLogOne] with x hx hxx
-  simp only [Real.maxLogOne, max_eq_left hx, max_eq_left hxx]
+  simp only [maxLogOne, max_eq_left hx, max_eq_left hxx]
 
 /-- Comparison of the truncated iterated logarithm at a real point with the
 ordinary iterated logarithm at its natural floor. -/
@@ -20759,7 +20759,7 @@ lemma half_maxLogOne_le_logLog_floor (x : ℝ) (hx : 2 ≤ x)
     (hlogLogOne : 1 ≤ Real.log (Real.log x))
     (hlogTwo : 2 * Real.log 2 ≤ Real.log x)
     (hlogLogTwo : 2 * Real.log 2 ≤ Real.log (Real.log x)) :
-    (1 / 2 : ℝ) * Real.maxLogOne (Real.maxLogOne x) ≤
+    (1 / 2 : ℝ) * maxLogOne (maxLogOne x) ≤
       Real.log (Real.log (⌊x⌋₊ : ℝ)) := by
   have hxpos : 0 < x := by linarith
   have hhalfpos : 0 < x / 2 := by positivity
@@ -20791,7 +20791,7 @@ counterexample, now with exactly the real frontier and truncated logarithm of
 the specification. -/
 lemma tendsto_real_semiprimeMass_ratio :
     Tendsto (fun x : ℝ ↦
-      1 / Real.maxLogOne (Real.maxLogOne x) * semiprimeMass ⌊x⌋₊)
+      1 / maxLogOne (maxLogOne x) * semiprimeMass ⌊x⌋₊)
       atTop atTop := by
   rw [tendsto_atTop]
   intro b
@@ -20800,7 +20800,7 @@ lemma tendsto_real_semiprimeMass_ratio :
   have hfloorBounds := (tendsto_nat_floor_atTop (α := ℝ)).eventually
     eventually_semiprime_quantitative_bounds
   have hscaled : Tendsto (fun x : ℝ ↦
-      (1 / 256 : ℝ) * Real.maxLogOne (Real.maxLogOne x)) atTop atTop :=
+      (1 / 256 : ℝ) * maxLogOne (maxLogOne x)) atTop atTop :=
     tendsto_maxLogOne_maxLogOne.const_mul_atTop (by norm_num)
   have hb := hscaled.eventually (eventually_ge_atTop b)
   have hlogOne := Real.tendsto_log_atTop.eventually (eventually_ge_atTop 1)
@@ -20812,7 +20812,7 @@ lemma tendsto_real_semiprimeMass_ratio :
   filter_upwards [eventually_ge_atTop 2, hfloorBounds, hb, hlogOne,
     hlogLogOne, hlogTwo, hlogLogTwo] with
     x hx hbounds hbX hlogOneX hlogLogOneX hlogTwoX hlogLogTwoX
-  let K := Real.maxLogOne (Real.maxLogOne x)
+  let K := maxLogOne (maxLogOne x)
   let L := Real.log (Real.log (⌊x⌋₊ : ℝ))
   change 8 ≤ L ∧ L ^ 2 / 64 ≤ semiprimeMass ⌊x⌋₊ ∧
     semiprimeEnergy ⌊x⌋₊ ≤ 48 * L ^ 4 at hbounds
@@ -20835,7 +20835,7 @@ lemma tendsto_real_semiprimeMass_ratio :
 
 lemma tendsto_squarefreeSemiprime_hypothesis :
     Tendsto (fun x : ℝ ↦
-      1 / Real.maxLogOne (Real.maxLogOne x) *
+      1 / maxLogOne (maxLogOne x) *
         ∑ n ∈ (squarefreeSemiprimes ∩ Icc 1 ⌊x⌋₊ : Set ℕ), (1 : ℝ) / n)
       atTop atTop := by
   refine tendsto_real_semiprimeMass_ratio.congr' ?_
@@ -20846,7 +20846,7 @@ lemma eventually_squarefreeSemiprime_normalizedEnergy_le :
     ∀ᶠ x : ℝ in atTop,
       1 / (∑ n ∈ (squarefreeSemiprimes ∩ Icc 1 ⌊x⌋₊ : Set ℕ),
           (1 : ℝ) / n) ^ 2 *
-        ∑ nm ∈ Set.bddProdUpper squarefreeSemiprimes x,
+        ∑ nm ∈ bddProdUpper squarefreeSemiprimes x,
           (1 : ℝ) / nm.1.lcm nm.2 ≤ 196608 := by
   have hbounds := (tendsto_nat_floor_atTop (α := ℝ)).eventually
     eventually_semiprime_normalizedEnergy_le
@@ -20867,10 +20867,10 @@ lemma not_tendsto_atTop_of_eventually_le {f : ℝ → ℝ} {C : ℝ}
 /-- Erdős Problem 442 has a negative answer.  The set of squarefree semiprimes
 satisfies the hypothesis, while its normalized LCM energy is eventually bounded. -/
 theorem erdos_442 : ¬ ∀ (A : Set ℕ),
-    Tendsto (fun x : ℝ ↦ 1 / Real.maxLogOne (Real.maxLogOne x) *
+    Tendsto (fun x : ℝ ↦ 1 / maxLogOne (maxLogOne x) *
       ∑ n ∈ (A ∩ Icc 1 ⌊x⌋₊ : Set ℕ), (1 : ℝ) / n) atTop atTop →
     Tendsto (fun x : ℝ ↦ 1 / (∑ n ∈ (A ∩ Icc 1 ⌊x⌋₊ : Set ℕ),
-      (1 : ℝ) / n) ^ 2 * ∑ nm ∈ Set.bddProdUpper A x,
+      (1 : ℝ) / n) ^ 2 * ∑ nm ∈ bddProdUpper A x,
         (1 : ℝ) / nm.1.lcm nm.2) atTop atTop := by
   intro hclaimed
   have hdiverges := hclaimed squarefreeSemiprimes

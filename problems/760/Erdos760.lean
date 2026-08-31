@@ -32,18 +32,18 @@ Number" by Alon, Krivelevich, and Sudakov (1997). Note: the reference paper expl
 
 /-- `CochromPartable G n` holds when `G`'s vertices can be coloured with `n` colours so that 
 each colour class induces either a complete or an empty graph. -/
-def _root_.SimpleGraph.CochromPartable {V : Type*} (G : SimpleGraph V) (n : ℕ) : Prop :=
+def CochromPartable {V : Type*} (G : SimpleGraph V) (n : ℕ) : Prop :=
   ∃ f : V → Fin n, ∀ i : Fin n, G.IsClique (f ⁻¹' {i}) ∨ G.IsIndepSet (f ⁻¹' {i})
 
 /-- The cochromatic number: minimum colours for a cochromatic partition. -/
-noncomputable def _root_.SimpleGraph.cochromaticNumber {V : Type*} (G : SimpleGraph V) : ℕ∞ :=
-  ⨅ n ∈ {n : ℕ | G.CochromPartable n}, (n : ℕ∞)
+noncomputable def cochromaticNumber {V : Type*} (G : SimpleGraph V) : ℕ∞ :=
+  ⨅ n ∈ {n : ℕ | CochromPartable G n}, (n : ℕ∞)
 
 /-! ## Basic lemmas about CochromPartable -/
 
 /-- Each vertex gets its own singleton colour class. -/
-theorem _root_.SimpleGraph.cochromPartable_card {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) :
-    G.CochromPartable (Fintype.card V) := by
+private theorem _root_.SimpleGraph.cochromPartable_card {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) :
+    CochromPartable G (Fintype.card V) := by
   use Fintype.equivFin V
   intro i
   right
@@ -52,13 +52,13 @@ theorem _root_.SimpleGraph.cochromPartable_card {V : Type*} [Fintype V] [Decidab
   exact absurd ((Fintype.equivFin V).injective (hu.trans hv.symm)) huv
 
 /-- If `G` is cochrom-partable with `n` colours, `ζ(G) ≤ n`. -/
-theorem _root_.SimpleGraph.cochromaticNumber_le_of_cochromPartable {V : Type*} (G : SimpleGraph V) {n : ℕ}
-    (h : G.CochromPartable n) :
-    G.cochromaticNumber ≤ n := iInf₂_le n h
+private theorem _root_.SimpleGraph.cochromaticNumber_le_of_cochromPartable {V : Type*} (G : SimpleGraph V) {n : ℕ}
+    (h : CochromPartable G n) :
+    (cochromaticNumber G) ≤ n := iInf₂_le n h
 
 /-- Cochromatic partability is invariant under `comap` by an equivalence (graph isomorphism). -/
-theorem _root_.SimpleGraph.CochromPartable_comap_equiv {V W : Type*} (G : SimpleGraph W) (e : V ≃ W) (k : ℕ) :
-    (G.comap e).CochromPartable k ↔ G.CochromPartable k := by
+private theorem _root_.SimpleGraph.CochromPartable_comap_equiv {V W : Type*} (G : SimpleGraph W) (e : V ≃ W) (k : ℕ) :
+    CochromPartable (G.comap e) k ↔ CochromPartable G k := by
   constructor
   · rintro ⟨f, hf⟩
     refine ⟨f ∘ e.symm, fun i => ?_⟩
@@ -101,8 +101,8 @@ theorem _root_.SimpleGraph.CochromPartable_comap_equiv {V W : Type*} (G : Simple
 
 /-- The cochromatic number is invariant under `comap` by an
 equivalence. -/
-theorem _root_.SimpleGraph.cochromaticNumber_comap_equiv {V W : Type*} (G : SimpleGraph W) (e : V ≃ W) :
-    (G.comap e).cochromaticNumber = G.cochromaticNumber := by
+private theorem _root_.SimpleGraph.cochromaticNumber_comap_equiv {V W : Type*} (G : SimpleGraph W) (e : V ≃ W) :
+    (cochromaticNumber (G.comap e)) = (cochromaticNumber G) := by
   simp only [cochromaticNumber]
   congr 1; ext k
   simp [CochromPartable_comap_equiv G e k]
@@ -111,8 +111,8 @@ theorem _root_.SimpleGraph.cochromaticNumber_comap_equiv {V W : Type*} (G : Simp
 
 /-- If `G` is cochrom-partable with `k` colours and has clique number `≤ ω`, then 
 `G` is `(k * ω)`-colourable. -/
-theorem _root_.SimpleGraph.colorable_of_cochromPartable_of_cliqueNum_le {V : Type*} [Fintype V] [DecidableEq V]
-    (G : SimpleGraph V) [DecidableRel G.Adj] (k ω : ℕ) (hk : G.CochromPartable k)
+private theorem _root_.SimpleGraph.colorable_of_cochromPartable_of_cliqueNum_le {V : Type*} [Fintype V] [DecidableEq V]
+    (G : SimpleGraph V) [DecidableRel G.Adj] (k ω : ℕ) (hk : CochromPartable G k)
     (hω : G.cliqueNum ≤ ω) :
     G.Colorable (k * ω) := by
   cases' hk with f hf
@@ -163,27 +163,27 @@ theorem _root_.SimpleGraph.colorable_of_cochromPartable_of_cliqueNum_le {V : Typ
   contrapose! hh; aesop
 
 /-- Product colouring inequality: `χ(G) ≤ ζ(G) · ω(G)`. -/
-theorem _root_.SimpleGraph.chi_le_cochromaticNumber_mul_cliqueNum' {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.chi_le_cochromaticNumber_mul_cliqueNum' {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] :
-    G.chromaticNumber ≤ G.cochromaticNumber * G.cliqueNum := by
-  have h_le : ∀ n : ℕ, G.CochromPartable n → G.chromaticNumber ≤ n * G.cliqueNum := by
+    G.chromaticNumber ≤ (cochromaticNumber G) * G.cliqueNum := by
+  have h_le : ∀ n : ℕ, CochromPartable G n → G.chromaticNumber ≤ n * G.cliqueNum := by
     intro n hn
     have := colorable_of_cochromPartable_of_cliqueNum_le G n G.cliqueNum hn le_rfl
     exact_mod_cast this.chromaticNumber_le
   refine' le_trans (h_le _ _) _
-  exact (InfSet.sInf {n : ℕ | G.CochromPartable n})
+  exact (InfSet.sInf {n : ℕ | CochromPartable G n})
   · exact Nat.sInf_mem (show
-        {n : ℕ | G.CochromPartable n}.Nonempty from ⟨_, cochromPartable_card G⟩)
+        {n : ℕ | CochromPartable G n}.Nonempty from ⟨_, cochromPartable_card G⟩)
   · refine' mul_le_mul_left _ _
     refine' le_ciInf fun n => _
-    by_cases hn : G.CochromPartable n <;> simp +decide [hn]
+    by_cases hn : CochromPartable G n <;> simp +decide [hn]
     exact Nat.sInf_le hn
 
 /-! ## Degeneracy coloring bound -/
 
 /-- If every non-empty induced subgraph has a vertex of degree `< d`,
 then `G` is `d`-colourable. -/
-theorem _root_.SimpleGraph.colorable_of_degenerate {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.colorable_of_degenerate {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (d : ℕ) (hd : 0 < d)
     (hdegen : ∀ (S : Finset V), S.Nonempty → ∃ v ∈ S, (S.filter (fun w => G.Adj v w)).card < d) :
     G.Colorable d := by
@@ -222,25 +222,25 @@ theorem _root_.SimpleGraph.colorable_of_degenerate {V : Type*} [Fintype V] [Deci
 
 /-- A spanning subgraph of `G` defined by a subset `T` of `G`'s
 edges. -/
-def _root_.SimpleGraph.spanSub {V : Type*} [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
+private def _root_.SimpleGraph.spanSub {V : Type*} [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
     (T : Finset (Sym2 V)) : SimpleGraph V where
   Adj u v := s(u, v) ∈ T ∧ G.Adj u v
   symm _ _ h := ⟨Sym2.eq_swap ▸ h.1, h.2.symm⟩
   loopless := ⟨fun _ h => G.ne_of_adj h.2 rfl⟩
 
-instance _root_.SimpleGraph.spanSub_decidableRel {V : Type*} [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
+private instance _root_.SimpleGraph.spanSub_decidableRel {V : Type*} [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
     (T : Finset (Sym2 V)) :
     DecidableRel (G.spanSub T).Adj :=
   fun _ _ => instDecidableAnd
 
 /-! ## Key counting identities -/
 
-theorem _root_.SimpleGraph.card_filter_superset' {α : Type*} [DecidableEq α] (U A : Finset α) (hA : A ⊆ U) :
+private theorem _root_.SimpleGraph.card_filter_superset' {α : Type*} [DecidableEq α] (U A : Finset α) (hA : A ⊆ U) :
     (U.powerset.filter (A ⊆ ·)).card = 2 ^ (U.card - A.card) := by
   rw [← Finset.Icc_eq_filter_powerset]
   exact Finset.card_Icc_finset hA
 
-theorem _root_.SimpleGraph.card_filter_disjoint' {α : Type*} [DecidableEq α] (U A : Finset α) (hA : A ⊆ U) :
+private theorem _root_.SimpleGraph.card_filter_disjoint' {α : Type*} [DecidableEq α] (U A : Finset α) (hA : A ⊆ U) :
     (U.powerset.filter (Disjoint A ·)).card = 2 ^ (U.card - A.card) := by
   rw [← card_filter_superset' _ _ hA]
   refine Finset.card_bij (fun x _ => U \ x) ?_ ?_ ?_
@@ -250,7 +250,7 @@ theorem _root_.SimpleGraph.card_filter_disjoint' {α : Type*} [DecidableEq α] (
     exact fun b hb₁ hb₂ => ⟨U \ b, ⟨fun x hx => by aesop, fun x hx₁ hx₂ => by aesop⟩, by aesop⟩
 
 /-- Key combinatorial estimate: `6 · C(N, 4L+1) ≤ 2^C(4L+1, 2)`. -/
-theorem _root_.SimpleGraph.six_choose_le_pow_choose2' (N L : ℕ) (hN : N ≤ 2 ^ L) (hL : 1 ≤ L) :
+private theorem _root_.SimpleGraph.six_choose_le_pow_choose2' (N L : ℕ) (hN : N ≤ 2 ^ L) (hL : 1 ≤ L) :
     6 * N.choose (4 * L + 1) ≤ 2 ^ ((4 * L + 1).choose 2) := by
   have h6 :
       6 * Nat.choose N (4 * L + 1) ≤ 6 * 2 ^ (L * (4 * L + 1)) / Nat.factorial (4 * L + 1) := by
@@ -268,7 +268,7 @@ theorem _root_.SimpleGraph.six_choose_le_pow_choose2' (N L : ℕ) (hN : N ≤ 2 
     grind
 
 /-- If no `(k+1)`-subset is a clique in `spanSub G T`, then `ω(spanSub G T) ≤ k`. -/
-theorem _root_.SimpleGraph.cliqueNum_spanSub_le_of_no_large_clique {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.cliqueNum_spanSub_le_of_no_large_clique {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (T : Finset (Sym2 V)) (k : ℕ)
     (h : ∀ S : Finset V, S.card = k + 1 → ¬((G.spanSub T).IsClique ↑S)) :
     (G.spanSub T).cliqueNum ≤ k := by
@@ -282,7 +282,7 @@ theorem _root_.SimpleGraph.cliqueNum_spanSub_le_of_no_large_clique {V : Type*} [
   exact ⟨S', hS'.2, fun u hu v hv huv => hS.2.1 (hS'.1 hu) (hS'.1 hv) huv⟩
 
 /-- Contrapositive extraction of the degeneracy witness. -/
-theorem _root_.SimpleGraph.degeneracy_of_no_dense_indep {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.degeneracy_of_no_dense_indep {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (T : Finset (Sym2 V)) (d : ℕ)
     (h : ∀ S : Finset V, S.Nonempty → (∀ u ∈ S, ∀ v ∈ S, u ≠ v → ¬(G.spanSub T).Adj u v) →
       ¬(∀ v ∈ S, d ≤ (S.filter (fun w => G.Adj v w)).card)) :
@@ -291,7 +291,7 @@ theorem _root_.SimpleGraph.degeneracy_of_no_dense_indep {V : Type*} [Fintype V] 
   fun S hS hS' => by push Not at h; exact h S hS hS'
 
 /-- Double-counting: `d · |S| ≤ 2 · |E(G[S])|`. -/
-theorem _root_.SimpleGraph.edgeFinset_within_ge_of_min_deg {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.edgeFinset_within_ge_of_min_deg {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (S : Finset V) (d : ℕ)
     (hmin : ∀ v ∈ S, d ≤ (S.filter (fun w => G.Adj v w)).card) :
     d * S.card ≤ 2 * (G.edgeFinset.filter (fun e => ∀ v, v ∈ e → v ∈ S)).card := by
@@ -315,17 +315,17 @@ theorem _root_.SimpleGraph.edgeFinset_within_ge_of_min_deg {V : Type*} [Fintype 
   simpa [ mul_comm, h_double_count ] using Finset.sum_le_sum hmin
 
 /-- The set of edges of `G` with both endpoints in `S`. -/
-def _root_.SimpleGraph.edgesWithin {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
+private def _root_.SimpleGraph.edgesWithin {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
     (S : Finset V) : Finset (Sym2 V) :=
   G.edgeFinset.filter (fun e => ∀ v, v ∈ e → v ∈ S)
 
-theorem _root_.SimpleGraph.edgesWithin_sub_edgeFinset {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.edgesWithin_sub_edgeFinset {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (S : Finset V) :
     G.edgesWithin S ⊆ G.edgeFinset :=
   Finset.filter_subset _ _
 
 /-- If `S` is independent in `spanSub G T`, every `G`-edge within `S` avoids `T`. -/
-theorem _root_.SimpleGraph.indep_spanSub_edgesWithin_disjoint {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.indep_spanSub_edgesWithin_disjoint {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (T : Finset (Sym2 V)) (S : Finset V)
     (hindep : ∀ u ∈ S, ∀ v ∈ S, u ≠ v → ¬(G.spanSub T).Adj u v) :
     Disjoint (G.edgesWithin S) T := by
@@ -336,7 +336,7 @@ theorem _root_.SimpleGraph.indep_spanSub_edgesWithin_disjoint {V : Type*} [Finty
   aesop
 
 /-- For a `G`-clique `S`, `|E(G[S])| ≥ C(|S|, 2)`. -/
-theorem _root_.SimpleGraph.card_edgesWithin_clique {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.card_edgesWithin_clique {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (S : Finset V) (hclique : G.IsClique ↑S) :
     S.card.choose 2 ≤ (G.edgesWithin S).card := by
   have h_deg : ∀ v ∈ S, (S.card - 1) ≤ (S.filter (fun w => G.Adj v w)).card := by
@@ -351,7 +351,7 @@ theorem _root_.SimpleGraph.card_edgesWithin_clique {V : Type*} [Fintype V] [Deci
   linarith!
 
 /-- For a fixed `G`-clique `S` of size `k`, at most `2^(m − C(k,2))` edge subsets make `S` a clique. -/
-theorem _root_.SimpleGraph.per_clique_bad_count {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.per_clique_bad_count {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (S : Finset V) (k : ℕ) (hS : S.card = k)
     (hclique : G.IsClique ↑S) :
     (G.edgeFinset.powerset.filter (fun T => (G.spanSub T).IsClique ↑S)).card ≤
@@ -370,7 +370,7 @@ theorem _root_.SimpleGraph.per_clique_bad_count {V : Type*} [Fintype V] [Decidab
 
 /-- For a dense independent set `S` with min `G`-degree `≥ d`, at most `2^(m − d·|S|/2)` edge 
 subsets make `S` independent. -/
-theorem _root_.SimpleGraph.per_degen_bad_count {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) 
+private theorem _root_.SimpleGraph.per_degen_bad_count {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) 
     [DecidableRel G.Adj] (S : Finset V) (d : ℕ)
     (hdense : ∀ v ∈ S, d ≤ (S.filter (fun w => G.Adj v w)).card) :
     (G.edgeFinset.powerset.filter (fun T => ∀ u ∈ S, ∀ v ∈ S, u ≠ v → ¬(G.spanSub T).Adj u v)).card ≤
@@ -393,14 +393,14 @@ theorem _root_.SimpleGraph.per_degen_bad_count {V : Type*} [Fintype V] [Decidabl
         (edgesWithin_sub_edgeFinset G S) using 1
 
 /-- Union bound for filters with existential quantifier. -/
-theorem _root_.SimpleGraph.card_filter_bexists_le_sum {α β : Type*} [DecidableEq α] [DecidableEq β]
+private theorem _root_.SimpleGraph.card_filter_bexists_le_sum {α β : Type*} [DecidableEq α] [DecidableEq β]
     [Fintype β] (Ω : Finset α) (P : α → β → Prop) [∀ a b, Decidable (P a b)] :
     (Ω.filter (fun a => ∃ b, P a b)).card ≤ ∑ b : β, (Ω.filter (fun a => P a b)).card := by
   refine' le_trans _ Finset.card_biUnion_le
   exact Finset.card_le_card fun x hx => by aesop
 
 /-- When `G` has fewer than `2L` edges, `T = ∅` works. -/
-theorem _root_.SimpleGraph.exists_good_edge_subset_of_few_edges {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V)
+private theorem _root_.SimpleGraph.exists_good_edge_subset_of_few_edges {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V)
     [DecidableRel G.Adj] (hm : G.edgeFinset.card < 2 * Nat.clog 2 (Fintype.card V)) :
     ∃ T ∈ G.edgeFinset.powerset,
       (∀ S : Finset V, S.card = 4 * Nat.clog 2 (Fintype.card V) + 1 → ¬((G.spanSub T).IsClique ↑S)) ∧
@@ -425,7 +425,7 @@ theorem _root_.SimpleGraph.exists_good_edge_subset_of_few_edges {V : Type*} [Fin
     nlinarith
 
 /-- The total bad-clique count, times 6, is `≤ 2^m`. -/
-theorem _root_.SimpleGraph.clique_bad_total_bound {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.clique_bad_total_bound {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (hn : 2 ≤ Fintype.card V) :
     6 * (G.edgeFinset.powerset.filter (fun T =>
       ∃ S : Finset V, S.card = 4 * Nat.clog 2 (Fintype.card V) + 1 ∧ 
@@ -460,7 +460,7 @@ theorem _root_.SimpleGraph.clique_bad_total_bound {V : Type*} [Fintype V] [Decid
 /-! ## Telescoping sum identity for geometric series -/
 
 /-- `(2^L − 1) · Σ 2^(m−(s+1)L) + 2^(m−KL) = 2^m`. -/
-theorem _root_.SimpleGraph.geom_sum_telesc (K m L : ℕ) (hL : 1 ≤ L) (hKL : K * L ≤ m) :
+private theorem _root_.SimpleGraph.geom_sum_telesc (K m L : ℕ) (hL : 1 ≤ L) (hKL : K * L ≤ m) :
     (2 ^ L - 1) * ∑ s ∈ Finset.range K, 2 ^ (m - (s + 1) * L) + 2 ^ (m - K * L) = 2 ^ m := by
   induction K with
   | zero => norm_num
@@ -476,26 +476,26 @@ theorem _root_.SimpleGraph.geom_sum_telesc (K m L : ℕ) (hL : 1 ≤ L) (hKL : K
     ring
 
 /-- Corollary: `(2^L − 1) · Σ ≤ 2^m`. -/
-theorem _root_.SimpleGraph.geom_sum_bound (K m L : ℕ) (hL : 1 ≤ L) (hKL : K * L ≤ m) :
+private theorem _root_.SimpleGraph.geom_sum_bound (K m L : ℕ) (hL : 1 ≤ L) (hKL : K * L ≤ m) :
     (2 ^ L - 1) * ∑ s ∈ Finset.range K, 2 ^ (m - (s + 1) * L) ≤ 2 ^ m := by
   have h := geom_sum_telesc K m L hL hKL
   linarith [Nat.one_le_two_pow (n := m - K * L)]
 
 /-- `L ≥ 5` when `4L < N ≤ 2^L`. -/
-theorem _root_.SimpleGraph.clog_ge_five (N : ℕ) (hN : 2 ≤ N) (hlarge : 4 * Nat.clog 2 N < N) : 5 ≤ Nat.clog 2 N := by
+private theorem _root_.SimpleGraph.clog_ge_five (N : ℕ) (hN : 2 ≤ N) (hlarge : 4 * Nat.clog 2 N < N) : 5 ≤ Nat.clog 2 N := by
   by_cases h5 : N ≤ 16
   · interval_cases N <;> exact absurd hlarge (by decide)
   · grind +suggestions
 
 /-- `C(N, s+1) · 2^(m − 2L(s+1)) ≤ 2^(m − L(s+1))`. -/
-theorem _root_.SimpleGraph.choose_pow_bound (N L s m : ℕ) (hN : N ≤ 2 ^ L) (hle : 2 * L * (s + 1) ≤ m) :
+private theorem _root_.SimpleGraph.choose_pow_bound (N L s m : ℕ) (hN : N ≤ 2 ^ L) (hle : 2 * L * (s + 1) ≤ m) :
     N.choose (s + 1) * 2 ^ (m - 2 * L * (s + 1)) ≤ 2 ^ (m - L * (s + 1)) := by
   convert Nat.mul_le_mul_right _ (Nat.choose_le_pow _ _ |> le_trans <| Nat.pow_le_pow_left hN _) using 1
   rw [← pow_mul, ← pow_add]
   grind
 
 /-- Total bad-degeneracy count, times 5, is `≤ 2^m`. -/
-theorem _root_.SimpleGraph.degen_bad_total_bound {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) 
+private theorem _root_.SimpleGraph.degen_bad_total_bound {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) 
     [DecidableRel G.Adj] (hn : 2 ≤ Fintype.card V)
     (hlarge : 4 * Nat.clog 2 (Fintype.card V) < Fintype.card V) :
     5 * (G.edgeFinset.powerset.filter (fun T =>
@@ -565,7 +565,7 @@ theorem _root_.SimpleGraph.degen_bad_total_bound {V : Type*} [Fintype V] [Decida
 /-! ## Main existence result via first moment method -/
 
 /-- There exists `T ⊆ E(G)` with no bad configurations. -/
-theorem _root_.SimpleGraph.exists_good_edge_subset {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) 
+private theorem _root_.SimpleGraph.exists_good_edge_subset {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) 
     [DecidableRel G.Adj] (hn : 2 ≤ Fintype.card V)
     (hlarge : 4 * Nat.clog 2 (Fintype.card V) < Fintype.card V) :
     ∃ T ∈ G.edgeFinset.powerset,
@@ -593,7 +593,7 @@ theorem _root_.SimpleGraph.exists_good_edge_subset {V : Type*} [Fintype V] [Deci
     linarith [pow_pos (zero_lt_two' ℕ) G.edgeFinset.card]
 
 /-- Combining existence with property extraction. -/
-theorem _root_.SimpleGraph.large_N_counting {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.large_N_counting {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (hn : 2 ≤ Fintype.card V)
     (hlarge : 4 * Nat.clog 2 (Fintype.card V) < Fintype.card V) :
     ∃ (H : SimpleGraph V) (_ : DecidableRel H.Adj), (∀ u v, H.Adj u v → G.Adj u v) ∧
@@ -608,7 +608,7 @@ theorem _root_.SimpleGraph.large_N_counting {V : Type*} [Fintype V] [DecidableEq
   · exact fun S hS₁ hS₂ => by push Not at hT; exact hT.2.2 S hS₁ hS₂;
 
 /-- The good spanning subgraph exists for all graphs on `≥ 2` vertices. -/
-theorem _root_.SimpleGraph.exists_good_spanning_subgraph {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.exists_good_spanning_subgraph {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (hn : 2 ≤ Fintype.card V) :
     ∃ (H : SimpleGraph V) (_ : DecidableRel H.Adj),
       (∀ u v, H.Adj u v → G.Adj u v) ∧ H.cliqueNum ≤ 4 * Nat.clog 2 (Fintype.card V) ∧
@@ -626,7 +626,7 @@ theorem _root_.SimpleGraph.exists_good_spanning_subgraph {V : Type*} [Fintype V]
       · exact le_trans ( Finset.card_le_univ _ ) ( le_of_not_gt h_large )
 
 /-- Degeneracy colouring restricted to a subset. -/
-theorem _root_.SimpleGraph.colorable_on_subset_of_degenerate {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.colorable_on_subset_of_degenerate {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (d : ℕ) (hd : 0 < d) (S : Finset V)
     (hdegen : ∀ (T : Finset V), T.Nonempty → T ⊆ S →
       ∃ v ∈ T, (T.filter (fun w => G.Adj v w)).card < d) :
@@ -648,9 +648,9 @@ theorem _root_.SimpleGraph.colorable_on_subset_of_degenerate {V : Type*} [Fintyp
     fun u hu v hv huv => by simpa [hu, hv] using hc ⟨u, hu⟩ ⟨v, hv⟩ huv⟩
 
 /-- From cochromatic partition + degeneracy bound → `G` is `(k * d)`-colourable. -/
-theorem _root_.SimpleGraph.colorable_of_cochrom_degen {V : Type*} [Fintype V] [DecidableEq V] (G H : SimpleGraph V)
+private theorem _root_.SimpleGraph.colorable_of_cochrom_degen {V : Type*} [Fintype V] [DecidableEq V] (G H : SimpleGraph V)
     [DecidableRel G.Adj] [DecidableRel H.Adj] (k d : ℕ) (hd : 0 < d)
-    (hk : H.CochromPartable k) (hω : H.cliqueNum ≤ d)
+    (hk : CochromPartable H k) (hω : H.cliqueNum ≤ d)
     (hdegen : ∀ (S : Finset V), S.Nonempty →
       (∀ u ∈ S, ∀ v ∈ S, u ≠ v → ¬ H.Adj u v) →
       ∃ v ∈ S, (S.filter (fun w => G.Adj v w)).card < d) :
@@ -697,18 +697,18 @@ theorem _root_.SimpleGraph.colorable_of_cochrom_degen {V : Type*} [Fintype V] [D
   exact fun { a b } hab => hc a b hab
 
 /-- Connection lemma: `χ(G) ≤ d · ζ(H)`. -/
-theorem _root_.SimpleGraph.chromaticNumber_le_of_good_subgraph {V : Type*} [Fintype V] [DecidableEq V] (G H : SimpleGraph V)
+private theorem _root_.SimpleGraph.chromaticNumber_le_of_good_subgraph {V : Type*} [Fintype V] [DecidableEq V] (G H : SimpleGraph V)
     [DecidableRel G.Adj] [DecidableRel H.Adj] (d : ℕ) (hd : 0 < d)
     (hω : H.cliqueNum ≤ d)
     (hdegen : ∀ (S : Finset V), S.Nonempty → (∀ u ∈ S, ∀ v ∈ S, u ≠ v → ¬ H.Adj u v) →
       ∃ v ∈ S, (S.filter (fun w => G.Adj v w)).card < d) :
-    G.chromaticNumber ≤ d * H.cochromaticNumber := by
+    G.chromaticNumber ≤ d * (cochromaticNumber H) := by
   refine' le_of_forall_le _
   intro c hc
   refine' le_trans hc _
-  rw [SimpleGraph.cochromaticNumber, ENat.mul_iInf]
+  rw [cochromaticNumber, ENat.mul_iInf]
   refine' le_iInf fun n => _
-  by_cases hn : H.CochromPartable n <;>
+  by_cases hn : CochromPartable H n <;>
     simp +decide [hn]
   · have :=
       colorable_of_cochrom_degen G H n d hd
@@ -717,11 +717,11 @@ theorem _root_.SimpleGraph.chromaticNumber_le_of_good_subgraph {V : Type*} [Fint
   · simp +decide [ENat.mul_top, hd.ne']
 
 /-- Cochromatic invariance for subgraphs via clique embeddings. -/
-theorem _root_.SimpleGraph.exists_subgraph_from_clique_cochrom {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.exists_subgraph_from_clique_cochrom {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (n : ℕ) (hn : n ≤ G.cliqueNum)
     (R : SimpleGraph (Fin n)) [DecidableRel R.Adj] :
     ∃ (S : Set V) (_ : Fintype S) (H : SimpleGraph S) (_ : DecidableEq S) (_ : DecidableRel H.Adj),
-      (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧ Fintype.card S = n ∧ H.cochromaticNumber = R.cochromaticNumber := by
+      (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧ Fintype.card S = n ∧ (cochromaticNumber H) = (cochromaticNumber R) := by
   have h_exists_clique : ∃ S : Finset V, S.card = n ∧ G.IsClique S := by
     -- Since $n \leq \omega(G)$, there exists a clique of size $n$ in $G$.
     have h_clique : ∃ S : Finset V, G.IsClique S ∧ S.card ≥ n := by
@@ -742,7 +742,7 @@ theorem _root_.SimpleGraph.exists_subgraph_from_clique_cochrom {V : Type*} [Fint
   · convert cochromaticNumber_comap_equiv R f.symm
 
 /-- Extension lemma: colour clique fibres, assign independent fibres their own colour. -/
-theorem _root_.SimpleGraph.colorable_of_cochrom_and_induce {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.colorable_of_cochrom_and_induce {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (n : ℕ) (f : V → Fin n)
     (hf : ∀ i, G.IsClique (f ⁻¹' {i}) ∨ G.IsIndepSet (f ⁻¹' {i}))
     (S : Set V) [DecidablePred (· ∈ S)]
@@ -763,7 +763,7 @@ theorem _root_.SimpleGraph.colorable_of_cochrom_and_induce {V : Type*} [Fintype 
     exact False.elim (this (by aesop) (by aesop) (by aesop) hab)
 
 /-- Clique fibres have total size `≤ n · ω(G)`. -/
-theorem _root_.SimpleGraph.card_clique_fibers_le {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.card_clique_fibers_le {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (n : ℕ) (f : V → Fin n) (S : Set V)
     [Fintype S] (hS : ∀ v, v ∈ S ↔ G.IsClique (f ⁻¹' {f v})) :
     Fintype.card S ≤ n * G.cliqueNum := by
@@ -786,8 +786,8 @@ theorem _root_.SimpleGraph.card_clique_fibers_le {V : Type*} [Fintype V] [Decida
 
 /-- **Lemma 2.1** (Cochromatic Partition Reduction): from a cochromatic partition with `n` parts, the 
 clique parts have bounded total size and `χ(G) ≤ χ(G[clique union]) + n`. -/
-theorem _root_.SimpleGraph.exists_clique_union_subgraph {V : Type*} [Fintype V] [DecidableEq V]
-    (G : SimpleGraph V) [DecidableRel G.Adj] (n : ℕ) (hn : G.CochromPartable n) :
+private theorem _root_.SimpleGraph.exists_clique_union_subgraph {V : Type*} [Fintype V] [DecidableEq V]
+    (G : SimpleGraph V) [DecidableRel G.Adj] (n : ℕ) (hn : CochromPartable G n) :
     ∃ (S : Set V) (_ : Fintype S) (_ : DecidableEq S) (_ : DecidableRel (G.induce S).Adj),
       (∀ u : S, ∀ v : S, (G.induce S).Adj u v → G.Adj (↑u) (↑v)) ∧ Fintype.card S ≤ n * G.cliqueNum ∧
       ∀ c : ℕ, (G.induce S).Colorable c → G.Colorable (c + n) := by
@@ -805,36 +805,36 @@ theorem _root_.SimpleGraph.exists_clique_union_subgraph {V : Type*} [Fintype V] 
 
 /-- **Random Subgraph Lemma** (Lemma 2.2, AKS 1997): for any graph `G` on `≥ 2` vertices, there exists a spanning
 subgraph `H` with `χ(G) ≤ 4⌈log₂|V|⌉ · ζ(H)`. -/
-theorem _root_.SimpleGraph.exists_spanning_subgraph_chi_cochrom {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.exists_spanning_subgraph_chi_cochrom {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (hn : 2 ≤ Fintype.card V) :
     ∃ (H : SimpleGraph V) (_ : DecidableRel H.Adj), (∀ u v, H.Adj u v → G.Adj u v) ∧
-      G.chromaticNumber ≤ 4 * Nat.clog 2 (Fintype.card V) * H.cochromaticNumber := by
+      G.chromaticNumber ≤ 4 * Nat.clog 2 (Fintype.card V) * (cochromaticNumber H) := by
   set L := Nat.clog 2 (Fintype.card V)
   by_cases hω : G.cliqueNum ≤ 4 * L
   · refine ⟨G, inferInstance, fun u v h => h, ?_⟩
     calc G.chromaticNumber
-        ≤ G.cochromaticNumber * G.cliqueNum :=
+        ≤ (cochromaticNumber G) * G.cliqueNum :=
           chi_le_cochromaticNumber_mul_cliqueNum' G
-      _ ≤ G.cochromaticNumber * (4 * L) := by
+      _ ≤ (cochromaticNumber G) * (4 * L) := by
           gcongr; exact_mod_cast hω
-      _ = (4 * L) * G.cochromaticNumber := by ring
+      _ = (4 * L) * (cochromaticNumber G) := by ring
   · push Not at hω
     obtain ⟨H, hdecH, hHG, hωH, hdegen⟩ := exists_good_spanning_subgraph G hn
     have hL_pos : 0 < L := Nat.clog_pos (by omega) (by omega)
     exact ⟨H, hdecH, hHG, chromaticNumber_le_of_good_subgraph G H (4 * L) (by omega) hωH hdegen⟩
 
 /-- Extract a `CochromPartable` witness. -/
-theorem _root_.SimpleGraph.exists_cochromPartable_nat {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.exists_cochromPartable_nat {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] :
-    ∃ k : ℕ, G.cochromaticNumber = ↑k ∧ G.CochromPartable k := by
-  have h_ne : {n : ℕ | G.CochromPartable n}.Nonempty := ⟨Fintype.card V, cochromPartable_card G⟩
-  obtain ⟨k, hk⟩ : ∃ k : ℕ, G.CochromPartable k ∧ k = G.cochromaticNumber := by
+    ∃ k : ℕ, (cochromaticNumber G) = ↑k ∧ CochromPartable G k := by
+  have h_ne : {n : ℕ | CochromPartable G n}.Nonempty := ⟨Fintype.card V, cochromPartable_card G⟩
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, CochromPartable G k ∧ k = (cochromaticNumber G) := by
     convert Nat.sInf_mem h_ne
     constructor <;> intro h
     · exact Nat.sInf_mem h_ne
     · refine' ⟨_, h, le_antisymm _ _⟩
       · refine' le_ciInf fun n => _
-        by_cases hn : G.CochromPartable n <;> simp +decide [hn]
+        by_cases hn : CochromPartable G n <;> simp +decide [hn]
         exact Nat.sInf_le hn
       · exact cochromaticNumber_le_of_cochromPartable G h
   exact ⟨k, hk.2.symm, hk.1⟩
@@ -872,19 +872,19 @@ private theorem cliqueNum_ge_two_of_chi_ge_two {V : Type*} [Fintype V] [Decidabl
 
 set_option maxHeartbeats 400000 in
 /-- Combined: Lemma 2.1 + random subgraph. -/
-theorem _root_.SimpleGraph.exists_subgraph_large_cochrom_of_small_omega' {V : Type*} [Fintype V] [DecidableEq V]
+private theorem _root_.SimpleGraph.exists_subgraph_large_cochrom_of_small_omega' {V : Type*} [Fintype V] [DecidableEq V]
     (G : SimpleGraph V) [DecidableRel G.Adj] (m : ℕ) (hchi : G.chromaticNumber = ↑m)
     (hm : 2 ≤ m) (hω : G.cliqueNum < m) :
     ∃ (S : Set V) (_ : Fintype S) (H : SimpleGraph S) (_ : DecidableEq S) (_ : DecidableRel H.Adj),
-      (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧ (m : ℕ∞) ≤ 16 * Nat.clog 2 m * H.cochromaticNumber := by
+      (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧ (m : ℕ∞) ≤ 16 * Nat.clog 2 m * (cochromaticNumber H) := by
   set L := Nat.clog 2 m with hL_def
   have hL_pos : 0 < L := Nat.clog_pos (by omega) (by omega)
   obtain ⟨ζ, hζ_eq, hζ_part⟩ := exists_cochromPartable_nat G
   by_cases hζ_large : m ≤ L * ζ
   · -- ζ ≥ m/L: take H = G via Set.univ
     refine' ⟨Set.univ, inferInstance, G.induce Set.univ, inferInstance, inferInstance, by simp +decide, _⟩
-    have h_eq : (induce Set.univ G).cochromaticNumber = G.cochromaticNumber := by
-      unfold SimpleGraph.cochromaticNumber
+    have h_eq : (cochromaticNumber (induce Set.univ G)) = (cochromaticNumber G) := by
+      unfold cochromaticNumber
       congr! 3
       constructor <;> rintro ⟨f, hf⟩
       · use fun v => f ⟨v, trivial⟩
@@ -931,7 +931,7 @@ theorem _root_.SimpleGraph.exists_subgraph_large_cochrom_of_small_omega' {V : Ty
         · convert hcolor _ _
           exact colorable_chromaticNumber_of_fintype (induce S G)
         · cases h : (induce S G).chromaticNumber <;> aesop
-    have h_combined : (m : ℕ∞) ≤ 4 * (2 * L) * H.cochromaticNumber + ζ := by
+    have h_combined : (m : ℕ∞) ≤ 4 * (2 * L) * (cochromaticNumber H) + ζ := by
       refine le_trans h_m_le (add_le_add ?_ le_rfl)
       refine hchi_bound.trans ?_
       gcongr
@@ -945,7 +945,7 @@ theorem _root_.SimpleGraph.exists_subgraph_large_cochrom_of_small_omega' {V : Ty
           gcongr
           exact Nat.le_pow_clog (by decide) _
         · rw [Nat.clog_pow]; norm_num
-    rcases k : H.cochromaticNumber with
+    rcases k : (cochromaticNumber H) with
       _ | _ | k <;> simp_all +decide
     · erw [WithTop.mul_top]; norm_num
       finiteness
@@ -969,7 +969,7 @@ private theorem erdos_760_clog :
     ∀ (V : Type*) [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj] (m : ℕ),
       G.chromaticNumber = ↑m → 2 ≤ m →
     ∃ (S : Set V) (_ : Fintype S) (H : SimpleGraph S) (_ : DecidableEq S) (_ : DecidableRel H.Adj),
-      (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧ (m : ℕ∞) ≤ 16 * Nat.clog 2 m * H.cochromaticNumber := by
+      (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧ (m : ℕ∞) ≤ 16 * Nat.clog 2 m * (cochromaticNumber H) := by
   intro V _ _ G _ m hchi hm
   set L := Nat.clog 2 m
   have hL_pos : 0 < L := Nat.clog_pos (by omega) (by omega)
@@ -984,9 +984,9 @@ private theorem erdos_760_clog :
     refine ⟨S, hfinS, H, hdeqS, hdecH, hsub, ?_⟩
     rw [hcochrom]
     calc (m : ℕ∞)
-        ≤ ↑(4 * L) * H₀.cochromaticNumber := by
+        ≤ ↑(4 * L) * (cochromaticNumber H₀) := by
           exact_mod_cast hbound
-      _ ≤ ↑(16 * L) * H₀.cochromaticNumber := by
+      _ ≤ ↑(16 * L) * (cochromaticNumber H₀) := by
           gcongr; omega
   · -- Case 2: ω(G) < m
     push Not at hω
@@ -1002,12 +1002,12 @@ private theorem clog_le_two_mul_log (m : ℕ) (hm : 2 ≤ m) : Nat.clog 2 m ≤ 
 
 /-- **Erdős Problem 760 (explicit bound)**: If `G` has `χ(G) = m ≥ 2`, then `G` contains
 a subgraph `H` with `ζ(H) ≥ m / (32 · ⌊log₂ m⌋)`, i.e. `m ≤ 32 · ⌊log₂ m⌋ · ζ(H)`. -/
-theorem _root_.SimpleGraph.erdos_760_explicit :
+private theorem _root_.SimpleGraph.erdos_760_explicit :
     ∀ (V : Type*) [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj] (m : ℕ),
       G.chromaticNumber = ↑m → 2 ≤ m →
     ∃ (S : Set V) (H : SimpleGraph S),
       (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧
-      (m : ℕ∞) ≤ 32 * Nat.log 2 m * H.cochromaticNumber := by
+      (m : ℕ∞) ≤ 32 * Nat.log 2 m * (cochromaticNumber H) := by
   intro V _ _ G _ m hchi hm
   obtain ⟨S, _, H, _, _, hsub, hbound⟩ := erdos_760_clog V G m hchi hm
   refine ⟨S, H, hsub, hbound.trans ?_⟩
@@ -1025,12 +1025,12 @@ If `G` is a graph with chromatic number `χ(G) = m`, then `G` must contain a sub
 Formally, there exists a universal constant `C > 0` such that for every finite simple graph `G`
 with `χ(G) = m ≥ 2`, the graph `G` contains a subgraph `H` satisfying
 `m ≤ C · ⌊log₂ m⌋ · ζ(H)`, i.e. `ζ(H) ≥ m / (C · log₂ m)`. We witness `C = 32`. -/
-theorem _root_.SimpleGraph.erdos_760 : ∃ C : ℕ, 0 < C ∧
+private theorem _root_.SimpleGraph.erdos_760 : ∃ C : ℕ, 0 < C ∧
     ∀ (V : Type*) [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj] (m : ℕ),
       G.chromaticNumber = ↑m → 2 ≤ m →
     ∃ (S : Set V) (H : SimpleGraph S),
       (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧
-      (m : ℕ∞) ≤ C * Nat.log 2 m * H.cochromaticNumber :=
+      (m : ℕ∞) ≤ C * Nat.log 2 m * (cochromaticNumber H) :=
   ⟨32, by omega, erdos_760_explicit⟩
 
 
@@ -1042,7 +1042,7 @@ theorem erdos_760 : ∃ C : ℕ, 0 < C ∧
       G.chromaticNumber = ↑m → 2 ≤ m →
     ∃ (S : Set V) (H : SimpleGraph S),
       (∀ (u v : S), H.Adj u v → G.Adj ↑u ↑v) ∧
-      (m : ℕ∞) ≤ C * Nat.log 2 m * H.cochromaticNumber :=
+      (m : ℕ∞) ≤ C * Nat.log 2 m * (cochromaticNumber H) :=
   SimpleGraph.erdos_760
 
 end

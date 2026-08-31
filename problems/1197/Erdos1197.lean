@@ -494,7 +494,7 @@ section Mathlib_Analysis_SpecialFunctions_Log_Basic
 open Filter Real
 
 /-- log^b x / x^a goes to zero at infinity if a is positive. -/
-theorem _root_.Real.tendsto_pow_log_div_pow_atTop (a : ℝ) (b : ℝ) (ha : 0 < a) :
+private theorem _root_.Real.tendsto_pow_log_div_pow_atTop (a : ℝ) (b : ℝ) (ha : 0 < a) :
     Filter.Tendsto (fun x ↦ log x ^ b / x^a) Filter.atTop (nhds 0) := by
   apply Asymptotics.isLittleO_iff_tendsto' _|>.mp <| isLittleO_log_rpow_rpow_atTop _ ha
   filter_upwards [eventually_gt_atTop 0] with x hx
@@ -513,7 +513,7 @@ section Mathlib_Analysis_Asymptotics_Asymptotics
 open Filter Topology
 
 -- (Asymptotics extension: define IsBigO.natCast at the root level)
-theorem _root_.Asymptotics.IsBigO.natCast {E : Type*} [Norm E] {f g : ℝ → E}
+private theorem _root_.Asymptotics.IsBigO.natCast {E : Type*} [Norm E] {f g : ℝ → E}
     (h : f =O[atTop] g) :
     (fun n : ℕ => f n) =O[atTop] fun n : ℕ => g n :=
   h.comp_tendsto tendsto_natCast_atTop_atTop
@@ -879,19 +879,19 @@ omit [Sub α] in
 
 end nabla
 
-lemma _root_.Finset.sum_shift_front {E : Type*} [Ring E] {u : ℕ → E} {n : ℕ} :
+private lemma _root_.Finset.sum_shift_front {E : Type*} [Ring E] {u : ℕ → E} {n : ℕ} :
     cumsum u (n + 1) = u 0 + cumsum (shift u) n := by
   simp_rw [add_comm n, cumsum, Finset.sum_range_add, Finset.sum_range_one, add_comm 1] ; rfl
 
-lemma _root_.Finset.sum_shift_front' {E : Type*} [Ring E] {u : ℕ → E} :
+private lemma _root_.Finset.sum_shift_front' {E : Type*} [Ring E] {u : ℕ → E} :
     shift (cumsum u) = (fun _ => u 0) + cumsum (shift u) := by
   ext n ; apply Finset.sum_shift_front
 
-lemma _root_.Finset.sum_shift_back {E : Type*} [Ring E] {u : ℕ → E} {n : ℕ} :
+private lemma _root_.Finset.sum_shift_back {E : Type*} [Ring E] {u : ℕ → E} {n : ℕ} :
     cumsum u (n + 1) = cumsum u n + u n := by
   simp [cumsum, Finset.range_add_one, add_comm]
 
-lemma _root_.Finset.sum_shift_back' {E : Type*} [Ring E] {u : ℕ → E} :
+private lemma _root_.Finset.sum_shift_back' {E : Type*} [Ring E] {u : ℕ → E} :
     shift (cumsum u) = cumsum u + u := by
   ext n ; apply Finset.sum_shift_back
 
@@ -925,14 +925,14 @@ lemma summable_iff_bounded {u : ℕ → ℝ} (hu : 0 ≤ u) :
   · exact ⟨C, fun n => sum_le_hasSum _ (fun i _ => hu i) h1⟩
   · exact summable_of_sum_range_le hu h1
 
-lemma _root_.Filter.EventuallyEq.summable {u v : ℕ → ℝ} (h : u =ᶠ[atTop] v) (hu : Summable v) :
+private lemma _root_.Filter.EventuallyEq.summable {u v : ℕ → ℝ} (h : u =ᶠ[atTop] v) (hu : Summable v) :
     Summable u :=
   summable_of_isBigO_nat hu h.isBigO
 
 lemma summable_congr_ae {u v : ℕ → ℝ} (huv : u =ᶠ[atTop] v) : Summable u ↔ Summable v := by
   constructor <;> intro h <;> simp [huv.summable, huv.symm.summable, h]
 
-lemma _root_.BoundedAtFilter.add_const {u : ℕ → ℝ} {c : ℝ} :
+private lemma _root_.BoundedAtFilter.add_const {u : ℕ → ℝ} {c : ℝ} :
     BoundedAtFilter atTop (fun n => u n + c) ↔ BoundedAtFilter atTop u := by
   have : u = fun n => (u n + c) + (-c) := by ext n ; ring
   simp only [BoundedAtFilter]
@@ -940,7 +940,7 @@ lemma _root_.BoundedAtFilter.add_const {u : ℕ → ℝ} {c : ℝ} :
   on_goal 1 => rw [this]
   all_goals { exact h.add (const_boundedAtFilter _ _) }
 
-lemma _root_.BoundedAtFilter.comp_add {u : ℕ → ℝ} {N : ℕ} :
+private lemma _root_.BoundedAtFilter.comp_add {u : ℕ → ℝ} {N : ℕ} :
     BoundedAtFilter atTop (fun n => u (n + N)) ↔ BoundedAtFilter atTop u := by
   simp only [BoundedAtFilter, Asymptotics.isBigO_iff, norm_eq_abs, Pi.one_apply, one_mem,
     CStarRing.norm_of_mem_unitary, mul_one, eventually_atTop, ge_iff_le]
@@ -1056,7 +1056,7 @@ lemma log_isbigo_log_div {d : ℝ} (hb : 0 < d) :
     (fun n ↦ Real.log n) =O[atTop] (fun n ↦ Real.log (n / d)) := by
   convert isBigO_log_mul_add (inv_pos.mpr hb) 0 using 1; simp only [add_zero]; field_simp
 
-lemma _root_.Asymptotics.IsBigO.add_isLittleO_right {f g : ℝ → ℝ} (h : g =o[atTop] f) :
+private lemma _root_.Asymptotics.IsBigO.add_isLittleO_right {f g : ℝ → ℝ} (h : g =o[atTop] f) :
     f =O[atTop] (f + g) := by
   rw [isLittleO_iff] at h ; specialize h (c := 2⁻¹) (by norm_num)
   rw [isBigO_iff'']
@@ -1068,7 +1068,7 @@ lemma _root_.Asymptotics.IsBigO.add_isLittleO_right {f g : ℝ → ℝ} (h : g =
        _ ≤ |(|f x| - |g x|)| := le_abs_self _
        _ ≤ _ := by rw [← sub_neg_eq_add, ← abs_neg (g x)] ; exact abs_abs_sub_abs_le (f x) (-g x)
 
-lemma _root_.Asymptotics.IsBigO.sq {α : Type*} [Preorder α] {f g : α → ℝ} (h : f =O[atTop] g) :
+private lemma _root_.Asymptotics.IsBigO.sq {α : Type*} [Preorder α] {f g : α → ℝ} (h : f =O[atTop] g) :
     (fun n ↦ f n ^ 2) =O[atTop] (fun n => g n ^ 2) := by
   simpa [pow_two] using h.mul h
 
@@ -1136,7 +1136,7 @@ lemma nnabla_bound_aux2 (a : ℝ) {b : ℝ} (hb : 0 < b) :
     ∀ᶠ x in atTop, 0 < x * (a + Real.log (x / b) ^ 2) :=
   (nnabla_bound_aux1 a hb).eventually (eventually_gt_atTop 0)
 
-lemma _root_.Real.log_eventually_gt_atTop (a : ℝ) :
+private lemma _root_.Real.log_eventually_gt_atTop (a : ℝ) :
     ∀ᶠ x in atTop, a < Real.log x :=
   Real.tendsto_log_atTop.eventually (eventually_gt_atTop a)
 
@@ -3610,7 +3610,7 @@ lemma crude_upper_bound
   exact hbound
 
 set_option backward.isDefEq.respectTransparency false in
-lemma _root_.Real.fourierIntegral_convolution {f g : ℝ → ℂ} (hf : Integrable f) (hg : Integrable g) :
+private lemma _root_.Real.fourierIntegral_convolution {f g : ℝ → ℂ} (hf : Integrable f) (hg : Integrable g) :
     𝓕 (convolution f g (ContinuousLinearMap.mul ℂ ℂ) volume) = 𝓕 f * 𝓕 g := by
   ext y
   simp only [Pi.mul_apply, FourierTransform.fourier, MeasureTheory.convolution,
@@ -3639,7 +3639,7 @@ lemma _root_.Real.fourierIntegral_convolution {f g : ℝ → ℂ} (hf : Integrab
     _ = (∫ t, 𝐞 (-(y * t)) • f t) * ∫ u, 𝐞 (-(y * u)) • g u := by
         simp only [Circle.smul_def, smul_eq_mul, ← mul_assoc, integral_mul_const]
 
-lemma _root_.Real.fourierIntegral_conj_neg {f : ℝ → ℂ} (y : ℝ) :
+private lemma _root_.Real.fourierIntegral_conj_neg {f : ℝ → ℂ} (y : ℝ) :
     𝓕 (fun x ↦ conj (f (-x))) y = conj (𝓕 f y) := by
   simp only [fourier_real_eq]
   have h_conj : ∀ x, 𝐞 (-(x * y)) • conj (f (-x)) = conj (𝐞 (x * y) • f (-x)) := fun x ↦ by
@@ -3975,7 +3975,7 @@ open Finset
 open BigOperators Filter Real Classical Asymptotics MeasureTheory intervalIntegral
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega Chebyshev
 
-lemma _root_.Set.Ico_subset_Ico_of_Icc_subset_Icc {a b c d : ℝ} (h : Set.Icc a b ⊆ Set.Icc c d) :
+private lemma _root_.Set.Ico_subset_Ico_of_Icc_subset_Icc {a b c d : ℝ} (h : Set.Icc a b ⊆ Set.Icc c d) :
     Set.Ico a b ⊆ Set.Ico c d := by
   intro z hz
   have hz' := Set.Ico_subset_Icc_self.trans h hz
@@ -3999,7 +3999,7 @@ lemma th43_b (x : ℝ) (hx : 2 ≤ x) :
 
 
 /-- If u ~ v and w-u = o(v) then w ~ v. -/
-theorem _root_.Asymptotics.IsEquivalent.add_isLittleO' {α : Type*} {β : Type*} [NormedAddCommGroup β]
+private theorem _root_.Asymptotics.IsEquivalent.add_isLittleO' {α : Type*} {β : Type*} [NormedAddCommGroup β]
     {u : α → β} {v : α → β} {w : α → β} {l : Filter α}
     (huv : Asymptotics.IsEquivalent l u v) (hwu : (w - u) =o[l] v) :
     Asymptotics.IsEquivalent l w v := by
@@ -4007,7 +4007,7 @@ theorem _root_.Asymptotics.IsEquivalent.add_isLittleO' {α : Type*} {β : Type*}
   exact Asymptotics.IsEquivalent.add_isLittleO huv hwu
 
 /-- If u ~ v and u-w = o(v) then w ~ v. -/
-theorem _root_.Asymptotics.IsEquivalent.add_isLittleO'' {α : Type*} {β : Type*} [NormedAddCommGroup β]
+private theorem _root_.Asymptotics.IsEquivalent.add_isLittleO'' {α : Type*} {β : Type*} [NormedAddCommGroup β]
     {u : α → β} {v : α → β} {w : α → β} {l : Filter α}
     (huv : Asymptotics.IsEquivalent l u v) (hwu : (u - w) =o[l] v) :
     Asymptotics.IsEquivalent l w v := by

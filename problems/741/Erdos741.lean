@@ -11,7 +11,7 @@ The two source proofs depend on the FCFM (`FormalConjecturesForMathlib`)
 density framework. Inlined verbatim from
 `google-deepmind/formal-conjectures@9d49204:FormalConjecturesForMathlib/Data/Set/Density.lean`
 lines 32–186. Each declaration is registered in `_root_.Set` so that the source
-proofs' dot-notation (`S.partialDensity`, `S.upperDensity`, etc.) resolves. -/
+proofs' dot-notation (`partialDensity S`, `(upperDensity S)`, etc.) resolves. -/
 
 /--
 Given a set `S` in an order `β`, where all intervals bounded above are finite,
@@ -21,12 +21,12 @@ we define the partial density of `S` (relative to a set `A`) to be the proportio
 This definition was inspired from https://github.com/b-mehta/unit-fractions
 -/
 @[inline]
-noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Iio b).ncard / (A ∩ Iio b).ncard
 
-theorem _root_.Set.partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) (b : β) : S.partialDensity A b ≤ 1 := by
+theorem partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) (b : β) : partialDensity S A b ≤ 1 := by
   apply div_le_one_of_le₀ _ (Nat.cast_nonneg _)
   exact mod_cast Set.ncard_le_ncard <| Set.inter_subset_inter_left _ inter_subset_right
 
@@ -35,30 +35,30 @@ Given a set `S` in an order `β`, where all intervals bounded above are finite, 
 density of `S` (relative to a set `A`) to be the limsup of the partial densities of `S`
 (relative to `A`) for `b → ∞`.
 -/
-noncomputable def _root_.Set.upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable def upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : ℝ :=
-  atTop.limsup fun (b : β) ↦ S.partialDensity A b
+  atTop.limsup fun (b : β) ↦ partialDensity S A b
 
 /--
 Given a set `S` in an order `β`, where all intervals bounded above are finite, we define the lower
 density of `S` (relative to a set `A`) to be the liminf of the partial densities of `S`
 (relative to `A`) for `b → ∞`.
 -/
-noncomputable def _root_.Set.lowerDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable def lowerDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : ℝ :=
-  atTop.liminf fun (b : β) ↦ S.partialDensity A b
+  atTop.liminf fun (b : β) ↦ partialDensity S A b
 
-theorem _root_.Set.lowerDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) : S.lowerDensity A ≤ 1 := by
+theorem lowerDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) : lowerDensity S A ≤ 1 := by
   by_cases h : atTop (α := β) = ⊥
-  · simp [h, Set.lowerDensity, Filter.liminf_eq]
+  · simp [h, lowerDensity, Filter.liminf_eq]
   · have : (atTop (α := β)).NeBot := ⟨h⟩
     apply Real.sSup_le (fun x hx ↦ ?_) one_pos.le
-    simpa using hx.mono fun y hy ↦ hy.trans (Set.partialDensity_le_one _ _ y)
+    simpa using hx.mono fun y hy ↦ hy.trans (partialDensity_le_one _ _ y)
 
-theorem _root_.Set.lowerDensity_nonneg {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) : 0 ≤ S.lowerDensity A := by
-  rw [Set.lowerDensity, Filter.liminf_eq]
+theorem lowerDensity_nonneg {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) : 0 ≤ lowerDensity S A := by
+  rw [lowerDensity, Filter.liminf_eq]
   exact (em _).elim (le_csSup · <| .of_forall fun _ ↦ by positivity)
     (Real.sSup_of_not_bddAbove · |>.ge)
 
@@ -70,29 +70,29 @@ in `A` tends to `α` as `n → ∞`.
 When `β = ℕ` this by default defines the natural density of a set
 (i.e., relative to all of `ℕ`).
 -/
-def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+def HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=
-  Tendsto (fun (b : β) => S.partialDensity A b) atTop (𝓝 α)
+  Tendsto (fun (b : β) => partialDensity S A b) atTop (𝓝 α)
 
 /--
 A set `S` in an order `β` where all intervals bounded above are finite is said to have
 positive density (relative to a set `A`) if there exists a positive `α : ℝ` such that
 `S` has density `α` (relative to a set `A`).
 -/
-def _root_.Set.HasPosDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+def HasPosDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : Prop :=
-  ∃ α > 0, S.HasDensity α A
+  ∃ α > 0, HasDensity S α A
 
 /-! Helpers needed by the Aristotle proofs of `variants.upper`. -/
 
 @[simp]
-theorem _root_.Set.ncard_Iio_nat (n : ℕ) : (Set.Iio n).ncard = n := by
+theorem ncard_Iio_nat (n : ℕ) : (Set.Iio n).ncard = n := by
   classical
   rw [Set.ncard_eq_toFinset_card', Set.toFinset_Iio]
   exact Nat.card_Iio n
 
 @[simp]
-theorem _root_.Set.ncard_Iic_nat (n : ℕ) : (Set.Iic n).ncard = n + 1 := by
+theorem ncard_Iic_nat (n : ℕ) : (Set.Iic n).ncard = n + 1 := by
   classical
   rw [Set.ncard_eq_toFinset_card', Set.toFinset_Iic]
   exact Nat.card_Iic n
@@ -117,7 +117,7 @@ from the theorem statement (renamed `erdos_741_variants_upper`). -/
 lemma upperDensity_pos_implies_seq (S : Set ℕ) (h : 0 < upperDensity S) :
     ∃ c > 0, ∃ f : ℕ → ℕ, StrictMono f ∧ ∀ k, c ≤ (Set.ncard (S ∩ Set.Iic (f k)) : ℝ) / (f k : ℝ) := by
   delta upperDensity at h
-  simp_all[Set.partialDensity,Filter.limsup_eq]
+  simp_all[partialDensity,Filter.limsup_eq]
   refine(exists_between h).imp fun and(a)=> ⟨a.1,((Classical.axiomOfChoice fun and=>not_forall.1 (not_le.2 a.2<|csInf_le (not_imp_comm.1 Real.sInf_of_not_bddBelow h.ne') ⟨and+1,·⟩)).elim) ?_⟩
   use fun and f=>⟨ (and ∘.rec 0 _),strictMono_nat_of_lt_succ fun and=>not_forall.1 (f _)|>.1, fun and=> (not_le.1 (f _ fun and=>.)).le.trans (div_le_div_of_nonneg_right (mod_cast ? _) (by bound))⟩
   exact (Set.ncard_le_ncard fun and=>.imp_right (@·.out.le))
@@ -130,7 +130,7 @@ lemma exists_N_sparse (A : Set ℕ) (c : ℝ) (hc : 0 < c)
     ∃ N : ℕ, N > K ∧ (K + 1 : ℝ) * (Set.ncard (A ∩ Set.Iic N) : ℝ) ≤ (c / 4) * (N : ℝ) ∧
              c ≤ (Set.ncard ((A + A) ∩ Set.Iic N) : ℝ) / (N : ℝ) := by
   simp_rw [upperDensity,.>.]at *
-  simp_all[Filter.limsup_eq, A.inter_comm, true,Set.partialDensity]
+  simp_all[Filter.limsup_eq, A.inter_comm, true,partialDensity]
   obtain ⟨y,@c, _⟩:=exists_lt_of_csInf_lt (by use 1,1, fun and x =>div_le_one_of_le₀ (mod_cast(Nat.card_mono (.of_fintype _) fun and=>And.left).trans (by bound)) and.cast_nonneg) (h_sparse.trans_lt (by bound:c/4/ (K+1)>0))
   apply(((tendsto_natCast_atTop_atTop.comp hf.tendsto_atTop).const_mul_atTop ↑(sub_pos.2 (by assumption):)).eventually_ge_atTop ((K+1)*y)).and (Filter.mem_atTop (K+1+c))|>.exists.elim
   use fun and h=>⟨ _,le_self_add.trans (h.2.trans hf.le_apply), (le_inv_mul_iff₀ (by positivity)).1 ? _,h_sum and⟩
@@ -155,7 +155,7 @@ theorem Erdos741.upperDensity_pos_implies_seq.extracted_1_3 (S : Set ℕ)
 lemma upperDensity_add_self_pos (A : Set ℕ) (h : 0 < upperDensity A) :
     0 < upperDensity (A + A) := by
   delta upperDensity at*
-  norm_num [Set.partialDensity] at h⊢
+  norm_num [partialDensity] at h⊢
   simp_rw [Filter.limsup_eq] at h⊢
   use (half_pos h).trans_le (le_csInf ⟨1,.of_forall fun and=>div_le_one_of_le₀ (mod_cast(Nat.card_mono (.of_fintype _) fun and=>And.right).trans (by(norm_num))) and.cast_nonneg⟩ fun and(p) =>p.exists_forall_of_atTop.elim fun and=>? _)
   use(div_le_iff₀ (by norm_num)).2.comp (csInf_le (not_imp_comm.1 Real.sInf_of_not_bddBelow h.ne')) ∘Filter.eventually_atTop.2 ∘.intro and ∘ fun and R L=>.trans (?_) (mul_le_mul_of_nonneg_right le_rfl ? _)
@@ -182,7 +182,7 @@ lemma case_dense_bounds (A : Set ℕ) (c : ℝ) (hc : 0 < c) (M : ℕ → ℕ) (
                c ≤ (Set.ncard (A ∩ Set.Iic (M (k + 1))) : ℝ) / (M (k + 1) : ℝ)) :
     0 < upperDensity (A ∩ block_set M) ∧ 0 < upperDensity (A \ block_set M) := by
   delta upperDensity block_set
-  simp_all[ Erdos741.in_block,Filter.limsup_eq,le_div_iff₀,(hM_mono (by constructor)).pos,Set.partialDensity]
+  simp_all[ Erdos741.in_block,Filter.limsup_eq,le_div_iff₀,(hM_mono (by constructor)).pos,partialDensity]
   use ((div_pos hc four_pos).trans_le) (le_csInf ⟨1,1,fun R L=>div_le_one_of_le₀ (mod_cast(Nat.card_mono (.of_fintype _) fun and=>And.right).trans (by norm_num)) R.cast_nonneg⟩ fun and ⟨a, _⟩=>? _)
   · use(div_pos hc four_pos).trans_le (le_csInf ⟨1,1, fun and x =>(div_le_one (by bound)).2 (mod_cast(Nat.card_mono (.of_fintype _) inf_le_right).trans ( (by bound)))⟩ fun and ⟨a, _⟩=>? _)
     apply((le_div_iff₀ (by bound)).mpr _).trans ( (by assumption :) ( M (2 *(a) +2)+1) ↑(.trans (by valid) (hM_mono.le_apply.trans_lt ↑(Nat.lt_succ_self ↑_))))
@@ -229,15 +229,15 @@ lemma case_sparse_bounds (A : Set ℕ) (c : ℝ) (hc : 0 < c) (M : ℕ → ℕ) 
                                                                                                                                                           linarith![((le_div_iff₀ (mod_cast(hM_mono (by constructor)).pos)).1 (hM (2 *and)).right).trans (.trans (Nat.cast_le.2 (h_bound1 and)) (by rw [Nat.cast_add,Nat.cast_mul,Nat.cast_succ])),hM (2 *and)]
   have h_dens2 : ∃ f : ℕ → ℕ, StrictMono f ∧ ∀ k, 3 * c / 4 ≤ (Set.ncard (((A \ block_set M) + (A \ block_set M)) ∩ Set.Iic (f k)) : ℝ) / (f k : ℝ) := by refine ⟨ _,hM_mono.comp ((strictMono_id.const_mul two_pos).add_const 2), fun and=>(le_div_iff₀ (mod_cast(hM_mono (by constructor)).pos)).2 ?_⟩
                                                                                                                                                           linarith![hM (2 *and+1), (le_div_iff₀ (mod_cast(hM_mono (by constructor)).pos)).1 (hM (2 *and + 1)).2|>.trans ((Nat.cast_le.2 (h_bound2 _)).trans ((by rw [Nat.cast_add,Nat.cast_mul,Nat.cast_succ])))]
-  have h_pos1 : 0 < upperDensity ((A ∩ block_set M) + (A ∩ block_set M)) := by delta Set.upperDensity
-                                                                               norm_num[Filter.limsup_eq,Set.partialDensity]
+  have h_pos1 : 0 < upperDensity ((A ∩ block_set M) + (A ∩ block_set M)) := by delta upperDensity
+                                                                               norm_num[Filter.limsup_eq,partialDensity]
                                                                                use(div_pos hc four_pos).trans_le (le_csInf ⟨1,1,fun R L=>div_le_one_of_le₀ (mod_cast(Nat.card_mono (.of_fintype _) inf_le_right).trans ( (by norm_num))) R.cast_nonneg⟩ fun and ⟨a, _⟩=>? _)
                                                                                use((le_div_iff₀ (by bound)).2 ? _).trans ( (by valid:) (M (2 *a+1)+1) (by linarith[hM_mono.le_apply.trans' (2 *a+1).le_refl]))
                                                                                use@Nat.cast_succ ℝ _ _▸.trans (?_) (Nat.cast_le.2 (Nat.card_mono (.of_fintype _) fun and=>.imp_right and.lt_succ_of_le))
                                                                                have := (le_div_iff₀ ↑(mod_cast(hM_mono (by constructor)).pos)).mp (hM (2 * a)).2 |>.trans ( Nat.cast_le.mpr (h_bound1 a))
                                                                                linarith![hM (2 *a), mul_le_mul_of_nonneg_left (mod_cast(hM_mono (by constructor)).pos: (1:ℝ) ≤M (2 *a + 1)) hc.le, this.trans (by rw [Nat.cast_add,Nat.cast_mul,Nat.cast_succ])]
-  have h_pos2 : 0 < upperDensity ((A \ block_set M) + (A \ block_set M)) := by delta Set.upperDensity
-                                                                               norm_num[Filter.limsup_eq,Set.partialDensity]
+  have h_pos2 : 0 < upperDensity ((A \ block_set M) + (A \ block_set M)) := by delta upperDensity
+                                                                               norm_num[Filter.limsup_eq,partialDensity]
                                                                                use(div_pos (mul_pos three_pos hc) four_pos).trans_le (h_dens2.elim fun and x =>le_csInf ⟨1,1,fun A B=>div_le_one_of_le₀ (mod_cast ? _) A.cast_nonneg⟩ fun and ⟨a, H⟩=>? _)
                                                                                · exact (Nat.card_mono (.of_fintype _) fun and=>And.right).trans (by {norm_num})
                                                                                use not_lt.1 fun and=>(((tendsto_natCast_atTop_atTop.comp x.1.tendsto_atTop).atTop_mul_const ↑(sub_pos.2 and)).eventually_gt_atTop (3*c/4)).frequently<|Filter.eventually_atTop.2 ⟨a+1,?_⟩

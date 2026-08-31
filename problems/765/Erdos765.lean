@@ -212,7 +212,7 @@ lemma card_clackers_eq [DecidableEq V] :
 
 variable (G) in
 /-- Construct a graph homomorphism from the 4-cycle to `G` given necessary adjacencies. -/
-def _root_.SimpleGraph.C4Hom {v₀ v₁ v₂ v₃ : V} (a₀₁ : G.Adj v₀ v₁) (a₁₂ : G.Adj v₁ v₂)
+private def _root_.SimpleGraph.C4Hom {v₀ v₁ v₂ v₃ : V} (a₀₁ : G.Adj v₀ v₁) (a₁₂ : G.Adj v₁ v₂)
     (a₂₃ : G.Adj v₂ v₃) (a₃₀ : G.Adj v₃ v₀) : C4 →g G where
   toFun := ![v₀, v₁, v₂, v₃]
   map_rel' {i j} a := by
@@ -5509,7 +5509,7 @@ open Finset Fintype SimpleGraph
 open scoped Finset
 
 /-- If `H` has no isolated vertices, then `H.Free` is preserved under `SimpleGraph.map`. -/
-lemma _root_.SimpleGraph.Free.map {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph X}
+private lemma _root_.SimpleGraph.Free.map {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph X}
     (hfree : H.Free G) (f : V ↪ W) (hH : ∀ x, ∃ y, H.Adj x y) : H.Free (G.map f) := by
   contrapose hfree
   obtain ⟨g, hg⟩ := hfree
@@ -5526,7 +5526,7 @@ lemma _root_.SimpleGraph.Free.map {V W X : Type*} {G : SimpleGraph V} {H : Simpl
     exact fun x y hxy ↦ hg (by rw [← hψ x, ← hψ y, hxy])
 
 /-- Monotonicity of `extremalNumber` for graphs without isolated vertices. -/
-lemma _root_.SimpleGraph.extremalNumber_mono_left_of_no_iso {W : Type*} {H : SimpleGraph W}
+private lemma _root_.SimpleGraph.extremalNumber_mono_left_of_no_iso {W : Type*} {H : SimpleGraph W}
     {m n : ℕ} (hmn : m ≤ n) (hH : ∀ w, ∃ w', H.Adj w w') :
     extremalNumber m H ≤ extremalNumber n H := by
   rw [← Fintype.card_fin m, ← Fintype.card_fin n, extremalNumber_le_iff]

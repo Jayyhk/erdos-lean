@@ -27,32 +27,32 @@ namespace Erdos125
 open Nat Pointwise
 
 /-- Partial density (vendored from formal-conjectures' FormalConjecturesForMathlib,
-    attached to root-level `Set` so dot notation `S.partialDensity` resolves). -/
+    attached to root-level `Set` so dot notation `partialDensity S` resolves). -/
 @[inline]
-noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Set.Iio b).ncard / (A ∩ Set.Iio b).ncard
 
 /-- Lower density (vendored from formal-conjectures' FormalConjecturesForMathlib,
-    attached to root-level `Set` so dot notation `S.lowerDensity` resolves). -/
-noncomputable def _root_.Set.lowerDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    attached to root-level `Set` so dot notation `(lowerDensity S)` resolves). -/
+noncomputable def lowerDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : ℝ :=
-  Filter.atTop.liminf fun (b : β) ↦ S.partialDensity A b
+  Filter.atTop.liminf fun (b : β) ↦ partialDensity S A b
 
 /-- `partialDensity` is always between 0 and 1 (vendored helper). -/
-theorem _root_.Set.partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) (b : β) : S.partialDensity A b ≤ 1 := by
+theorem partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) (b : β) : partialDensity S A b ≤ 1 := by
   apply div_le_one_of_le₀ _ (Nat.cast_nonneg _)
   exact_mod_cast Set.ncard_le_ncard (Set.inter_subset_inter_left _ Set.inter_subset_right)
     (Set.toFinite _)
 
-theorem _root_.Set.partialDensity_nonneg {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) (b : β) : 0 ≤ S.partialDensity A b := by
+theorem partialDensity_nonneg {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) (b : β) : 0 ≤ partialDensity S A b := by
   apply div_nonneg <;> exact Nat.cast_nonneg _
 
-/-- `Nat.ncard_Iio` (vendored from FC's FormalConjecturesForMathlib). -/
+/-- `ncard_Iio` (vendored from FC's FormalConjecturesForMathlib). -/
 @[simp]
-theorem _root_.Nat.ncard_Iio (b : ℕ) : (Set.Iio b).ncard = b := by
+theorem ncard_Iio (b : ℕ) : (Set.Iio b).ncard = b := by
   rw [← Finset.coe_Iio, Set.ncard_coe_finset]
   exact Nat.card_Iio _
 
@@ -469,9 +469,9 @@ lemma pach_pintz_diophantine_gaps :
     rw [Real.dist_eq, sub_zero, abs_of_nonneg h_nonneg]
     exact hk
 
-lemma lower_density_zero : (A + B).lowerDensity = 0 := by
+lemma lower_density_zero : (lowerDensity (A + B)) = 0 := by
   have h_gaps := pach_pintz_diophantine_gaps
-  simp_all[div_eq_inv_mul, Real.zero_lt_one,Set.lowerDensity,Set.inter_comm]
+  simp_all[div_eq_inv_mul, Real.zero_lt_one,lowerDensity,Set.inter_comm]
   refine h_gaps.elim fun and⟨A, B⟩=>Filter.liminf_eq.trans (symm ? _)
   exact (IsGreatest.csSup_eq (by use .of_forall (by bound), fun and=>ge_of_tendsto B ∘ A.eventually)).symm
 
@@ -479,8 +479,8 @@ lemma lower_density_zero : (A + B).lowerDensity = 0 := by
 the lower density of A + B is zero, where A and B are the sets of base-3 and base-4
 digit-{0,1} integers. Equivalently, A + B does NOT have positive lower density. -/
 theorem erdos_125 :
-    ¬ 0 < ({ x : ℕ | (digits 3 x).toFinset ⊆ {0, 1} } +
-      { x : ℕ | (digits 4 x).toFinset ⊆ {0, 1} }).lowerDensity := by
+    ¬ 0 < (lowerDensity ({ x : ℕ | (digits 3 x).toFinset ⊆ {0, 1} } +
+      { x : ℕ | (digits 4 x).toFinset ⊆ {0, 1} })) := by
   have hA : {x : ℕ | (digits 3 x).toFinset ⊆ {0, 1}} = A := rfl
   have hB : {x : ℕ | (digits 4 x).toFinset ⊆ {0, 1}} = B := rfl
   intro h

@@ -16,7 +16,7 @@ The question appears in [Er79], [ErGr80, p.89] and [Er81h, p.173]; it was refute
 Tenenbaum [ErTe81], who showed the upper density of the exceptional set is bounded below.
 Below, `tauPlus n` is `(n.divisors.image (Nat.log 2)).card`, i.e. the number of distinct
 dyadic blocks `[2^k, 2^{k+1})` containing a divisor of `n`, and "for almost all `n`" is
-`Set.HasDensity … 1`.
+`HasDensity … 1`.
 
 The formalisation is by plby (github.com/plby/lean-proofs),
 `src/latest/ErdosProblems/Erdos448.lean` together with the modules of
@@ -60,12 +60,12 @@ we define the partial density of `S` (relative to a set `A`) to be the proportio
 This definition was inspired from https://github.com/b-mehta/unit-fractions
 -/
 @[inline]
-noncomputable abbrev _root_.Set.partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=
   ((S ∩ A) ∩ Set.Iio b).ncard / (A ∩ Set.Iio b).ncard
 
-theorem _root_.Set.partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
-    (S : Set β) (A : Set β := Set.univ) (b : β) : S.partialDensity A b ≤ 1 := by
+theorem partialDensity_le_one {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+    (S : Set β) (A : Set β := Set.univ) (b : β) : partialDensity S A b ≤ 1 := by
   apply div_le_one_of_le₀ _ (Nat.cast_nonneg _)
   exact mod_cast Set.ncard_le_ncard <| Set.inter_subset_inter_left _ inter_subset_right
 
@@ -74,9 +74,9 @@ Given a set `S` in an order `β`, where all intervals bounded above are finite, 
 density of `S` (relative to a set `A`) to be the limsup of the partial densities of `S`
 (relative to `A`) for `b → ∞`.
 -/
-noncomputable def _root_.Set.upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+noncomputable def upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (A : Set β := Set.univ) : ℝ :=
-  atTop.limsup fun (b : β) ↦ S.partialDensity A b
+  atTop.limsup fun (b : β) ↦ partialDensity S A b
 
 /--
 A set `S` in an order `β` where all intervals bounded above are finite is said to have
@@ -86,17 +86,17 @@ in `A` tends to `α` as `n → ∞`.
 When `β = ℕ` this by default defines the natural density of a set
 (i.e., relative to all of `ℕ`).
 -/
-def _root_.Set.HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
+def HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]
     (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=
-  Tendsto (fun (b : β) => S.partialDensity A b) atTop (𝓝 α)
+  Tendsto (fun (b : β) => partialDensity S A b) atTop (𝓝 α)
 
 section
 
 /-- In a non-trivial partial order with a least element, the set of all
 elements has density one. -/
 @[simp]
-theorem _root_.Set.HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
-    (@Set.univ β).HasDensity 1 := by
+theorem HasDensity.univ {β : Type*} [PartialOrder β] [LocallyFiniteOrder β] [OrderBot β] [Nontrivial β] :
+    HasDensity (@Set.univ β) 1 := by
   by_cases h : atTop (α := β) = ⊥
   · simp [h, HasDensity]
   · simp only [HasDensity, partialDensity, univ_inter, inter_univ]
@@ -296,20 +296,20 @@ def smallRatioSet (ε : ℝ) : Set ℕ :=
 
 /-- A set with a natural density has the same upper density. -/
 lemma upperDensity_eq_of_hasDensity {S : Set ℕ} {d : ℝ}
-    (hS : S.HasDensity d) : S.upperDensity = d := by
-  simpa [Set.upperDensity] using hS.limsup_eq
+    (hS : HasDensity S d) : (upperDensity S) = d := by
+  simpa [upperDensity] using hS.limsup_eq
 
 lemma partialDensity_nonneg (S : Set ℕ) (x : ℕ) :
-    0 ≤ S.partialDensity Set.univ x := by
+    0 ≤ partialDensity S Set.univ x := by
   positivity
 
 lemma partialDensity_nat_eq (S : Set ℕ) (x : ℕ) :
-    S.partialDensity Set.univ x =
+    partialDensity S Set.univ x =
       (((S ∩ Set.Iio x).ncard : ℕ) : ℝ) / x := by
-  simp [Set.partialDensity]
+  simp [partialDensity]
 
 lemma partialDensity_nat_eq_filter (S : Set ℕ) [DecidablePred (· ∈ S)] (x : ℕ) :
-    S.partialDensity Set.univ x =
+    partialDensity S Set.univ x =
       (((Finset.range x).filter fun n ↦ n ∈ S).card : ℝ) / x := by
   rw [partialDensity_nat_eq]
   have hset : S ∩ Set.Iio x =
@@ -319,63 +319,63 @@ lemma partialDensity_nat_eq_filter (S : Set ℕ) [DecidablePred (· ∈ S)] (x :
   rw [hset, Set.ncard_coe_finset]
 
 lemma partialDensity_mono {S T : Set ℕ} (hST : S ⊆ T) (x : ℕ) :
-    S.partialDensity Set.univ x ≤ T.partialDensity Set.univ x := by
+    partialDensity S Set.univ x ≤ partialDensity T Set.univ x := by
   rw [partialDensity_nat_eq, partialDensity_nat_eq]
   apply div_le_div_of_nonneg_right _ (Nat.cast_nonneg _)
   exact_mod_cast Set.ncard_le_ncard
     (Set.inter_subset_inter_left (Set.Iio x) hST)
 
 lemma partialDensity_union_le (S T : Set ℕ) (x : ℕ) :
-    (S ∪ T).partialDensity Set.univ x ≤
-      S.partialDensity Set.univ x + T.partialDensity Set.univ x := by
-  simp only [Set.partialDensity, Set.inter_univ, Set.univ_inter]
+    partialDensity (S ∪ T) Set.univ x ≤
+      partialDensity S Set.univ x + partialDensity T Set.univ x := by
+  simp only [partialDensity, Set.inter_univ, Set.univ_inter]
   rw [Set.union_inter_distrib_right, ← add_div]
   apply div_le_div_of_nonneg_right _ (Nat.cast_nonneg _)
   exact_mod_cast Set.ncard_union_le (S ∩ Set.Iio x) (T ∩ Set.Iio x)
 
 private lemma partialDensity_isCobounded (S : Set ℕ) :
     IsCoboundedUnder (· ≤ ·) atTop
-      (fun x : ℕ ↦ S.partialDensity Set.univ x) :=
+      (fun x : ℕ ↦ partialDensity S Set.univ x) :=
   isCoboundedUnder_le_of_le atTop fun x ↦ partialDensity_nonneg S x
 
 private lemma partialDensity_isBoundedAbove (S : Set ℕ) :
     IsBoundedUnder (· ≤ ·) atTop
-      (fun x : ℕ ↦ S.partialDensity Set.univ x) :=
+      (fun x : ℕ ↦ partialDensity S Set.univ x) :=
   isBoundedUnder_of_eventually_le <| Eventually.of_forall fun x ↦
-    Set.partialDensity_le_one S Set.univ x
+    partialDensity_le_one S Set.univ x
 
 private lemma partialDensity_isBoundedBelow (S : Set ℕ) :
     IsBoundedUnder (fun x y : ℝ ↦ x ≥ y) atTop
-      (fun x : ℕ ↦ S.partialDensity Set.univ x) :=
+      (fun x : ℕ ↦ partialDensity S Set.univ x) :=
   isBoundedUnder_of_eventually_ge <| Eventually.of_forall fun x ↦
     partialDensity_nonneg S x
 
 /-- Upper density is monotone under inclusion. -/
 lemma upperDensity_mono {S T : Set ℕ} (hST : S ⊆ T) :
-    S.upperDensity ≤ T.upperDensity := by
-  unfold Set.upperDensity
+    (upperDensity S) ≤ (upperDensity T) := by
+  unfold upperDensity
   exact Filter.limsup_le_limsup
     (Eventually.of_forall fun x ↦ partialDensity_mono hST x)
     (partialDensity_isCobounded S) (partialDensity_isBoundedAbove T)
 
 /-- Upper density is finitely subadditive. -/
 lemma upperDensity_union_le (S T : Set ℕ) :
-    (S ∪ T).upperDensity ≤ S.upperDensity + T.upperDensity := by
-  unfold Set.upperDensity
+    (upperDensity (S ∪ T)) ≤ (upperDensity S) + (upperDensity T) := by
+  unfold upperDensity
   calc
-    limsup (fun x ↦ (S ∪ T).partialDensity Set.univ x) atTop ≤
-        limsup (fun x ↦ S.partialDensity Set.univ x +
-          T.partialDensity Set.univ x) atTop := by
+    limsup (fun x ↦ partialDensity (S ∪ T) Set.univ x) atTop ≤
+        limsup (fun x ↦ partialDensity S Set.univ x +
+          partialDensity T Set.univ x) atTop := by
       exact Filter.limsup_le_limsup
         (Eventually.of_forall fun x ↦ partialDensity_union_le S T x)
         (partialDensity_isCobounded (S ∪ T))
         (isBoundedUnder_of_eventually_le <| Eventually.of_forall fun x ↦
-          add_le_add (Set.partialDensity_le_one S Set.univ x)
-            (Set.partialDensity_le_one T Set.univ x))
-    _ ≤ limsup (fun x ↦ S.partialDensity Set.univ x) atTop +
-        limsup (fun x ↦ T.partialDensity Set.univ x) atTop := by
-      change limsup ((fun x ↦ S.partialDensity Set.univ x) +
-          (fun x ↦ T.partialDensity Set.univ x)) atTop ≤ _
+          add_le_add (partialDensity_le_one S Set.univ x)
+            (partialDensity_le_one T Set.univ x))
+    _ ≤ limsup (fun x ↦ partialDensity S Set.univ x) atTop +
+        limsup (fun x ↦ partialDensity T Set.univ x) atTop := by
+      change limsup ((fun x ↦ partialDensity S Set.univ x) +
+          (fun x ↦ partialDensity T Set.univ x)) atTop ≤ _
       exact limsup_add_le
         (partialDensity_isBoundedBelow S)
         (partialDensity_isBoundedAbove S)
@@ -399,7 +399,7 @@ lemma card_filter_mul_le_sum (f : ℕ → ℝ) (hf : ∀ n, 0 ≤ f n)
 lemma partialDensity_superlevel_le (f : ℕ → ℝ) (hf : ∀ n, 0 ≤ f n)
     {K t : ℝ} (ht : 0 < t) {x : ℕ} (hx : 0 < x)
     (hsum : (∑ n ∈ Finset.range x, f n) ≤ K * x) :
-    ({n : ℕ | t < f n} : Set ℕ).partialDensity Set.univ x ≤ K / t := by
+    partialDensity ({n : ℕ | t < f n} : Set ℕ) Set.univ x ≤ K / t := by
   classical
   rw [partialDensity_nat_eq_filter]
   rw [div_le_div_iff₀ (Nat.cast_pos.mpr hx) ht]
@@ -410,8 +410,8 @@ density form of Markov's inequality. -/
 theorem upperDensity_superlevel_le (f : ℕ → ℝ) (hf : ∀ n, 0 ≤ f n)
     {K t : ℝ} (ht : 0 < t)
     (hsum : ∀ᶠ x in atTop, (∑ n ∈ Finset.range x, f n) ≤ K * x) :
-    ({n : ℕ | t < f n} : Set ℕ).upperDensity ≤ K / t := by
-  rw [Set.upperDensity]
+    (upperDensity ({n : ℕ | t < f n} : Set ℕ)) ≤ K / t := by
+  rw [upperDensity]
   refine Filter.limsup_le_of_le (a := K / t) ?_ ?_
   · exact isCoboundedUnder_le_of_le atTop fun x ↦ by positivity
   · filter_upwards [hsum, eventually_gt_atTop 0] with x hxsum hx
@@ -428,14 +428,14 @@ following lemma performs all remaining choices explicitly.
 theorem exists_strict_upperDensity_of_fixed_moment_package
     (G : Set ℕ) (f : ℕ → ℝ) (K : ℝ)
     (hK : 0 ≤ K)
-    (hG : (Gᶜ).upperDensity ≤ 1 / 4)
+    (hG : (upperDensity (Gᶜ)) ≤ 1 / 4)
     (hmoment : ∀ n ∈ G,
       (4 / 5 : ℝ) * (n.divisors.card : ℝ) / (tauPlus n : ℝ) ≤
         1 + f n)
     (hf : ∀ n, 0 ≤ f n)
     (hsum : ∀ᶠ x in atTop,
       (∑ n ∈ Finset.range x, f n) ≤ K * x) :
-    ∃ ε : ℝ, 0 < ε ∧ (smallRatioSet ε).upperDensity < 1 := by
+    ∃ ε : ℝ, 0 < ε ∧ (upperDensity (smallRatioSet ε)) < 1 := by
   let t : ℝ := 4 * K + 1
   let ε : ℝ := (2 / 5) / (1 + t)
   have ht : 0 < t := by
@@ -491,18 +491,18 @@ theorem exists_strict_upperDensity_of_fixed_moment_package
     · left
       exact hnG
   have hmarkov :
-      ({n : ℕ | t < f n} : Set ℕ).upperDensity ≤ K / t :=
+      (upperDensity ({n : ℕ | t < f n} : Set ℕ)) ≤ K / t :=
     upperDensity_superlevel_le f hf ht hsum
   have hratio : K / t < 1 / 4 := by
     apply (div_lt_iff₀ ht).2
     dsimp [t]
     linarith
   calc
-    (smallRatioSet ε).upperDensity ≤
-        (Gᶜ ∪ {n : ℕ | t < f n}).upperDensity :=
+    (upperDensity (smallRatioSet ε)) ≤
+        (upperDensity (Gᶜ ∪ {n : ℕ | t < f n})) :=
       upperDensity_mono hsubset
-    _ ≤ (Gᶜ).upperDensity +
-        ({n : ℕ | t < f n} : Set ℕ).upperDensity :=
+    _ ≤ (upperDensity (Gᶜ)) +
+        (upperDensity ({n : ℕ | t < f n} : Set ℕ)) :=
       upperDensity_union_le _ _
     _ ≤ 1 / 4 + K / t := add_le_add hG hmarkov
     _ < 1 := by linarith
@@ -510,13 +510,13 @@ theorem exists_strict_upperDensity_of_fixed_moment_package
 /-- The exact yes/no theorem follows as soon as one positive threshold has
 exceptional set of upper density strictly below one. -/
 theorem erdos_448_of_exists_strict_upperDensity
-    (hET : ∃ ε : ℝ, 0 < ε ∧ (smallRatioSet ε).upperDensity < 1) :
+    (hET : ∃ ε : ℝ, 0 < ε ∧ (upperDensity (smallRatioSet ε)) < 1) :
     ¬ ∀ ε : ℝ, 0 < ε →
-        {n : ℕ | (tauPlus n : ℝ) <
-          ε * (n.divisors.card : ℝ)}.HasDensity 1 := by
+        HasDensity {n : ℕ | (tauPlus n : ℝ) <
+          ε * (n.divisors.card : ℝ)} 1 := by
   intro hall
   obtain ⟨ε, hε, hlt⟩ := hET
-  have heq : (smallRatioSet ε).upperDensity = 1 :=
+  have heq : (upperDensity (smallRatioSet ε)) = 1 :=
     upperDensity_eq_of_hasDensity (hall ε hε)
   linarith
 
@@ -1833,7 +1833,7 @@ end PrimeSummatory
 section
 open Nat
 
-theorem _root_.Nat.cast_floor_eq_cast_int_floor {a : ℝ} (ha : 0 ≤ a) : (⌊a⌋₊ : ℝ) = ⌊a⌋ := by
+theorem cast_floor_eq_cast_int_floor {a : ℝ} (ha : 0 ≤ a) : (⌊a⌋₊ : ℝ) = ⌊a⌋ := by
   exact natCast_floor_eq_intCast_floor ha
 
 end
@@ -1955,7 +1955,7 @@ end
 section
 open Finset
 
-lemma _root_.Finset.Icc_eq_insert_Icc_succ {a b : ℕ} (h : a ≤ b) :
+lemma Icc_eq_insert_Icc_succ {a b : ℕ} (h : a ≤ b) :
     Finset.Icc a b = insert a (Finset.Icc (a + 1) b) := by
   simpa using (Finset.insert_Icc_succ_left_eq_Icc h).symm
 
@@ -1964,7 +1964,7 @@ end
 section
 open Nat
 
-@[simp] lemma _root_.Nat.floor_two {R : Type*} [Semiring R] [LinearOrder R] [FloorSemiring R]
+@[simp] lemma floor_two {R : Type*} [Semiring R] [LinearOrder R] [FloorSemiring R]
     [IsStrictOrderedRing R] :
   ⌊(2 : R)⌋₊ = 2 := by
   simp
@@ -2111,7 +2111,7 @@ lemma summatory_log_aux {x : ℝ} (hx : 1 ≤ x) :
   simp only [one_mul] at ps
   simp only [ps, integral_Icc_eq_integral_Ioc]
   clear ps
-  rw [summatory_const_one, Nat.cast_floor_eq_cast_int_floor (zero_le_one.trans hx),
+  rw [summatory_const_one, cast_floor_eq_cast_int_floor (zero_le_one.trans hx),
     ← Int.self_sub_fract, sub_mul, sub_sub (x * log x), sub_sub_sub_cancel_left,
     sub_eq_iff_eq_add, add_assoc, ← sub_eq_iff_eq_add', ← add_assoc, sub_add_cancel, Nat.cast_one,
     ← integral_add]
@@ -2121,7 +2121,7 @@ lemma summatory_log_aux {x : ℝ} (hx : 1 ≤ x) :
       intro y hy
       have hy' : 0 < y := zero_lt_one.trans hy.1
       have hs : summatory (fun _ ↦ (1 : ℝ)) 1 y = (⌊y⌋ : ℝ) := by
-        simpa [Nat.cast_floor_eq_cast_int_floor hy'.le] using (summatory_const_one (x := y))
+        simpa [cast_floor_eq_cast_int_floor hy'.le] using (summatory_const_one (x := y))
       dsimp
       rw [hs]
       have hyinv : y * y⁻¹ = (1 : ℝ) := by
@@ -2200,7 +2200,7 @@ lemma summatory_mul_floor_eq_summatory_sum_divisors {x y : ℝ}
   (hy : 0 ≤ x) (xy : x ≤ y) (f : ℕ → ℝ) :
   summatory (fun n ↦ f n * ⌊x / n⌋) 1 y =
     summatory (fun n ↦ ∑ i ∈ n.divisors, f i) 1 x := by
-  simp_rw [summatory, ← Nat.cast_floor_eq_cast_int_floor (div_nonneg hy (Nat.cast_nonneg _)),
+  simp_rw [summatory, ← cast_floor_eq_cast_int_floor (div_nonneg hy (Nat.cast_nonneg _)),
     ← summatory_const_one, summatory, Finset.mul_sum, mul_one]
   calc
     ∑ i ∈ Finset.Icc 1 ⌊y⌋₊, ∑ j ∈ Finset.Icc 1 ⌊x / i⌋₊, f i
@@ -2356,7 +2356,7 @@ lemma chebyshev_second_eq_summatory : chebyshev_second = summatory Λ 1 := by
   ext x
   change Chebyshev.psi x = summatory (⇑Λ) 1 x
   rw [Chebyshev.psi_eq_sum_Icc, summatory]
-  rw [Finset.Icc_eq_insert_Icc_succ (Nat.zero_le _), Finset.sum_insert]
+  rw [Icc_eq_insert_Icc_succ (Nat.zero_le _), Finset.sum_insert]
   · simp
   · simp
 
@@ -2760,7 +2760,7 @@ lemma abs_von_mangoldt_div_self_sub_log_div_self_le {x : ℝ} :
     have hInsert :
         insert 1 (filter (fun k ↦ (p ^ k : ℝ) ≤ x) (Icc 2 ⌊x⌋₊)) =
           filter (fun k ↦ (p ^ k : ℝ) ≤ x) (Icc 1 ⌊x⌋₊) := by
-      rw [Finset.Icc_eq_insert_Icc_succ (hp₁.trans hp₂), filter_insert, pow_one, if_pos]
+      rw [Icc_eq_insert_Icc_succ (hp₁.trans hp₂), filter_insert, pow_one, if_pos]
       exact hp₃
     have hnotmem : 1 ∉ filter (fun k ↦ (p ^ k : ℝ) ≤ x) (Icc 2 ⌊x⌋₊) := by
       simp
@@ -3297,7 +3297,7 @@ lemma is_O_partial_of_bound' {f : ℕ → ℝ} (hf : ∀ n, f n ≤ (((n - 1) * 
   intro x
   have hIco : Finset.Ico 0 (⌊x⌋₊ + 1) = Finset.Icc 0 ⌊x⌋₊ := by
     simpa using (Finset.Ico_succ_right_eq_Icc 0 ⌊x⌋₊)
-  rw [Finset.range_eq_Ico, hIco, Finset.Icc_eq_insert_Icc_succ (Nat.zero_le _), Finset.sum_insert]
+  rw [Finset.range_eq_Ico, hIco, Icc_eq_insert_Icc_succ (Nat.zero_le _), Finset.sum_insert]
   · have h0 : f 0 = 0 := ((hf' 0).antisymm (by simpa using hf 0)).symm
     simp [h0]
   · simp
@@ -15755,11 +15755,11 @@ theorem naturalGridFourFifthsSet_compl_upperDensity_le_one_fourth
     (hmean : ∀ᶠ x : ℕ in atTop,
       (∑ n ∈ Finset.range x, naturalGridRejectedFraction K n) ≤
         (1 / 20 : ℝ) * x) :
-    ((naturalGridFourFifthsSet K)ᶜ : Set ℕ).upperDensity ≤ 1 / 4 := by
+    (upperDensity ((naturalGridFourFifthsSet K)ᶜ : Set ℕ)) ≤ 1 / 4 := by
   calc
-    ((naturalGridFourFifthsSet K)ᶜ : Set ℕ).upperDensity ≤
-        ({n : ℕ | (1 / 5 : ℝ) < naturalGridRejectedFraction K n} :
-          Set ℕ).upperDensity :=
+    (upperDensity ((naturalGridFourFifthsSet K)ᶜ : Set ℕ)) ≤
+        (upperDensity ({n : ℕ | (1 / 5 : ℝ) < naturalGridRejectedFraction K n} :
+          Set ℕ)) :=
       Erdos448.upperDensity_mono
         (compl_naturalGridFourFifthsSet_subset_superlevel K)
     _ ≤ (1 / 20 : ℝ) / (1 / 5 : ℝ) :=
@@ -15773,7 +15773,7 @@ an eventual rejected-mass bound, and hence a four-fifths set whose complement
 has upper density at most one fourth. -/
 theorem exists_naturalGrid_goodSet :
     ∃ K : ℕ, 0 < K ∧
-      ((naturalGridFourFifthsSet K)ᶜ : Set ℕ).upperDensity ≤ 1 / 4 := by
+      (upperDensity ((naturalGridFourFifthsSet K)ᶜ : Set ℕ)) ≤ 1 / 4 := by
   rcases exists_naturalGrid_firstMoment with ⟨K, hK, hmean⟩
   exact ⟨K, hK,
     naturalGridFourFifthsSet_compl_upperDensity_le_one_fourth K hmean⟩
@@ -18066,8 +18066,8 @@ theorem erdos_448_of_naturalGrid_linear_moment
       ∀ᶠ x : ℕ in atTop,
         (∑ n ∈ Finset.range x, naturalGridSelectedPairTerm K n) ≤ C * x) :
     ¬ ∀ ε : ℝ, 0 < ε →
-        {n : ℕ | (Erdos448.tauPlus n : ℝ) <
-          ε * (n.divisors.card : ℝ)}.HasDensity 1 := by
+        HasDensity {n : ℕ | (Erdos448.tauPlus n : ℝ) <
+          ε * (n.divisors.card : ℝ)} 1 := by
   rcases NaturalGridConcentration448.exists_naturalGrid_goodSet with
     ⟨K, hK, hG⟩
   rcases hlinear K hK with ⟨C, hC, hsum⟩
@@ -30452,7 +30452,7 @@ lemma exists_zmod_fiber_card_div_le (T : Finset ℕ) (P : ℕ) [NeZero P]
   rcases exists_fiber_card_div_le T r hT with ⟨b, hb⟩
   exact ⟨b, by simpa [ZMod.card] using hb⟩
 
-lemma _root_.List.mem_dvd_foldr_mul {l : List ℕ} {a : ℕ} (ha : a ∈ l) :
+lemma mem_dvd_foldr_mul {l : List ℕ} {a : ℕ} (ha : a ∈ l) :
     a ∣ l.foldr (· * ·) 1 := by
   induction l with
   | nil => simp at ha
@@ -30465,7 +30465,7 @@ lemma _root_.List.mem_dvd_foldr_mul {l : List ℕ} {a : ℕ} (ha : a ∈ l) :
       | inr h =>
           exact dvd_mul_of_dvd_right (ih h) b
 
-private lemma _root_.List.foldr_mul_pos {l : List ℕ}
+private lemma foldr_mul_pos {l : List ℕ}
     (hpos : ∀ a ∈ l, 0 < a) : 0 < l.foldr (· * ·) 1 := by
   induction l with
   | nil => simp
@@ -30475,7 +30475,7 @@ private lemma _root_.List.foldr_mul_pos {l : List ℕ}
         intro b hb
         exact hpos b (by simp [hb])))
 
-private lemma _root_.List.coprime_foldr_mul_of_forall
+private lemma coprime_foldr_mul_of_forall
     {P : ℕ} {Ps : List ℕ} (hcop_all : ∀ Q ∈ Ps, Nat.Coprime P Q) :
     Nat.Coprime P (Ps.foldr (· * ·) 1) := by
   induction Ps with
@@ -30604,7 +30604,7 @@ lemma ChainState.productP_hExp_bound {N : ℕ} {D : PrunedData N}
 lemma ChainState.block_dvd_productP {N : ℕ} {D : PrunedData N}
     (S : ChainState N D) {B : ℕ} (hB : B ∈ S.blocks) : B ∣ S.productP := by
   rw [S.product_eq]
-  exact List.mem_dvd_foldr_mul hB
+  exact mem_dvd_foldr_mul hB
 
 lemma ChainState.selected_remaining_disjoint {N : ℕ} {D : PrunedData N}
     (S : ChainState N D) {q : ℕ} (hq : q ∈ S.Qsurv) :
@@ -31822,7 +31822,7 @@ private lemma chainTFromBlocks_le_length_mul_omega_foldr
           omega (Ps.foldr (· * ·) 1) ≤ omega (P * Ps.foldr (· * ·) 1) := by
         apply omega_le_of_dvd
         · exact dvd_mul_left (Ps.foldr (· * ·) 1) P
-        · exact (Nat.mul_pos (hpos P (by simp)) (List.foldr_mul_pos hPs_pos)).ne'
+        · exact (Nat.mul_pos (hpos P (by simp)) (foldr_mul_pos hPs_pos)).ne'
       calc
         omega (Ps.foldr (· * ·) 1) + chainTFromBlocks Ps
             ≤ omega (P * Ps.foldr (· * ·) 1) +
@@ -31854,7 +31854,7 @@ private lemma chainTFromBlocks_add_omega_real_quadratic_bound
         exact homega_pos B (by simp [hB])
       have hPomega : 1 ≤ omega P := homega_pos P (by simp)
       have hcop : Nat.Coprime P (Ps.foldr (· * ·) 1) :=
-        List.coprime_foldr_mul_of_forall hpair.1
+        coprime_foldr_mul_of_forall hpair.1
       have homega :
           omega (P * Ps.foldr (· * ·) 1) =
             omega P + omega (Ps.foldr (· * ·) 1) :=
@@ -36979,8 +36979,8 @@ Erdős--Tenenbaum theorem are documented in tex/448.tex.
 the exceptional set has upper density strictly smaller than one. -/
 theorem erdos_448 :
     ¬ ∀ ε : ℝ, 0 < ε →
-      {n : ℕ | (tauPlus n : ℝ) <
-        ε * (n.divisors.card : ℝ)}.HasDensity 1 :=
+      HasDensity {n : ℕ | (tauPlus n : ℝ) <
+        ε * (n.divisors.card : ℝ)} 1 :=
   Erdos448FinalAssembly.erdos_448_of_naturalGrid_linear_moment
     Erdos448Prop3Assembly.naturalGridSelectedPair_eventually_linear_all_K
 
