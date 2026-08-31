@@ -818,13 +818,6 @@ theorem Ah_minus_1_upper_bound (h : ℕ) (r : ℝ) (TB : ThinBasis h) (S : Valid
     linarith [ show ( L r ( S.d n ) : ℝ ) ≤ ( S.d n : ℝ ) ^ r by exact_mod_cast Nat.floor_le ( by exact Real.rpow_nonneg ( Nat.cast_nonneg _ ) _ ) ]
 
 /-
-Checking the type of Filter.liminf and Filter.atTop.
--/
-#check Filter.liminf
-
-#check Filter.atTop
-
-/-
 The limit inferior of the ratio A_{h-1}(x)/A(x) is at most 4.
 -/
 noncomputable def ratio_fun (A : Set ℕ) (h : ℕ) (x : ℝ) : ℝ :=

@@ -266,9 +266,6 @@ noncomputable def S_seq (t : ℝ) (ht : t ≠ 0) (lambda_val : ℂ) (k : ℕ) : 
 noncomputable def rem_seq (t : ℝ) (ht : t ≠ 0) (lambda_val : ℂ) (k : ℕ) : ℂ :=
   (construction_seq t ht lambda_val k).2.1
 
-#check nhds
-#check (nhds 0 : Filter ℂ)
-
 /-
 The remainder sequence converges to 0.
 -/

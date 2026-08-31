@@ -44,14 +44,14 @@ noncomputable section
 section
 open SimpleGraph
 
-theorem _root_.SimpleGraph.IndepSetFree.comap {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β} {n : ℕ}
+private theorem _root_.SimpleGraph.IndepSetFree.comap {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β} {n : ℕ}
     (f : H ↪g G) : G.IndepSetFree n → H.IndepSetFree n := by
   intro h
   rw [← cliqueFree_compl] at h ⊢
   exact CliqueFree.comap
     (((Embedding.complEquiv (G := H) (H := G)).toFun f).isContained) h
 
-def _root_.SimpleGraph.Iso.compl {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β}
+private def _root_.SimpleGraph.Iso.compl {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β}
     (e : G ≃g H) : Gᶜ ≃g Hᶜ where
   toEquiv := e.toEquiv
   map_rel_iff' := by
@@ -62,7 +62,7 @@ def _root_.SimpleGraph.Iso.compl {α β : Type*} {G : SimpleGraph α} {H : Simpl
     · simpa [compl_adj, hvw, e.injective.ne_iff] using
         not_congr (e.map_adj_iff (v := v) (w := w))
 
-theorem _root_.SimpleGraph.Iso.cliqueFree_iff {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β} {n : ℕ}
+private theorem _root_.SimpleGraph.Iso.cliqueFree_iff {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β} {n : ℕ}
     (e : G ≃g H) : G.CliqueFree n ↔ H.CliqueFree n := by
   constructor
   · intro h
@@ -70,7 +70,7 @@ theorem _root_.SimpleGraph.Iso.cliqueFree_iff {α β : Type*} {G : SimpleGraph �
   · intro h
     exact CliqueFree.comap e.toEmbedding.isContained h
 
-theorem _root_.SimpleGraph.Iso.indepSetFree_iff {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β} {n : ℕ}
+private theorem _root_.SimpleGraph.Iso.indepSetFree_iff {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β} {n : ℕ}
     (e : G ≃g H) : G.IndepSetFree n ↔ H.IndepSetFree n := by
   simpa [indepSetFree_compl] using
     (Iso.cliqueFree_iff (n := n) (e := Iso.compl e))
