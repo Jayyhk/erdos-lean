@@ -20,14 +20,15 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-264 proofs in the catalog (out of 291 Erdős problems with formalized solutions):
-- 262 `complete`
+267 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
+- 265 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
 | [2](https://www.erdosproblems.com/2) | `complete` | [problems/2/](problems/2/) | |
 | [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) | |
+| [8](https://www.erdosproblems.com/8) | `complete` | [problems/8/](problems/8/) | |
 | [13](https://www.erdosproblems.com/13) | `complete` | [problems/13/](problems/13/) | |
 | [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
 | [22](https://www.erdosproblems.com/22) | `complete` | [problems/22/](problems/22/) | |
@@ -47,6 +48,7 @@ lake build
 | [53](https://www.erdosproblems.com/53) | `complete` | [problems/53/](problems/53/) | |
 | [56](https://www.erdosproblems.com/56) | `complete` | [problems/56/](problems/56/) | |
 | [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) | |
+| [83](https://www.erdosproblems.com/83) | `complete` | [problems/83/](problems/83/) | |
 | [90](https://www.erdosproblems.com/90) | `axiomatic` | [problems/90/](problems/90/) | assumes Theorem 3.9.7 of [Neukirch–Schmidt–Wingberg](https://jayyhk.github.io/papers/neukirch-schmidt-wingberg2008.pdf) (`golod_shafarevich_inequality`) and Theorem 5.1 of [Mayer](https://jayyhk.github.io/papers/mayer2015.pdf) (`shafarevich_relation_rank_bound`) |
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
 | [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
@@ -57,6 +59,7 @@ lake build
 | [119](https://www.erdosproblems.com/119) | `complete` | [problems/119/](problems/119/) | |
 | [123](https://www.erdosproblems.com/123) | `complete` | [problems/123/](problems/123/) | |
 | [125](https://www.erdosproblems.com/125) | `complete` | [problems/125/](problems/125/) | |
+| [127](https://www.erdosproblems.com/127) | `complete` | [problems/127/](problems/127/) | |
 | [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
 | [139](https://www.erdosproblems.com/139) | `complete` | [problems/139/](problems/139/) | |
 | [146](https://www.erdosproblems.com/146) | `complete` | [problems/146/](problems/146/) | |

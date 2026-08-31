@@ -19,6 +19,16 @@
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos6.lean"
       - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
+- number: "8"
+  proof:
+    path: "problems/8/"
+    theorem: "Erdos8.erdos_8"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos8.lean"
 - number: "13"
   proof:
     path: "problems/13/"
@@ -218,6 +228,16 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/71#post-6635"
+- number: "83"
+  proof:
+    path: "problems/83/"
+    theorem: "Erdos83.erdos_83"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos83.lean"
 - number: "90"
   proof:
     path: "problems/90/"
@@ -326,6 +346,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/125#post-5110"
       - "https://github.com/mo271/formal-conjectures/blob/c27415379b5dbe34105d1fdd707994540c4c6fc7/FormalConjectures/ErdosProblems/125.lean#L468"
+- number: "127"
+  proof:
+    path: "problems/127/"
+    theorem: "Erdos127.erdos_127"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos127.lean"
 - number: "134"
   proof:
     path: "problems/134/"
