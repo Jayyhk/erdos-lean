@@ -325,7 +325,7 @@ private theorem _root_.SelbergSieve.selbergTerms_apply (d : ℕ) :
 
 section UpperBoundSieve
 
-structure _root_.SelbergSieve.UpperBoundSieve where mk ::
+private structure _root_.SelbergSieve.UpperBoundSieve where mk ::
   μPlus : ℕ → ℝ
   hμPlus : IsUpperMoebius μPlus
 
@@ -334,7 +334,7 @@ private instance _root_.SelbergSieve.ubToμPlus : CoeFun UpperBoundSieve fun _ =
 private def _root_.SelbergSieve.IsLowerMoebius (μMinus : ℕ → ℝ) : Prop :=
   ∀ n : ℕ, ∑ d ∈ n.divisors, μMinus d ≤ (if n=1 then 1 else 0)
 
-structure _root_.SelbergSieve.LowerBoundSieve where mk ::
+private structure _root_.SelbergSieve.LowerBoundSieve where mk ::
   μMinus : ℕ → ℝ
   hμMinus : IsLowerMoebius μMinus
 
@@ -593,7 +593,7 @@ noncomputable section
 
 open scoped BigOperators Classical SelbergSieve ArithmeticFunction.Moebius ArithmeticFunction.omega
 
-open Finset Real Nat SelbergSieve.UpperBoundSieve ArithmeticFunction SelbergSieve BoundingSieve
+open Finset Real Nat ArithmeticFunction SelbergSieve BoundingSieve
 
 namespace SelbergSieve
 set_option quotPrecheck false
