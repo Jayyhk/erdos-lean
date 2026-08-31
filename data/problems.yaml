@@ -1,3 +1,13 @@
+- number: "2"
+  proof:
+    path: "problems/2/"
+    theorem: "Erdos2.erdos_2"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos2.lean"
 - number: "6"
   proof:
     path: "problems/6/"
@@ -348,6 +358,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/146#post-8253"
       - "https://github.com/openai/ten-proofs/blob/main/CompactnessAndDegeneracy.lean"
+- number: "147"
+  proof:
+    path: "problems/147/"
+    theorem: "Erdos147.erdos_147"
+    state: "complete"
+    last_update: "2026-08-31"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos147.lean"
 - number: "150"
   proof:
     path: "problems/150/"
@@ -699,6 +719,16 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos253.lean"
+- number: "255"
+  proof:
+    path: "problems/255/"
+    theorem: "Erdos255.erdos_255"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos255.lean"
 - number: "258"
   proof:
     path: "problems/258/"
@@ -1098,6 +1128,16 @@
     mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
     sources:
       - "https://www.erdosproblems.com/forum/thread/379#post-2350"
+- number: "391"
+  proof:
+    path: "problems/391/"
+    theorem: "Erdos391.erdos_391"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos391.lean"
 - number: "392"
   proof:
     path: "problems/392/"

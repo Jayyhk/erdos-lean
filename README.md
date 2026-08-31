@@ -20,12 +20,13 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-260 proofs in the catalog (out of 291 Erdős problems with formalized solutions):
-- 258 `complete`
+264 proofs in the catalog (out of 291 Erdős problems with formalized solutions):
+- 262 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
+| [2](https://www.erdosproblems.com/2) | `complete` | [problems/2/](problems/2/) | |
 | [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) | |
 | [13](https://www.erdosproblems.com/13) | `complete` | [problems/13/](problems/13/) | |
 | [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
@@ -59,6 +60,7 @@ lake build
 | [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
 | [139](https://www.erdosproblems.com/139) | `complete` | [problems/139/](problems/139/) | |
 | [146](https://www.erdosproblems.com/146) | `complete` | [problems/146/](problems/146/) | |
+| [147](https://www.erdosproblems.com/147) | `complete` | [problems/147/](problems/147/) | |
 | [150](https://www.erdosproblems.com/150) | `complete` | [problems/150/](problems/150/) | |
 | [152](https://www.erdosproblems.com/152) | `complete` | [problems/152/](problems/152/) | |
 | [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) | |
@@ -91,6 +93,7 @@ lake build
 | [248](https://www.erdosproblems.com/248) | `complete` | [problems/248/](problems/248/) | |
 | [250](https://www.erdosproblems.com/250) | `complete` | [problems/250/](problems/250/) | |
 | [253](https://www.erdosproblems.com/253) | `complete` | [problems/253/](problems/253/) | |
+| [255](https://www.erdosproblems.com/255) | `complete` | [problems/255/](problems/255/) | |
 | [258](https://www.erdosproblems.com/258) | `complete` | [problems/258/](problems/258/) | |
 | [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
 | [262](https://www.erdosproblems.com/262) | `complete` | [problems/262/](problems/262/) | |
@@ -128,6 +131,7 @@ lake build
 | [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
 | [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
 | [379](https://www.erdosproblems.com/379) | `complete` | [problems/379/](problems/379/) | |
+| [391](https://www.erdosproblems.com/391) | `complete` | [problems/391/](problems/391/) | |
 | [392](https://www.erdosproblems.com/392) | `complete` | [problems/392/](problems/392/) | |
 | [395](https://www.erdosproblems.com/395) | `complete` | [problems/395/](problems/395/) | |
 | [397](https://www.erdosproblems.com/397) | `complete` | [problems/397/](problems/397/) | |
