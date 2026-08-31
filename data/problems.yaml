@@ -50,6 +50,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/16#post-4464"
       - "https://github.com/danielchin/proofs/blob/main/Proofs/ErdosProblems/Erdos16.lean"
+- number: "21"
+  proof:
+    path: "problems/21/"
+    theorem: "Erdos21.erdos_21"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos21.lean"
 - number: "22"
   proof:
     path: "problems/22/"
@@ -228,6 +238,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/56#post-1850"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos56.lean"
+- number: "59"
+  proof:
+    path: "problems/59/"
+    theorem: "Erdos59.erdos_59"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos59.lean"
 - number: "71"
   proof:
     path: "problems/71/"
@@ -626,6 +646,16 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos219.lean"
+- number: "220"
+  proof:
+    path: "problems/220/"
+    theorem: "Erdos220.erdos_220"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos220.lean"
 - number: "221"
   proof:
     path: "problems/221/"
@@ -960,6 +990,26 @@
     mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
     sources:
       - "https://www.erdosproblems.com/forum/thread/303#post-2347"
+- number: "309"
+  proof:
+    path: "problems/309/"
+    theorem: "Erdos309.erdos_309"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos309.lean"
+- number: "310"
+  proof:
+    path: "problems/310/"
+    theorem: "Erdos310.erdos_310"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos310.lean"
 - number: "314"
   proof:
     path: "problems/314/"

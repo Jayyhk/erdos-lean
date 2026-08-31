@@ -32,8 +32,7 @@ square, and `16 = 2 ^ 4`. The search over its factors is discharged by kernel `d
 via the hand-proved bridging lemmas `isAbelianSquare_iff` and `containsAbelianSquare_iff`
 relating the `Bool`-valued decision procedures to their `Prop` counterparts. This replaces
 the repository's previous proof, which obtained arbitrarily long witnesses from Keränen's
-85-uniform morphism and needed `native_decide`; `erdos_231` now depends on Lean's standard
-foundations alone.
+85-uniform morphism; `erdos_231` now depends on Lean's standard foundations alone.
 
 The decision procedures, their correctness lemmas, and the witness are vendored from
 plby (github.com/plby/lean-proofs), `src/latest/ErdosProblems/Erdos231.lean` and

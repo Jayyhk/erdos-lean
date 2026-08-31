@@ -10,10 +10,8 @@ Erdős Problem 192. Let `A = {a₁, a₂, …} ⊂ ℝ^d` be an infinite sequenc
 must `A` contain a three-term arithmetic progression? `erdos_192` answers this: exactly
 for `d ≤ 3`.
 
-`erdos_192` is proved here without `native_decide`: the finite Keränen obligations are
-kernel checked using prefix-count, streaming and bitset certificates, so the proof depends
-on Lean's standard foundations alone rather than on `Lean.ofReduceBool` and
-`Lean.trustCompiler`.
+The finite Keränen obligations are kernel checked using prefix-count, streaming and
+bitset certificates, so `erdos_192` depends on Lean's standard foundations alone.
 
 `erdos_192` is also restated in the geometric form the problem is posed in, over positive
 unit walks in `ℝ^d`. The word form this repository previously used — for which `d` is

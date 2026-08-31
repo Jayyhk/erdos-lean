@@ -2314,7 +2314,7 @@ Certificate data for the bounded subset-sum covering lemma, as 6-tuples
   * `certTableB` — the 178 Case-B class-base rows (the paper's Table B),
     each the root of a λ-lift chain (the paper's λ-lift lemma).
 Every row is kernel-decided against `frameCertOK` — validity, budget and
-lift-stability (`Y+Z+1 ≤ a`) in one decided property (no native_decide).
+lift-stability (`Y+Z+1 ≤ a`) in one decided property.
 -/
 
 namespace Proof
