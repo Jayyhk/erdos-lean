@@ -4192,5 +4192,6 @@ theorem erdos_147 :
 end
 
 #print axioms erdos_147
+-- 'Erdos147.erdos_147' depends on axioms: [propext, Classical.choice, Quot.sound]
 
 end Erdos147

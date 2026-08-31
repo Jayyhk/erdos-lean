@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-267 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
-- 265 `complete`
+269 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
+- 267 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -34,6 +34,7 @@ lake build
 | [22](https://www.erdosproblems.com/22) | `complete` | [problems/22/](problems/22/) | |
 | [24](https://www.erdosproblems.com/24) | `complete` | [problems/24/](problems/24/) | |
 | [26](https://www.erdosproblems.com/26) | `complete` | [problems/26/](problems/26/) | |
+| [29](https://www.erdosproblems.com/29) | `complete` | [problems/29/](problems/29/) | |
 | [31](https://www.erdosproblems.com/31) | `complete` | [problems/31/](problems/31/) | |
 | [34](https://www.erdosproblems.com/34) | `complete` | [problems/34/](problems/34/) | |
 | [35](https://www.erdosproblems.com/35) | `complete` | [problems/35/](problems/35/) | |
@@ -89,6 +90,7 @@ lake build
 | [226](https://www.erdosproblems.com/226) | `complete` | [problems/226/](problems/226/) | |
 | [228](https://www.erdosproblems.com/228) | `complete` | [problems/228/](problems/228/) | |
 | [229](https://www.erdosproblems.com/229) | `complete` | [problems/229/](problems/229/) | |
+| [230](https://www.erdosproblems.com/230) | `complete` | [problems/230/](problems/230/) | |
 | [231](https://www.erdosproblems.com/231) | `complete` | [problems/231/](problems/231/) | |
 | [237](https://www.erdosproblems.com/237) | `complete` | [problems/237/](problems/237/) | |
 | [239](https://www.erdosproblems.com/239) | `complete` | [problems/239/](problems/239/) | |

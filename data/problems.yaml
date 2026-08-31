@@ -82,6 +82,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/26#post-2532"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos26.lean"
+- number: "29"
+  proof:
+    path: "problems/29/"
+    theorem: "Erdos29.erdos_29"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos29.lean"
 - number: "31"
   proof:
     path: "problems/31/"
@@ -670,6 +680,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/229#post-2514"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos229.lean"
+- number: "230"
+  proof:
+    path: "problems/230/"
+    theorem: "Erdos230.erdos_230"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos230.lean"
 - number: "231"
   proof:
     path: "problems/231/"
