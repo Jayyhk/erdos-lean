@@ -3639,13 +3639,13 @@ section ImageOrientation
 variable {V W U R : Type*}
 
 /-- Compare an equivalence of two `n`-element finsets with their increasing enumerations. -/
-noncomputable def _root_.Finset.orientationPerm [LinearOrder V] [LinearOrder W] {n : ℕ}
+private noncomputable def _root_.Finset.orientationPerm [LinearOrder V] [LinearOrder W] {n : ℕ}
     (s : Finset V) (t : Finset W) (hs : s.card = n) (ht : t.card = n)
     (e : s ≃ t) : Equiv.Perm (Fin n) :=
   (s.orderIsoOfFin hs).toEquiv |>.trans e |>.trans (t.orderIsoOfFin ht).symm.toEquiv
 
 /-- An injective map on a finset is an equivalence with its finset image. -/
-noncomputable def _root_.Finset.imageEquiv [DecidableEq W] (s : Finset V) (f : V → W)
+private noncomputable def _root_.Finset.imageEquiv [DecidableEq W] (s : Finset V) (f : V → W)
     (hf : Set.InjOn f s) : s ≃ s.image f :=
   Equiv.ofBijective
     (fun x : s ↦ ⟨f x, mem_image_of_mem f x.2⟩)
@@ -3660,7 +3660,7 @@ noncomputable def _root_.Finset.imageEquiv [DecidableEq W] (s : Finset V) (f : V
 
 /-- The permutation comparing the increasing enumeration of `s`, transported by `f`,
 with the increasing enumeration of `s.image f`. -/
-noncomputable def _root_.Finset.imagePerm [LinearOrder V] [LinearOrder W]
+private noncomputable def _root_.Finset.imagePerm [LinearOrder V] [LinearOrder W]
     (s : Finset V) (f : V → W) (hf : Set.InjOn f s) : Equiv.Perm (Fin s.card) :=
   orientationPerm s (s.image f) rfl (card_image_of_injOn hf) (imageEquiv s f hf)
 
@@ -3672,13 +3672,13 @@ noncomputable def _root_.Finset.imagePerm [LinearOrder V] [LinearOrder W]
   rfl
 
 /-- Canonical orientation sign of an injective finite image. -/
-noncomputable def _root_.Finset.imageSign [LinearOrder V] [LinearOrder W]
+private noncomputable def _root_.Finset.imageSign [LinearOrder V] [LinearOrder W]
     (s : Finset V) (f : V → W) (hf : Set.InjOn f s) : ℤˣ :=
   Equiv.Perm.sign (imagePerm s f hf)
 
 /-- The normalized coefficient for the image of an ordered finite set: it is its canonical
 orientation sign if `f` is injective on `s`, and zero otherwise. -/
-noncomputable def _root_.Finset.imageCoeff [LinearOrder V] [LinearOrder W] [Ring R]
+private noncomputable def _root_.Finset.imageCoeff [LinearOrder V] [LinearOrder W] [Ring R]
     (s : Finset V) (f : V → W) : R :=
   if hf : Set.InjOn f s then (((imageSign s f hf : ℤˣ) : ℤ) : R) else 0
 

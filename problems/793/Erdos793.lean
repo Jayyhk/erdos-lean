@@ -530,7 +530,7 @@ variable [SeminormedAddCommGroup E'] [SeminormedAddCommGroup F'] [SeminormedAddC
   [SeminormedRing R']
 
 
-theorem _root_.Asymptotics.IsBigO.natCast {f g : ℝ → E} (h : f =O[atTop] g) :
+private theorem _root_.Asymptotics.IsBigO.natCast {f g : ℝ → E} (h : f =O[atTop] g) :
     (fun n : ℕ => f n) =O[atTop] fun n : ℕ => g n :=
   h.comp_tendsto tendsto_natCast_atTop_atTop
 
@@ -1077,7 +1077,7 @@ lemma log_isbigo_log_div {d : ℝ} (hb : 0 < d) :
     (fun n ↦ Real.log n) =O[atTop] (fun n ↦ Real.log (n / d)) := by
   convert isBigO_log_mul_add (inv_pos.mpr hb) 0 using 1; simp only [add_zero]; field_simp
 
-lemma _root_.Asymptotics.IsBigO.add_isLittleO_right {f g : ℝ → ℝ} (h : g =o[atTop] f) :
+private lemma _root_.Asymptotics.IsBigO.add_isLittleO_right {f g : ℝ → ℝ} (h : g =o[atTop] f) :
     f =O[atTop] (f + g) := by
   rw [isLittleO_iff] at h ; specialize h (c := 2⁻¹) (by norm_num)
   rw [isBigO_iff'']
@@ -4024,7 +4024,7 @@ lemma th43_b (x : ℝ) (hx : 2 ≤ x) :
 
 
 /-- If u ~ v and w-u = o(v) then w ~ v. -/
-theorem _root_.Asymptotics.IsEquivalent.add_isLittleO' {α : Type*} {β : Type*} [NormedAddCommGroup β]
+private theorem _root_.Asymptotics.IsEquivalent.add_isLittleO' {α : Type*} {β : Type*} [NormedAddCommGroup β]
     {u : α → β} {v : α → β} {w : α → β} {l : Filter α}
     (huv : Asymptotics.IsEquivalent l u v) (hwu : (w - u) =o[l] v) :
     Asymptotics.IsEquivalent l w v := by
@@ -4032,7 +4032,7 @@ theorem _root_.Asymptotics.IsEquivalent.add_isLittleO' {α : Type*} {β : Type*}
   exact Asymptotics.IsEquivalent.add_isLittleO huv hwu
 
 /-- If u ~ v and u-w = o(v) then w ~ v. -/
-theorem _root_.Asymptotics.IsEquivalent.add_isLittleO'' {α : Type*} {β : Type*} [NormedAddCommGroup β]
+private theorem _root_.Asymptotics.IsEquivalent.add_isLittleO'' {α : Type*} {β : Type*} [NormedAddCommGroup β]
     {u : α → β} {v : α → β} {w : α → β} {l : Filter α}
     (huv : Asymptotics.IsEquivalent l u v) (hwu : (u - w) =o[l] v) :
     Asymptotics.IsEquivalent l w v := by

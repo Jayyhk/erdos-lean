@@ -19592,36 +19592,36 @@ variable {α : Type*} [AddCommMonoid α]
 
 /-- A set is an arithmetic progression of length `l`, first term `a`, and
 difference `d`. Cardinality is included so repeated terms are not nontrivial. -/
-def _root_.Set.IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=
+def IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=
   ENat.card s = l ∧ s = {a + n • d | (n : ℕ) (_ : n < l)}
 
 /-- A set is an arithmetic progression of length `l`. -/
-def _root_.Set.IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=
-  ∃ a d : α, s.IsAPOfLengthWith l a d
+def IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=
+  ∃ a d : α, IsAPOfLengthWith s l a d
 
 section
 
-theorem _root_.Set.IsAPOfLength.card {s : Set α} {l : ℕ∞} (h : s.IsAPOfLength l) : ENat.card s = l :=
+theorem IsAPOfLength.card {s : Set α} {l : ℕ∞} (h : IsAPOfLength s l) : ENat.card s = l :=
   h.choose_spec.choose_spec.1
 
 end
 
 /-- A set is free of nontrivial arithmetic progressions of length `l`. -/
-def _root_.Set.IsAPOfLengthFree (s : Set α) (l : ℕ∞) : Prop :=
-  ∀ t ⊆ s, t.IsAPOfLength l → l ≤ 1
+def IsAPOfLengthFree (s : Set α) (l : ℕ∞) : Prop :=
+  ∀ t ⊆ s, IsAPOfLength t l → l ≤ 1
 
 section
 
 /-- The largest cardinality of a `k`-AP-free subset of `{1, ..., N}`. -/
-noncomputable def _root_.Set.IsAPOfLengthFree.maxCard (k : ℕ) (N : ℕ) : ℕ :=
+noncomputable def IsAPOfLengthFree.maxCard (k : ℕ) (N : ℕ) : ℕ :=
   sSup {Finset.card S | (S) (_ : S ⊆ Finset.Icc 1 N)
-    (_ : (S : Set ℕ).IsAPOfLengthFree k)}
+    (_ : IsAPOfLengthFree (S : Set ℕ) k)}
 
 end
 
 namespace SzemeredisTheorem
 
-noncomputable abbrev r := Set.IsAPOfLengthFree.maxCard
+noncomputable abbrev r := IsAPOfLengthFree.maxCard
 
 private lemma arithmeticProgressionSet_card
     (a d k : ℕ) (hd : 0 < d) :
@@ -19648,7 +19648,7 @@ private lemma arithmeticProgressionSet_card
 form used by the Formal Conjectures specification. -/
 theorem arithmeticProgressionSet_isAP
     (a d k : ℕ) (hd : 0 < d) :
-    Set.IsAPOfLength
+    IsAPOfLength
       {x : ℕ | ∃ i : ℕ, i < k ∧ x = a + i * d} (k : ℕ∞) := by
   refine ⟨a, d, arithmeticProgressionSet_card a d k hd, ?_⟩
   ext x
@@ -71420,7 +71420,7 @@ Authors: OpenAI Codex
 
 /-- The set of nonempty arithmetic progressions consisting entirely of primes. -/
 def primeArithmeticProgressions : Set (Set ℕ) :=
-  {s | (∀ p ∈ s, p.Prime) ∧ ∃ l > 0, s.IsAPOfLength l}
+  {s | (∀ p ∈ s, p.Prime) ∧ ∃ l > 0, IsAPOfLength s l}
 
 /-- Erdős Problem 219: there are arbitrarily long arithmetic progressions of primes. -/
 theorem erdos_219 :
@@ -71429,7 +71429,7 @@ theorem erdos_219 :
   let L : ℕ := max 1 N
   obtain ⟨a, b, hb, hmem⟩ := GreenTao.green_tao L
   let s : Set ℕ := {x | ∃ i : ℕ, i < L ∧ x = a + i * b}
-  have hAP : s.IsAPOfLength (L : ℕ∞) :=
+  have hAP : IsAPOfLength s (L : ℕ∞) :=
     SzemeredisTheorem.arithmeticProgressionSet_isAP a b L (by omega)
   refine ⟨s, ?_, ?_⟩
   · refine ⟨?_, ⟨(L : ℕ∞), ?_, hAP⟩⟩

@@ -4587,28 +4587,28 @@ theorem erdos_71_of_infiniteAP (P : InfiniteAP) (heven : P.ContainsEven) :
     linarith
   exact_mod_cast h_ℚ
 
-/-- `Set.IsAPOfLengthWith s l a d` says `s` is the AP of length `l` (possibly `⊤`)
+/-- `IsAPOfLengthWith s l a d` says `s` is the AP of length `l` (possibly `⊤`)
 with first term `a` and common difference `d`. Matches the definition in the
 Formal Conjectures repository. -/
-def _root_.Set.IsAPOfLengthWith (s : Set ℕ) (l : ℕ∞) (a d : ℕ) : Prop :=
+def IsAPOfLengthWith (s : Set ℕ) (l : ℕ∞) (a d : ℕ) : Prop :=
   ENat.card s = l ∧ s = {a + n • d | (n : ℕ) (_ : n < l)}
 
-/-- `Set.IsAPOfLength s l` says `s` is some AP of length `l`. Matches the
+/-- `IsAPOfLength s l` says `s` is some AP of length `l`. Matches the
 definition in the Formal Conjectures repository. -/
-def _root_.Set.IsAPOfLength (s : Set ℕ) (l : ℕ∞) : Prop :=
-  ∃ a d, s.IsAPOfLengthWith l a d
+def IsAPOfLength (s : Set ℕ) (l : ℕ∞) : Prop :=
+  ∃ a d, IsAPOfLengthWith s l a d
 
 /-- The average degree `(∑ deg) / |V|`. Matches
-`SimpleGraph.averageDegree` in the Formal Conjectures repository. -/
-noncomputable def _root_.SimpleGraph.averageDegree {V : Type*} [Fintype V]
+`averageDegree` in the Formal Conjectures repository. -/
+noncomputable def averageDegree {V : Type*} [Fintype V]
     (G : SimpleGraph V) [DecidableRel G.Adj] : ℚ :=
   (∑ v, (G.degree v : ℚ)) / (Fintype.card V : ℚ)
 
 /-- Handshake lemma: `avgDegree G = averageDegree G`. -/
 private lemma avgDegree_eq_averageDegree {V : Type*} [Fintype V]
     (G : SimpleGraph V) [DecidableRel G.Adj] :
-    avgDegree G = G.averageDegree := by
-  unfold avgDegree SimpleGraph.averageDegree
+    avgDegree G = averageDegree G := by
+  unfold avgDegree averageDegree
   congr 1
   have h : (∑ v, G.degree v : ℕ) = 2 * G.edgeFinset.card :=
     G.sum_degrees_eq_twice_card_edges
@@ -4625,13 +4625,13 @@ with `averageDegree G ≥ c` contains a cycle whose length lies in `P`.
 
 This formulation matches the Formal Conjectures repository: it takes a
 `Set ℕ` with `IsAPOfLength ⊤` rather than a bundled `InfiniteAP`, uses
-`G.averageDegree` (the `∑ deg / |V|` form) rather than `2|E|/|V|`, does not
+`averageDegree G` (the `∑ deg / |V|` form) rather than `2|E|/|V|`, does not
 assume `[Nonempty V]`, and allows the AP to start at `0`. All three
 adjustments are made by wrapping `erdos_71_of_infiniteAP`. -/
 theorem erdos_71 :
-    ∀ P : Set ℕ, P.IsAPOfLength ⊤ → (∃ n ∈ P, Even n) →
+    ∀ P : Set ℕ, IsAPOfLength P ⊤ → (∃ n ∈ P, Even n) →
       ∃ c : ℚ, ∀ (V : Type) [Fintype V] [DecidableEq V] (G : SimpleGraph V)
-        [DecidableRel G.Adj], c ≤ G.averageDegree →
+        [DecidableRel G.Adj], c ≤ averageDegree G →
           ∃ (v : V) (w : G.Walk v v), w.IsCycle ∧ w.length ∈ P := by
   intro P hAP hEven
   obtain ⟨a, d, hcard, hP⟩ := hAP
@@ -4704,8 +4704,8 @@ theorem erdos_71 :
     exfalso
     have hcard : Fintype.card V = 0 :=
       Fintype.card_eq_zero_iff.mpr (not_nonempty_iff.mp hV)
-    have hzero : G.averageDegree = 0 := by
-      unfold SimpleGraph.averageDegree
+    have hzero : averageDegree G = 0 := by
+      unfold averageDegree
       simp [hcard]
     rw [hzero] at hdeg
     have : (0 : ℚ) ≤ (c₀ : ℚ) := by exact_mod_cast Nat.zero_le c₀

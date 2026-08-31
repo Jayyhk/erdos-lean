@@ -65,7 +65,7 @@ end
 section
 
 open Filter.EventuallyEq in
-theorem _root_.Filter.EventuallyEq.iff_eventually {α : Type _} {β : Type _} {l : Filter α} {f g : α → β} : f =ᶠ[l] g ↔ ∀ᶠ (x : α) in l, f x = g x := by rfl
+private theorem _root_.Filter.EventuallyEq.iff_eventually {α : Type _} {β : Type _} {l : Filter α} {f g : α → β} : f =ᶠ[l] g ↔ ∀ᶠ (x : α) in l, f x = g x := by rfl
 
 
 section
@@ -73,7 +73,7 @@ open Real
 
 open Filter Asymptotics
 
-theorem _root_.Real.inv_log_eq_o_one : (fun x ↦ 1 / log x) =o[atTop] (fun _ ↦ (1:ℝ)) := by
+private theorem _root_.Real.inv_log_eq_o_one : (fun x ↦ 1 / log x) =o[atTop] (fun _ ↦ (1:ℝ)) := by
     rw [isLittleO_one_iff]
     convert tendsto_log_atTop.inv_tendsto_atTop using 1
     ext; simp
@@ -4279,7 +4279,7 @@ end nabla
 
 
 open Filter.EventuallyEq in
-lemma _root_.Filter.EventuallyEq.summable {u v : ℕ → ℝ} (h : u =ᶠ[atTop] v) (hu : Summable v) :
+private lemma _root_.Filter.EventuallyEq.summable {u v : ℕ → ℝ} (h : u =ᶠ[atTop] v) (hu : Summable v) :
     Summable u :=
   summable_of_isBigO_nat hu h.isBigO
 
@@ -4300,7 +4300,7 @@ lemma _root_.Filter.EventuallyEq.summable {u v : ℕ → ℝ} (h : u =ᶠ[atTop]
 
 
 open Asymptotics.IsBigO in
-lemma _root_.Asymptotics.IsBigO.sq {α : Type*} [Preorder α] {f g : α → ℝ} (h : f =O[atTop] g) :
+private lemma _root_.Asymptotics.IsBigO.sq {α : Type*} [Preorder α] {f g : α → ℝ} (h : f =O[atTop] g) :
     (fun n ↦ f n ^ 2) =O[atTop] (fun n => g n ^ 2) := by
   simpa [pow_two] using h.mul h
 
