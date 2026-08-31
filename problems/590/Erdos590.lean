@@ -714,7 +714,7 @@ noncomputable def strongDecomp : (p : ℕ) →
           exact hetail _
 termination_by p => p
 
-theorem _root_.List.lex_append_of_eq_length {r : α → α → Prop}
+theorem List.lex_append_of_eq_length {r : α → α → Prop}
     {s t : List α} (hlen : s.length = t.length) (hst : List.Lex r s t)
     (u v : List α) : List.Lex r (s ++ u) (t ++ v) := by
   induction hst generalizing u v with
