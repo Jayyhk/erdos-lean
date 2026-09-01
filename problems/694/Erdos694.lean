@@ -7,6 +7,10 @@ set_option linter.style.setOption false
 
 namespace Erdos694
 
+attribute [local fun_prop] measurable_from_top
+attribute [local fun_prop] Real.continuous_fourierChar
+attribute [local fun_prop] measurable_coe_nnreal_ennreal
+
 /-
 # Problem Description
 
@@ -768,7 +772,6 @@ private theorem integrable_const_div_mul_log_sq {x : ℝ} (c : ℝ) (hx : 2 ≤ 
     simp only [Set.mem_Ioi] at ht
     exact one_div_nonneg.mpr <| mul_nonneg (by linarith) (sq_nonneg _)
 
-attribute [fun_prop] measurable_from_top
 
 private theorem integrable_E₁Λ_div_mul_log_sq {x : ℝ} (hx : 2 ≤ x) :
     MeasureTheory.IntegrableOn (fun x ↦ E₁Λ x / (x * log x ^ 2)) (Set.Ioi x) MeasureTheory.volume := by
@@ -4215,7 +4218,6 @@ instance instBorelSpace : BorelSpace Circle :=
   inferInstanceAs <| BorelSpace <| Subtype (· ∈ Metric.sphere (0 : ℂ) 1)
 
 -- TODO - add to mathlib
-attribute [fun_prop] Real.continuous_fourierChar
 
 
 
@@ -4224,7 +4226,6 @@ attribute [fun_prop] Real.continuous_fourierChar
 
 
 
-attribute [fun_prop] measurable_coe_nnreal_ennreal
 
 
 

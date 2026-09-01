@@ -13,6 +13,9 @@ set_option linter.unusedVariables false
 
 namespace Erdos659
 
+attribute [local fun_prop] Real.continuous_fourierChar
+attribute [local fun_prop] measurable_coe_nnreal_ennreal
+
 /-
 # Problem Description
 
@@ -751,7 +754,6 @@ instance instBorelSpace : BorelSpace Circle :=
   inferInstanceAs <| BorelSpace <| Subtype (· ∈ Metric.sphere (0 : ℂ) 1)
 
 -- TODO - add to mathlib
-attribute [fun_prop] Real.continuous_fourierChar
 
 lemma first_fourier_aux1 (hψ : AEMeasurable ψ) {x : ℝ} (n : ℕ) : AEMeasurable fun (u : ℝ) ↦
     (‖fourierChar (-(u * ((1 : ℝ) / ((2 : ℝ) * π) * (n / x).log))) • ψ u‖ₑ : ENNReal) := by
@@ -831,7 +833,6 @@ lemma first_fourier (hf : ∀ (σ' : ℝ), 1 < σ' → Summable (nterm f σ'))
 @[continuity]
 lemma continuous_multiplicative_ofAdd : Continuous (⇑Multiplicative.ofAdd : ℝ → ℝ) := ⟨fun _ ↦ id⟩
 
-attribute [fun_prop] measurable_coe_nnreal_ennreal
 
 lemma second_fourier_integrable_aux1a (hσ : 1 < σ') :
     IntegrableOn (fun (x : ℝ) ↦ cexp (-((x : ℂ) * ((σ' : ℂ) - 1)))) (Ici (-Real.log x)) := by
