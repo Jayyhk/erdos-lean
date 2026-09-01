@@ -471,6 +471,26 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/164#post-5760"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.29.0/ErdosProblems/Erdos164.lean"
+- number: "171"
+  proof:
+    path: "problems/171/"
+    theorem: "Erdos171.erdos_171"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos171.lean"
+- number: "175"
+  proof:
+    path: "problems/175/"
+    theorem: "Erdos175.erdos_175"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos175.lean"
 - number: "178"
   proof:
     path: "problems/178/"
@@ -504,6 +524,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/183#post-8250"
       - "https://github.com/openai/ten-proofs/blob/main/MulticolorTriangleRamsey.lean"
+- number: "185"
+  proof:
+    path: "problems/185/"
+    theorem: "Erdos185.erdos_185"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos185.lean"
 - number: "189"
   proof:
     path: "problems/189/"
@@ -980,6 +1010,16 @@
     mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
     sources:
       - "https://github.com/plby/unit-fractions/blob/master/src4/ErdosProblems.lean"
+- number: "300"
+  proof:
+    path: "problems/300/"
+    theorem: "Erdos300.erdos_300"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos300.lean"
 - number: "303"
   proof:
     path: "problems/303/"

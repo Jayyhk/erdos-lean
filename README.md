@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-274 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
-- 272 `complete`
+278 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
+- 276 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -71,9 +71,12 @@ lake build
 | [152](https://www.erdosproblems.com/152) | `complete` | [problems/152/](problems/152/) | |
 | [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) | |
 | [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) | |
+| [171](https://www.erdosproblems.com/171) | `complete` | [problems/171/](problems/171/) | |
+| [175](https://www.erdosproblems.com/175) | `complete` | [problems/175/](problems/175/) | |
 | [178](https://www.erdosproblems.com/178) | `complete` | [problems/178/](problems/178/) | |
 | [180](https://www.erdosproblems.com/180) | `complete` | [problems/180/](problems/180/) | |
 | [183](https://www.erdosproblems.com/183) | `complete` | [problems/183/](problems/183/) | |
+| [185](https://www.erdosproblems.com/185) | `complete` | [problems/185/](problems/185/) | |
 | [189](https://www.erdosproblems.com/189) | `complete` | [problems/189/](problems/189/) | |
 | [191](https://www.erdosproblems.com/191) | `complete` | [problems/191/](problems/191/) | |
 | [192](https://www.erdosproblems.com/192) | `complete` | [problems/192/](problems/192/) | |
@@ -118,6 +121,7 @@ lake build
 | [296](https://www.erdosproblems.com/296) | `complete` | [problems/296/](problems/296/) | |
 | [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
 | [299](https://www.erdosproblems.com/299) | `complete` | [problems/299/](problems/299/) | |
+| [300](https://www.erdosproblems.com/300) | `complete` | [problems/300/](problems/300/) | |
 | [303](https://www.erdosproblems.com/303) | `complete` | [problems/303/](problems/303/) | |
 | [309](https://www.erdosproblems.com/309) | `complete` | [problems/309/](problems/309/) | |
 | [310](https://www.erdosproblems.com/310) | `complete` | [problems/310/](problems/310/) | |
