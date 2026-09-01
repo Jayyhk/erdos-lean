@@ -258,6 +258,16 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos59.lean"
+- number: "63"
+  proof:
+    path: "problems/63/"
+    theorem: "Erdos63.erdos_63"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos63.lean"
 - number: "71"
   proof:
     path: "problems/71/"
@@ -344,6 +354,16 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos109.lean"
+- number: "113"
+  proof:
+    path: "problems/113/"
+    theorem: "Erdos113.erdos_113"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos113.lean"
 - number: "115"
   proof:
     path: "problems/115/"

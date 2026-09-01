@@ -20150,9 +20150,9 @@ Any 4-point subset of P_m determines at least 3 distinct Euclidean distances.
 
 open EuclideanGeometry Finset Real
 
-notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
+scoped notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 
-notation g " ≪ " f => Asymptotics.IsBigO Filter.atTop (g : ℕ → ℝ) (f : ℕ → ℝ)
+scoped notation g " ≪ " f => Asymptotics.IsBigO Filter.atTop (g : ℕ → ℝ) (f : ℕ → ℝ)
 
 /--
 Given a finite set of points in the plane, we define the number of distinct distances between pairs

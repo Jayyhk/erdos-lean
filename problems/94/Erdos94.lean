@@ -42,8 +42,8 @@ def S (P : Finset Point) : ℝ :=
 def BigO_n3 (P : Finset Point) : Prop :=
   ∃ C : ℝ, 0 ≤ C ∧ S P ≤ C * (P.card : ℝ)^3
 
-syntax "S(" term ")=O(n^3)" : term
-macro_rules
+scoped syntax "S(" term ")=O(n^3)" : term
+scoped macro_rules
   | `(S($P)=O(n^3)) => `(BigO_n3 $P)
 
 -- Ordered isosceles triples: (z,x,y) pairwise distinct with dist z x = dist z y.

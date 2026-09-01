@@ -329,7 +329,7 @@ theorem squarefree_of_myDvd (a b : ℕ) (hb : Squarefree b) (h : MyDvd a b) :
   exact Squarefree.squarefree_of_dvd h hb
 
 /-- Run `aesop` with the divisibility lemma pack inlined and simp disabled. -/
-macro (name := aesopDiv) "aesopDiv" c:Aesop.tactic_clause* : tactic =>
+scoped macro (name := aesopDiv) "aesopDiv" c:Aesop.tactic_clause* : tactic =>
 `(tactic|
   aesop $c*
     (config := { enableSimp := false })
@@ -351,7 +351,7 @@ macro (name := aesopDiv) "aesopDiv" c:Aesop.tactic_clause* : tactic =>
                        $(Lean.mkIdent `LPSieve.prodPrimes_squarefree):ident]))
 
 /-- `aesop?` companion variant of `aesopDiv`. -/
-macro (name := aesopDiv?) "aesopDiv?" c:Aesop.tactic_clause* : tactic =>
+scoped macro (name := aesopDiv?) "aesopDiv?" c:Aesop.tactic_clause* : tactic =>
 `(tactic|
   aesop? $c*
     (config := { enableSimp := false })
@@ -1168,6 +1168,7 @@ structure LPSelbergSieve extends LPSieve where mk ::
   one_le_level : 1 ≤ level
 
 namespace LPSelbergSieve
+open scoped LPSieve
 
 variable (s : LPSelbergSieve)
 local notation3 "ν" => LPSieve.nu (toLPSieve s)
