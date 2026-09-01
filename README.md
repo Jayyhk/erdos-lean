@@ -20,8 +20,8 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-278 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
-- 276 `complete`
+281 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
+- 279 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
@@ -49,12 +49,14 @@ lake build
 | [48](https://www.erdosproblems.com/48) | `complete` | [problems/48/](problems/48/) | |
 | [53](https://www.erdosproblems.com/53) | `complete` | [problems/53/](problems/53/) | |
 | [56](https://www.erdosproblems.com/56) | `complete` | [problems/56/](problems/56/) | |
+| [57](https://www.erdosproblems.com/57) | `complete` | [problems/57/](problems/57/) | |
 | [59](https://www.erdosproblems.com/59) | `complete` | [problems/59/](problems/59/) | |
 | [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) | |
 | [83](https://www.erdosproblems.com/83) | `complete` | [problems/83/](problems/83/) | |
 | [90](https://www.erdosproblems.com/90) | `axiomatic` | [problems/90/](problems/90/) | assumes Theorem 3.9.7 of [Neukirch–Schmidt–Wingberg](https://jayyhk.github.io/papers/neukirch-schmidt-wingberg2008.pdf) (`golod_shafarevich_inequality`) and Theorem 5.1 of [Mayer](https://jayyhk.github.io/papers/mayer2015.pdf) (`shafarevich_relation_rank_bound`) |
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
 | [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
+| [95](https://www.erdosproblems.com/95) | `complete` | [problems/95/](problems/95/) | |
 | [105](https://www.erdosproblems.com/105) | `complete` | [problems/105/](problems/105/) | |
 | [109](https://www.erdosproblems.com/109) | `complete` | [problems/109/](problems/109/) | |
 | [115](https://www.erdosproblems.com/115) | `complete` | [problems/115/](problems/115/) | |
@@ -89,6 +91,7 @@ lake build
 | [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |
 | [209](https://www.erdosproblems.com/209) | `complete` | [problems/209/](problems/209/) | |
 | [214](https://www.erdosproblems.com/214) | `complete` | [problems/214/](problems/214/) | |
+| [215](https://www.erdosproblems.com/215) | `complete` | [problems/215/](problems/215/) | |
 | [219](https://www.erdosproblems.com/219) | `complete` | [problems/219/](problems/219/) | |
 | [220](https://www.erdosproblems.com/220) | `complete` | [problems/220/](problems/220/) | |
 | [221](https://www.erdosproblems.com/221) | `complete` | [problems/221/](problems/221/) | |

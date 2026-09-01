@@ -238,6 +238,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/56#post-1850"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos56.lean"
+- number: "57"
+  proof:
+    path: "problems/57/"
+    theorem: "Erdos57.erdos_57"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos57.lean"
 - number: "59"
   proof:
     path: "problems/59/"
@@ -303,6 +313,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/94"
       - "https://github.com/SpringSense-Innovation-Institute/ai-for-math-lean/blob/main/erdos-problems/erdos94/erdos94.lean"
+- number: "95"
+  proof:
+    path: "problems/95/"
+    theorem: "Erdos95.erdos_95"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos95.lean"
 - number: "105"
   proof:
     path: "problems/105/"
@@ -666,6 +686,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/214#post-4547"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem214FourPoints.lean"
+- number: "215"
+  proof:
+    path: "problems/215/"
+    theorem: "Erdos215.erdos_215"
+    state: "complete"
+    last_update: "2026-08-28"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos215.lean"
 - number: "219"
   proof:
     path: "problems/219/"
