@@ -354,6 +354,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/105#post-1746"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos105.lean"
+- number: "106"
+  proof:
+    path: "problems/106/"
+    theorem: "Erdos106.erdos_106"
+    state: "complete"
+    last_update: "2026-09-01"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos106.lean"
 - number: "109"
   proof:
     path: "problems/109/"
@@ -457,6 +467,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/134#post-4233"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos134.lean"
+- number: "135"
+  proof:
+    path: "problems/135/"
+    theorem: "Erdos135.erdos_135"
+    state: "complete"
+    last_update: "2026-09-01"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos135.lean"
 - number: "139"
   proof:
     path: "problems/139/"
