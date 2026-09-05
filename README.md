@@ -20,7 +20,7 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-289 proofs in the catalog (out of 292 Erdős problems with formalized solutions):
+289 proofs in the catalog (out of 298 Erdős problems with formalized solutions):
 - 287 `complete`
 - 2 `axiomatic`
 
