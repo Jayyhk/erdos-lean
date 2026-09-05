@@ -20,12 +20,13 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-290 proofs in the catalog (out of 298 Erdős problems with formalized solutions):
-- 288 `complete`
+294 proofs in the catalog (out of 298 Erdős problems with formalized solutions):
+- 292 `complete`
 - 2 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
+| [1](https://www.erdosproblems.com/1) | `complete` | [problems/1/](problems/1/) | |
 | [2](https://www.erdosproblems.com/2) | `complete` | [problems/2/](problems/2/) | |
 | [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) | |
 | [8](https://www.erdosproblems.com/8) | `complete` | [problems/8/](problems/8/) | |
@@ -54,6 +55,7 @@ lake build
 | [59](https://www.erdosproblems.com/59) | `complete` | [problems/59/](problems/59/) | |
 | [63](https://www.erdosproblems.com/63) | `complete` | [problems/63/](problems/63/) | |
 | [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) | |
+| [74](https://www.erdosproblems.com/74) | `complete` | [problems/74/](problems/74/) | |
 | [83](https://www.erdosproblems.com/83) | `complete` | [problems/83/](problems/83/) | |
 | [90](https://www.erdosproblems.com/90) | `axiomatic` | [problems/90/](problems/90/) | assumes Theorem 3.9.7 of [Neukirch–Schmidt–Wingberg](https://jayyhk.github.io/papers/neukirch-schmidt-wingberg2008.pdf) (`golod_shafarevich_inequality`) and Theorem 5.1 of [Mayer](https://jayyhk.github.io/papers/mayer2015.pdf) (`shafarevich_relation_rank_bound`) |
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
@@ -69,6 +71,7 @@ lake build
 | [121](https://www.erdosproblems.com/121) | `complete` | [problems/121/](problems/121/) | |
 | [123](https://www.erdosproblems.com/123) | `complete` | [problems/123/](problems/123/) | |
 | [125](https://www.erdosproblems.com/125) | `complete` | [problems/125/](problems/125/) | |
+| [126](https://www.erdosproblems.com/126) | `complete` | [problems/126/](problems/126/) | |
 | [127](https://www.erdosproblems.com/127) | `complete` | [problems/127/](problems/127/) | |
 | [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
 | [135](https://www.erdosproblems.com/135) | `complete` | [problems/135/](problems/135/) | |
@@ -202,6 +205,7 @@ lake build
 | [540](https://www.erdosproblems.com/540) | `complete` | [problems/540/](problems/540/) | |
 | [541](https://www.erdosproblems.com/541) | `complete` | [problems/541/](problems/541/) | |
 | [548](https://www.erdosproblems.com/548) | `complete` | [problems/548/](problems/548/) | |
+| [571](https://www.erdosproblems.com/571) | `complete` | [problems/571/](problems/571/) | |
 | [582](https://www.erdosproblems.com/582) | `complete` | [problems/582/](problems/582/) | |
 | [590](https://www.erdosproblems.com/590) | `complete` | [problems/590/](problems/590/) | |
 | [594](https://www.erdosproblems.com/594) | `complete` | [problems/594/](problems/594/) | |

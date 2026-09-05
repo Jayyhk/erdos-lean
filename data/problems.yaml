@@ -1,3 +1,14 @@
+- number: "1"
+  proof:
+    path: "problems/1/"
+    theorem: "Erdos1.erdos_1"
+    state: "complete"
+    last_update: "2026-09-05"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/1/proof-claims"
+      - "https://github.com/tadamcz/erdos1"
 - number: "2"
   proof:
     path: "problems/2/"
@@ -288,6 +299,17 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/71#post-6635"
+- number: "74"
+  proof:
+    path: "problems/74/"
+    theorem: "Erdos74.erdos_74"
+    state: "complete"
+    last_update: "2026-09-05"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/74/proof-claims"
+      - "https://github.com/tadamcz/erdos74"
 - number: "83"
   proof:
     path: "problems/83/"
@@ -446,6 +468,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/125#post-5110"
       - "https://github.com/mo271/formal-conjectures/blob/c27415379b5dbe34105d1fdd707994540c4c6fc7/FormalConjectures/ErdosProblems/125.lean#L468"
+- number: "126"
+  proof:
+    path: "problems/126/"
+    theorem: "Erdos126.erdos_126"
+    state: "complete"
+    last_update: "2026-09-05"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/126/proof-claims"
+      - "https://github.com/tadamcz/erdos126"
 - number: "127"
   proof:
     path: "problems/127/"
@@ -1875,6 +1908,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/548/proof-claims"
       - "https://github.com/tadamcz/erdos548"
+- number: "571"
+  proof:
+    path: "problems/571/"
+    theorem: "Erdos571.erdos_571"
+    state: "complete"
+    last_update: "2026-09-05"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/571/proof-claims"
+      - "https://github.com/tadamcz/erdos571"
 - number: "582"
   proof:
     path: "problems/582/"
