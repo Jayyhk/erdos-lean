@@ -1864,6 +1864,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/541#post-2617"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos541.lean"
+- number: "548"
+  proof:
+    path: "problems/548/"
+    theorem: "Erdos548.erdos_548"
+    state: "complete"
+    last_update: "2026-09-05"
+    lean_toolchain: "leanprover/lean4:v4.28.0"
+    mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/548/proof-claims"
+      - "https://github.com/tadamcz/erdos548"
 - number: "582"
   proof:
     path: "problems/582/"
