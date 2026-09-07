@@ -1,12 +1,6 @@
 name = "erdos46"
 defaultTargets = ["Erdos46"]
 
-[leanOptions]
-pp.unicode.fun = true
-relaxedAutoImplicit = false
-weak.linter.mathlibStandardSet = true
-maxSynthPendingDepth = 3
-
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"
