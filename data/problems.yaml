@@ -324,16 +324,13 @@
   proof:
     path: "problems/90/"
     theorem: "Erdos90.erdos_90"
-    state: "axiomatic"
-    last_update: "2026-08-05"
-    lean_toolchain: "leanprover/lean4:v4.29.1"
-    mathlib_revision: "5e932f97dd25535344f80f9dd8da3aab83df0fe6"
-    extra_axioms: ["Erdos90.golod_shafarevich_inequality", "Erdos90.shafarevich_relation_rank_bound"]
+    state: "complete"
+    last_update: "2026-09-13"
+    lean_toolchain: "leanprover/lean4:v4.30.0"
+    mathlib_revision: "c5ea00351c28e24afc9f0f84379aa41082b1188f"
     sources:
-      - "https://www.erdosproblems.com/forum/thread/90#post-6715"
-      - "https://logicalintelligence.com/blog/aleph-prover-erdos-disproof-lean-4-formal-methods"
-      - "https://github.com/logical-intelligence/erdos-unit-distance"
-      - "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd"
+      - "https://www.erdosproblems.com/forum/thread/90#post-7551"
+      - "https://github.com/plby/Erdos90/tree/main/src/submission"
 - number: "93"
   proof:
     path: "problems/93/"

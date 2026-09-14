@@ -21,8 +21,8 @@ lake build
 
 <!-- TABLE:START -->
 295 proofs in the catalog (out of 298 Erdős problems with formalized solutions):
-- 293 `complete`
-- 2 `axiomatic`
+- 294 `complete`
+- 1 `axiomatic`
 
 | # | State | Lean | Notes |
 |---|-------|------|-------|
@@ -57,7 +57,7 @@ lake build
 | [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) | |
 | [74](https://www.erdosproblems.com/74) | `complete` | [problems/74/](problems/74/) | |
 | [83](https://www.erdosproblems.com/83) | `complete` | [problems/83/](problems/83/) | |
-| [90](https://www.erdosproblems.com/90) | `axiomatic` | [problems/90/](problems/90/) | assumes Theorem 3.9.7 of [Neukirch–Schmidt–Wingberg](https://jayyhk.github.io/papers/neukirch-schmidt-wingberg2008.pdf) (`golod_shafarevich_inequality`) and Theorem 5.1 of [Mayer](https://jayyhk.github.io/papers/mayer2015.pdf) (`shafarevich_relation_rank_bound`) |
+| [90](https://www.erdosproblems.com/90) | `complete` | [problems/90/](problems/90/) | |
 | [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
 | [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
 | [95](https://www.erdosproblems.com/95) | `complete` | [problems/95/](problems/95/) | |
