@@ -697,6 +697,17 @@
       - "https://www.erdosproblems.com/forum/thread/192#post-6375"
       - "https://gist.github.com/LorenzoLuccioli/f2ead0e5941e78a8fb78cf1d5925eca1#file-erdos192-lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos192.lean"
+- number: "193"
+  proof:
+    path: "problems/193/"
+    theorem: "Erdos193.erdos_193"
+    state: "complete"
+    last_update: "2026-09-18"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/193/proof-claims#proof-claim-239"
+      - "https://github.com/ekalvi/erdos-193/tree/main/formal/Hilbert193"
 - number: "194"
   proof:
     path: "problems/194/"
