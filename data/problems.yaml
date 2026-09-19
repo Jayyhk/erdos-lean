@@ -2937,6 +2937,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1048#post-3847"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos1048.lean"
+- number: "1050"
+  proof:
+    path: "problems/1050/"
+    theorem: "Erdos1050.erdos_1050"
+    state: "complete"
+    last_update: "2026-09-18"
+    lean_toolchain: "leanprover/lean4:v4.33.1"
+    mathlib_revision: "0df444a360eaa60ab8c11dca51a86af692955474"
+    sources:
+      - "https://github.com/gotrevor/lean-gallery/tree/main/LeanGallery/NumberTheory/Erdos1050"
 - number: "1051"
   proof:
     path: "problems/1051/"
