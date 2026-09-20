@@ -1916,6 +1916,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/548/proof-claims#proof-claim-245"
       - "https://github.com/tadamcz/erdos548/blob/main/Erdos548/Resolutions/Erdos548_192usd_21h.lean"
+- number: "550"
+  proof:
+    path: "problems/550/"
+    theorem: "Erdos550.erdos_550"
+    state: "complete"
+    last_update: "2026-09-20"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/550/proof-claims#proof-claim-74"
+      - "https://github.com/plby/lean-proofs/tree/main/src/latest/ErdosProblems/Erdos550"
 - number: "557"
   proof:
     path: "problems/557/"
