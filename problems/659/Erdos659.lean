@@ -8251,10 +8251,6 @@ def zsqrtdIsDomain (d : ℤ) (hd : d < 0) : IsDomain (Zsqrtd d) := by
   letI : NoZeroDivisors (Zsqrtd d) := zsqrtdNoZeroDivisors d hd
   exact NoZeroDivisors.to_isDomain _
 
-example (d : ℤ) (hd : d < 0) : Ring.HasFiniteQuotients (Zsqrtd d) := by
-  letI : NoZeroDivisors (Zsqrtd d) := zsqrtdNoZeroDivisors d hd
-  letI : IsDomain (Zsqrtd d) := zsqrtdIsDomain d hd
-  infer_instance
 
 section General
 

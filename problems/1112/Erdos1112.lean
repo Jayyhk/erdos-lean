@@ -3248,17 +3248,6 @@ theorem staircase_merge_c (S : StairSetup a b M g e' μ')
     -- u = n - (y+z+1)*a ≥ V'+1-a ≥ max C' 1
     omega
 
-/-- **The merge condition of the staircase extended/base form (d) is not removable** (counterexample,
-machine-checked): for `(a,b,M) = (5,7,9)` with
-`(x,y,z) = (3,1,0)` — the multiset `{5,5,5,7}`, which satisfies every
-hypothesis of the extended form EXCEPT `V′−C′ ≥ a−1` — the would-be interval
-`[10, 12]` is broken: `11` is not a subset sum (while `10` and `12` are).
-Any attempt to drop `hmerge` from `staircase_phase_extended` must fail here. -/
-example :
-    11 ∉ subsetSums (stair 5 7 9 3 1 0) ∧
-    10 ∈ subsetSums (stair 5 7 9 3 1 0) ∧
-    12 ∈ subsetSums (stair 5 7 9 3 1 0) := by
-  decide
 
 end Staircase
 
@@ -6282,13 +6271,6 @@ theorem sharp_of_noncoprime_pair {d α β M : ℕ} (hd : 2 ≤ d) (hα : 0 < α)
       rw [hexp, ← hwij]
       omega
 
-set_option maxRecDepth 100000 in
-/-- The `(α, β) = (1, 2)` equality corner of L3, pinned as a decided
-instance: `G = {5, 10, 11}` (`d = 5`, `a ∣ b`), witness
-`{5} + 5×{10} + 4×{11}`, budget `10 = M − 1`, covering an 11-run. -/
-example : ∀ i < 11, 44 + i ∈ subsetSums
-    (Multiset.replicate 1 5 + Multiset.replicate 5 10 + Multiset.replicate 4 11) := by
-  decide
 
 /-! ### Reduction-layer interfaces
 

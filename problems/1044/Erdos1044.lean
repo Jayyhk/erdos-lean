@@ -3192,9 +3192,6 @@ theorem lambda_ge_two_of_roots_on_circle (f : Polynomial ℂ) (hf : f.Monic)
 **Lemma 4.1**. Every connected component of Ω(f) contains at least one zero of f.
     In particular, Ω(f) has at most n connected components.
 -/
--- Lemma 4.1 is now proved in ComponentRoot.lean.
--- Re-exported here for use in this file:
-example := @Erdos1044.component_contains_root
 
 /-
 Special case of Pólya's theorem for degree 1: For f = X - C a (monic, degree 1),

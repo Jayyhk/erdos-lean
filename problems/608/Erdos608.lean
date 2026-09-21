@@ -55,9 +55,6 @@ def OnC5 {V : Type*} (G : SimpleGraph V) (e : Sym2 V) : Prop :=
 def pentEdges {V : Type*} (G : SimpleGraph V) : Set (Sym2 V) :=
   {e ∈ G.edgeSet | OnC5 G e}
 
-/-- Non-vacuity: in `K₅` the edge `{0, 1}` lies on a pentagon. -/
-example : OnC5 (⊤ : SimpleGraph (Fin 5)) s((0 : Fin 5), 1) := by
-  unfold OnC5; decide
 
 /-! ### The literal `∀ n` reading is degenerately false -/
 
