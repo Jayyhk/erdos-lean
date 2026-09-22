@@ -1431,6 +1431,18 @@
     mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
     sources:
       - "https://www.erdosproblems.com/forum/thread/379#post-2350"
+- number: "390"
+  proof:
+    path: "problems/390/"
+    theorem: "Erdos390.erdos_390"
+    state: "complete"
+    last_update: "2026-09-21"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/390/proof-claims#proof-claim-88"
+      - "https://github.com/ShouqiaoW/erdos/tree/61325b10bbdc29f4fb5e0618b414b9f2189333ad/390/lean"
+      - "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd"
 - number: "391"
   proof:
     path: "problems/391/"
