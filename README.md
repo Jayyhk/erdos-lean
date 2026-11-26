@@ -20,312 +20,311 @@ lake build
 ## Catalog
 
 <!-- TABLE:START -->
-301 proofs in the catalog (out of 317 Erdős problems with formalized solutions):
-- 300 `complete`
-- 1 `axiomatic`
+300 proofs in the catalog (out of 322[^1] Erdős problems with formalized solutions).
 
-| # | State | Lean | Notes |
-|---|-------|------|-------|
-| [1](https://www.erdosproblems.com/1) | `complete` | [problems/1/](problems/1/) | |
-| [2](https://www.erdosproblems.com/2) | `complete` | [problems/2/](problems/2/) | |
-| [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) | |
-| [8](https://www.erdosproblems.com/8) | `complete` | [problems/8/](problems/8/) | |
-| [13](https://www.erdosproblems.com/13) | `complete` | [problems/13/](problems/13/) | |
-| [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) | |
-| [21](https://www.erdosproblems.com/21) | `complete` | [problems/21/](problems/21/) | |
-| [22](https://www.erdosproblems.com/22) | `complete` | [problems/22/](problems/22/) | |
-| [24](https://www.erdosproblems.com/24) | `complete` | [problems/24/](problems/24/) | |
-| [26](https://www.erdosproblems.com/26) | `complete` | [problems/26/](problems/26/) | |
-| [29](https://www.erdosproblems.com/29) | `complete` | [problems/29/](problems/29/) | |
-| [31](https://www.erdosproblems.com/31) | `complete` | [problems/31/](problems/31/) | |
-| [34](https://www.erdosproblems.com/34) | `complete` | [problems/34/](problems/34/) | |
-| [35](https://www.erdosproblems.com/35) | `complete` | [problems/35/](problems/35/) | |
-| [37](https://www.erdosproblems.com/37) | `complete` | [problems/37/](problems/37/) | |
-| [38](https://www.erdosproblems.com/38) | `complete` | [problems/38/](problems/38/) | |
-| [42](https://www.erdosproblems.com/42) | `complete` | [problems/42/](problems/42/) | |
-| [43](https://www.erdosproblems.com/43) | `complete` | [problems/43/](problems/43/) | |
-| [45](https://www.erdosproblems.com/45) | `complete` | [problems/45/](problems/45/) | |
-| [46](https://www.erdosproblems.com/46) | `complete` | [problems/46/](problems/46/) | |
-| [47](https://www.erdosproblems.com/47) | `complete` | [problems/47/](problems/47/) | |
-| [48](https://www.erdosproblems.com/48) | `complete` | [problems/48/](problems/48/) | |
-| [49](https://www.erdosproblems.com/49) | `complete` | [problems/49/](problems/49/) | |
-| [53](https://www.erdosproblems.com/53) | `complete` | [problems/53/](problems/53/) | |
-| [56](https://www.erdosproblems.com/56) | `complete` | [problems/56/](problems/56/) | |
-| [57](https://www.erdosproblems.com/57) | `complete` | [problems/57/](problems/57/) | |
-| [59](https://www.erdosproblems.com/59) | `complete` | [problems/59/](problems/59/) | |
-| [63](https://www.erdosproblems.com/63) | `complete` | [problems/63/](problems/63/) | |
-| [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) | |
-| [74](https://www.erdosproblems.com/74) | `complete` | [problems/74/](problems/74/) | |
-| [83](https://www.erdosproblems.com/83) | `complete` | [problems/83/](problems/83/) | |
-| [90](https://www.erdosproblems.com/90) | `complete` | [problems/90/](problems/90/) | |
-| [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) | |
-| [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) | |
-| [95](https://www.erdosproblems.com/95) | `complete` | [problems/95/](problems/95/) | |
-| [105](https://www.erdosproblems.com/105) | `complete` | [problems/105/](problems/105/) | |
-| [106](https://www.erdosproblems.com/106) | `complete` | [problems/106/](problems/106/) | |
-| [109](https://www.erdosproblems.com/109) | `complete` | [problems/109/](problems/109/) | |
-| [113](https://www.erdosproblems.com/113) | `complete` | [problems/113/](problems/113/) | |
-| [115](https://www.erdosproblems.com/115) | `complete` | [problems/115/](problems/115/) | |
-| [116](https://www.erdosproblems.com/116) | `complete` | [problems/116/](problems/116/) | |
-| [119](https://www.erdosproblems.com/119) | `complete` | [problems/119/](problems/119/) | |
-| [121](https://www.erdosproblems.com/121) | `complete` | [problems/121/](problems/121/) | |
-| [123](https://www.erdosproblems.com/123) | `complete` | [problems/123/](problems/123/) | |
-| [125](https://www.erdosproblems.com/125) | `complete` | [problems/125/](problems/125/) | |
-| [126](https://www.erdosproblems.com/126) | `complete` | [problems/126/](problems/126/) | |
-| [127](https://www.erdosproblems.com/127) | `complete` | [problems/127/](problems/127/) | |
-| [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) | |
-| [135](https://www.erdosproblems.com/135) | `complete` | [problems/135/](problems/135/) | |
-| [139](https://www.erdosproblems.com/139) | `complete` | [problems/139/](problems/139/) | |
-| [140](https://www.erdosproblems.com/140) | `complete` | [problems/140/](problems/140/) | |
-| [144](https://www.erdosproblems.com/144) | `complete` | [problems/144/](problems/144/) | |
-| [146](https://www.erdosproblems.com/146) | `complete` | [problems/146/](problems/146/) | |
-| [147](https://www.erdosproblems.com/147) | `complete` | [problems/147/](problems/147/) | |
-| [150](https://www.erdosproblems.com/150) | `complete` | [problems/150/](problems/150/) | |
-| [152](https://www.erdosproblems.com/152) | `complete` | [problems/152/](problems/152/) | |
-| [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) | |
-| [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) | |
-| [171](https://www.erdosproblems.com/171) | `complete` | [problems/171/](problems/171/) | |
-| [175](https://www.erdosproblems.com/175) | `complete` | [problems/175/](problems/175/) | |
-| [178](https://www.erdosproblems.com/178) | `complete` | [problems/178/](problems/178/) | |
-| [180](https://www.erdosproblems.com/180) | `complete` | [problems/180/](problems/180/) | |
-| [183](https://www.erdosproblems.com/183) | `complete` | [problems/183/](problems/183/) | |
-| [185](https://www.erdosproblems.com/185) | `complete` | [problems/185/](problems/185/) | |
-| [189](https://www.erdosproblems.com/189) | `complete` | [problems/189/](problems/189/) | |
-| [190](https://www.erdosproblems.com/190) | `complete` | [problems/190/](problems/190/) | |
-| [191](https://www.erdosproblems.com/191) | `complete` | [problems/191/](problems/191/) | |
-| [192](https://www.erdosproblems.com/192) | `complete` | [problems/192/](problems/192/) | |
-| [193](https://www.erdosproblems.com/193) | `complete` | [problems/193/](problems/193/) | |
-| [194](https://www.erdosproblems.com/194) | `complete` | [problems/194/](problems/194/) | |
-| [198](https://www.erdosproblems.com/198) | `complete` | [problems/198/](problems/198/) | |
-| [199](https://www.erdosproblems.com/199) | `complete` | [problems/199/](problems/199/) | |
-| [202](https://www.erdosproblems.com/202) | `complete` | [problems/202/](problems/202/) | |
-| [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) | |
-| [205](https://www.erdosproblems.com/205) | `complete` | [problems/205/](problems/205/) | |
-| [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) | |
-| [209](https://www.erdosproblems.com/209) | `complete` | [problems/209/](problems/209/) | |
-| [214](https://www.erdosproblems.com/214) | `complete` | [problems/214/](problems/214/) | |
-| [215](https://www.erdosproblems.com/215) | `complete` | [problems/215/](problems/215/) | |
-| [219](https://www.erdosproblems.com/219) | `complete` | [problems/219/](problems/219/) | |
-| [220](https://www.erdosproblems.com/220) | `complete` | [problems/220/](problems/220/) | |
-| [221](https://www.erdosproblems.com/221) | `complete` | [problems/221/](problems/221/) | |
-| [224](https://www.erdosproblems.com/224) | `complete` | [problems/224/](problems/224/) | |
-| [226](https://www.erdosproblems.com/226) | `complete` | [problems/226/](problems/226/) | |
-| [228](https://www.erdosproblems.com/228) | `complete` | [problems/228/](problems/228/) | |
-| [229](https://www.erdosproblems.com/229) | `complete` | [problems/229/](problems/229/) | |
-| [230](https://www.erdosproblems.com/230) | `complete` | [problems/230/](problems/230/) | |
-| [231](https://www.erdosproblems.com/231) | `complete` | [problems/231/](problems/231/) | |
-| [237](https://www.erdosproblems.com/237) | `complete` | [problems/237/](problems/237/) | |
-| [239](https://www.erdosproblems.com/239) | `complete` | [problems/239/](problems/239/) | |
-| [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) | |
-| [248](https://www.erdosproblems.com/248) | `complete` | [problems/248/](problems/248/) | |
-| [250](https://www.erdosproblems.com/250) | `complete` | [problems/250/](problems/250/) | |
-| [253](https://www.erdosproblems.com/253) | `complete` | [problems/253/](problems/253/) | |
-| [255](https://www.erdosproblems.com/255) | `complete` | [problems/255/](problems/255/) | |
-| [258](https://www.erdosproblems.com/258) | `complete` | [problems/258/](problems/258/) | |
-| [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) | |
-| [262](https://www.erdosproblems.com/262) | `complete` | [problems/262/](problems/262/) | |
-| [266](https://www.erdosproblems.com/266) | `complete` | [problems/266/](problems/266/) | |
-| [268](https://www.erdosproblems.com/268) | `complete` | [problems/268/](problems/268/) | |
-| [270](https://www.erdosproblems.com/270) | `complete` | [problems/270/](problems/270/) | |
-| [275](https://www.erdosproblems.com/275) | `complete` | [problems/275/](problems/275/) | |
-| [277](https://www.erdosproblems.com/277) | `complete` | [problems/277/](problems/277/) | |
-| [280](https://www.erdosproblems.com/280) | `complete` | [problems/280/](problems/280/) | |
-| [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) | |
-| [283](https://www.erdosproblems.com/283) | `complete` | [problems/283/](problems/283/) | |
-| [285](https://www.erdosproblems.com/285) | `complete` | [problems/285/](problems/285/) | |
-| [290](https://www.erdosproblems.com/290) | `complete` | [problems/290/](problems/290/) | |
-| [296](https://www.erdosproblems.com/296) | `complete` | [problems/296/](problems/296/) | |
-| [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) | |
-| [299](https://www.erdosproblems.com/299) | `complete` | [problems/299/](problems/299/) | |
-| [300](https://www.erdosproblems.com/300) | `complete` | [problems/300/](problems/300/) | |
-| [303](https://www.erdosproblems.com/303) | `complete` | [problems/303/](problems/303/) | |
-| [309](https://www.erdosproblems.com/309) | `complete` | [problems/309/](problems/309/) | |
-| [310](https://www.erdosproblems.com/310) | `complete` | [problems/310/](problems/310/) | |
-| [314](https://www.erdosproblems.com/314) | `complete` | [problems/314/](problems/314/) | |
-| [315](https://www.erdosproblems.com/315) | `complete` | [problems/315/](problems/315/) | |
-| [316](https://www.erdosproblems.com/316) | `complete` | [problems/316/](problems/316/) | |
-| [328](https://www.erdosproblems.com/328) | `complete` | [problems/328/](problems/328/) | |
-| [330](https://www.erdosproblems.com/330) | `complete` | [problems/330/](problems/330/) | |
-| [331](https://www.erdosproblems.com/331) | `complete` | [problems/331/](problems/331/) | |
-| [333](https://www.erdosproblems.com/333) | `complete` | [problems/333/](problems/333/) | |
-| [337](https://www.erdosproblems.com/337) | `complete` | [problems/337/](problems/337/) | |
-| [347](https://www.erdosproblems.com/347) | `complete` | [problems/347/](problems/347/) | |
-| [350](https://www.erdosproblems.com/350) | `complete` | [problems/350/](problems/350/) | |
-| [351](https://www.erdosproblems.com/351) | `complete` | [problems/351/](problems/351/) | |
-| [353](https://www.erdosproblems.com/353) | `complete` | [problems/353/](problems/353/) | |
-| [355](https://www.erdosproblems.com/355) | `complete` | [problems/355/](problems/355/) | |
-| [356](https://www.erdosproblems.com/356) | `complete` | [problems/356/](problems/356/) | |
-| [358](https://www.erdosproblems.com/358) | `complete` | [problems/358/](problems/358/) | |
-| [362](https://www.erdosproblems.com/362) | `complete` | [problems/362/](problems/362/) | |
-| [363](https://www.erdosproblems.com/363) | `complete` | [problems/363/](problems/363/) | |
-| [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) | |
-| [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) | |
-| [379](https://www.erdosproblems.com/379) | `complete` | [problems/379/](problems/379/) | |
-| [390](https://www.erdosproblems.com/390) | `complete` | [problems/390/](problems/390/) | |
-| [391](https://www.erdosproblems.com/391) | `complete` | [problems/391/](problems/391/) | |
-| [392](https://www.erdosproblems.com/392) | `complete` | [problems/392/](problems/392/) | |
-| [395](https://www.erdosproblems.com/395) | `complete` | [problems/395/](problems/395/) | |
-| [397](https://www.erdosproblems.com/397) | `complete` | [problems/397/](problems/397/) | |
-| [399](https://www.erdosproblems.com/399) | `complete` | [problems/399/](problems/399/) | |
-| [401](https://www.erdosproblems.com/401) | `complete` | [problems/401/](problems/401/) | |
-| [403](https://www.erdosproblems.com/403) | `complete` | [problems/403/](problems/403/) | |
-| [405](https://www.erdosproblems.com/405) | `complete` | [problems/405/](problems/405/) | |
-| [418](https://www.erdosproblems.com/418) | `complete` | [problems/418/](problems/418/) | |
-| [419](https://www.erdosproblems.com/419) | `complete` | [problems/419/](problems/419/) | |
-| [426](https://www.erdosproblems.com/426) | `complete` | [problems/426/](problems/426/) | |
-| [427](https://www.erdosproblems.com/427) | `complete` | [problems/427/](problems/427/) | |
-| [429](https://www.erdosproblems.com/429) | `complete` | [problems/429/](problems/429/) | |
-| [433](https://www.erdosproblems.com/433) | `complete` | [problems/433/](problems/433/) | |
-| [434](https://www.erdosproblems.com/434) | `complete` | [problems/434/](problems/434/) | |
-| [435](https://www.erdosproblems.com/435) | `complete` | [problems/435/](problems/435/) | |
-| [442](https://www.erdosproblems.com/442) | `complete` | [problems/442/](problems/442/) | |
-| [443](https://www.erdosproblems.com/443) | `complete` | [problems/443/](problems/443/) | |
-| [447](https://www.erdosproblems.com/447) | `complete` | [problems/447/](problems/447/) | |
-| [448](https://www.erdosproblems.com/448) | `complete` | [problems/448/](problems/448/) | |
-| [453](https://www.erdosproblems.com/453) | `complete` | [problems/453/](problems/453/) | |
-| [457](https://www.erdosproblems.com/457) | `complete` | [problems/457/](problems/457/) | |
-| [459](https://www.erdosproblems.com/459) | `complete` | [problems/459/](problems/459/) | |
-| [464](https://www.erdosproblems.com/464) | `complete` | [problems/464/](problems/464/) | |
-| [469](https://www.erdosproblems.com/469) | `complete` | [problems/469/](problems/469/) | |
-| [476](https://www.erdosproblems.com/476) | `complete` | [problems/476/](problems/476/) | |
-| [480](https://www.erdosproblems.com/480) | `complete` | [problems/480/](problems/480/) | |
-| [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) | |
-| [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) | |
-| [487](https://www.erdosproblems.com/487) | `complete` | [problems/487/](problems/487/) | |
-| [490](https://www.erdosproblems.com/490) | `complete` | [problems/490/](problems/490/) | |
-| [493](https://www.erdosproblems.com/493) | `complete` | [problems/493/](problems/493/) | |
-| [497](https://www.erdosproblems.com/497) | `complete` | [problems/497/](problems/497/) | |
-| [498](https://www.erdosproblems.com/498) | `complete` | [problems/498/](problems/498/) | |
-| [499](https://www.erdosproblems.com/499) | `complete` | [problems/499/](problems/499/) | |
-| [502](https://www.erdosproblems.com/502) | `complete` | [problems/502/](problems/502/) | |
-| [505](https://www.erdosproblems.com/505) | `complete` | [problems/505/](problems/505/) | |
-| [512](https://www.erdosproblems.com/512) | `complete` | [problems/512/](problems/512/) | |
-| [516](https://www.erdosproblems.com/516) | `complete` | [problems/516/](problems/516/) | |
-| [519](https://www.erdosproblems.com/519) | `complete` | [problems/519/](problems/519/) | |
-| [532](https://www.erdosproblems.com/532) | `complete` | [problems/532/](problems/532/) | |
-| [533](https://www.erdosproblems.com/533) | `complete` | [problems/533/](problems/533/) | |
-| [537](https://www.erdosproblems.com/537) | `complete` | [problems/537/](problems/537/) | |
-| [540](https://www.erdosproblems.com/540) | `complete` | [problems/540/](problems/540/) | |
-| [541](https://www.erdosproblems.com/541) | `complete` | [problems/541/](problems/541/) | |
-| [548](https://www.erdosproblems.com/548) | `complete` | [problems/548/](problems/548/) | |
-| [550](https://www.erdosproblems.com/550) | `complete` | [problems/550/](problems/550/) | |
-| [557](https://www.erdosproblems.com/557) | `complete` | [problems/557/](problems/557/) | |
-| [571](https://www.erdosproblems.com/571) | `complete` | [problems/571/](problems/571/) | |
-| [582](https://www.erdosproblems.com/582) | `complete` | [problems/582/](problems/582/) | |
-| [590](https://www.erdosproblems.com/590) | `complete` | [problems/590/](problems/590/) | |
-| [594](https://www.erdosproblems.com/594) | `complete` | [problems/594/](problems/594/) | |
-| [608](https://www.erdosproblems.com/608) | `complete` | [problems/608/](problems/608/) | |
-| [610](https://www.erdosproblems.com/610) | `axiomatic` | [problems/610/](problems/610/) | assumes Corollary 2 of [Joret–Micek–Reed–Smid](https://jayyhk.github.io/papers/joret-micek-reed-smid2021.pdf) (`jmrs_corollary2`) |
-| [613](https://www.erdosproblems.com/613) | `complete` | [problems/613/](problems/613/) | |
-| [615](https://www.erdosproblems.com/615) | `complete` | [problems/615/](problems/615/) | |
-| [618](https://www.erdosproblems.com/618) | `complete` | [problems/618/](problems/618/) | |
-| [619](https://www.erdosproblems.com/619) | `complete` | [problems/619/](problems/619/) | |
-| [621](https://www.erdosproblems.com/621) | `complete` | [problems/621/](problems/621/) | |
-| [639](https://www.erdosproblems.com/639) | `complete` | [problems/639/](problems/639/) | |
-| [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) | |
-| [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) | |
-| [648](https://www.erdosproblems.com/648) | `complete` | [problems/648/](problems/648/) | |
-| [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) | |
-| [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) | |
-| [658](https://www.erdosproblems.com/658) | `complete` | [problems/658/](problems/658/) | |
-| [659](https://www.erdosproblems.com/659) | `complete` | [problems/659/](problems/659/) | |
-| [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) | |
-| [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) | |
-| [678](https://www.erdosproblems.com/678) | `complete` | [problems/678/](problems/678/) | |
-| [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) | |
-| [694](https://www.erdosproblems.com/694) | `complete` | [problems/694/](problems/694/) | |
-| [696](https://www.erdosproblems.com/696) | `complete` | [problems/696/](problems/696/) | |
-| [698](https://www.erdosproblems.com/698) | `complete` | [problems/698/](problems/698/) | |
-| [707](https://www.erdosproblems.com/707) | `complete` | [problems/707/](problems/707/) | |
-| [716](https://www.erdosproblems.com/716) | `complete` | [problems/716/](problems/716/) | |
-| [728](https://www.erdosproblems.com/728) | `complete` | [problems/728/](problems/728/) | |
-| [729](https://www.erdosproblems.com/729) | `complete` | [problems/729/](problems/729/) | |
-| [741](https://www.erdosproblems.com/741) | `complete` | [problems/741/](problems/741/) | |
-| [750](https://www.erdosproblems.com/750) | `complete` | [problems/750/](problems/750/) | |
-| [751](https://www.erdosproblems.com/751) | `complete` | [problems/751/](problems/751/) | |
-| [753](https://www.erdosproblems.com/753) | `complete` | [problems/753/](problems/753/) | |
-| [755](https://www.erdosproblems.com/755) | `complete` | [problems/755/](problems/755/) | |
-| [756](https://www.erdosproblems.com/756) | `complete` | [problems/756/](problems/756/) | |
-| [760](https://www.erdosproblems.com/760) | `complete` | [problems/760/](problems/760/) | |
-| [762](https://www.erdosproblems.com/762) | `complete` | [problems/762/](problems/762/) | |
-| [765](https://www.erdosproblems.com/765) | `complete` | [problems/765/](problems/765/) | |
-| [775](https://www.erdosproblems.com/775) | `complete` | [problems/775/](problems/775/) | |
-| [785](https://www.erdosproblems.com/785) | `complete` | [problems/785/](problems/785/) | |
-| [793](https://www.erdosproblems.com/793) | `complete` | [problems/793/](problems/793/) | |
-| [794](https://www.erdosproblems.com/794) | `complete` | [problems/794/](problems/794/) | |
-| [798](https://www.erdosproblems.com/798) | `complete` | [problems/798/](problems/798/) | |
-| [818](https://www.erdosproblems.com/818) | `complete` | [problems/818/](problems/818/) | |
-| [825](https://www.erdosproblems.com/825) | `complete` | [problems/825/](problems/825/) | |
-| [844](https://www.erdosproblems.com/844) | `complete` | [problems/844/](problems/844/) | |
-| [845](https://www.erdosproblems.com/845) | `complete` | [problems/845/](problems/845/) | |
-| [846](https://www.erdosproblems.com/846) | `complete` | [problems/846/](problems/846/) | |
-| [847](https://www.erdosproblems.com/847) | `complete` | [problems/847/](problems/847/) | |
-| [862](https://www.erdosproblems.com/862) | `complete` | [problems/862/](problems/862/) | |
-| [865](https://www.erdosproblems.com/865) | `complete` | [problems/865/](problems/865/) | |
-| [867](https://www.erdosproblems.com/867) | `complete` | [problems/867/](problems/867/) | |
-| [868](https://www.erdosproblems.com/868) | `complete` | [problems/868/](problems/868/) | |
-| [871](https://www.erdosproblems.com/871) | `complete` | [problems/871/](problems/871/) | |
-| [884](https://www.erdosproblems.com/884) | `complete` | [problems/884/](problems/884/) | |
-| [888](https://www.erdosproblems.com/888) | `complete` | [problems/888/](problems/888/) | |
-| [897](https://www.erdosproblems.com/897) | `complete` | [problems/897/](problems/897/) | |
-| [898](https://www.erdosproblems.com/898) | `complete` | [problems/898/](problems/898/) | |
-| [899](https://www.erdosproblems.com/899) | `complete` | [problems/899/](problems/899/) | |
-| [904](https://www.erdosproblems.com/904) | `complete` | [problems/904/](problems/904/) | |
-| [905](https://www.erdosproblems.com/905) | `complete` | [problems/905/](problems/905/) | |
-| [907](https://www.erdosproblems.com/907) | `complete` | [problems/907/](problems/907/) | |
-| [914](https://www.erdosproblems.com/914) | `complete` | [problems/914/](problems/914/) | |
-| [923](https://www.erdosproblems.com/923) | `complete` | [problems/923/](problems/923/) | |
-| [927](https://www.erdosproblems.com/927) | `complete` | [problems/927/](problems/927/) | |
-| [937](https://www.erdosproblems.com/937) | `complete` | [problems/937/](problems/937/) | |
-| [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) | |
-| [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) | |
-| [964](https://www.erdosproblems.com/964) | `complete` | [problems/964/](problems/964/) | |
-| [965](https://www.erdosproblems.com/965) | `complete` | [problems/965/](problems/965/) | |
-| [966](https://www.erdosproblems.com/966) | `complete` | [problems/966/](problems/966/) | |
-| [967](https://www.erdosproblems.com/967) | `complete` | [problems/967/](problems/967/) | |
-| [974](https://www.erdosproblems.com/974) | `complete` | [problems/974/](problems/974/) | |
-| [987](https://www.erdosproblems.com/987) | `complete` | [problems/987/](problems/987/) | |
-| [990](https://www.erdosproblems.com/990) | `complete` | [problems/990/](problems/990/) | |
-| [997](https://www.erdosproblems.com/997) | `complete` | [problems/997/](problems/997/) | |
-| [1000](https://www.erdosproblems.com/1000) | `complete` | [problems/1000/](problems/1000/) | |
-| [1007](https://www.erdosproblems.com/1007) | `complete` | [problems/1007/](problems/1007/) | |
-| [1008](https://www.erdosproblems.com/1008) | `complete` | [problems/1008/](problems/1008/) | |
-| [1014](https://www.erdosproblems.com/1014) | `complete` | [problems/1014/](problems/1014/) | |
-| [1022](https://www.erdosproblems.com/1022) | `complete` | [problems/1022/](problems/1022/) | |
-| [1023](https://www.erdosproblems.com/1023) | `complete` | [problems/1023/](problems/1023/) | |
-| [1025](https://www.erdosproblems.com/1025) | `complete` | [problems/1025/](problems/1025/) | |
-| [1026](https://www.erdosproblems.com/1026) | `complete` | [problems/1026/](problems/1026/) | |
-| [1028](https://www.erdosproblems.com/1028) | `complete` | [problems/1028/](problems/1028/) | |
-| [1034](https://www.erdosproblems.com/1034) | `complete` | [problems/1034/](problems/1034/) | |
-| [1036](https://www.erdosproblems.com/1036) | `complete` | [problems/1036/](problems/1036/) | |
-| [1037](https://www.erdosproblems.com/1037) | `complete` | [problems/1037/](problems/1037/) | |
-| [1043](https://www.erdosproblems.com/1043) | `complete` | [problems/1043/](problems/1043/) | |
-| [1044](https://www.erdosproblems.com/1044) | `complete` | [problems/1044/](problems/1044/) | |
-| [1047](https://www.erdosproblems.com/1047) | `complete` | [problems/1047/](problems/1047/) | |
-| [1048](https://www.erdosproblems.com/1048) | `complete` | [problems/1048/](problems/1048/) | |
-| [1050](https://www.erdosproblems.com/1050) | `complete` | [problems/1050/](problems/1050/) | |
-| [1051](https://www.erdosproblems.com/1051) | `complete` | [problems/1051/](problems/1051/) | |
-| [1067](https://www.erdosproblems.com/1067) | `complete` | [problems/1067/](problems/1067/) | |
-| [1071](https://www.erdosproblems.com/1071) | `complete` | [problems/1071/](problems/1071/) | |
-| [1077](https://www.erdosproblems.com/1077) | `complete` | [problems/1077/](problems/1077/) | |
-| [1080](https://www.erdosproblems.com/1080) | `complete` | [problems/1080/](problems/1080/) | |
-| [1090](https://www.erdosproblems.com/1090) | `complete` | [problems/1090/](problems/1090/) | |
-| [1096](https://www.erdosproblems.com/1096) | `complete` | [problems/1096/](problems/1096/) | |
-| [1098](https://www.erdosproblems.com/1098) | `complete` | [problems/1098/](problems/1098/) | |
-| [1102](https://www.erdosproblems.com/1102) | `complete` | [problems/1102/](problems/1102/) | |
-| [1112](https://www.erdosproblems.com/1112) | `complete` | [problems/1112/](problems/1112/) | |
-| [1121](https://www.erdosproblems.com/1121) | `complete` | [problems/1121/](problems/1121/) | |
-| [1125](https://www.erdosproblems.com/1125) | `complete` | [problems/1125/](problems/1125/) | |
-| [1126](https://www.erdosproblems.com/1126) | `complete` | [problems/1126/](problems/1126/) | |
-| [1128](https://www.erdosproblems.com/1128) | `complete` | [problems/1128/](problems/1128/) | |
-| [1134](https://www.erdosproblems.com/1134) | `complete` | [problems/1134/](problems/1134/) | |
-| [1136](https://www.erdosproblems.com/1136) | `complete` | [problems/1136/](problems/1136/) | |
-| [1138](https://www.erdosproblems.com/1138) | `complete` | [problems/1138/](problems/1138/) | |
-| [1141](https://www.erdosproblems.com/1141) | `complete` | [problems/1141/](problems/1141/) | |
-| [1148](https://www.erdosproblems.com/1148) | `complete` | [problems/1148/](problems/1148/) | |
-| [1190](https://www.erdosproblems.com/1190) | `complete` | [problems/1190/](problems/1190/) | |
-| [1193](https://www.erdosproblems.com/1193) | `complete` | [problems/1193/](problems/1193/) | |
-| [1196](https://www.erdosproblems.com/1196) | `complete` | [problems/1196/](problems/1196/) | |
-| [1197](https://www.erdosproblems.com/1197) | `complete` | [problems/1197/](problems/1197/) | |
+| # | State | Lean |
+|---|-------|------|
+| [1](https://www.erdosproblems.com/1) | `complete` | [problems/1/](problems/1/) |
+| [2](https://www.erdosproblems.com/2) | `complete` | [problems/2/](problems/2/) |
+| [6](https://www.erdosproblems.com/6) | `complete` | [problems/6/](problems/6/) |
+| [8](https://www.erdosproblems.com/8) | `complete` | [problems/8/](problems/8/) |
+| [13](https://www.erdosproblems.com/13) | `complete` | [problems/13/](problems/13/) |
+| [16](https://www.erdosproblems.com/16) | `complete` | [problems/16/](problems/16/) |
+| [21](https://www.erdosproblems.com/21) | `complete` | [problems/21/](problems/21/) |
+| [22](https://www.erdosproblems.com/22) | `complete` | [problems/22/](problems/22/) |
+| [24](https://www.erdosproblems.com/24) | `complete` | [problems/24/](problems/24/) |
+| [26](https://www.erdosproblems.com/26) | `complete` | [problems/26/](problems/26/) |
+| [29](https://www.erdosproblems.com/29) | `complete` | [problems/29/](problems/29/) |
+| [31](https://www.erdosproblems.com/31) | `complete` | [problems/31/](problems/31/) |
+| [34](https://www.erdosproblems.com/34) | `complete` | [problems/34/](problems/34/) |
+| [35](https://www.erdosproblems.com/35) | `complete` | [problems/35/](problems/35/) |
+| [37](https://www.erdosproblems.com/37) | `complete` | [problems/37/](problems/37/) |
+| [38](https://www.erdosproblems.com/38) | `complete` | [problems/38/](problems/38/) |
+| [42](https://www.erdosproblems.com/42) | `complete` | [problems/42/](problems/42/) |
+| [43](https://www.erdosproblems.com/43) | `complete` | [problems/43/](problems/43/) |
+| [45](https://www.erdosproblems.com/45) | `complete` | [problems/45/](problems/45/) |
+| [46](https://www.erdosproblems.com/46) | `complete` | [problems/46/](problems/46/) |
+| [47](https://www.erdosproblems.com/47) | `complete` | [problems/47/](problems/47/) |
+| [48](https://www.erdosproblems.com/48) | `complete` | [problems/48/](problems/48/) |
+| [49](https://www.erdosproblems.com/49) | `complete` | [problems/49/](problems/49/) |
+| [53](https://www.erdosproblems.com/53) | `complete` | [problems/53/](problems/53/) |
+| [56](https://www.erdosproblems.com/56) | `complete` | [problems/56/](problems/56/) |
+| [57](https://www.erdosproblems.com/57) | `complete` | [problems/57/](problems/57/) |
+| [59](https://www.erdosproblems.com/59) | `complete` | [problems/59/](problems/59/) |
+| [63](https://www.erdosproblems.com/63) | `complete` | [problems/63/](problems/63/) |
+| [71](https://www.erdosproblems.com/71) | `complete` | [problems/71/](problems/71/) |
+| [74](https://www.erdosproblems.com/74) | `complete` | [problems/74/](problems/74/) |
+| [83](https://www.erdosproblems.com/83) | `complete` | [problems/83/](problems/83/) |
+| [90](https://www.erdosproblems.com/90) | `complete` | [problems/90/](problems/90/) |
+| [93](https://www.erdosproblems.com/93) | `complete` | [problems/93/](problems/93/) |
+| [94](https://www.erdosproblems.com/94) | `complete` | [problems/94/](problems/94/) |
+| [95](https://www.erdosproblems.com/95) | `complete` | [problems/95/](problems/95/) |
+| [105](https://www.erdosproblems.com/105) | `complete` | [problems/105/](problems/105/) |
+| [106](https://www.erdosproblems.com/106) | `complete` | [problems/106/](problems/106/) |
+| [109](https://www.erdosproblems.com/109) | `complete` | [problems/109/](problems/109/) |
+| [113](https://www.erdosproblems.com/113) | `complete` | [problems/113/](problems/113/) |
+| [115](https://www.erdosproblems.com/115) | `complete` | [problems/115/](problems/115/) |
+| [116](https://www.erdosproblems.com/116) | `complete` | [problems/116/](problems/116/) |
+| [119](https://www.erdosproblems.com/119) | `complete` | [problems/119/](problems/119/) |
+| [121](https://www.erdosproblems.com/121) | `complete` | [problems/121/](problems/121/) |
+| [123](https://www.erdosproblems.com/123) | `complete` | [problems/123/](problems/123/) |
+| [125](https://www.erdosproblems.com/125) | `complete` | [problems/125/](problems/125/) |
+| [126](https://www.erdosproblems.com/126) | `complete` | [problems/126/](problems/126/) |
+| [127](https://www.erdosproblems.com/127) | `complete` | [problems/127/](problems/127/) |
+| [134](https://www.erdosproblems.com/134) | `complete` | [problems/134/](problems/134/) |
+| [135](https://www.erdosproblems.com/135) | `complete` | [problems/135/](problems/135/) |
+| [139](https://www.erdosproblems.com/139) | `complete` | [problems/139/](problems/139/) |
+| [140](https://www.erdosproblems.com/140) | `complete` | [problems/140/](problems/140/) |
+| [144](https://www.erdosproblems.com/144) | `complete` | [problems/144/](problems/144/) |
+| [146](https://www.erdosproblems.com/146) | `complete` | [problems/146/](problems/146/) |
+| [147](https://www.erdosproblems.com/147) | `complete` | [problems/147/](problems/147/) |
+| [150](https://www.erdosproblems.com/150) | `complete` | [problems/150/](problems/150/) |
+| [152](https://www.erdosproblems.com/152) | `complete` | [problems/152/](problems/152/) |
+| [154](https://www.erdosproblems.com/154) | `complete` | [problems/154/](problems/154/) |
+| [164](https://www.erdosproblems.com/164) | `complete` | [problems/164/](problems/164/) |
+| [171](https://www.erdosproblems.com/171) | `complete` | [problems/171/](problems/171/) |
+| [175](https://www.erdosproblems.com/175) | `complete` | [problems/175/](problems/175/) |
+| [178](https://www.erdosproblems.com/178) | `complete` | [problems/178/](problems/178/) |
+| [180](https://www.erdosproblems.com/180) | `complete` | [problems/180/](problems/180/) |
+| [183](https://www.erdosproblems.com/183) | `complete` | [problems/183/](problems/183/) |
+| [185](https://www.erdosproblems.com/185) | `complete` | [problems/185/](problems/185/) |
+| [189](https://www.erdosproblems.com/189) | `complete` | [problems/189/](problems/189/) |
+| [190](https://www.erdosproblems.com/190) | `complete` | [problems/190/](problems/190/) |
+| [191](https://www.erdosproblems.com/191) | `complete` | [problems/191/](problems/191/) |
+| [192](https://www.erdosproblems.com/192) | `complete` | [problems/192/](problems/192/) |
+| [193](https://www.erdosproblems.com/193) | `complete` | [problems/193/](problems/193/) |
+| [194](https://www.erdosproblems.com/194) | `complete` | [problems/194/](problems/194/) |
+| [198](https://www.erdosproblems.com/198) | `complete` | [problems/198/](problems/198/) |
+| [199](https://www.erdosproblems.com/199) | `complete` | [problems/199/](problems/199/) |
+| [202](https://www.erdosproblems.com/202) | `complete` | [problems/202/](problems/202/) |
+| [204](https://www.erdosproblems.com/204) | `complete` | [problems/204/](problems/204/) |
+| [205](https://www.erdosproblems.com/205) | `complete` | [problems/205/](problems/205/) |
+| [206](https://www.erdosproblems.com/206) | `complete` | [problems/206/](problems/206/) |
+| [209](https://www.erdosproblems.com/209) | `complete` | [problems/209/](problems/209/) |
+| [214](https://www.erdosproblems.com/214) | `complete` | [problems/214/](problems/214/) |
+| [215](https://www.erdosproblems.com/215) | `complete` | [problems/215/](problems/215/) |
+| [219](https://www.erdosproblems.com/219) | `complete` | [problems/219/](problems/219/) |
+| [220](https://www.erdosproblems.com/220) | `complete` | [problems/220/](problems/220/) |
+| [221](https://www.erdosproblems.com/221) | `complete` | [problems/221/](problems/221/) |
+| [224](https://www.erdosproblems.com/224) | `complete` | [problems/224/](problems/224/) |
+| [226](https://www.erdosproblems.com/226) | `complete` | [problems/226/](problems/226/) |
+| [228](https://www.erdosproblems.com/228) | `complete` | [problems/228/](problems/228/) |
+| [229](https://www.erdosproblems.com/229) | `complete` | [problems/229/](problems/229/) |
+| [230](https://www.erdosproblems.com/230) | `complete` | [problems/230/](problems/230/) |
+| [231](https://www.erdosproblems.com/231) | `complete` | [problems/231/](problems/231/) |
+| [237](https://www.erdosproblems.com/237) | `complete` | [problems/237/](problems/237/) |
+| [239](https://www.erdosproblems.com/239) | `complete` | [problems/239/](problems/239/) |
+| [246](https://www.erdosproblems.com/246) | `complete` | [problems/246/](problems/246/) |
+| [248](https://www.erdosproblems.com/248) | `complete` | [problems/248/](problems/248/) |
+| [250](https://www.erdosproblems.com/250) | `complete` | [problems/250/](problems/250/) |
+| [253](https://www.erdosproblems.com/253) | `complete` | [problems/253/](problems/253/) |
+| [255](https://www.erdosproblems.com/255) | `complete` | [problems/255/](problems/255/) |
+| [258](https://www.erdosproblems.com/258) | `complete` | [problems/258/](problems/258/) |
+| [259](https://www.erdosproblems.com/259) | `complete` | [problems/259/](problems/259/) |
+| [262](https://www.erdosproblems.com/262) | `complete` | [problems/262/](problems/262/) |
+| [266](https://www.erdosproblems.com/266) | `complete` | [problems/266/](problems/266/) |
+| [268](https://www.erdosproblems.com/268) | `complete` | [problems/268/](problems/268/) |
+| [270](https://www.erdosproblems.com/270) | `complete` | [problems/270/](problems/270/) |
+| [275](https://www.erdosproblems.com/275) | `complete` | [problems/275/](problems/275/) |
+| [277](https://www.erdosproblems.com/277) | `complete` | [problems/277/](problems/277/) |
+| [280](https://www.erdosproblems.com/280) | `complete` | [problems/280/](problems/280/) |
+| [281](https://www.erdosproblems.com/281) | `complete` | [problems/281/](problems/281/) |
+| [283](https://www.erdosproblems.com/283) | `complete` | [problems/283/](problems/283/) |
+| [285](https://www.erdosproblems.com/285) | `complete` | [problems/285/](problems/285/) |
+| [290](https://www.erdosproblems.com/290) | `complete` | [problems/290/](problems/290/) |
+| [296](https://www.erdosproblems.com/296) | `complete` | [problems/296/](problems/296/) |
+| [298](https://www.erdosproblems.com/298) | `complete` | [problems/298/](problems/298/) |
+| [299](https://www.erdosproblems.com/299) | `complete` | [problems/299/](problems/299/) |
+| [300](https://www.erdosproblems.com/300) | `complete` | [problems/300/](problems/300/) |
+| [303](https://www.erdosproblems.com/303) | `complete` | [problems/303/](problems/303/) |
+| [309](https://www.erdosproblems.com/309) | `complete` | [problems/309/](problems/309/) |
+| [310](https://www.erdosproblems.com/310) | `complete` | [problems/310/](problems/310/) |
+| [314](https://www.erdosproblems.com/314) | `complete` | [problems/314/](problems/314/) |
+| [315](https://www.erdosproblems.com/315) | `complete` | [problems/315/](problems/315/) |
+| [316](https://www.erdosproblems.com/316) | `complete` | [problems/316/](problems/316/) |
+| [328](https://www.erdosproblems.com/328) | `complete` | [problems/328/](problems/328/) |
+| [330](https://www.erdosproblems.com/330) | `complete` | [problems/330/](problems/330/) |
+| [331](https://www.erdosproblems.com/331) | `complete` | [problems/331/](problems/331/) |
+| [333](https://www.erdosproblems.com/333) | `complete` | [problems/333/](problems/333/) |
+| [337](https://www.erdosproblems.com/337) | `complete` | [problems/337/](problems/337/) |
+| [347](https://www.erdosproblems.com/347) | `complete` | [problems/347/](problems/347/) |
+| [350](https://www.erdosproblems.com/350) | `complete` | [problems/350/](problems/350/) |
+| [351](https://www.erdosproblems.com/351) | `complete` | [problems/351/](problems/351/) |
+| [353](https://www.erdosproblems.com/353) | `complete` | [problems/353/](problems/353/) |
+| [355](https://www.erdosproblems.com/355) | `complete` | [problems/355/](problems/355/) |
+| [356](https://www.erdosproblems.com/356) | `complete` | [problems/356/](problems/356/) |
+| [358](https://www.erdosproblems.com/358) | `complete` | [problems/358/](problems/358/) |
+| [362](https://www.erdosproblems.com/362) | `complete` | [problems/362/](problems/362/) |
+| [363](https://www.erdosproblems.com/363) | `complete` | [problems/363/](problems/363/) |
+| [369](https://www.erdosproblems.com/369) | `complete` | [problems/369/](problems/369/) |
+| [370](https://www.erdosproblems.com/370) | `complete` | [problems/370/](problems/370/) |
+| [379](https://www.erdosproblems.com/379) | `complete` | [problems/379/](problems/379/) |
+| [390](https://www.erdosproblems.com/390) | `complete` | [problems/390/](problems/390/) |
+| [391](https://www.erdosproblems.com/391) | `complete` | [problems/391/](problems/391/) |
+| [392](https://www.erdosproblems.com/392) | `complete` | [problems/392/](problems/392/) |
+| [395](https://www.erdosproblems.com/395) | `complete` | [problems/395/](problems/395/) |
+| [397](https://www.erdosproblems.com/397) | `complete` | [problems/397/](problems/397/) |
+| [399](https://www.erdosproblems.com/399) | `complete` | [problems/399/](problems/399/) |
+| [401](https://www.erdosproblems.com/401) | `complete` | [problems/401/](problems/401/) |
+| [403](https://www.erdosproblems.com/403) | `complete` | [problems/403/](problems/403/) |
+| [405](https://www.erdosproblems.com/405) | `complete` | [problems/405/](problems/405/) |
+| [418](https://www.erdosproblems.com/418) | `complete` | [problems/418/](problems/418/) |
+| [419](https://www.erdosproblems.com/419) | `complete` | [problems/419/](problems/419/) |
+| [426](https://www.erdosproblems.com/426) | `complete` | [problems/426/](problems/426/) |
+| [427](https://www.erdosproblems.com/427) | `complete` | [problems/427/](problems/427/) |
+| [429](https://www.erdosproblems.com/429) | `complete` | [problems/429/](problems/429/) |
+| [433](https://www.erdosproblems.com/433) | `complete` | [problems/433/](problems/433/) |
+| [434](https://www.erdosproblems.com/434) | `complete` | [problems/434/](problems/434/) |
+| [435](https://www.erdosproblems.com/435) | `complete` | [problems/435/](problems/435/) |
+| [442](https://www.erdosproblems.com/442) | `complete` | [problems/442/](problems/442/) |
+| [443](https://www.erdosproblems.com/443) | `complete` | [problems/443/](problems/443/) |
+| [447](https://www.erdosproblems.com/447) | `complete` | [problems/447/](problems/447/) |
+| [448](https://www.erdosproblems.com/448) | `complete` | [problems/448/](problems/448/) |
+| [453](https://www.erdosproblems.com/453) | `complete` | [problems/453/](problems/453/) |
+| [457](https://www.erdosproblems.com/457) | `complete` | [problems/457/](problems/457/) |
+| [459](https://www.erdosproblems.com/459) | `complete` | [problems/459/](problems/459/) |
+| [464](https://www.erdosproblems.com/464) | `complete` | [problems/464/](problems/464/) |
+| [469](https://www.erdosproblems.com/469) | `complete` | [problems/469/](problems/469/) |
+| [476](https://www.erdosproblems.com/476) | `complete` | [problems/476/](problems/476/) |
+| [480](https://www.erdosproblems.com/480) | `complete` | [problems/480/](problems/480/) |
+| [481](https://www.erdosproblems.com/481) | `complete` | [problems/481/](problems/481/) |
+| [484](https://www.erdosproblems.com/484) | `complete` | [problems/484/](problems/484/) |
+| [487](https://www.erdosproblems.com/487) | `complete` | [problems/487/](problems/487/) |
+| [490](https://www.erdosproblems.com/490) | `complete` | [problems/490/](problems/490/) |
+| [493](https://www.erdosproblems.com/493) | `complete` | [problems/493/](problems/493/) |
+| [497](https://www.erdosproblems.com/497) | `complete` | [problems/497/](problems/497/) |
+| [498](https://www.erdosproblems.com/498) | `complete` | [problems/498/](problems/498/) |
+| [499](https://www.erdosproblems.com/499) | `complete` | [problems/499/](problems/499/) |
+| [502](https://www.erdosproblems.com/502) | `complete` | [problems/502/](problems/502/) |
+| [505](https://www.erdosproblems.com/505) | `complete` | [problems/505/](problems/505/) |
+| [512](https://www.erdosproblems.com/512) | `complete` | [problems/512/](problems/512/) |
+| [516](https://www.erdosproblems.com/516) | `complete` | [problems/516/](problems/516/) |
+| [519](https://www.erdosproblems.com/519) | `complete` | [problems/519/](problems/519/) |
+| [532](https://www.erdosproblems.com/532) | `complete` | [problems/532/](problems/532/) |
+| [533](https://www.erdosproblems.com/533) | `complete` | [problems/533/](problems/533/) |
+| [537](https://www.erdosproblems.com/537) | `complete` | [problems/537/](problems/537/) |
+| [540](https://www.erdosproblems.com/540) | `complete` | [problems/540/](problems/540/) |
+| [541](https://www.erdosproblems.com/541) | `complete` | [problems/541/](problems/541/) |
+| [548](https://www.erdosproblems.com/548) | `complete` | [problems/548/](problems/548/) |
+| [550](https://www.erdosproblems.com/550) | `complete` | [problems/550/](problems/550/) |
+| [557](https://www.erdosproblems.com/557) | `complete` | [problems/557/](problems/557/) |
+| [571](https://www.erdosproblems.com/571) | `complete` | [problems/571/](problems/571/) |
+| [582](https://www.erdosproblems.com/582) | `complete` | [problems/582/](problems/582/) |
+| [590](https://www.erdosproblems.com/590) | `complete` | [problems/590/](problems/590/) |
+| [594](https://www.erdosproblems.com/594) | `complete` | [problems/594/](problems/594/) |
+| [608](https://www.erdosproblems.com/608) | `complete` | [problems/608/](problems/608/) |
+| [613](https://www.erdosproblems.com/613) | `complete` | [problems/613/](problems/613/) |
+| [615](https://www.erdosproblems.com/615) | `complete` | [problems/615/](problems/615/) |
+| [618](https://www.erdosproblems.com/618) | `complete` | [problems/618/](problems/618/) |
+| [619](https://www.erdosproblems.com/619) | `complete` | [problems/619/](problems/619/) |
+| [621](https://www.erdosproblems.com/621) | `complete` | [problems/621/](problems/621/) |
+| [639](https://www.erdosproblems.com/639) | `complete` | [problems/639/](problems/639/) |
+| [645](https://www.erdosproblems.com/645) | `complete` | [problems/645/](problems/645/) |
+| [646](https://www.erdosproblems.com/646) | `complete` | [problems/646/](problems/646/) |
+| [648](https://www.erdosproblems.com/648) | `complete` | [problems/648/](problems/648/) |
+| [649](https://www.erdosproblems.com/649) | `complete` | [problems/649/](problems/649/) |
+| [650](https://www.erdosproblems.com/650) | `complete` | [problems/650/](problems/650/) |
+| [658](https://www.erdosproblems.com/658) | `complete` | [problems/658/](problems/658/) |
+| [659](https://www.erdosproblems.com/659) | `complete` | [problems/659/](problems/659/) |
+| [666](https://www.erdosproblems.com/666) | `complete` | [problems/666/](problems/666/) |
+| [674](https://www.erdosproblems.com/674) | `complete` | [problems/674/](problems/674/) |
+| [678](https://www.erdosproblems.com/678) | `complete` | [problems/678/](problems/678/) |
+| [692](https://www.erdosproblems.com/692) | `complete` | [problems/692/](problems/692/) |
+| [694](https://www.erdosproblems.com/694) | `complete` | [problems/694/](problems/694/) |
+| [696](https://www.erdosproblems.com/696) | `complete` | [problems/696/](problems/696/) |
+| [698](https://www.erdosproblems.com/698) | `complete` | [problems/698/](problems/698/) |
+| [707](https://www.erdosproblems.com/707) | `complete` | [problems/707/](problems/707/) |
+| [716](https://www.erdosproblems.com/716) | `complete` | [problems/716/](problems/716/) |
+| [728](https://www.erdosproblems.com/728) | `complete` | [problems/728/](problems/728/) |
+| [729](https://www.erdosproblems.com/729) | `complete` | [problems/729/](problems/729/) |
+| [741](https://www.erdosproblems.com/741) | `complete` | [problems/741/](problems/741/) |
+| [750](https://www.erdosproblems.com/750) | `complete` | [problems/750/](problems/750/) |
+| [751](https://www.erdosproblems.com/751) | `complete` | [problems/751/](problems/751/) |
+| [753](https://www.erdosproblems.com/753) | `complete` | [problems/753/](problems/753/) |
+| [755](https://www.erdosproblems.com/755) | `complete` | [problems/755/](problems/755/) |
+| [756](https://www.erdosproblems.com/756) | `complete` | [problems/756/](problems/756/) |
+| [760](https://www.erdosproblems.com/760) | `complete` | [problems/760/](problems/760/) |
+| [762](https://www.erdosproblems.com/762) | `complete` | [problems/762/](problems/762/) |
+| [765](https://www.erdosproblems.com/765) | `complete` | [problems/765/](problems/765/) |
+| [775](https://www.erdosproblems.com/775) | `complete` | [problems/775/](problems/775/) |
+| [785](https://www.erdosproblems.com/785) | `complete` | [problems/785/](problems/785/) |
+| [793](https://www.erdosproblems.com/793) | `complete` | [problems/793/](problems/793/) |
+| [794](https://www.erdosproblems.com/794) | `complete` | [problems/794/](problems/794/) |
+| [798](https://www.erdosproblems.com/798) | `complete` | [problems/798/](problems/798/) |
+| [818](https://www.erdosproblems.com/818) | `complete` | [problems/818/](problems/818/) |
+| [825](https://www.erdosproblems.com/825) | `complete` | [problems/825/](problems/825/) |
+| [844](https://www.erdosproblems.com/844) | `complete` | [problems/844/](problems/844/) |
+| [845](https://www.erdosproblems.com/845) | `complete` | [problems/845/](problems/845/) |
+| [846](https://www.erdosproblems.com/846) | `complete` | [problems/846/](problems/846/) |
+| [847](https://www.erdosproblems.com/847) | `complete` | [problems/847/](problems/847/) |
+| [862](https://www.erdosproblems.com/862) | `complete` | [problems/862/](problems/862/) |
+| [865](https://www.erdosproblems.com/865) | `complete` | [problems/865/](problems/865/) |
+| [867](https://www.erdosproblems.com/867) | `complete` | [problems/867/](problems/867/) |
+| [868](https://www.erdosproblems.com/868) | `complete` | [problems/868/](problems/868/) |
+| [871](https://www.erdosproblems.com/871) | `complete` | [problems/871/](problems/871/) |
+| [884](https://www.erdosproblems.com/884) | `complete` | [problems/884/](problems/884/) |
+| [888](https://www.erdosproblems.com/888) | `complete` | [problems/888/](problems/888/) |
+| [897](https://www.erdosproblems.com/897) | `complete` | [problems/897/](problems/897/) |
+| [898](https://www.erdosproblems.com/898) | `complete` | [problems/898/](problems/898/) |
+| [899](https://www.erdosproblems.com/899) | `complete` | [problems/899/](problems/899/) |
+| [904](https://www.erdosproblems.com/904) | `complete` | [problems/904/](problems/904/) |
+| [905](https://www.erdosproblems.com/905) | `complete` | [problems/905/](problems/905/) |
+| [907](https://www.erdosproblems.com/907) | `complete` | [problems/907/](problems/907/) |
+| [914](https://www.erdosproblems.com/914) | `complete` | [problems/914/](problems/914/) |
+| [923](https://www.erdosproblems.com/923) | `complete` | [problems/923/](problems/923/) |
+| [927](https://www.erdosproblems.com/927) | `complete` | [problems/927/](problems/927/) |
+| [937](https://www.erdosproblems.com/937) | `complete` | [problems/937/](problems/937/) |
+| [947](https://www.erdosproblems.com/947) | `complete` | [problems/947/](problems/947/) |
+| [958](https://www.erdosproblems.com/958) | `complete` | [problems/958/](problems/958/) |
+| [964](https://www.erdosproblems.com/964) | `complete` | [problems/964/](problems/964/) |
+| [965](https://www.erdosproblems.com/965) | `complete` | [problems/965/](problems/965/) |
+| [966](https://www.erdosproblems.com/966) | `complete` | [problems/966/](problems/966/) |
+| [967](https://www.erdosproblems.com/967) | `complete` | [problems/967/](problems/967/) |
+| [974](https://www.erdosproblems.com/974) | `complete` | [problems/974/](problems/974/) |
+| [987](https://www.erdosproblems.com/987) | `complete` | [problems/987/](problems/987/) |
+| [990](https://www.erdosproblems.com/990) | `complete` | [problems/990/](problems/990/) |
+| [997](https://www.erdosproblems.com/997) | `complete` | [problems/997/](problems/997/) |
+| [1000](https://www.erdosproblems.com/1000) | `complete` | [problems/1000/](problems/1000/) |
+| [1007](https://www.erdosproblems.com/1007) | `complete` | [problems/1007/](problems/1007/) |
+| [1008](https://www.erdosproblems.com/1008) | `complete` | [problems/1008/](problems/1008/) |
+| [1014](https://www.erdosproblems.com/1014) | `complete` | [problems/1014/](problems/1014/) |
+| [1022](https://www.erdosproblems.com/1022) | `complete` | [problems/1022/](problems/1022/) |
+| [1023](https://www.erdosproblems.com/1023) | `complete` | [problems/1023/](problems/1023/) |
+| [1025](https://www.erdosproblems.com/1025) | `complete` | [problems/1025/](problems/1025/) |
+| [1026](https://www.erdosproblems.com/1026) | `complete` | [problems/1026/](problems/1026/) |
+| [1028](https://www.erdosproblems.com/1028) | `complete` | [problems/1028/](problems/1028/) |
+| [1034](https://www.erdosproblems.com/1034) | `complete` | [problems/1034/](problems/1034/) |
+| [1036](https://www.erdosproblems.com/1036) | `complete` | [problems/1036/](problems/1036/) |
+| [1037](https://www.erdosproblems.com/1037) | `complete` | [problems/1037/](problems/1037/) |
+| [1043](https://www.erdosproblems.com/1043) | `complete` | [problems/1043/](problems/1043/) |
+| [1044](https://www.erdosproblems.com/1044) | `complete` | [problems/1044/](problems/1044/) |
+| [1047](https://www.erdosproblems.com/1047) | `complete` | [problems/1047/](problems/1047/) |
+| [1048](https://www.erdosproblems.com/1048) | `complete` | [problems/1048/](problems/1048/) |
+| [1050](https://www.erdosproblems.com/1050) | `complete` | [problems/1050/](problems/1050/) |
+| [1051](https://www.erdosproblems.com/1051) | `complete` | [problems/1051/](problems/1051/) |
+| [1067](https://www.erdosproblems.com/1067) | `complete` | [problems/1067/](problems/1067/) |
+| [1071](https://www.erdosproblems.com/1071) | `complete` | [problems/1071/](problems/1071/) |
+| [1077](https://www.erdosproblems.com/1077) | `complete` | [problems/1077/](problems/1077/) |
+| [1080](https://www.erdosproblems.com/1080) | `complete` | [problems/1080/](problems/1080/) |
+| [1090](https://www.erdosproblems.com/1090) | `complete` | [problems/1090/](problems/1090/) |
+| [1096](https://www.erdosproblems.com/1096) | `complete` | [problems/1096/](problems/1096/) |
+| [1098](https://www.erdosproblems.com/1098) | `complete` | [problems/1098/](problems/1098/) |
+| [1102](https://www.erdosproblems.com/1102) | `complete` | [problems/1102/](problems/1102/) |
+| [1112](https://www.erdosproblems.com/1112) | `complete` | [problems/1112/](problems/1112/) |
+| [1121](https://www.erdosproblems.com/1121) | `complete` | [problems/1121/](problems/1121/) |
+| [1125](https://www.erdosproblems.com/1125) | `complete` | [problems/1125/](problems/1125/) |
+| [1126](https://www.erdosproblems.com/1126) | `complete` | [problems/1126/](problems/1126/) |
+| [1128](https://www.erdosproblems.com/1128) | `complete` | [problems/1128/](problems/1128/) |
+| [1134](https://www.erdosproblems.com/1134) | `complete` | [problems/1134/](problems/1134/) |
+| [1136](https://www.erdosproblems.com/1136) | `complete` | [problems/1136/](problems/1136/) |
+| [1138](https://www.erdosproblems.com/1138) | `complete` | [problems/1138/](problems/1138/) |
+| [1141](https://www.erdosproblems.com/1141) | `complete` | [problems/1141/](problems/1141/) |
+| [1148](https://www.erdosproblems.com/1148) | `complete` | [problems/1148/](problems/1148/) |
+| [1190](https://www.erdosproblems.com/1190) | `complete` | [problems/1190/](problems/1190/) |
+| [1193](https://www.erdosproblems.com/1193) | `complete` | [problems/1193/](problems/1193/) |
+| [1196](https://www.erdosproblems.com/1196) | `complete` | [problems/1196/](problems/1196/) |
+| [1197](https://www.erdosproblems.com/1197) | `complete` | [problems/1197/](problems/1197/) |
 
 <!-- TABLE:END -->
+
+[^1]: [Erdős 610](https://www.erdosproblems.com/610) is not counted, as its existing formalization is invalid (see [this comment](https://www.erdosproblems.com/forum/thread/610#post-8594)).
