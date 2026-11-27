@@ -654,6 +654,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/183#post-8250"
       - "https://github.com/openai/ten-proofs/blob/main/MulticolorTriangleRamsey.lean"
+- number: "184"
+  proof:
+    path: "problems/184/"
+    theorem: "Erdos184.erdos_184"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.1"
+    mathlib_revision: "d13f23b723b8a846827a245b89c10fc7d3f11612"
+    sources:
+      - "https://github.com/openai/math/tree/main/lean/OAI/Combinatorics/CycleDecomposition"
 - number: "185"
   proof:
     path: "problems/185/"
