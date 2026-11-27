@@ -1245,6 +1245,17 @@
     mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
     sources:
       - "https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/316.lean"
+- number: "318"
+  proof:
+    path: "problems/318/"
+    theorem: "Erdos318.erdos_318"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/8c4f1b2b4b9d1e7fb872340b7ae88dde5e862097/submissions/jsp-000264-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos318.lean"
 - number: "328"
   proof:
     path: "problems/328/"
@@ -1299,6 +1310,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/337#post-2142"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos337.lean"
+- number: "343"
+  proof:
+    path: "problems/343/"
+    theorem: "Erdos343.erdos_343"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/46ae0c27d3bb808ff4419cf0c88cac7afafa73f1/submissions/jsp-000285-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos344.lean"
 - number: "347"
   proof:
     path: "problems/347/"
@@ -1431,6 +1453,19 @@
     mathlib_revision: "79e94a093aff4a60fb1b1f92d9681e407124c2ca"
     sources:
       - "https://www.erdosproblems.com/forum/thread/379#post-2350"
+- number: "384"
+  proof:
+    path: "problems/384/"
+    theorem: "Erdos384.erdos_384"
+    state: "axiomatic"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    extra_axioms:
+      - "Erdos384.ecklund"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/384#post-4157"
+      - "https://msp.org/pjm/1969/29-2/pjm-v29-n2-p04-s.pdf"
 - number: "390"
   proof:
     path: "problems/390/"
@@ -1617,6 +1652,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/435#post-4173"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.24.0/ErdosProblems/Erdos435.lean"
+- number: "441"
+  proof:
+    path: "problems/441/"
+    theorem: "Erdos441.erdos_441"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/7d38593f55eb49c6854a4d0b2fc7bee33f33e4a9/submissions/jsp-000360-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos441.lean"
 - number: "442"
   proof:
     path: "problems/442/"
@@ -1745,6 +1791,16 @@
     mathlib_revision: "8f9d9cff6bd728b17a24e163c9402775d9e6a365"
     sources:
       - "https://www.erdosproblems.com/forum/thread/481#post-1930"
+- number: "482"
+  proof:
+    path: "problems/482/"
+    theorem: "Erdos482.erdos_482"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.33.1"
+    mathlib_revision: "0df444a360eaa60ab8c11dca51a86af692955474"
+    sources:
+      - "https://github.com/gotrevor/lean-gallery/tree/a834bbad2f36eedcc16066b2bc4da49f98ab5b85/LeanGallery/NumberTheory/Erdos482"
 - number: "484"
   proof:
     path: "problems/484/"
@@ -1875,6 +1931,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/519#post-5599"
       - "https://gist.github.com/JohnEdwardJennings/db1e0cb00b7d6866193c12f1c70a1813#file-erdos519-lean"
+- number: "522"
+  proof:
+    path: "problems/522/"
+    theorem: "Erdos522.erdos_522"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0"
+    mathlib_revision: "5ed2965256430c3649e86755f9576b54eca72435"
+    sources:
+      - "https://www.erdosproblems.com/forum/thread/522/proof-claims#proof-claim-353"
+      - "https://github.com/chreia/erdos-522/tree/03b373231dea614a8476aa0ab6623c15166cebf5/lean"
 - number: "532"
   proof:
     path: "problems/532/"
@@ -2068,6 +2135,28 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/621#post-5605"
       - "https://gist.github.com/LorenzoLuccioli/71247a0c86fa35cb1e000160baef0bba#file-erdos621-lean"
+- number: "625"
+  proof:
+    path: "problems/625/"
+    theorem: "Erdos625.erdos_625"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.31.0"
+    mathlib_revision: "fabf563a7c95a166b8d7b6efca11c8b4dc9d911f"
+    sources:
+      - "https://github.com/SamPetkov/Erdos/tree/main/625/formalization"
+- number: "630"
+  proof:
+    path: "problems/630/"
+    theorem: "Erdos630.erdos_630"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/566c5b9b083ebcdbe5e256ceb59f79472a36a41e/submissions/jsp-000511-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos630.lean"
+      - "https://github.com/alonamaloh/schoenflies-lean/tree/main"
 - number: "639"
   proof:
     path: "problems/639/"
@@ -2135,6 +2224,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/650#post-4683"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem650.lean"
+- number: "651"
+  proof:
+    path: "problems/651/"
+    theorem: "Erdos651.erdos_651"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/169af3b2c1a7abe50786e6276c0f56b895823a91/submissions/jsp-000527-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos651.lean"
 - number: "658"
   proof:
     path: "problems/658/"
@@ -2239,6 +2339,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/698#post-3276"
       - "https://github.com/Woett/Lean-files/blob/main/ErdosProblem698.lean"
+- number: "703"
+  proof:
+    path: "problems/703/"
+    theorem: "Erdos703.erdos_703"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/bb7c6ed15ed8c2cf8b7a2be0e9388871cb16d59c/submissions/jsp-000573-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos703.lean"
 - number: "707"
   proof:
     path: "problems/707/"
@@ -2328,6 +2439,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/753#post-5373"
       - "https://gist.github.com/madeve-unipi/80eaf8008c7c798b4f7b5baeb8c1812b#file-erdos753-lean"
+- number: "754"
+  proof:
+    path: "problems/754/"
+    theorem: "Erdos754.erdos_754"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/19f6269a89a6161bef13b90af62a79de6d9a683a/submissions/jsp-000620-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos754.lean"
 - number: "755"
   proof:
     path: "problems/755/"
@@ -2438,6 +2560,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/798#post-6329"
       - "https://gist.github.com/Parcly-Taxel/757ca8323d74784da1a776795b9c90a9#file-erdos798-lean"
+- number: "803"
+  proof:
+    path: "problems/803/"
+    theorem: "Erdos803.erdos_803"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/137faffa350f15cbeb9b73c03a7382a288b97b1d/submissions/jsp-000660-cyr/README.md"
 - number: "818"
   proof:
     path: "problems/818/"
@@ -2750,6 +2882,16 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/967#post-2303"
       - "https://gist.github.com/llllvvuu/d25f037d1f1000bdabd6ca928c74c9bb#file-967-lean"
+- number: "973"
+  proof:
+    path: "problems/973/"
+    theorem: "Erdos973.erdos_973"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.33.1"
+    mathlib_revision: "0df444a360eaa60ab8c11dca51a86af692955474"
+    sources:
+      - "https://github.com/linrock/math-proofs/tree/1571a487465fb6a87f92dcc46f1bd71b0846c413/erdos-973"
 - number: "974"
   proof:
     path: "problems/974/"
@@ -2782,6 +2924,17 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/990#post-5312"
       - "https://github.com/yuta0x89/ErdosProblems/blob/main/Erdos990.lean"
+- number: "994"
+  proof:
+    path: "problems/994/"
+    theorem: "Erdos994.erdos_994"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/0e9e601721e330405a477dc7b33965349da9ffe4/submissions/jsp-000827-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos994.lean"
 - number: "997"
   proof:
     path: "problems/997/"
@@ -2839,6 +2992,30 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1014#post-5751"
       - "https://github.com/plby/lean-proofs/blob/main/src/v4.29.0/ErdosProblems/Erdos1014.lean"
+- number: "1018"
+  proof:
+    path: "problems/1018/"
+    theorem: "Erdos1018.erdos_1018"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/2398377a9bb59c21ec2ff1f14e049e4753972c79/submissions/jsp-000848-cyr/README.md"
+      - "https://github.com/CollinYuanjieRen/awards/blob/566c5b9b083ebcdbe5e256ceb59f79472a36a41e/submissions/jsp-000511-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos1018.lean"
+      - "https://github.com/alonamaloh/schoenflies-lean/tree/main"
+- number: "1019"
+  proof:
+    path: "problems/1019/"
+    theorem: "Erdos1019.erdos_1019"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/be3461dd89a6509c62a96ae201a41b36afa8cfa6/submissions/jsp-000849-cyr/README.md"
+      - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos1019.lean"
 - number: "1022"
   proof:
     path: "problems/1022/"
@@ -3046,6 +3223,16 @@
     mathlib_revision: "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
     sources:
       - "https://www.erdosproblems.com/forum/thread/1090#post-4523"
+- number: "1092"
+  proof:
+    path: "problems/1092/"
+    theorem: "Erdos1092.erdos_1092"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.33.0"
+    mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
+    sources:
+      - "https://github.com/Wang060919/erdos1092-lean/tree/main"
 - number: "1096"
   proof:
     path: "problems/1096/"
@@ -3133,6 +3320,17 @@
     mathlib_revision: "db584cd6d46c92f209a44c0f1c829460d327499d"
     sources:
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos1128.lean"
+- number: "1129"
+  proof:
+    path: "problems/1129/"
+    theorem: "Erdos1129.erdos_1129"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.27.0"
+    mathlib_revision: "a3a10db0e9d66acbebf76c5e6a135066525ac900"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/791bf61df4366b60b6b47b9e062661ee65b3143b/submissions/jsp-000936-cyr/README.md"
+      - "https://github.com/randyxian08/jsp000958-lean/tree/e1df51e950876056d8951f4a93fa7fef6863b422"
 - number: "1134"
   proof:
     path: "problems/1134/"
@@ -3180,6 +3378,16 @@
       - "https://github.com/Woett/Lean-files/blob/main/MertensThird.lean"
       - "https://github.com/plby/lean-proofs/blob/main/src/latest/ErdosProblems/Erdos1141.lean"
       - "https://github.com/frenzymath/FormalPantheon/tree/main/BoundedGaps"
+- number: "1147"
+  proof:
+    path: "problems/1147/"
+    theorem: "Erdos1147.erdos_1147"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.34.0-rc1"
+    mathlib_revision: "1fe0a51a5ecdee23c424b6e29ecb1d40eb35316d"
+    sources:
+      - "https://github.com/CollinYuanjieRen/awards/blob/7e05ab7a1f3defe48d72d6af17a66c9d6a57567e/submissions/jsp-000952-cyr/README.md"
 - number: "1148"
   proof:
     path: "problems/1148/"
@@ -3235,3 +3443,13 @@
     sources:
       - "https://www.erdosproblems.com/forum/thread/1197#post-5409"
       - "https://github.com/Tomodovodoo/Erdos_1197"
+- number: "1219"
+  proof:
+    path: "problems/1219/"
+    theorem: "Erdos1219.erdos_1219"
+    state: "complete"
+    last_update: "2026-11-26"
+    lean_toolchain: "leanprover/lean4:v4.35.0-rc3"
+    mathlib_revision: "c55e6e786f49471c72fbddbec5415808896aec1e"
+    sources:
+      - "https://github.com/jbaelaw/erdos1219-lean/tree/main"
